@@ -1,7 +1,7 @@
 {
   "name": "abu-abed-box",
-  "version": "3.0.0",
-  "description": "أبو عابد بوكس - منصة ألعاب جماعية سعودية احترافية",
+  "version": "4.0.0",
+  "description": "أبو عابد بوكس - منصة ألعاب جماعية سعودية احترافية | Saudi Party Games Platform",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -14,7 +14,16 @@
     "express": "^4.18.2",
     "socket.io": "^4.7.2"
   },
-  "keywords": ["jackbox", "party-games", "arabic", "saudi", "multiplayer"],
+  "keywords": [
+    "jackbox",
+    "party-games",
+    "arabic",
+    "saudi",
+    "multiplayer",
+    "quiplash",
+    "fibbage",
+    "trivia"
+  ],
   "author": "Abu Abed Box",
   "license": "MIT"
 }
