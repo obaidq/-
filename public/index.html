@@ -1,0 +1,149 @@
+                    </div>
+                </div>
+                <div class="game-card game-fibbage" onclick="selectGame('fibbage')">
+                    <div class="game-card-header"><span class="game-card-icon">🎭</span></div>
+                    <div class="game-card-body">
+                        <h3 class="game-card-title">كشف الكذاب</h3>
+                        <p class="game-card-desc">اكتب كذبة مقنعة واخدع أصحابك!</p>
+                        <div class="game-card-meta"><span class="meta-tag">👥 ٢-٨</span><span class="meta-tag">⏱️ ٢٠د</span></div>
+                    </div>
+                </div>
+                <div class="game-card game-drawful" onclick="selectGame('drawful')">
+                    <div class="game-card-header"><span class="game-card-icon">🎨</span></div>
+                    <div class="game-card-body">
+                        <h3 class="game-card-title">ارسم لي</h3>
+                        <p class="game-card-desc">ارسم الكلمة السرية!</p>
+                        <div class="game-card-meta"><span class="meta-tag">👥 ٣-٨</span><span class="meta-tag">⏱️ ٢٠د</span></div>
+                    </div>
+                </div>
+                <div class="game-card game-trivia" onclick="selectGame('trivia')">
+                    <div class="game-card-header"><span class="game-card-icon">💀</span></div>
+                    <div class="game-card-body">
+                        <h3 class="game-card-title">لغز القاتل</h3>
+                        <p class="game-card-desc">أجب صح عشان تنجو!</p>
+                        <div class="game-card-meta"><span class="meta-tag">👥 ١-٨</span><span class="meta-tag">⏱️ ٢٥د</span></div>
+                    </div>
+                </div>
+                <div class="game-card game-teeko" onclick="selectGame('teeko')">
+                    <div class="game-card-header"><span class="game-card-icon">👕</span></div>
+                    <div class="game-card-body">
+                        <h3 class="game-card-title">حرب التيشيرتات</h3>
+                        <p class="game-card-desc">صمم تيشيرت وتنافس!</p>
+                        <div class="game-card-meta"><span class="meta-tag">👥 ٣-٨</span><span class="meta-tag">⏱️ ٣٠د</span></div>
+                    </div>
+                </div>
+                <div class="game-card game-push" onclick="selectGame('push')">
+                    <div class="game-card-header"><span class="game-card-icon">👽</span></div>
+                    <div class="game-card-body">
+                        <h3 class="game-card-title">كشف الجاسوس</h3>
+                        <p class="game-card-desc">اكتشفوا الفضائي!</p>
+                        <div class="game-card-meta"><span class="meta-tag">👥 ٤-١٠</span><span class="meta-tag">⏱️ ٢٠د</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameScreen" class="screen">
+        <div class="game-header">
+            <div class="game-info">
+                <span class="game-icon" id="gameIcon">⚡</span>
+                <div>
+                    <div class="game-title" id="gameTitle">رد سريع</div>
+                    <div class="game-round" id="gameRound">الجولة ١ من ٣</div>
+                </div>
+            </div>
+            <div class="game-timer" id="gameTimer">30</div>
+            <button class="btn btn-danger" style="padding:10px 20px;" onclick="if(confirm('متأكد؟'))location.reload()">🚪</button>
+        </div>
+        <div class="game-content" id="gameContent"></div>
+        <div class="game-footer">
+            <p class="footer-instruction" id="gameInstruction">💡 اكتب أطرف إجابة!</p>
+        </div>
+    </div>
+
+    <!-- Final Results Screen -->
+    <div id="finalResultsScreen" class="screen">
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;">
+            <h1 class="results-title">🏆 النتائج النهائية!</h1>
+            <div class="scoreboard" id="finalScoreboard"></div>
+            <div style="margin-top:30px;display:flex;gap:15px;flex-wrap:wrap;justify-content:center;">
+                <button class="btn btn-primary" id="playAgainBtn" onclick="socket.emit('backToLobby',currentRoom)">🔄 العب مرة ثانية</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let socket, currentRoom = null, isHost = false, gameTimer = null;
+        let canvas, ctx, isDrawing = false, currentColor = '#000', brushSize = 5;
+
+        function initSocket() {
+            socket = io();
+            socket.on('roomCreated', d => { currentRoom = d.code; isHost = true; document.getElementById('displayRoomCode').textContent = d.code; updatePlayers(d.players); showScreen('lobbyScreen'); updateHostUI(); });
+            socket.on('roomJoined', d => { currentRoom = d.code; document.getElementById('displayRoomCode').textContent = d.code; updatePlayers(d.players); showScreen('lobbyScreen'); updateHostUI(); });
+            socket.on('playerJoined', d => updatePlayers(d.players));
+            socket.on('playerLeft', d => { updatePlayers(d.players); const me = d.players.find(p => p.id === socket.id); if (me?.isHost) { isHost = true; updateHostUI(); } });
+            socket.on('playerUpdated', d => updatePlayers(d.players));
+            socket.on('error', d => showError(d.message));
+            socket.on('gameStarted', d => { showScreen('gameScreen'); updateGameHeader(d.game); });
+            socket.on('quiplashQuestion', handleQuiplashQuestion);
+            socket.on('quiplashVoting', handleQuiplashVoting);
+            socket.on('quiplashResults', handleQuiplashResults);
+            socket.on('fibbageQuestion', handleFibbageQuestion);
+            socket.on('fibbageVoting', handleFibbageVoting);
+            socket.on('fibbageResults', handleFibbageResults);
+            socket.on('drawfulPrompt', handleDrawfulPrompt);
+            socket.on('triviaQuestion', handleTriviaQuestion);
+            socket.on('triviaResults', handleTriviaResults);
+            socket.on('gameEnded', handleGameEnded);
+            socket.on('returnedToLobby', d => { updatePlayers(d.players); showScreen('lobbyScreen'); });
+        }
+
+        function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        function showError(msg) { const t = document.createElement('div'); t.className = 'error-toast'; t.textContent = '⚠️ ' + msg; document.body.appendChild(t); setTimeout(() => t.remove(), 3000); }
+        function createRoom() { const name = document.getElementById('hostNameInput').value.trim(); if (!name) return showError('ادخل اسمك!'); socket.emit('createRoom', name); }
+        function joinRoom() { const code = document.getElementById('roomCodeInput').value.trim().toUpperCase(); const name = document.getElementById('playerNameInput').value.trim(); if (!code || code.length !== 4) return showError('كود خاطئ!'); if (!name) return showError('ادخل اسمك!'); socket.emit('joinRoom', { code, playerName: name }); }
+        function toggleReady() { socket.emit('playerReady', currentRoom); }
+        function selectGame(game) { if (!isHost) return showError('المضيف فقط يختار!'); socket.emit('startGame', { code: currentRoom, game }); }
+        function updatePlayers(players) { document.getElementById('playersGrid').innerHTML = players.map(p => `<div class="player-card ${p.isHost?'host':''} ${p.isReady?'ready':''}"><div class="player-avatar" style="background:${p.color}">${p.avatar}</div><div class="player-name">${p.name}</div><div class="player-status ${p.isReady?'ready':''}">${p.isHost?'👑':p.isReady?'✅':'⏳'}</div><div class="player-score">${p.score} نقطة</div></div>`).join(''); }
+        function updateHostUI() { document.getElementById('gamesSection').style.display = isHost ? 'block' : 'none'; }
+        function updateGameHeader(game) { const g = {quiplash:{i:'⚡',t:'رد سريع',n:'اكتب أطرف إجابة!'},fibbage:{i:'🎭',t:'كشف الكذاب',n:'اكتب كذبة مقنعة!'},drawful:{i:'🎨',t:'ارسم لي',n:'ارسم الكلمة!'},trivia:{i:'💀',t:'لغز القاتل',n:'أجب صح!'}}; const info = g[game]||g.quiplash; document.getElementById('gameIcon').textContent = info.i; document.getElementById('gameTitle').textContent = info.t; document.getElementById('gameInstruction').textContent = '💡 ' + info.n; }
+        function startTimer(sec) { let t = sec; const el = document.getElementById('gameTimer'); el.textContent = t; el.className = 'game-timer'; if (gameTimer) clearInterval(gameTimer); gameTimer = setInterval(() => { t--; el.textContent = t; if (t <= 10) el.classList.add('warning'); if (t <= 5) { el.classList.remove('warning'); el.classList.add('danger'); } if (t <= 0) clearInterval(gameTimer); }, 1000); }
+        function showWaiting(msg) { document.getElementById('gameContent').innerHTML = `<div class="waiting-state"><div class="waiting-icon">⏳</div><p class="waiting-text">${msg}</p></div>`; }
+        function createConfetti() { const colors = ['#E91E8C','#FFD93D','#6BCB77','#4ECDC4']; for (let i = 0; i < 30; i++) { const c = document.createElement('div'); c.className = 'confetti'; c.style.left = Math.random()*100+'vw'; c.style.background = colors[Math.floor(Math.random()*colors.length)]; c.style.animationDelay = Math.random()*2+'s'; document.body.appendChild(c); setTimeout(() => c.remove(), 5000); } }
+
+        // Quiplash
+        function handleQuiplashQuestion(d) { document.getElementById('gameRound').textContent = `الجولة ${d.round} من ${d.maxRounds}`; startTimer(d.timeLimit); document.getElementById('gameContent').innerHTML = `<div class="question-card"><div class="question-badge">${d.round}</div><p class="question-text">${d.question}</p></div><div class="answer-section"><input type="text" class="answer-input" id="answerInput" placeholder="إجابتك..." maxlength="100"><button class="btn btn-primary" onclick="submitQuiplash()">إرسال ⚡</button></div>`; document.getElementById('answerInput').focus(); }
+        function submitQuiplash() { const a = document.getElementById('answerInput').value.trim(); if (!a) return showError('اكتب إجابة!'); socket.emit('submitQuiplashAnswer', { code: currentRoom, answer: a }); showWaiting('ننتظر الباقين...'); }
+        function handleQuiplashVoting(d) { startTimer(d.timeLimit); document.getElementById('gameContent').innerHTML = `<div class="question-card" style="margin-bottom:20px;"><p class="question-text">${d.question}</p></div><h3 style="color:var(--yellow);text-shadow:2px 2px 0 #000;margin-bottom:20px;">🗳️ صوّت للأفضل!</h3><div class="voting-section">${d.answers.map((a,i) => `<div class="vote-card" onclick="voteQuiplash('${a.playerId}')">${a.answer}</div>${i===0?'<div class="vs-circle">أو</div>':''}`).join('')}</div>`; }
+        function voteQuiplash(id) { document.querySelectorAll('.vote-card').forEach(c => c.classList.remove('selected')); event.currentTarget.classList.add('selected'); socket.emit('submitQuiplashVote', { code: currentRoom, votedPlayerId: id }); }
+        function handleQuiplashResults(d) { clearInterval(gameTimer); createConfetti(); const w = d.results[0]; document.getElementById('gameContent').innerHTML = `<div class="results-section"><h2 class="results-title">🏆 الفائز!</h2><div class="results-card"><p class="winner-answer">"${w.answer}"</p><p class="winner-name">- ${w.playerName}</p><div class="votes-display">${'👍'.repeat(w.votes)}</div></div><div class="scoreboard"><h3 class="scoreboard-title">📊 النتائج</h3>${d.results.map((r,i) => `<div class="score-row"><div class="score-player"><span class="score-rank">${i+1}</span><span class="score-name">${r.playerName}</span></div><span class="score-points">+${r.votes*100}</span></div>`).join('')}</div>${isHost && !d.isLastRound ? '<button class="btn btn-primary" onclick="socket.emit(\'requestNextRound\',currentRoom)">التالي ➡️</button>' : ''}${isHost && d.isLastRound ? '<button class="btn btn-primary" onclick="socket.emit(\'requestNextRound\',currentRoom)">النتائج 🏆</button>' : ''}</div>`; }
+
+        // Fibbage
+        function handleFibbageQuestion(d) { document.getElementById('gameRound').textContent = `الجولة ${d.round} من ${d.maxRounds}`; startTimer(d.timeLimit); document.getElementById('gameContent').innerHTML = `<div class="question-card"><div class="question-badge">🎭</div><p class="question-text">${d.question}</p></div><div class="answer-section"><input type="text" class="answer-input" id="lieInput" placeholder="كذبتك..." maxlength="50"><button class="btn btn-primary" onclick="submitFibbage()">إرسال 🎭</button></div>`; }
+        function submitFibbage() { const l = document.getElementById('lieInput').value.trim(); if (!l) return showError('اكتب كذبة!'); socket.emit('submitFibbageLie', { code: currentRoom, lie: l }); showWaiting('ننتظر الكذابين...'); }
+        function handleFibbageVoting(d) { startTimer(d.timeLimit); document.getElementById('gameContent').innerHTML = `<div class="question-card" style="margin-bottom:20px;"><p class="question-text">${d.question}</p></div><h3 style="color:var(--yellow);margin-bottom:20px;">🔍 اختر الصح!</h3><div class="options-grid">${d.options.map(o => `<button class="option-btn" onclick="guessFibbage('${o.id}')">${o.text}</button>`).join('')}</div>`; }
+        function guessFibbage(id) { document.querySelectorAll('.option-btn').forEach(b => { b.disabled = true; b.style.opacity = '0.6'; }); event.currentTarget.classList.add('selected'); event.currentTarget.style.opacity = '1'; socket.emit('submitFibbageGuess', { code: currentRoom, guessId: id }); }
+        function handleFibbageResults(d) { clearInterval(gameTimer); createConfetti(); document.getElementById('gameContent').innerHTML = `<div class="results-section"><h2 class="results-title">🎭 الإجابة!</h2><div class="results-card"><p class="winner-answer">"${d.correctAnswer}"</p></div><div class="scoreboard"><h3 class="scoreboard-title">📊 النتائج</h3>${d.results.map((r,i) => `<div class="score-row"><div class="score-player"><span class="score-rank">${i+1}</span><span class="score-name">${r.playerName}</span></div><span class="score-points">+${r.pointsEarned}</span></div>`).join('')}</div>${isHost && !d.isLastRound ? '<button class="btn btn-primary" onclick="socket.emit(\'requestNextRound\',currentRoom)">التالي ➡️</button>' : ''}${isHost && d.isLastRound ? '<button class="btn btn-primary" onclick="socket.emit(\'requestNextRound\',currentRoom)">النتائج 🏆</button>' : ''}</div>`; }
+
+        // Drawful
+        function handleDrawfulPrompt(d) { document.getElementById('gameRound').textContent = `الجولة ${d.round} من ${d.maxRounds}`; startTimer(d.timeLimit); document.getElementById('gameContent').innerHTML = `<div class="drawing-section"><div class="drawing-prompt"><p style="font-size:20px;font-weight:800;color:#000;">ارسم: <strong>${d.prompt}</strong></p></div><canvas id="drawingCanvas" class="drawing-canvas" width="350" height="280"></canvas><div class="drawing-tools"><button class="tool-btn color-btn active" style="background:#000" onclick="setColor('#000',this)"></button><button class="tool-btn color-btn" style="background:#E23636" onclick="setColor('#E23636',this)"></button><button class="tool-btn color-btn" style="background:#2B5B84" onclick="setColor('#2B5B84',this)"></button><button class="tool-btn color-btn" style="background:#6BCB77" onclick="setColor('#6BCB77',this)"></button><button class="tool-btn color-btn" style="background:#FFD93D" onclick="setColor('#FFD93D',this)"></button><button class="tool-btn" onclick="brushSize=3">•</button><button class="tool-btn" onclick="brushSize=10">●</button><button class="tool-btn" onclick="clearCanvas()">🗑️</button></div></div><button class="btn btn-primary" style="margin-top:20px;" onclick="submitDrawing()">تم! 🖼️</button>`; initCanvas(); }
+        function initCanvas() { canvas = document.getElementById('drawingCanvas'); ctx = canvas.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.lineCap = 'round'; canvas.onmousedown = e => { isDrawing = true; draw(e); }; canvas.onmousemove = draw; canvas.onmouseup = canvas.onmouseout = () => { isDrawing = false; ctx.beginPath(); }; canvas.ontouchstart = e => { e.preventDefault(); isDrawing = true; }; canvas.ontouchmove = e => { e.preventDefault(); const t = e.touches[0]; const r = canvas.getBoundingClientRect(); ctx.strokeStyle = currentColor; ctx.lineWidth = brushSize; ctx.lineTo(t.clientX - r.left, t.clientY - r.top); ctx.stroke(); ctx.beginPath(); ctx.moveTo(t.clientX - r.left, t.clientY - r.top); }; canvas.ontouchend = () => { isDrawing = false; ctx.beginPath(); }; }
+        function draw(e) { if (!isDrawing) return; const r = canvas.getBoundingClientRect(); ctx.strokeStyle = currentColor; ctx.lineWidth = brushSize; ctx.lineTo(e.clientX - r.left, e.clientY - r.top); ctx.stroke(); ctx.beginPath(); ctx.moveTo(e.clientX - r.left, e.clientY - r.top); }
+        function setColor(c, btn) { currentColor = c; document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+        function clearCanvas() { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+        function submitDrawing() { socket.emit('submitDrawing', { code: currentRoom, drawing: canvas.toDataURL() }); showWaiting('ننتظر الفنانين...'); }
+
+        // Trivia
+        function handleTriviaQuestion(d) { document.getElementById('gameRound').textContent = `الجولة ${d.round} من ${d.maxRounds}`; startTimer(d.timeLimit); document.getElementById('gameContent').innerHTML = `<div class="question-card" style="background:#1a1a2e;color:#fff;"><div class="question-badge" style="background:var(--red);">💀</div><p class="question-text">${d.question}</p></div><div class="options-grid">${d.options.map((o,i) => `<button class="option-btn" onclick="answerTrivia(${i},this)">${o}</button>`).join('')}</div>`; }
+        function answerTrivia(i, btn) { document.querySelectorAll('.option-btn').forEach(b => { b.disabled = true; b.style.opacity = '0.6'; }); btn.classList.add('selected'); btn.style.opacity = '1'; socket.emit('submitTriviaAnswer', { code: currentRoom, answerIndex: i }); }
+        function handleTriviaResults(d) { clearInterval(gameTimer); document.querySelectorAll('.option-btn').forEach(b => { if (b.textContent === d.correctAnswer) b.classList.add('correct'); else if (b.classList.contains('selected')) b.classList.add('wrong'); }); setTimeout(() => { document.getElementById('gameContent').innerHTML = `<div class="results-section"><h2 class="results-title">${d.results.filter(r=>!r.isCorrect).length>0?'💀 القاتل يهجم!':'✅ الكل نجا!'}</h2><div class="results-card"><p class="winner-answer">الإجابة: ${d.correctAnswer}</p></div><div class="scoreboard">${d.results.map(r => `<div class="score-row" style="${!r.isAlive?'opacity:0.5':''}"><div class="score-player"><span>${r.isAlive?'😊':'💀'}</span><span class="score-name">${r.playerName}</span></div><span class="score-points">${r.score}</span></div>`).join('')}</div>${isHost && !d.isLastRound ? '<button class="btn btn-primary" onclick="socket.emit(\'requestNextRound\',currentRoom)">التالي ➡️</button>' : ''}${isHost && d.isLastRound ? '<button class="btn btn-primary" onclick="socket.emit(\'requestNextRound\',currentRoom)">النتائج 🏆</button>' : ''}</div>`; }, 2000); }
+
+        // Game Ended
+        function handleGameEnded(d) { clearInterval(gameTimer); createConfetti(); document.getElementById('finalScoreboard').innerHTML = `<h3 class="scoreboard-title">🏆 الترتيب</h3>${d.finalResults.map((p,i) => `<div class="score-row"><div class="score-player"><span class="score-rank">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</span><span>${p.avatar}</span><span class="score-name">${p.name}</span></div><span class="score-points">${p.score}</span></div>`).join('')}`; document.getElementById('playAgainBtn').style.display = isHost ? 'inline-block' : 'none'; showScreen('finalResultsScreen'); }
+
+        document.addEventListener('DOMContentLoaded', initSocket);
+    </script>
+</body>
+</html>
