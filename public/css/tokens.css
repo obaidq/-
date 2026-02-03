@@ -1,0 +1,197 @@
+/*
+ * ═══════════════════════════════════════════════════════════════
+ * ABU ABED BOX - DESIGN TOKENS
+ * النظام التصميمي الأساسي - لا تعدل بدون سبب!
+ * ═══════════════════════════════════════════════════════════════
+ */
+
+:root {
+  /* ─────────────────────────────────────────────────────────────
+   * COLOR PALETTE - الألوان الأساسية
+   * ───────────────────────────────────────────────────────────── */
+  
+  /* Primary - اللون الرئيسي (أزرق داكن) */
+  --color-primary-900: #0a1628;
+  --color-primary-800: #0f2137;
+  --color-primary-700: #162d4a;
+  --color-primary-600: #1e3a5f;
+  --color-primary-500: #2a4a73;
+  --color-primary-400: #3d6090;
+  --color-primary-300: #5a7fad;
+  
+  /* Secondary - اللون الثانوي (تركواز) */
+  --color-secondary-500: #00d4aa;
+  --color-secondary-400: #00e6bb;
+  --color-secondary-300: #33ecc9;
+  
+  /* Accent Colors - ألوان التمييز */
+  --color-accent-yellow: #ffd93d;
+  --color-accent-orange: #ff8c42;
+  --color-accent-pink: #ff3f7f;
+  --color-accent-red: #ff2d55;
+  --color-accent-purple: #9d4edd;
+  --color-accent-green: #00e676;
+  --color-accent-cyan: #00d4ff;
+  
+  /* Neutral - الرمادي */
+  --color-neutral-white: #ffffff;
+  --color-neutral-100: #f5f5f5;
+  --color-neutral-200: #eeeeee;
+  --color-neutral-300: #e0e0e0;
+  --color-neutral-400: #bdbdbd;
+  --color-neutral-500: #9e9e9e;
+  --color-neutral-600: #757575;
+  --color-neutral-700: #424242;
+  --color-neutral-800: #212121;
+  --color-neutral-black: #000000;
+  
+  /* Semantic Colors */
+  --color-success: var(--color-accent-green);
+  --color-warning: var(--color-accent-orange);
+  --color-error: var(--color-accent-red);
+  --color-info: var(--color-accent-cyan);
+  
+  /* ─────────────────────────────────────────────────────────────
+   * TYPOGRAPHY - الخطوط
+   * Jackbox-style: Bold, Blocky, Readable from couch
+   * ───────────────────────────────────────────────────────────── */
+  
+  /* Font Family - نستخدم Rubik لأنه أقرب لـ Jackbox مع دعم عربي */
+  --font-primary: 'Rubik', 'Tajawal', sans-serif;
+  --font-display: 'Black Ops One', 'Rubik', sans-serif;
+  
+  /* Font Sizes - مقياس الخطوط (Couch-readable) */
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.875rem;   /* 14px */
+  --text-base: 1rem;     /* 16px */
+  --text-lg: 1.25rem;    /* 20px */
+  --text-xl: 1.5rem;     /* 24px */
+  --text-2xl: 2rem;      /* 32px */
+  --text-3xl: 2.5rem;    /* 40px */
+  --text-4xl: 3rem;      /* 48px */
+  --text-5xl: 4rem;      /* 64px */
+  --text-6xl: 5rem;      /* 80px */
+  
+  /* Font Weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-black: 900;
+  
+  /* Line Heights */
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+  
+  /* ─────────────────────────────────────────────────────────────
+   * SPACING - المسافات
+   * ───────────────────────────────────────────────────────────── */
+  --space-0: 0;
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+  --space-20: 5rem;     /* 80px */
+  --space-24: 6rem;     /* 96px */
+  
+  /* ─────────────────────────────────────────────────────────────
+   * BORDERS & RADIUS - الحواف
+   * Jackbox = blocky, thick borders, no soft curves
+   * ───────────────────────────────────────────────────────────── */
+  --radius-none: 0;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+  
+  --border-thin: 2px;
+  --border-medium: 4px;
+  --border-thick: 6px;
+  --border-chonky: 8px;
+  
+  /* ─────────────────────────────────────────────────────────────
+   * SHADOWS - الظلال
+   * Jackbox = hard shadows, no blur (offset only)
+   * ───────────────────────────────────────────────────────────── */
+  --shadow-sm: 2px 2px 0 var(--color-neutral-black);
+  --shadow-md: 4px 4px 0 var(--color-neutral-black);
+  --shadow-lg: 6px 6px 0 var(--color-neutral-black);
+  --shadow-xl: 8px 8px 0 var(--color-neutral-black);
+  --shadow-2xl: 12px 12px 0 var(--color-neutral-black);
+  
+  /* Colored shadows for special effects */
+  --shadow-glow-yellow: 0 0 20px var(--color-accent-yellow);
+  --shadow-glow-cyan: 0 0 20px var(--color-accent-cyan);
+  --shadow-glow-pink: 0 0 20px var(--color-accent-pink);
+  
+  /* ─────────────────────────────────────────────────────────────
+   * MOTION - الحركة
+   * ───────────────────────────────────────────────────────────── */
+  --duration-instant: 0ms;
+  --duration-fast: 100ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 500ms;
+  
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-elastic: cubic-bezier(0.68, -0.6, 0.32, 1.6);
+  
+  /* ─────────────────────────────────────────────────────────────
+   * Z-INDEX - الطبقات
+   * ───────────────────────────────────────────────────────────── */
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-overlay: 300;
+  --z-modal: 400;
+  --z-toast: 500;
+  --z-tooltip: 600;
+  --z-max: 9999;
+  
+  /* ─────────────────────────────────────────────────────────────
+   * LAYOUT - التخطيط
+   * ───────────────────────────────────────────────────────────── */
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1536px;
+  
+  /* Safe area for TV/couch viewing */
+  --safe-area-x: 48px;
+  --safe-area-y: 32px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ * THEME VARIABLES - متغيرات الثيم القابلة للتغيير
+ * هذه تتغير حسب اللعبة النشطة
+ * ═══════════════════════════════════════════════════════════════ */
+:root {
+  /* Current theme (defaults to hub) */
+  --theme-bg-primary: var(--color-primary-700);
+  --theme-bg-secondary: var(--color-primary-800);
+  --theme-accent: var(--color-accent-yellow);
+  --theme-text-primary: var(--color-neutral-white);
+  --theme-text-secondary: var(--color-neutral-300);
+  --theme-pattern: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ * DARK MODE (Default - Games are always dark)
+ * ═══════════════════════════════════════════════════════════════ */
+html {
+  color-scheme: dark;
+}

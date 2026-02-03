@@ -1,0 +1,685 @@
+/*
+ * ═══════════════════════════════════════════════════════════════
+ * ABU ABED BOX - CORE COMPONENTS
+ * المكونات الأساسية - استخدم هذه فقط!
+ * ═══════════════════════════════════════════════════════════════
+ */
+
+/* ─────────────────────────────────────────────────────────────
+ * BUTTONS - الأزرار
+ * Jackbox-style: chunky, bold, satisfying click
+ * ───────────────────────────────────────────────────────────── */
+
+.btn {
+  /* Reset */
+  appearance: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+  
+  /* Base styles */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  
+  /* Typography */
+  font-family: var(--font-primary);
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  
+  /* Sizing */
+  padding: var(--space-4) var(--space-8);
+  min-height: 56px;
+  min-width: 160px;
+  
+  /* Border */
+  border: var(--border-thick) solid var(--color-neutral-black);
+  border-radius: var(--radius-lg);
+  
+  /* Shadow */
+  box-shadow: var(--shadow-md);
+  
+  /* Transition */
+  transition: transform var(--duration-fast) var(--ease-out),
+              box-shadow var(--duration-fast) var(--ease-out);
+  
+  /* Prevent text selection */
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Button Variants */
+.btn--primary {
+  background: var(--color-accent-green);
+  color: var(--color-neutral-black);
+}
+
+.btn--secondary {
+  background: var(--color-accent-yellow);
+  color: var(--color-neutral-black);
+}
+
+.btn--danger {
+  background: var(--color-accent-red);
+  color: var(--color-neutral-white);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--color-neutral-white);
+  border-color: var(--color-neutral-white);
+}
+
+.btn--accent {
+  background: var(--theme-accent);
+  color: var(--color-neutral-black);
+}
+
+/* Button Sizes */
+.btn--sm {
+  font-size: var(--text-base);
+  padding: var(--space-2) var(--space-4);
+  min-height: 40px;
+  min-width: 100px;
+  border-width: var(--border-medium);
+}
+
+.btn--lg {
+  font-size: var(--text-2xl);
+  padding: var(--space-5) var(--space-10);
+  min-height: 72px;
+  min-width: 200px;
+  border-width: var(--border-chonky);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn--lg:hover {
+  box-shadow: var(--shadow-xl);
+}
+
+.btn--full {
+  width: 100%;
+}
+
+/* Icon Button */
+.btn--icon {
+  min-width: auto;
+  padding: var(--space-3);
+  aspect-ratio: 1;
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * CARDS - الكروت
+ * ───────────────────────────────────────────────────────────── */
+
+.card {
+  background: var(--color-neutral-white);
+  border: var(--border-thick) solid var(--color-neutral-black);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.card__header {
+  padding: var(--space-6);
+  background: var(--theme-accent);
+  border-bottom: var(--border-thick) solid var(--color-neutral-black);
+}
+
+.card__body {
+  padding: var(--space-6);
+  color: var(--color-neutral-800);
+}
+
+.card__footer {
+  padding: var(--space-4) var(--space-6);
+  background: var(--color-neutral-100);
+  border-top: var(--border-medium) solid var(--color-neutral-300);
+}
+
+/* Clickable Card */
+.card--clickable {
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-out),
+              box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.card--clickable:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+}
+
+.card--clickable:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-md);
+}
+
+/* Dark Card */
+.card--dark {
+  background: var(--color-primary-800);
+  color: var(--color-neutral-white);
+}
+
+.card--dark .card__body {
+  color: var(--color-neutral-white);
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * PANELS - اللوحات
+ * ───────────────────────────────────────────────────────────── */
+
+.panel {
+  background: rgba(0, 0, 0, 0.7);
+  border: var(--border-thick) solid var(--color-neutral-black);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-8);
+  backdrop-filter: blur(8px);
+}
+
+.panel--solid {
+  background: var(--color-primary-800);
+  backdrop-filter: none;
+}
+
+.panel--accent {
+  border-color: var(--theme-accent);
+  box-shadow: 0 0 0 2px var(--theme-accent);
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * INPUT FIELDS - حقول الإدخال
+ * ───────────────────────────────────────────────────────────── */
+
+.input {
+  display: block;
+  width: 100%;
+  padding: var(--space-4) var(--space-5);
+  
+  font-family: var(--font-primary);
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  text-align: center;
+  
+  background: var(--color-neutral-white);
+  color: var(--color-neutral-800);
+  
+  border: var(--border-thick) solid var(--color-neutral-black);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  
+  transition: border-color var(--duration-fast),
+              box-shadow var(--duration-fast);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--theme-accent);
+  box-shadow: 0 0 0 4px rgba(255, 217, 61, 0.3);
+}
+
+.input::placeholder {
+  color: var(--color-neutral-500);
+  font-weight: var(--font-medium);
+}
+
+/* Code Input (for room codes) */
+.input--code {
+  font-size: var(--text-4xl);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  font-family: var(--font-display), var(--font-primary);
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * BADGES - الشارات
+ * ───────────────────────────────────────────────────────────── */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  
+  padding: var(--space-2) var(--space-4);
+  
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  
+  background: var(--color-neutral-200);
+  color: var(--color-neutral-700);
+  
+  border: var(--border-thin) solid var(--color-neutral-black);
+  border-radius: var(--radius-full);
+}
+
+.badge--primary { background: var(--color-primary-500); color: white; }
+.badge--success { background: var(--color-success); color: black; }
+.badge--warning { background: var(--color-warning); color: black; }
+.badge--error { background: var(--color-error); color: white; }
+.badge--info { background: var(--color-info); color: black; }
+
+/* ─────────────────────────────────────────────────────────────
+ * TIMER / PROGRESS - المؤقت
+ * ───────────────────────────────────────────────────────────── */
+
+.timer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  width: 80px;
+  height: 80px;
+  
+  font-size: var(--text-3xl);
+  font-weight: var(--font-black);
+  font-family: var(--font-display), var(--font-primary);
+  
+  background: var(--color-accent-yellow);
+  color: var(--color-neutral-black);
+  
+  border: var(--border-thick) solid var(--color-neutral-black);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-md);
+}
+
+.timer--warning {
+  background: var(--color-accent-orange);
+  animation: timer-pulse 0.5s ease infinite;
+}
+
+.timer--danger {
+  background: var(--color-accent-red);
+  color: var(--color-neutral-white);
+  animation: timer-pulse 0.3s ease infinite;
+}
+
+@keyframes timer-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Progress Bar */
+.progress {
+  width: 100%;
+  height: 16px;
+  
+  background: var(--color-neutral-700);
+  
+  border: var(--border-medium) solid var(--color-neutral-black);
+  border-radius: var(--radius-full);
+  
+  overflow: hidden;
+}
+
+.progress__bar {
+  height: 100%;
+  background: var(--color-accent-green);
+  transition: width var(--duration-normal) var(--ease-default);
+}
+
+.progress--warning .progress__bar { background: var(--color-accent-orange); }
+.progress--danger .progress__bar { background: var(--color-accent-red); }
+
+/* ─────────────────────────────────────────────────────────────
+ * TOAST - الإشعارات
+ * ───────────────────────────────────────────────────────────── */
+
+.toast {
+  position: fixed;
+  top: var(--space-6);
+  left: 50%;
+  transform: translateX(-50%) translateY(-120%);
+  z-index: var(--z-toast);
+  
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  
+  padding: var(--space-4) var(--space-6);
+  
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  
+  border: var(--border-thick) solid var(--color-neutral-black);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  
+  animation: toast-slide-in var(--duration-slow) var(--ease-bounce) forwards;
+}
+
+.toast--success {
+  background: var(--color-success);
+  color: var(--color-neutral-black);
+}
+
+.toast--error {
+  background: var(--color-error);
+  color: var(--color-neutral-white);
+}
+
+.toast--info {
+  background: var(--color-info);
+  color: var(--color-neutral-black);
+}
+
+.toast--leaving {
+  animation: toast-slide-out var(--duration-normal) var(--ease-in) forwards;
+}
+
+@keyframes toast-slide-in {
+  to { transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes toast-slide-out {
+  to { transform: translateX(-50%) translateY(-120%); }
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * MODAL - النوافذ المنبثقة
+ * ───────────────────────────────────────────────────────────── */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+  
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--duration-normal), visibility var(--duration-normal);
+}
+
+.modal-overlay.is-active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal {
+  background: var(--color-neutral-white);
+  border: var(--border-thick) solid var(--color-neutral-black);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-2xl);
+  
+  max-width: 500px;
+  width: 100%;
+  
+  transform: scale(0.9);
+  transition: transform var(--duration-normal) var(--ease-bounce);
+}
+
+.modal-overlay.is-active .modal {
+  transform: scale(1);
+}
+
+.modal__header {
+  padding: var(--space-6);
+  text-align: center;
+  border-bottom: var(--border-medium) solid var(--color-neutral-300);
+}
+
+.modal__title {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-black);
+  color: var(--color-neutral-800);
+  margin: 0;
+}
+
+.modal__body {
+  padding: var(--space-6);
+  color: var(--color-neutral-700);
+}
+
+.modal__footer {
+  padding: var(--space-4) var(--space-6);
+  display: flex;
+  gap: var(--space-4);
+  justify-content: center;
+  border-top: var(--border-medium) solid var(--color-neutral-300);
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * AVATAR - صورة اللاعب
+ * ───────────────────────────────────────────────────────────── */
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  width: 64px;
+  height: 64px;
+  
+  font-size: var(--text-2xl);
+  
+  background: var(--color-primary-500);
+  
+  border: var(--border-thick) solid var(--color-neutral-black);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-md);
+  
+  position: relative;
+}
+
+.avatar--sm { width: 48px; height: 48px; font-size: var(--text-xl); }
+.avatar--lg { width: 80px; height: 80px; font-size: var(--text-3xl); }
+.avatar--xl { width: 100px; height: 100px; font-size: var(--text-4xl); }
+
+/* Host Crown */
+.avatar--host::before {
+  content: '👑';
+  position: absolute;
+  top: -12px;
+  right: -8px;
+  font-size: var(--text-xl);
+  filter: drop-shadow(1px 1px 0 black);
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * ROOM CODE DISPLAY - عرض كود الغرفة
+ * ───────────────────────────────────────────────────────────── */
+
+.room-code {
+  background: var(--color-neutral-white);
+  border: var(--border-thick) solid var(--color-neutral-black);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  
+  padding: var(--space-6) var(--space-10);
+  text-align: center;
+}
+
+.room-code__label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-neutral-500);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: var(--space-2);
+}
+
+.room-code__value {
+  font-family: var(--font-display), var(--font-primary);
+  font-size: var(--text-5xl);
+  font-weight: var(--font-black);
+  letter-spacing: 0.2em;
+  color: var(--color-primary-700);
+}
+
+.room-code__url {
+  display: block;
+  font-size: var(--text-sm);
+  color: var(--color-accent-pink);
+  margin-top: var(--space-2);
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * PLAYER CARD - كارت اللاعب
+ * ───────────────────────────────────────────────────────────── */
+
+.player-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  
+  padding: var(--space-4);
+  
+  animation: player-join var(--duration-slow) var(--ease-bounce);
+}
+
+@keyframes player-join {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.player-card__name {
+  font-size: var(--text-base);
+  font-weight: var(--font-bold);
+  color: var(--color-neutral-white);
+}
+
+.player-card__score {
+  font-size: var(--text-sm);
+  color: var(--theme-accent);
+}
+
+.player-card__status {
+  font-size: var(--text-xs);
+  color: var(--color-neutral-400);
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * GAME CARD - كارت اللعبة
+ * ───────────────────────────────────────────────────────────── */
+
+.game-card {
+  background: var(--color-neutral-white);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  cursor: pointer;
+  
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  
+  transition: transform var(--duration-normal) var(--ease-out),
+              box-shadow var(--duration-normal) var(--ease-out);
+}
+
+.game-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+}
+
+.game-card:active {
+  transform: translateY(-4px) scale(1.01);
+}
+
+.game-card__header {
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--game-card-bg, var(--color-primary-500));
+}
+
+.game-card__icon {
+  font-size: 64px;
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
+  transition: transform var(--duration-normal) var(--ease-bounce);
+}
+
+.game-card:hover .game-card__icon {
+  transform: scale(1.2) rotate(-5deg);
+}
+
+.game-card__body {
+  padding: var(--space-5);
+  text-align: right;
+}
+
+.game-card__title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-black);
+  color: var(--color-neutral-800);
+  margin: 0 0 var(--space-2) 0;
+}
+
+.game-card__desc {
+  font-size: var(--text-sm);
+  color: var(--color-neutral-600);
+  line-height: var(--leading-relaxed);
+  margin: 0 0 var(--space-4) 0;
+}
+
+.game-card__meta {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * LOADING SPINNER
+ * ───────────────────────────────────────────────────────────── */
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 6px solid var(--color-neutral-700);
+  border-top-color: var(--theme-accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * DIVIDER
+ * ───────────────────────────────────────────────────────────── */
+
+.divider {
+  height: var(--border-medium);
+  background: var(--color-neutral-700);
+  border: none;
+  margin: var(--space-6) 0;
+}
+
+.divider--light {
+  background: var(--color-neutral-300);
+}

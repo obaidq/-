@@ -1,169 +1,339 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>أبو عابد بوكس 🎮 | منصة الألعاب السعودية</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Cairo:wght@600;700;800;900&display=swap" rel="stylesheet">
-    <script src="/socket.io/socket.io.js"></script>
-    <link rel="stylesheet" href="/css/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>أبو عابد بوكس | ألعاب الجماعة 🇸🇦</title>
+  
+  <!-- Fonts - Rubik for Jackbox-style bold look -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Socket.IO -->
+  <script src="/socket.io/socket.io.js"></script>
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/patterns.css">
 </head>
-<body>
-    <!-- شاشة التحميل -->
-    <div id="loading-screen" class="screen active">
-        <div class="loader-container">
-            <div class="saudi-logo">
-                <div class="logo-icon">🎮</div>
-                <h1 class="logo-text">أبو عابد بوكس</h1>
-                <p class="logo-subtitle">منصة الألعاب السعودية</p>
-            </div>
-            <div class="loader">
-                <div class="loader-bar"></div>
-            </div>
-            <p class="loader-text">جاري التحميل...</p>
+<body data-theme="hub">
+  
+  <!-- Background -->
+  <div class="bg">
+    <div class="bg__pattern pattern-rays"></div>
+    <div class="bg__overlay"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SCREEN: BOOT / LOADING
+       ═══════════════════════════════════════════════════════════════ -->
+  <div id="bootScreen" class="screen screen--centered is-active">
+    <div class="boot-content">
+      <div class="boot-mascot animate-bounce">🧔🏻</div>
+      <div class="boot-logo">
+        <span class="boot-logo__box">أبو عابد</span>
+        <span class="boot-logo__name">بوكس</span>
+      </div>
+      <div class="spinner mt-6"></div>
+      <p class="boot-tip text-accent mt-4">💡 نصيحة: الأمانة في اللعب... مو دايم مطلوبة!</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SCREEN: MAIN MENU
+       ═══════════════════════════════════════════════════════════════ -->
+  <div id="menuScreen" class="screen screen--centered">
+    <div class="menu-content">
+      <div class="menu-mascot animate-bounce">🧔🏻</div>
+      <div class="menu-logo">
+        <span class="menu-logo__box">أبو عابد</span>
+        <span class="menu-logo__name">بوكس</span>
+      </div>
+      <p class="menu-tagline">🇸🇦 ألعاب جماعية سعودية • العب مع ربعك!</p>
+      
+      <div class="menu-buttons mt-8">
+        <button class="btn btn--primary btn--lg btn--full" onclick="App.showScreen('createScreen')">
+          🏠 أنشئ غرفة
+        </button>
+        <button class="btn btn--secondary btn--lg btn--full" onclick="App.showScreen('joinScreen')">
+          🚪 انضم لغرفة
+        </button>
+        <button class="btn btn--ghost btn--full" onclick="App.showScreen('howToPlayScreen')">
+          ❓ كيف ألعب؟
+        </button>
+      </div>
+    </div>
+    
+    <div class="saudi-badge">
+      <span>🇸🇦</span>
+      <span>صنع في السعودية بكل حب</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SCREEN: CREATE ROOM
+       ═══════════════════════════════════════════════════════════════ -->
+  <div id="createScreen" class="screen screen--centered">
+    <div class="panel" style="max-width: 450px; width: 100%;">
+      <h2 class="text-3xl font-black text-center text-accent mb-8">🏠 أنشئ غرفة</h2>
+      
+      <div class="mb-6">
+        <label class="text-sm text-muted uppercase mb-2 block">اسمك</label>
+        <input type="text" id="hostNameInput" class="input" placeholder="أدخل اسمك..." maxlength="12">
+      </div>
+      
+      <div class="flex flex-col gap-4">
+        <button class="btn btn--primary btn--full" onclick="App.createRoom()">
+          إنشاء! 🎉
+        </button>
+        <button class="btn btn--ghost btn--full" onclick="App.showScreen('menuScreen')">
+          رجوع
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SCREEN: JOIN ROOM
+       ═══════════════════════════════════════════════════════════════ -->
+  <div id="joinScreen" class="screen screen--centered">
+    <div class="panel" style="max-width: 450px; width: 100%;">
+      <h2 class="text-3xl font-black text-center text-accent mb-8">🚪 انضم لغرفة</h2>
+      
+      <div class="mb-6">
+        <label class="text-sm text-muted uppercase mb-2 block">كود الغرفة</label>
+        <input type="text" id="roomCodeInput" class="input input--code" placeholder="ABCD" maxlength="4" 
+               oninput="this.value = this.value.toUpperCase()">
+      </div>
+      
+      <div class="mb-6">
+        <label class="text-sm text-muted uppercase mb-2 block">اسمك</label>
+        <input type="text" id="playerNameInput" class="input" placeholder="أدخل اسمك..." maxlength="12">
+      </div>
+      
+      <div class="flex flex-col gap-4">
+        <button class="btn btn--primary btn--full" onclick="App.joinRoom()">
+          انضم! 🎮
+        </button>
+        <button class="btn btn--ghost btn--full" onclick="App.showScreen('menuScreen')">
+          رجوع
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SCREEN: HOW TO PLAY
+       ═══════════════════════════════════════════════════════════════ -->
+  <div id="howToPlayScreen" class="screen screen--centered">
+    <div class="panel" style="max-width: 600px; width: 100%;">
+      <h2 class="text-3xl font-black text-center text-accent mb-6">❓ كيف ألعب؟</h2>
+      
+      <div class="how-to-steps">
+        <div class="how-to-step">
+          <span class="how-to-step__num">1</span>
+          <span class="how-to-step__text">أنشئ غرفة أو انضم لوحدة موجودة</span>
         </div>
-    </div>
-
-    <!-- الشاشة الرئيسية -->
-    <div id="main-menu" class="screen">
-        <div class="menu-bg"></div>
-        <div class="menu-container">
-            <div class="menu-header">
-                <div class="main-logo">
-                    <span class="logo-emoji">🎮</span>
-                    <h1>أبو عابد بوكس</h1>
-                </div>
-                <p class="tagline">ألعاب جماعية سعودية 100%</p>
-            </div>
-            <div class="menu-buttons">
-                <button class="btn btn-primary btn-large" onclick="showScreen('create-room')">
-                    <span class="btn-icon">🏠</span>
-                    <span class="btn-text">إنشاء غرفة</span>
-                </button>
-                <button class="btn btn-secondary btn-large" onclick="showScreen('join-room')">
-                    <span class="btn-icon">🚪</span>
-                    <span class="btn-text">دخول غرفة</span>
-                </button>
-            </div>
-            <div class="menu-footer">
-                <p>الإصدار 4.0 | صنع بـ ❤️ في السعودية</p>
-            </div>
+        <div class="how-to-step">
+          <span class="how-to-step__num">2</span>
+          <span class="how-to-step__text">شارك الكود مع أصدقائك</span>
         </div>
-    </div>
-
-    <!-- إنشاء غرفة -->
-    <div id="create-room" class="screen">
-        <div class="form-container">
-            <button class="back-btn" onclick="showScreen('main-menu')">← رجوع</button>
-            <h2>إنشاء غرفة جديدة</h2>
-            <div class="input-group">
-                <label>اسمك</label>
-                <input type="text" id="host-name" placeholder="مثال: أبو فهد" maxlength="15">
-            </div>
-            <button class="btn btn-primary" onclick="createRoom()">إنشاء الغرفة 🎉</button>
+        <div class="how-to-step">
+          <span class="how-to-step__num">3</span>
+          <span class="how-to-step__text">اختر لعبة من القائمة</span>
         </div>
-    </div>
-
-    <!-- دخول غرفة -->
-    <div id="join-room" class="screen">
-        <div class="form-container">
-            <button class="back-btn" onclick="showScreen('main-menu')">← رجوع</button>
-            <h2>الانضمام لغرفة</h2>
-            <div class="input-group">
-                <label>كود الغرفة</label>
-                <input type="text" id="room-code-input" placeholder="XXXX" maxlength="4" style="text-transform:uppercase">
-            </div>
-            <div class="input-group">
-                <label>اسمك</label>
-                <input type="text" id="player-name" placeholder="مثال: أم سعود" maxlength="15">
-            </div>
-            <button class="btn btn-primary" onclick="joinRoom()">دخول 🚀</button>
+        <div class="how-to-step">
+          <span class="how-to-step__num">4</span>
+          <span class="how-to-step__text">استمتعوا! 🎉</span>
         </div>
+      </div>
+      
+      <button class="btn btn--secondary btn--full mt-6" onclick="App.showScreen('menuScreen')">
+        فهمت! 👍
+      </button>
     </div>
+  </div>
 
-    <!-- غرفة الانتظار -->
-    <div id="lobby" class="screen">
-        <div class="lobby-container">
-            <div class="lobby-header">
-                <div class="room-code-display">
-                    <span class="code-label">كود الغرفة</span>
-                    <span class="code-value" id="display-room-code">XXXX</span>
-                </div>
-                <div class="player-count">
-                    <span id="player-count-num">0</span>/10 لاعبين
-                </div>
+  <!-- ═══════════════════════════════════════════════════════════════
+       SCREEN: LOBBY
+       ═══════════════════════════════════════════════════════════════ -->
+  <div id="lobbyScreen" class="screen">
+    <div class="lobby-header text-center mb-6">
+      <div class="menu-mascot animate-bounce" style="font-size: 60px;">🧔🏻</div>
+      <div class="menu-logo" style="transform: scale(0.8);">
+        <span class="menu-logo__box">أبو عابد</span>
+        <span class="menu-logo__name">بوكس</span>
+      </div>
+      
+      <div class="room-code mt-6 mx-auto">
+        <span class="room-code__label">كود الغرفة</span>
+        <span class="room-code__value" id="displayRoomCode">XXXX</span>
+        <span class="room-code__url">شارك الكود مع أصدقائك!</span>
+      </div>
+    </div>
+    
+    <div class="players-grid mb-6" id="playersGrid">
+      <!-- Players will be rendered here -->
+    </div>
+    
+    <!-- Games Grid (Host Only) -->
+    <div id="gamesSection" class="games-section mb-6" style="display: none;">
+      <h3 class="text-2xl font-bold text-center mb-4">🎮 اختر لعبة</h3>
+      <div class="games-grid">
+        <!-- Quiplash -->
+        <div class="game-card" onclick="App.selectGame('quiplash')" style="--game-card-bg: linear-gradient(135deg, #667eea, #764ba2);">
+          <div class="game-card__header">
+            <span class="game-card__icon">⚡</span>
+          </div>
+          <div class="game-card__body">
+            <h4 class="game-card__title">رد سريع</h4>
+            <p class="game-card__desc">اكتب أذكى وأطرف إجابة! أصدقاؤك يصوتون على الأفضل</p>
+            <div class="game-card__meta">
+              <span class="badge">👥 ٣-٨</span>
+              <span class="badge">⏱️ ١٥د</span>
             </div>
-            
-            <div class="players-grid" id="players-list"></div>
-            
-            <div class="game-selection" id="game-selection">
-                <h3>اختر اللعبة</h3>
-                <div class="games-grid">
-                    <div class="game-card" data-game="quiplash" onclick="selectGame('quiplash')">
-                        <div class="game-icon">💬</div>
-                        <div class="game-name">رد سريع</div>
-                        <div class="game-players">3-8 لاعبين</div>
-                    </div>
-                    <div class="game-card" data-game="fibbage" onclick="selectGame('fibbage')">
-                        <div class="game-icon">🤥</div>
-                        <div class="game-name">كشف الكذاب</div>
-                        <div class="game-players">2-8 لاعبين</div>
-                    </div>
-                    <div class="game-card" data-game="guesspionage" onclick="selectGame('guesspionage')">
-                        <div class="game-icon">📊</div>
-                        <div class="game-name">خمّن النسبة</div>
-                        <div class="game-players">2-8 لاعبين</div>
-                    </div>
-                    <div class="game-card" data-game="fakinit" onclick="selectGame('fakinit')">
-                        <div class="game-icon">🎭</div>
-                        <div class="game-name">المزيّف</div>
-                        <div class="game-players">3-6 لاعبين</div>
-                    </div>
-                    <div class="game-card" data-game="triviamurder" onclick="selectGame('triviamurder')">
-                        <div class="game-icon">💀</div>
-                        <div class="game-name">حفلة القاتل</div>
-                        <div class="game-players">1-8 لاعبين</div>
-                    </div>
-                    <div class="game-card" data-game="drawful" onclick="selectGame('drawful')">
-                        <div class="game-icon">🎨</div>
-                        <div class="game-name">الرسّام</div>
-                        <div class="game-players">3-8 لاعبين</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="lobby-actions">
-                <button class="btn btn-primary btn-large" id="start-game-btn" onclick="startGame()" style="display:none">
-                    ابدأ اللعبة 🎮
-                </button>
-                <button class="btn btn-secondary" id="ready-btn" onclick="toggleReady()">
-                    جاهز ✓
-                </button>
-            </div>
+          </div>
         </div>
-    </div>
-
-    <!-- شاشة اللعبة العامة -->
-    <div id="game-screen" class="screen">
-        <div class="game-container" id="game-container">
-            <!-- محتوى اللعبة يتم تحميله ديناميكياً -->
+        
+        <!-- Guesspionage -->
+        <div class="game-card" onclick="App.selectGame('guesspionage')" style="--game-card-bg: linear-gradient(135deg, #11998e, #38ef7d);">
+          <div class="game-card__header">
+            <span class="game-card__icon">📊</span>
+          </div>
+          <div class="game-card__body">
+            <h4 class="game-card__title">خمّن النسبة</h4>
+            <p class="game-card__desc">خمّن كم نسبة الناس اللي يسوون كذا؟</p>
+            <div class="game-card__meta">
+              <span class="badge">👥 ٢-٨</span>
+              <span class="badge">⏱️ ١٥د</span>
+            </div>
+          </div>
         </div>
+        
+        <!-- Fakin' It -->
+        <div class="game-card" onclick="App.selectGame('fakinit')" style="--game-card-bg: linear-gradient(135deg, #fa709a, #fee140);">
+          <div class="game-card__header">
+            <span class="game-card__icon">🕵️</span>
+          </div>
+          <div class="game-card__body">
+            <h4 class="game-card__title">المزيّف</h4>
+            <p class="game-card__desc">واحد ما يعرف المهمة - اكتشفوه!</p>
+            <div class="game-card__meta">
+              <span class="badge">👥 ٣-٦</span>
+              <span class="badge">⏱️ ١٥د</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Trivia Murder Party -->
+        <div class="game-card" onclick="App.selectGame('triviamurder')" style="--game-card-bg: linear-gradient(135deg, #434343, #000000);">
+          <div class="game-card__header">
+            <span class="game-card__icon">💀</span>
+          </div>
+          <div class="game-card__body">
+            <h4 class="game-card__title">حفلة القاتل</h4>
+            <p class="game-card__desc">أجب صح أو مت! آخر واحد يفوز</p>
+            <div class="game-card__meta">
+              <span class="badge">👥 ١-٨</span>
+              <span class="badge">⏱️ ٢٥د</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Fibbage -->
+        <div class="game-card" onclick="App.selectGame('fibbage')" style="--game-card-bg: linear-gradient(135deg, #f093fb, #f5576c);">
+          <div class="game-card__header">
+            <span class="game-card__icon">🎭</span>
+          </div>
+          <div class="game-card__body">
+            <h4 class="game-card__title">كشف الكذاب</h4>
+            <p class="game-card__desc">اكتب كذبة مقنعة واخدع أصحابك!</p>
+            <div class="game-card__meta">
+              <span class="badge">👥 ٢-٨</span>
+              <span class="badge">⏱️ ٢٠د</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Drawful -->
+        <div class="game-card" onclick="App.selectGame('drawful')" style="--game-card-bg: linear-gradient(135deg, #4facfe, #00f2fe);">
+          <div class="game-card__header">
+            <span class="game-card__icon">🎨</span>
+          </div>
+          <div class="game-card__body">
+            <h4 class="game-card__title">ارسم لي</h4>
+            <p class="game-card__desc">ارسم الكلمة السرية وخل الباقين يخمنون!</p>
+            <div class="game-card__meta">
+              <span class="badge">👥 ٣-٨</span>
+              <span class="badge">⏱️ ٢٠د</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <!-- نتائج اللعبة -->
-    <div id="results-screen" class="screen">
-        <div class="results-container" id="results-container"></div>
+    
+    <div class="lobby-actions flex justify-center gap-4">
+      <button class="btn btn--secondary" onclick="App.toggleReady()">
+        ✋ جاهز!
+      </button>
+      <button class="btn btn--danger" onclick="location.reload()">
+        🚪 خروج
+      </button>
     </div>
+  </div>
 
-    <!-- رسائل الخطأ -->
-    <div id="toast-container"></div>
+  <!-- ═══════════════════════════════════════════════════════════════
+       SCREEN: GAME
+       ═══════════════════════════════════════════════════════════════ -->
+  <div id="gameScreen" class="screen">
+    <div class="game-hud">
+      <div class="game-hud__start">
+        <button class="btn btn--danger btn--sm btn--icon" onclick="if(confirm('متأكد؟')) location.reload()">🚪</button>
+        <div>
+          <div class="game-hud__title" id="gameTitle">اللعبة</div>
+          <div class="game-hud__round" id="gameRound">الجولة ١ من ٣</div>
+        </div>
+      </div>
+      <div class="game-hud__center"></div>
+      <div class="game-hud__end">
+        <div class="timer" id="gameTimer">30</div>
+      </div>
+    </div>
+    
+    <div class="game-content" id="gameContent">
+      <!-- Game content rendered here -->
+    </div>
+    
+    <div class="game-footer">
+      <p class="game-footer__hint" id="gameHint">💡 اكتب أطرف إجابة!</p>
+    </div>
+  </div>
 
-    <!-- الصوت -->
-    <audio id="sound-correct" preload="auto"></audio>
-    <audio id="sound-wrong" preload="auto"></audio>
-    <audio id="sound-tick" preload="auto"></audio>
+  <!-- ═══════════════════════════════════════════════════════════════
+       SCREEN: FINAL RESULTS
+       ═══════════════════════════════════════════════════════════════ -->
+  <div id="resultsScreen" class="screen screen--centered">
+    <div class="results-content text-center">
+      <h1 class="text-5xl font-black text-accent mb-6">🏆 النتائج النهائية!</h1>
+      
+      <div class="results-scoreboard" id="finalScoreboard">
+        <!-- Scores rendered here -->
+      </div>
+      
+      <div class="flex justify-center gap-4 mt-8" id="resultsActions">
+        <button class="btn btn--primary btn--lg" onclick="App.backToLobby()">
+          🔄 العب مرة ثانية
+        </button>
+      </div>
+    </div>
+  </div>
 
-    <script src="/js/app.js"></script>
+  <!-- Toast Container -->
+  <div id="toastContainer"></div>
+
+  <script src="/js/app.js"></script>
 </body>
 </html>

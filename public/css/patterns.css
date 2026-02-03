@@ -1,0 +1,235 @@
+/*
+ * ═══════════════════════════════════════════════════════════════
+ * ABU ABED BOX - BACKGROUND PATTERNS
+ * أنماط الخلفيات - كل لعبة لها روح مختلفة
+ * ═══════════════════════════════════════════════════════════════
+ */
+
+/* ─────────────────────────────────────────────────────────────
+ * PATTERN: RAYS - أشعة (للقوائم والنتائج)
+ * ───────────────────────────────────────────────────────────── */
+
+.pattern-rays {
+  background: repeating-conic-gradient(
+    from 0deg at 50% 50%,
+    var(--theme-bg-primary) 0deg 10deg,
+    var(--theme-bg-secondary) 10deg 20deg
+  );
+  animation: pattern-rotate 120s linear infinite;
+}
+
+@keyframes pattern-rotate {
+  to { transform: rotate(360deg); }
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * PATTERN: DOTS - نقاط (Guesspionage)
+ * ───────────────────────────────────────────────────────────── */
+
+.pattern-dots {
+  background-image: radial-gradient(
+    circle at center,
+    var(--color-neutral-white) 2px,
+    transparent 2px
+  );
+  background-size: 40px 40px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * PATTERN: GRID - شبكة (للألعاب الاستراتيجية)
+ * ───────────────────────────────────────────────────────────── */
+
+.pattern-grid {
+  background-image: 
+    linear-gradient(var(--color-neutral-white) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-neutral-white) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * PATTERN: ZIGZAG - متعرج (Fakin' It)
+ * ───────────────────────────────────────────────────────────── */
+
+.pattern-zigzag {
+  background: 
+    linear-gradient(135deg, var(--theme-bg-secondary) 25%, transparent 25%) -50px 0,
+    linear-gradient(225deg, var(--theme-bg-secondary) 25%, transparent 25%) -50px 0,
+    linear-gradient(315deg, var(--theme-bg-secondary) 25%, transparent 25%),
+    linear-gradient(45deg, var(--theme-bg-secondary) 25%, transparent 25%);
+  background-size: 100px 50px;
+  background-color: var(--theme-bg-primary);
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * PATTERN: STRIPES - خطوط (Quiplash)
+ * ───────────────────────────────────────────────────────────── */
+
+.pattern-stripes {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--theme-bg-primary),
+    var(--theme-bg-primary) 20px,
+    var(--theme-bg-secondary) 20px,
+    var(--theme-bg-secondary) 40px
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * PATTERN: HALFTONE - نصف نغمة (Fibbage)
+ * ───────────────────────────────────────────────────────────── */
+
+.pattern-halftone {
+  background-image: radial-gradient(
+    circle at center,
+    var(--color-neutral-white) 1px,
+    transparent 1px
+  );
+  background-size: 8px 8px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * PATTERN: CONFETTI - قصاصات (للنتائج والفوز)
+ * ───────────────────────────────────────────────────────────── */
+
+.pattern-confetti {
+  background-image: 
+    radial-gradient(circle at 20% 30%, var(--color-accent-yellow) 3px, transparent 3px),
+    radial-gradient(circle at 40% 70%, var(--color-accent-pink) 2px, transparent 2px),
+    radial-gradient(circle at 60% 20%, var(--color-accent-cyan) 3px, transparent 3px),
+    radial-gradient(circle at 80% 60%, var(--color-accent-green) 2px, transparent 2px),
+    radial-gradient(circle at 30% 80%, var(--color-accent-orange) 2px, transparent 2px),
+    radial-gradient(circle at 70% 40%, var(--color-accent-purple) 3px, transparent 3px);
+  background-size: 200px 200px;
+  animation: confetti-float 20s linear infinite;
+}
+
+@keyframes confetti-float {
+  0% { background-position: 0 0; }
+  100% { background-position: 200px 200px; }
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * PATTERN: NOISE - تشويش (Horror - Trivia Murder)
+ * ───────────────────────────────────────────────────────────── */
+
+.pattern-noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.1;
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * PATTERN: WAVES - موجات (Drawful)
+ * ───────────────────────────────────────────────────────────── */
+
+.pattern-waves {
+  background: 
+    radial-gradient(ellipse at 50% 0%, var(--theme-bg-secondary) 0%, transparent 70%),
+    radial-gradient(ellipse at 50% 100%, var(--theme-bg-secondary) 0%, transparent 70%);
+  background-size: 100% 100px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * PATTERN: SPOTLIGHT - ضوء مسلط (للأسئلة)
+ * ───────────────────────────────────────────────────────────── */
+
+.pattern-spotlight {
+  background: 
+    radial-gradient(ellipse 80% 50% at 50% 20%, rgba(255, 217, 61, 0.2) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 50% 50%, var(--theme-bg-secondary) 0%, var(--theme-bg-primary) 100%);
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * PATTERN: TRIANGLES - مثلثات
+ * ───────────────────────────────────────────────────────────── */
+
+.pattern-triangles {
+  background-image: 
+    linear-gradient(30deg, var(--theme-bg-secondary) 12%, transparent 12.5%, transparent 87%, var(--theme-bg-secondary) 87.5%, var(--theme-bg-secondary)),
+    linear-gradient(150deg, var(--theme-bg-secondary) 12%, transparent 12.5%, transparent 87%, var(--theme-bg-secondary) 87.5%, var(--theme-bg-secondary)),
+    linear-gradient(30deg, var(--theme-bg-secondary) 12%, transparent 12.5%, transparent 87%, var(--theme-bg-secondary) 87.5%, var(--theme-bg-secondary)),
+    linear-gradient(150deg, var(--theme-bg-secondary) 12%, transparent 12.5%, transparent 87%, var(--theme-bg-secondary) 87.5%, var(--theme-bg-secondary)),
+    linear-gradient(60deg, rgba(255,255,255,0.05) 25%, transparent 25.5%, transparent 75%, rgba(255,255,255,0.05) 75%, rgba(255,255,255,0.05)),
+    linear-gradient(60deg, rgba(255,255,255,0.05) 25%, transparent 25.5%, transparent 75%, rgba(255,255,255,0.05) 75%, rgba(255,255,255,0.05));
+  background-size: 80px 140px;
+  background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * PATTERN: DIAMONDS - ماسات
+ * ───────────────────────────────────────────────────────────── */
+
+.pattern-diamonds {
+  background: 
+    linear-gradient(45deg, var(--theme-bg-secondary) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--theme-bg-secondary) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--theme-bg-secondary) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--theme-bg-secondary) 75%);
+  background-size: 60px 60px;
+  background-position: 0 0, 30px 0, 30px -30px, 0 30px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ * GAME THEMES - ثيمات الألعاب
+ * ═══════════════════════════════════════════════════════════════ */
+
+/* Hub / Menu Theme */
+[data-theme="hub"] {
+  --theme-bg-primary: var(--color-primary-700);
+  --theme-bg-secondary: var(--color-primary-800);
+  --theme-accent: var(--color-accent-yellow);
+}
+
+/* Quiplash - رد سريع */
+[data-theme="quiplash"] {
+  --theme-bg-primary: #4a148c;
+  --theme-bg-secondary: #311b92;
+  --theme-accent: var(--color-accent-yellow);
+  --game-card-bg: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+/* Fibbage - كشف الكذاب */
+[data-theme="fibbage"] {
+  --theme-bg-primary: #880e4f;
+  --theme-bg-secondary: #4a0025;
+  --theme-accent: var(--color-accent-pink);
+  --game-card-bg: linear-gradient(135deg, #f093fb, #f5576c);
+}
+
+/* Guesspionage - خمّن النسبة */
+[data-theme="guesspionage"] {
+  --theme-bg-primary: #004d40;
+  --theme-bg-secondary: #00251a;
+  --theme-accent: var(--color-accent-cyan);
+  --game-card-bg: linear-gradient(135deg, #11998e, #38ef7d);
+}
+
+/* Fakin' It - المزيّف */
+[data-theme="fakinit"] {
+  --theme-bg-primary: #e65100;
+  --theme-bg-secondary: #bf360c;
+  --theme-accent: var(--color-accent-yellow);
+  --game-card-bg: linear-gradient(135deg, #fa709a, #fee140);
+}
+
+/* Trivia Murder Party - حفلة القاتل */
+[data-theme="triviamurder"] {
+  --theme-bg-primary: #1a1a1a;
+  --theme-bg-secondary: #0a0a0a;
+  --theme-accent: var(--color-accent-red);
+  --game-card-bg: linear-gradient(135deg, #434343, #000000);
+}
+
+/* Drawful - ارسم لي */
+[data-theme="drawful"] {
+  --theme-bg-primary: #0277bd;
+  --theme-bg-secondary: #01579b;
+  --theme-accent: var(--color-accent-cyan);
+  --game-card-bg: linear-gradient(135deg, #4facfe, #00f2fe);
+}
+
+/* Results / Victory Theme */
+[data-theme="victory"] {
+  --theme-bg-primary: #1b5e20;
+  --theme-bg-secondary: #0d3d10;
+  --theme-accent: var(--color-accent-yellow);
+}
