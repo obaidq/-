@@ -26,14 +26,72 @@ const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
+
+// ── CORS: تقييد الأصول المسموحة ──
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim())
+  : null; // null = السماح لكل الأصول في التطوير فقط
+
 const io = new Server(server, {
   cors: {
-    origin: '*',
+    origin: ALLOWED_ORIGINS || '*',
     methods: ['GET', 'POST']
   },
   pingTimeout: 60000,
   pingInterval: 25000
 });
+
+// ── Rate Limiter لأحداث Socket ──
+function createRateLimiter(maxPerSecond) {
+  const clients = new Map();
+  return function(socketId) {
+    const now = Date.now();
+    const record = clients.get(socketId);
+    if (!record) {
+      clients.set(socketId, { count: 1, resetAt: now + 1000 });
+      return true;
+    }
+    if (now > record.resetAt) {
+      record.count = 1;
+      record.resetAt = now + 1000;
+      return true;
+    }
+    record.count++;
+    return record.count <= maxPerSecond;
+  };
+}
+
+const rateLimiters = {
+  submitAnswer: createRateLimiter(3),
+  submitVote: createRateLimiter(3),
+  sendEmoji: createRateLimiter(2),
+  createRoom: createRateLimiter(1),
+  joinRoom: createRateLimiter(2),
+  submitDrawing: createRateLimiter(2)
+};
+
+/**
+ * التحقق من صحة بيانات الرسم
+ */
+function validateDrawingData(drawing) {
+  if (!drawing || typeof drawing !== 'string') return false;
+  // حد أقصى 2MB للبيانات
+  if (drawing.length > 2 * 1024 * 1024) return false;
+  try {
+    const strokes = JSON.parse(drawing);
+    if (!Array.isArray(strokes)) return false;
+    if (strokes.length > 500) return false;
+    for (const stroke of strokes) {
+      if (!stroke || !Array.isArray(stroke.points)) return false;
+      if (stroke.points.length > 5000) return false;
+      if (typeof stroke.color !== 'string' || stroke.color.length > 20) return false;
+      if (typeof stroke.size !== 'number' || stroke.size < 1 || stroke.size > 50) return false;
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
 
 // تقديم الملفات الثابتة
 app.use(express.static(path.join(__dirname, 'public')));
@@ -247,6 +305,7 @@ io.on('connection', (socket) => {
   // إنشاء غرفة جديدة
   // ─────────────────────────────────────────────
   socket.on('createRoom', (playerName) => {
+    if (!rateLimiters.createRoom(socket.id)) return;
     // التحقق من صحة الاسم
     if (!playerName || typeof playerName !== 'string' || playerName.trim().length === 0) {
       return socket.emit('error', { message: 'الرجاء إدخال اسم صحيح!' });
@@ -285,6 +344,7 @@ io.on('connection', (socket) => {
   // الانضمام لغرفة موجودة
   // ─────────────────────────────────────────────
   socket.on('joinRoom', ({ code, playerName }) => {
+    if (!rateLimiters.joinRoom(socket.id)) return;
     // التحقق من المدخلات
     if (!code || typeof code !== 'string') {
       return socket.emit('error', { message: 'كود الغرفة غير صحيح!' });
@@ -420,6 +480,7 @@ io.on('connection', (socket) => {
   // إرسال إجابة
   // ─────────────────────────────────────────────
   socket.on('submitAnswer', ({ code, answer }) => {
+    if (!rateLimiters.submitAnswer(socket.id)) return;
     const room = rooms.get(code);
     if (!room || room.state !== 'playing') return;
 
@@ -465,6 +526,7 @@ io.on('connection', (socket) => {
   // إرسال تصويت
   // ─────────────────────────────────────────────
   socket.on('submitVote', ({ code, voteId }) => {
+    if (!rateLimiters.submitVote(socket.id)) return;
     const room = rooms.get(code);
     if (!room || room.state !== 'playing') return;
 
@@ -498,6 +560,7 @@ io.on('connection', (socket) => {
   // إرسال رسمة (لعبة ارسم لي)
   // ─────────────────────────────────────────────
   socket.on('submitDrawing', ({ code, drawing }) => {
+    if (!rateLimiters.submitDrawing(socket.id)) return;
     const room = rooms.get(code);
     if (!room || room.state !== 'playing' || room.currentGame !== 'drawful') return;
 
@@ -506,6 +569,11 @@ io.on('connection', (socket) => {
 
     // التحقق أن هذا اللاعب هو الرسام
     if (room.gameData.drawerId !== socket.id) return;
+
+    // التحقق من صحة بيانات الرسم
+    if (!validateDrawingData(drawing)) {
+      return socket.emit('error', { message: 'بيانات الرسمة غير صالحة!' });
+    }
 
     room.gameData.drawing = drawing;
     touchRoom(room);
@@ -575,6 +643,7 @@ io.on('connection', (socket) => {
   // إيموجي ردود الفعل
   // ─────────────────────────────────────────────
   socket.on('sendEmoji', ({ code, emoji }) => {
+    if (!rateLimiters.sendEmoji(socket.id)) return;
     const room = rooms.get(code);
     if (!room || !room.players.has(socket.id)) return;
     const validEmojis = ['😂', '🔥', '👏', '😱', '💀', '❤️', '👎', '🤣'];

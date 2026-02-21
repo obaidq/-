@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0a1628">
   <meta name="description" content="أبو عابد بوكس - ألعاب جماعية سعودية مثل جاكبوكس! العب مع ربعك">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -339,7 +339,7 @@
         <h3 class="text-xl font-black text-center mb-4">🎮 اختر لعبة</h3>
         <div class="games-grid">
           <!-- Quiplash -->
-          <div class="game-card" onclick="App.selectGame('quiplash')">
+          <div class="game-card" onclick="App.selectGame('quiplash')" role="button" tabindex="0" aria-label="لعبة رد سريع" onkeydown="if(event.key==='Enter')this.click()">
             <div class="game-card__banner" style="background:linear-gradient(135deg,#667eea,#764ba2)">
               <span class="game-card__icon">⚡</span>
             </div>
@@ -355,7 +355,7 @@
           </div>
 
           <!-- Guesspionage -->
-          <div class="game-card" onclick="App.selectGame('guesspionage')">
+          <div class="game-card" onclick="App.selectGame('guesspionage')" role="button" tabindex="0" aria-label="لعبة خمّن النسبة" onkeydown="if(event.key==='Enter')this.click()">
             <div class="game-card__banner" style="background:linear-gradient(135deg,#11998e,#38ef7d)">
               <span class="game-card__icon">📊</span>
             </div>
@@ -371,7 +371,7 @@
           </div>
 
           <!-- Fakin' It -->
-          <div class="game-card" onclick="App.selectGame('fakinit')">
+          <div class="game-card" onclick="App.selectGame('fakinit')" role="button" tabindex="0" aria-label="لعبة المزيّف" onkeydown="if(event.key==='Enter')this.click()">
             <div class="game-card__banner" style="background:linear-gradient(135deg,#fa709a,#fee140)">
               <span class="game-card__icon">🕵️</span>
             </div>
@@ -387,7 +387,7 @@
           </div>
 
           <!-- Trivia Murder Party -->
-          <div class="game-card" onclick="App.selectGame('triviamurder')">
+          <div class="game-card" onclick="App.selectGame('triviamurder')" role="button" tabindex="0" aria-label="لعبة حفلة القاتل" onkeydown="if(event.key==='Enter')this.click()">
             <div class="game-card__banner" style="background:linear-gradient(135deg,#434343,#000)">
               <span class="game-card__icon">💀</span>
             </div>
@@ -403,7 +403,7 @@
           </div>
 
           <!-- Fibbage -->
-          <div class="game-card" onclick="App.selectGame('fibbage')">
+          <div class="game-card" onclick="App.selectGame('fibbage')" role="button" tabindex="0" aria-label="لعبة كشف الكذاب" onkeydown="if(event.key==='Enter')this.click()">
             <div class="game-card__banner" style="background:linear-gradient(135deg,#f093fb,#f5576c)">
               <span class="game-card__icon">🎭</span>
             </div>
@@ -419,7 +419,7 @@
           </div>
 
           <!-- Drawful -->
-          <div class="game-card" onclick="App.selectGame('drawful')">
+          <div class="game-card" onclick="App.selectGame('drawful')" role="button" tabindex="0" aria-label="لعبة ارسم لي" onkeydown="if(event.key==='Enter')this.click()">
             <div class="game-card__banner" style="background:linear-gradient(135deg,#4facfe,#00f2fe)">
               <span class="game-card__icon">🎨</span>
             </div>
@@ -469,7 +469,7 @@
       </div>
       <div class="game-hud__end">
         <button class="btn btn--ghost btn--sm btn--icon" onclick="App.toggleSettings()" style="font-size:20px">⚙️</button>
-        <div class="game-timer" id="gameTimer">30</div>
+        <div class="game-timer" id="gameTimer" role="timer" aria-live="polite" aria-label="المؤقت">30</div>
       </div>
     </div>
 
@@ -501,15 +501,15 @@
   <!-- ═══════════════════════════════════════════════════════════
    * EMOJI REACTION BAR - ردود فعل
    * ═══════════════════════════════════════════════════════════ -->
-  <div id="emojiBar" class="emoji-bar hidden">
-    <button class="emoji-btn" onclick="App.sendEmoji('😂')">😂</button>
-    <button class="emoji-btn" onclick="App.sendEmoji('🔥')">🔥</button>
-    <button class="emoji-btn" onclick="App.sendEmoji('👏')">👏</button>
-    <button class="emoji-btn" onclick="App.sendEmoji('😱')">😱</button>
-    <button class="emoji-btn" onclick="App.sendEmoji('💀')">💀</button>
-    <button class="emoji-btn" onclick="App.sendEmoji('❤️')">❤️</button>
-    <button class="emoji-btn" onclick="App.sendEmoji('👎')">👎</button>
-    <button class="emoji-btn" onclick="App.sendEmoji('🤣')">🤣</button>
+  <div id="emojiBar" class="emoji-bar hidden" role="toolbar" aria-label="ردود الفعل">
+    <button class="emoji-btn" onclick="App.sendEmoji('😂')" aria-label="ضحك">😂</button>
+    <button class="emoji-btn" onclick="App.sendEmoji('🔥')" aria-label="حماس">🔥</button>
+    <button class="emoji-btn" onclick="App.sendEmoji('👏')" aria-label="تصفيق">👏</button>
+    <button class="emoji-btn" onclick="App.sendEmoji('😱')" aria-label="صدمة">😱</button>
+    <button class="emoji-btn" onclick="App.sendEmoji('💀')" aria-label="موت">💀</button>
+    <button class="emoji-btn" onclick="App.sendEmoji('❤️')" aria-label="حب">❤️</button>
+    <button class="emoji-btn" onclick="App.sendEmoji('👎')" aria-label="رفض">👎</button>
+    <button class="emoji-btn" onclick="App.sendEmoji('🤣')" aria-label="ضحك شديد">🤣</button>
   </div>
   <div id="emojiFloatContainer" class="emoji-float-container"></div>
 
@@ -524,16 +524,16 @@
         <button class="btn btn--ghost btn--sm" onclick="App.toggleSettings()">✕</button>
       </div>
       <div class="settings-group">
-        <label class="settings-label">🔊 الصوت الرئيسي</label>
-        <input type="range" class="settings-slider" id="volMaster" min="0" max="100" value="70" oninput="App.updateVolume('master',this.value)">
+        <label class="settings-label" for="volMaster">🔊 الصوت الرئيسي</label>
+        <input type="range" class="settings-slider" id="volMaster" min="0" max="100" value="70" aria-label="الصوت الرئيسي" oninput="App.updateVolume('master',this.value)">
       </div>
       <div class="settings-group">
-        <label class="settings-label">🎵 الموسيقى</label>
-        <input type="range" class="settings-slider" id="volMusic" min="0" max="100" value="40" oninput="App.updateVolume('music',this.value)">
+        <label class="settings-label" for="volMusic">🎵 الموسيقى</label>
+        <input type="range" class="settings-slider" id="volMusic" min="0" max="100" value="40" aria-label="مستوى الموسيقى" oninput="App.updateVolume('music',this.value)">
       </div>
       <div class="settings-group">
-        <label class="settings-label">🔔 المؤثرات</label>
-        <input type="range" class="settings-slider" id="volSfx" min="0" max="100" value="80" oninput="App.updateVolume('sfx',this.value)">
+        <label class="settings-label" for="volSfx">🔔 المؤثرات</label>
+        <input type="range" class="settings-slider" id="volSfx" min="0" max="100" value="80" aria-label="مستوى المؤثرات" oninput="App.updateVolume('sfx',this.value)">
       </div>
       <div class="settings-group">
         <label class="settings-label">
@@ -544,7 +544,7 @@
   </div>
 
   <!-- Toast Container -->
-  <div id="toastContainer"></div>
+  <div id="toastContainer" aria-live="assertive" role="alert"></div>
 
   <!-- App Scripts -->
   <script src="/js/audio.js"></script>

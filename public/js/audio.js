@@ -58,34 +58,38 @@ const AudioEngine = {
   // ─── Note helper ───
   playNote(freq, duration, type, gainNode, vol, delay) {
     if (!this.enabled || !this.ctx) return;
-    const t = this.ctx.currentTime + (delay || 0);
-    const osc = this.ctx.createOscillator();
-    const g = this.ctx.createGain();
-    osc.type = type || 'sine';
-    osc.frequency.setValueAtTime(freq, t);
-    g.gain.setValueAtTime(vol || 0.3, t);
-    g.gain.exponentialRampToValueAtTime(0.001, t + duration);
-    osc.connect(g);
-    g.connect(gainNode || this.sfxGain);
-    osc.start(t);
-    osc.stop(t + duration);
+    try {
+      const t = this.ctx.currentTime + (delay || 0);
+      const osc = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.setValueAtTime(freq, t);
+      g.gain.setValueAtTime(vol || 0.3, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + duration);
+      osc.connect(g);
+      g.connect(gainNode || this.sfxGain);
+      osc.start(t);
+      osc.stop(t + duration);
+    } catch (e) { /* تجاهل أخطاء الصوت */ }
   },
 
   playNoise(duration, gainNode, vol, delay) {
     if (!this.enabled || !this.ctx) return;
-    const t = this.ctx.currentTime + (delay || 0);
-    const bufferSize = this.ctx.sampleRate * duration;
-    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-    const src = this.ctx.createBufferSource();
-    src.buffer = buffer;
-    const g = this.ctx.createGain();
-    g.gain.setValueAtTime(vol || 0.1, t);
-    g.gain.exponentialRampToValueAtTime(0.001, t + duration);
-    src.connect(g);
-    g.connect(gainNode || this.sfxGain);
-    src.start(t);
+    try {
+      const t = this.ctx.currentTime + (delay || 0);
+      const bufferSize = Math.min(this.ctx.sampleRate * duration, this.ctx.sampleRate * 5);
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+      const src = this.ctx.createBufferSource();
+      src.buffer = buffer;
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(vol || 0.1, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + duration);
+      src.connect(g);
+      g.connect(gainNode || this.sfxGain);
+      src.start(t);
+    } catch (e) { /* تجاهل أخطاء الصوت */ }
   },
 
   // ═══ Sound Effects ═══
@@ -302,6 +306,11 @@ const AudioEngine = {
     if (this.currentMusic) {
       try { this.currentMusic.stop(); } catch(e) {}
       this.currentMusic = null;
+    }
+    // مسح مؤقت الموسيقى لمنع التسريب
+    if (this._musicTimeout) {
+      clearTimeout(this._musicTimeout);
+      this._musicTimeout = null;
     }
   },
 

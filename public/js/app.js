@@ -74,6 +74,15 @@ const App = {
   // ─────────────────────────────────────────────
   // التهيئة
   // ─────────────────────────────────────────────
+  // حالة الإرسال (منع الإرسال المزدوج)
+  _submitting: false,
+
+  // مرجع Canvas listeners (لمنع التراكم)
+  _canvasHandlers: null,
+
+  // حالة الاتصال
+  _connectionState: 'connected',
+
   init() {
     this.socket = io();
     this.myId = this.socket.id;
@@ -82,7 +91,6 @@ const App = {
     // تهيئة نظام الصوت
     if (typeof AudioEngine !== 'undefined') {
       AudioEngine.init();
-      // استئناف الصوت عند أول تفاعل
       const resumeAudio = () => {
         AudioEngine.resume();
         document.removeEventListener('click', resumeAudio);
@@ -114,6 +122,30 @@ const App = {
     document.getElementById('roomCodeInput')?.addEventListener('keypress', e => {
       if (e.key === 'Enter') this.joinRoom();
     });
+
+    // ── Event Delegation لمحتوى اللعبة (بدلاً من inline onclick مع بيانات مستخدم) ──
+    document.getElementById('gameContent')?.addEventListener('click', (e) => {
+      const target = e.target.closest('[data-action]');
+      if (!target) return;
+      const action = target.getAttribute('data-action');
+      const id = target.getAttribute('data-id');
+      switch (action) {
+        case 'voteAnswer': this.voteAnswer(id, target); break;
+        case 'votePlayer': this.votePlayer(id, target); break;
+        case 'guessFibbage': this.guessFibbage(id, target); break;
+        case 'submitTriviaAnswer': this.submitTriviaAnswer(parseInt(id), target); break;
+      }
+    });
+
+    // ── Escape لإغلاق الإعدادات ──
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('settingsModal');
+        if (modal && !modal.classList.contains('hidden')) {
+          this.toggleSettings();
+        }
+      }
+    });
   },
 
   // ─────────────────────────────────────────────
@@ -122,7 +154,23 @@ const App = {
   setupSocketEvents() {
     const s = this.socket;
 
-    s.on('connect', () => { this.myId = s.id; });
+    s.on('connect', () => {
+      this.myId = s.id;
+      this._updateConnectionState('connected');
+    });
+
+    s.on('disconnect', () => {
+      this._updateConnectionState('disconnected');
+    });
+
+    s.on('reconnect', () => {
+      this._updateConnectionState('connected');
+      this.showToast('تم إعادة الاتصال!', 'success');
+    });
+
+    s.on('connect_error', () => {
+      this._updateConnectionState('reconnecting');
+    });
 
     // ── الغرفة ──
     s.on('roomCreated', data => {
@@ -266,11 +314,19 @@ const App = {
   // ═══════════════════════════════════════════════════════════════
 
   showScreen(id) {
+    // تنظيف confetti عند تبديل الشاشات
+    document.querySelectorAll('.confetti-particle').forEach(el => el.remove());
+    // إعادة تعيين حالة الإرسال
+    this._submitting = false;
+
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('is-active'));
     const screen = document.getElementById(id);
     if (screen) {
       screen.classList.add('is-active');
       AudioEngine.whoosh();
+      // إدارة Focus: نركّز على أول عنصر تفاعلي
+      const focusable = screen.querySelector('input, button, [tabindex]');
+      if (focusable) setTimeout(() => focusable.focus(), 100);
     }
   },
 
@@ -340,12 +396,12 @@ const App = {
     const grid = document.getElementById('playersGrid');
     if (!grid) return;
     grid.innerHTML = players.map(p =>
-      '<div class="player-avatar' + (p.isReady ? ' player-avatar--ready' : '') + (!p.isAlive ? ' player-avatar--dead' : '') + '">' +
+      '<div class="player-avatar' + (p.isReady ? ' player-avatar--ready' : '') + (!p.isAlive ? ' player-avatar--dead' : '') + '" aria-label="' + escapeHtml(p.name) + (p.isReady ? ' - جاهز' : '') + (!p.isAlive ? ' - ميت' : '') + '">' +
         '<div class="player-avatar__face" style="background:' + escapeHtml(p.color) + '">' + escapeHtml(p.avatar) +
           (p.isHost ? '<span class="player-avatar__crown">👑</span>' : '') +
           (!p.isAlive ? '<span style="position:absolute;font-size:32px">💀</span>' : '') +
         '</div>' +
-        '<span class="player-avatar__name">' + escapeHtml(p.name) + '</span>' +
+        '<span class="player-avatar__name">' + escapeHtml(p.name) + (p.isReady ? ' ✓' : '') + '</span>' +
         '<span class="player-avatar__score">' + p.score + ' نقطة</span>' +
       '</div>'
     ).join('');
@@ -425,7 +481,7 @@ const App = {
     document.getElementById('gameRound').textContent = 'مواجهة ' + d.matchupNumber + ' من ' + d.totalMatchups;
     this.startTimer(d.timeLimit);
     const answers = d.answers.map(a =>
-      '<div class="vote-option" onclick="App.voteAnswer(\'' + a.playerId + '\',this)">' +
+      '<div class="vote-option" data-action="voteAnswer" data-id="' + escapeHtml(a.playerId) + '">' +
         '<div class="vote-option__text">"' + escapeHtml(a.answer) + '"</div>' +
       '</div>'
     ).join('<div class="text-3xl font-black text-accent" style="margin:12px 0">VS</div>');
@@ -486,8 +542,10 @@ const App = {
   },
 
   submitGuess() {
+    if (this._submitting) return;
     const val = document.getElementById('percentSlider')?.value;
     if (val === undefined) return;
+    this._submitting = true;
     AudioEngine.submit();
     this.socket.emit('submitAnswer', { code: this.currentRoom, answer: val });
     this.showWaiting('ننتظر التخمينات...');
@@ -529,7 +587,7 @@ const App = {
   handleFakinItVoting(d) {
     this.startTimer(d.timeLimit);
     const players = d.players.map(p =>
-      '<div class="player-avatar" style="cursor:pointer" onclick="App.votePlayer(\'' + p.id + '\',this)">' +
+      '<div class="player-avatar" style="cursor:pointer" data-action="votePlayer" data-id="' + escapeHtml(p.id) + '">' +
         '<div class="player-avatar__face" style="background:' + escapeHtml(p.color) + '">' + escapeHtml(p.avatar) + '</div>' +
         '<span class="player-avatar__name">' + escapeHtml(p.name) + '</span>' +
       '</div>'
@@ -560,7 +618,7 @@ const App = {
     document.getElementById('gameRound').textContent = 'الجولة ' + d.round + ' من ' + d.maxRounds;
     this.startTimer(d.timeLimit);
     const opts = d.options.map((o, i) =>
-      '<button class="btn btn--secondary btn--full" onclick="App.submitTriviaAnswer(' + i + ',this)">' + escapeHtml(o) + '</button>'
+      '<button class="btn btn--secondary btn--full" data-action="submitTriviaAnswer" data-id="' + i + '">' + escapeHtml(o) + '</button>'
     ).join('');
 
     document.getElementById('gameContent').innerHTML =
@@ -618,8 +676,10 @@ const App = {
   },
 
   submitDeathAnswer() {
+    if (this._submitting) return;
     const answer = document.getElementById('deathInput')?.value?.trim();
     if (!answer) return this.showToast('اكتب شي!', 'error');
+    this._submitting = true;
     this.socket.emit('submitAnswer', { code: this.currentRoom, answer });
     this.showWaiting('هل بتنجو؟ 💀');
   },
@@ -677,8 +737,10 @@ const App = {
   },
 
   submitLie() {
+    if (this._submitting) return;
     const lie = document.getElementById('lieInput')?.value?.trim();
     if (!lie) return this.showToast('اكتب كذبة!', 'error');
+    this._submitting = true;
     AudioEngine.submit();
     this.socket.emit('submitAnswer', { code: this.currentRoom, answer: lie });
     this.showWaiting('ننتظر الكذابين...');
@@ -687,7 +749,7 @@ const App = {
   handleFibbageVoting(d) {
     this.startTimer(d.timeLimit);
     const opts = d.options.map(o =>
-      '<div class="vote-option" onclick="App.guessFibbage(\'' + o.id + '\',this)">' +
+      '<div class="vote-option" data-action="guessFibbage" data-id="' + escapeHtml(o.id) + '">' +
         '<div class="vote-option__text">' + escapeHtml(o.text) + '</div>' +
       '</div>'
     ).join('');
@@ -798,7 +860,7 @@ const App = {
     const isDrawer = d.drawerId === this.myId;
 
     const opts = d.options.map(o =>
-      '<div class="vote-option" ' + (isDrawer ? '' : 'onclick="App.guessFibbage(\'' + o.id + '\',this)"') + ' style="' + (isDrawer ? 'cursor:default' : '') + '">' +
+      '<div class="vote-option" ' + (isDrawer ? 'style="cursor:default"' : 'data-action="guessFibbage" data-id="' + escapeHtml(o.id) + '"') + '>' +
         '<div class="vote-option__text">' + escapeHtml(o.text) + '</div>' +
       '</div>'
     ).join('');
@@ -829,16 +891,38 @@ const App = {
     this.ctx.fillStyle = '#ffffff';
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // أحداث الماوس
-    this.canvas.addEventListener('mousedown', e => this.startDraw(e));
-    this.canvas.addEventListener('mousemove', e => this.draw(e));
-    this.canvas.addEventListener('mouseup', () => this.endDraw());
-    this.canvas.addEventListener('mouseleave', () => this.endDraw());
+    // إزالة listeners القديمة لمنع التراكم
+    if (this._canvasHandlers) {
+      const old = this._canvasHandlers;
+      old.canvas.removeEventListener('mousedown', old.mousedown);
+      old.canvas.removeEventListener('mousemove', old.mousemove);
+      old.canvas.removeEventListener('mouseup', old.mouseup);
+      old.canvas.removeEventListener('mouseleave', old.mouseleave);
+      old.canvas.removeEventListener('touchstart', old.touchstart);
+      old.canvas.removeEventListener('touchmove', old.touchmove);
+      old.canvas.removeEventListener('touchend', old.touchend);
+    }
 
-    // أحداث اللمس
-    this.canvas.addEventListener('touchstart', e => { e.preventDefault(); this.startDraw(e.touches[0]); }, { passive: false });
-    this.canvas.addEventListener('touchmove', e => { e.preventDefault(); this.draw(e.touches[0]); }, { passive: false });
-    this.canvas.addEventListener('touchend', e => { e.preventDefault(); this.endDraw(); }, { passive: false });
+    // إنشاء handlers جديدة مع حفظ المراجع
+    const handlers = {
+      canvas: this.canvas,
+      mousedown: e => this.startDraw(e),
+      mousemove: e => this.draw(e),
+      mouseup: () => this.endDraw(),
+      mouseleave: () => this.endDraw(),
+      touchstart: e => { e.preventDefault(); this.startDraw(e.touches[0]); },
+      touchmove: e => { e.preventDefault(); this.draw(e.touches[0]); },
+      touchend: e => { e.preventDefault(); this.endDraw(); }
+    };
+    this._canvasHandlers = handlers;
+
+    this.canvas.addEventListener('mousedown', handlers.mousedown);
+    this.canvas.addEventListener('mousemove', handlers.mousemove);
+    this.canvas.addEventListener('mouseup', handlers.mouseup);
+    this.canvas.addEventListener('mouseleave', handlers.mouseleave);
+    this.canvas.addEventListener('touchstart', handlers.touchstart, { passive: false });
+    this.canvas.addEventListener('touchmove', handlers.touchmove, { passive: false });
+    this.canvas.addEventListener('touchend', handlers.touchend, { passive: false });
   },
 
   getCanvasPos(e) {
@@ -864,6 +948,8 @@ const App = {
 
   draw(e) {
     if (!this.isDrawing || !this.ctx) return;
+    // تحديد النقاط لكل خط (5000 كحد أقصى)
+    if (this.currentStroke.points.length >= 5000) return;
     const pos = this.getCanvasPos(e);
     this.currentStroke.points.push(pos);
     this.ctx.lineTo(pos.x, pos.y);
@@ -874,7 +960,12 @@ const App = {
     if (!this.isDrawing) return;
     this.isDrawing = false;
     if (this.currentStroke && this.currentStroke.points.length > 0) {
-      this.strokes.push(this.currentStroke);
+      // تحديد الحد الأقصى للخطوط (500)
+      if (this.strokes.length >= 500) {
+        this.showToast('وصلت الحد الأقصى للخطوط!', 'error');
+      } else {
+        this.strokes.push(this.currentStroke);
+      }
     }
     this.currentStroke = null;
   },
@@ -899,7 +990,9 @@ const App = {
   },
 
   submitDrawing() {
+    if (this._submitting) return;
     if (this.strokes.length === 0) return this.showToast('ارسم شي!', 'error');
+    this._submitting = true;
     AudioEngine.submit();
     this.socket.emit('submitDrawing', {
       code: this.currentRoom,
@@ -912,35 +1005,43 @@ const App = {
     if (!container) return;
     try {
       const strokes = typeof drawingData === 'string' ? JSON.parse(drawingData) : drawingData;
+
+      // التحقق من بنية البيانات
+      if (!Array.isArray(strokes)) {
+        container.innerHTML = '<p class="text-muted">بيانات الرسمة غير صالحة</p>';
+        return;
+      }
+
       const canvas = document.createElement('canvas');
       canvas.width = 400;
       canvas.height = 300;
       canvas.style.cssText = 'width:100%;border-radius:12px;border:3px solid #000;background:#fff';
       const ctx = canvas.getContext('2d');
 
-      // خلفية بيضاء
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, 400, 300);
 
-      if (Array.isArray(strokes)) {
-        strokes.forEach(stroke => {
-          if (!stroke.points || stroke.points.length === 0) return;
-          ctx.beginPath();
-          ctx.strokeStyle = stroke.color || '#000';
-          ctx.lineWidth = stroke.size || 4;
-          ctx.lineCap = 'round';
-          ctx.lineJoin = 'round';
-          ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
-          for (let i = 1; i < stroke.points.length; i++) {
-            ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
-          }
-          ctx.stroke();
-        });
+      // تحديد الحد الأقصى: 500 stroke، 5000 نقطة لكل stroke
+      const maxStrokes = Math.min(strokes.length, 500);
+      for (let s = 0; s < maxStrokes; s++) {
+        const stroke = strokes[s];
+        if (!stroke || !Array.isArray(stroke.points) || stroke.points.length === 0) continue;
+        ctx.beginPath();
+        ctx.strokeStyle = typeof stroke.color === 'string' ? stroke.color : '#000';
+        ctx.lineWidth = typeof stroke.size === 'number' ? Math.min(stroke.size, 50) : 4;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        const maxPoints = Math.min(stroke.points.length, 5000);
+        ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+        for (let i = 1; i < maxPoints; i++) {
+          ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
+        }
+        ctx.stroke();
       }
 
       container.appendChild(canvas);
     } catch (e) {
-      container.innerHTML = '<p class="text-muted">ما قدرنا نعرض الرسمة 😅</p>';
+      container.innerHTML = '<p class="text-muted">ما قدرنا نعرض الرسمة</p>';
     }
   },
 
@@ -949,8 +1050,10 @@ const App = {
   // ═══════════════════════════════════════════════════════════════
 
   submitAnswer() {
+    if (this._submitting) return;
     const ans = document.getElementById('answerInput')?.value?.trim();
     if (!ans) return this.showToast('اكتب إجابة!', 'error');
+    this._submitting = true;
     AudioEngine.submit();
     this.socket.emit('submitAnswer', { code: this.currentRoom, answer: ans });
     this.showWaiting('ننتظر الإجابات...');
@@ -970,7 +1073,16 @@ const App = {
   // ── نتائج الجولة ──
 
   handleRoundResults(d) {
+    try { this._handleRoundResultsInner(d); } catch (e) {
+      console.error('خطأ في عرض النتائج:', e);
+      const gc = document.getElementById('gameContent');
+      if (gc) gc.innerHTML = '<div class="text-center"><p class="text-xl">حصل خطأ في عرض النتائج</p></div>';
+    }
+  },
+
+  _handleRoundResultsInner(d) {
     clearInterval(this.gameTimer);
+    this._submitting = false;
 
     let resultHtml = '';
 
@@ -1097,6 +1209,13 @@ const App = {
   // ── نتائج اللعبة النهائية ──
 
   handleGameEnded(d) {
+    try { this._handleGameEndedInner(d); } catch (e) {
+      console.error('خطأ في عرض نهاية اللعبة:', e);
+      this.showScreen('resultsScreen');
+    }
+  },
+
+  _handleGameEndedInner(d) {
     clearInterval(this.gameTimer);
     this.setTheme('victory');
     document.getElementById('emojiBar')?.classList.add('hidden');
@@ -1300,9 +1419,14 @@ const App = {
   // ═══════════════════════════════════════════════════════════════
 
   confetti() {
+    if (this.reducedMotion) return;
+    // تنظيف confetti الموجود
+    document.querySelectorAll('.confetti-particle').forEach(el => el.remove());
     const colors = ['#FFD93D', '#E91E8C', '#00d4ff', '#00e676', '#7c4dff', '#FF8C42', '#f093fb'];
-    for (let i = 0; i < 60; i++) {
+    const count = 30; // تقليل العدد للأداء
+    for (let i = 0; i < count; i++) {
       const c = document.createElement('div');
+      c.className = 'confetti-particle';
       const size = 6 + Math.random() * 10;
       const isCircle = Math.random() > 0.5;
       c.style.cssText =
@@ -1315,6 +1439,45 @@ const App = {
         'pointer-events:none';
       document.body.appendChild(c);
       setTimeout(() => c.remove(), 6000);
+    }
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // مؤشر حالة الاتصال
+  // ═══════════════════════════════════════════════════════════════
+
+  _updateConnectionState(state) {
+    this._connectionState = state;
+    let indicator = document.getElementById('connectionIndicator');
+    if (!indicator) {
+      indicator = document.createElement('div');
+      indicator.id = 'connectionIndicator';
+      indicator.style.cssText = 'position:fixed;bottom:12px;right:12px;z-index:9999;display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;pointer-events:none;transition:all 0.3s';
+      document.body.appendChild(indicator);
+    }
+    switch (state) {
+      case 'connected':
+        indicator.style.background = 'rgba(0,230,118,0.2)';
+        indicator.style.color = '#00e676';
+        indicator.style.border = '1px solid rgba(0,230,118,0.4)';
+        indicator.textContent = '● متصل';
+        setTimeout(() => { indicator.style.opacity = '0'; }, 3000);
+        break;
+      case 'disconnected':
+        indicator.style.background = 'rgba(255,68,68,0.2)';
+        indicator.style.color = '#ff4444';
+        indicator.style.border = '1px solid rgba(255,68,68,0.4)';
+        indicator.style.opacity = '1';
+        indicator.textContent = '● منقطع';
+        this.showToast('انقطع الاتصال!', 'error');
+        break;
+      case 'reconnecting':
+        indicator.style.background = 'rgba(255,165,0,0.2)';
+        indicator.style.color = '#ffa500';
+        indicator.style.border = '1px solid rgba(255,165,0,0.4)';
+        indicator.style.opacity = '1';
+        indicator.textContent = '● جاري إعادة الاتصال...';
+        break;
     }
   }
 };
