@@ -392,6 +392,81 @@
 
 
 /* ═══════════════════════════════════════════════════════════════
+ * 🧔🏻 ABU ABED COMMENTARY BAR
+ * ═══════════════════════════════════════════════════════════════ */
+
+.commentary-bar {
+  position:fixed; bottom:70px; left:50%; transform:translateX(-50%);
+  z-index:150; max-width:500px; width:90%;
+  pointer-events:none; transition:opacity 0.4s, transform 0.4s;
+}
+.commentary-bar.hidden { display:none !important; }
+.commentary-bubble {
+  display:flex; align-items:center; gap:12px;
+  background:linear-gradient(135deg,rgba(0,40,25,0.95),rgba(0,20,10,0.98));
+  border:2px solid rgba(0,200,83,0.4); border-radius:20px;
+  padding:14px 20px; box-shadow:0 8px 30px rgba(0,0,0,0.5), 0 0 20px rgba(0,200,83,0.15);
+  backdrop-filter:blur(8px);
+}
+.commentary-icon { font-size:36px; flex-shrink:0; filter:drop-shadow(2px 2px 0 rgba(0,0,0,0.5)); }
+.commentary-text {
+  font-size:16px; font-weight:600; color:#e0f7e0; line-height:1.5;
+  font-family:'Tajawal',sans-serif; text-shadow:1px 1px 0 rgba(0,0,0,0.3);
+}
+.commentary-enter { animation:commentary-slideIn 0.4s ease-out; }
+.commentary-leave { animation:commentary-slideOut 0.5s ease-in forwards; }
+@keyframes commentary-slideIn {
+  from { opacity:0; transform:translateX(-50%) translateY(20px); }
+  to { opacity:1; transform:translateX(-50%) translateY(0); }
+}
+@keyframes commentary-slideOut {
+  from { opacity:1; transform:translateX(-50%) translateY(0); }
+  to { opacity:0; transform:translateX(-50%) translateY(-20px); }
+}
+
+/* ─── Much Higher/Lower Buttons (Guesspionage Round 2) ─── */
+.gspy-much-label {
+  font-size:16px; font-weight:800; color:#FFD93D; text-align:center;
+  text-shadow:1px 1px 0 rgba(0,0,0,0.5); letter-spacing:1px;
+}
+.gspy-bet-buttons--much { margin-top:8px; }
+.gspy-bet-btn--much-higher {
+  background:linear-gradient(135deg,#00E676,#00C853,#009624);
+  color:#000; border:5px solid #000;
+  box-shadow:6px 6px 0 #000, 0 0 15px rgba(0,230,118,0.3);
+}
+.gspy-bet-btn--much-lower {
+  background:linear-gradient(135deg,#ff6b6b,#ee5a24,#c0392b);
+  color:#fff; border:5px solid #000;
+  box-shadow:6px 6px 0 #000, 0 0 15px rgba(255,68,68,0.3);
+}
+.gspy-bet-sub {
+  font-size:12px; font-weight:700; opacity:0.8; letter-spacing:0.5px;
+}
+
+/* ─── Guesspionage Final Round Grid ─── */
+.gspy-final-container {
+  display:flex; flex-direction:column; align-items:center; gap:16px;
+  max-width:600px; width:100%; animation:gspy-fadeIn 0.5s ease-out;
+}
+.gspy-final-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:10px; width:100%;
+}
+.gspy-final-option {
+  background:rgba(0,50,40,0.8); border:3px solid rgba(0,212,170,0.3);
+  border-radius:14px; padding:16px 12px; text-align:center;
+  cursor:pointer; font-size:14px; font-weight:600; color:#e0f7f4;
+  font-family:'Tajawal',sans-serif; transition:all 0.2s;
+  box-shadow:0 4px 12px rgba(0,0,0,0.2);
+}
+.gspy-final-option:hover { border-color:#00D4AA; transform:translateY(-2px); }
+.gspy-final-option--selected {
+  background:rgba(0,212,170,0.2); border-color:#00D4AA;
+  box-shadow:0 0 20px rgba(0,212,170,0.3), 0 4px 12px rgba(0,0,0,0.2);
+  color:#00D4AA;
+}
+
+/* ═══════════════════════════════════════════════════════════════
  * CONFETTI, TOAST, SPINNER - moved from inline JS
  * ═══════════════════════════════════════════════════════════════ */
 
@@ -459,6 +534,10 @@
   .gspy-featured-number { font-size:48px; }
   .gspy-results-number { font-size:56px; }
   .gspy-guess-number { font-size:56px; }
+  .gspy-final-grid { grid-template-columns:1fr 1fr; }
+  .gspy-bet-buttons--much { flex-direction:column; gap:12px; }
+  .gspy-bet-btn--much-higher, .gspy-bet-btn--much-lower { flex-direction:row; min-width:auto; width:100%; justify-content:center; }
+  .commentary-bar { bottom:60px; }
 }
 
 @media(max-width:480px) {
@@ -468,4 +547,6 @@
   .vote-option { min-width:auto; width:100%; }
   .gspy-percent-display { font-size:44px; }
   .gspy-question-text { font-size:18px; }
+  .gspy-final-grid { grid-template-columns:1fr; }
+  .commentary-text { font-size:14px; }
 }

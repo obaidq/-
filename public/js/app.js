@@ -141,6 +141,7 @@ const App = {
         case 'submitLie': this.submitLie(); break;
         case 'submitDrawing': this.submitDrawing(); break;
         case 'submitGuessDrawful': this.submitGuessDrawful(); break;
+        case 'submitFinalPicks': this.submitFinalPicks(); break;
         case 'requestNextRound': this.requestNextRound(); break;
         case 'backToLobby': this.backToLobby(); break;
         case 'undoStroke': this.undoStroke(); break;
@@ -231,6 +232,7 @@ const App = {
     s.on('playerJoined', data => {
       this.updatePlayers(data.players);
       if (data.newPlayer) this.showToast(escapeHtml(data.newPlayer) + ' انضم!', 'success');
+      if (data.commentary) this.showCommentary(data.commentary);
       AudioEngine.playerJoin();
     });
 
@@ -252,6 +254,7 @@ const App = {
       this.updateGameHeader(data.game);
       AudioEngine.gameStart();
       AudioEngine.startMusic(data.game);
+      if (data.commentary) this.showCommentary(data.commentary);
       // عد تنازلي ثم عرض شاشة اللعبة
       this.showCountdown(() => {
         this.showScreen('gameScreen');
@@ -307,16 +310,24 @@ const App = {
     s.on('drawfulVoting', data => this.handleDrawfulVoting(data));
 
     // ── النتائج ──
-    s.on('roundResults', data => { AudioEngine.reveal(); this.handleRoundResults(data); });
+    s.on('roundResults', data => {
+      AudioEngine.reveal();
+      if (data.commentary) this.showCommentary(data.commentary);
+      this.handleRoundResults(data);
+    });
     s.on('gameEnded', data => {
       AudioEngine.stopMusic();
       AudioEngine.drumRoll(2);
       setTimeout(() => { AudioEngine.victory(); AudioEngine.applause(); }, 2000);
+      if (data.commentary) this.showCommentary(data.commentary);
       this.handleGameEnded(data);
     });
 
     // ── الإيموجي ──
     s.on('emojiReaction', data => this.showEmojiFloat(data.emoji));
+
+    // ── Guesspionage Final Round ──
+    s.on('guesspionageFinalRound', data => this.handleGuesspionageFinalRound(data));
 
     // ── الرجوع والإلغاء ──
     s.on('returnedToLobby', data => {
@@ -627,6 +638,7 @@ const App = {
     document.getElementById('gameRound').textContent = 'الجولة ' + d.round + ' من ' + d.maxRounds;
     document.getElementById('gameHint').textContent = '🎯 أنت المميز! خمّن النسبة بدقة';
     this.startTimer(d.timeLimit);
+    if (d.commentary) this.showCommentary(d.commentary);
     AudioEngine.reveal();
     document.getElementById('gameContent').innerHTML =
       '<div class="gspy-featured-container">' +
@@ -665,6 +677,7 @@ const App = {
     document.getElementById('gameRound').textContent = 'الجولة ' + d.round + ' من ' + d.maxRounds;
     document.getElementById('gameHint').textContent = '⏳ انتظر ' + escapeHtml(d.featuredPlayerName) + ' يخمّن...';
     this.startTimer(d.timeLimit);
+    if (d.commentary) this.showCommentary(d.commentary);
     document.getElementById('gameContent').innerHTML =
       '<div class="gspy-wait-container">' +
         '<div class="gspy-question-card">' +
@@ -702,12 +715,42 @@ const App = {
       '</div>';
   },
 
-  // مرحلة التحدي - أعلى أو أقل
+  // مرحلة التحدي - أعلى أو أقل (+ much higher/lower in round 2)
   handleGuesspionageChallenge(d) {
     document.getElementById('gameRound').textContent = 'الجولة ' + d.round + ' من ' + d.maxRounds;
     document.getElementById('gameHint').textContent = '🔮 الجواب أعلى أو أقل من ' + d.featuredGuess + '%؟';
     this.startTimer(d.timeLimit);
     AudioEngine.whoosh();
+    if (d.commentary) this.showCommentary(d.commentary);
+
+    let buttonsHtml =
+      '<button class="gspy-bet-btn gspy-bet-btn--higher" data-action="submitGuess" data-bet="higher" aria-label="الجواب أعلى من التخمين">' +
+        '<span class="gspy-bet-arrow">▲</span>' +
+        '<span class="gspy-bet-text">أعلى</span>' +
+      '</button>' +
+      '<button class="gspy-bet-btn gspy-bet-btn--lower" data-action="submitGuess" data-bet="lower" aria-label="الجواب أقل من التخمين">' +
+        '<span class="gspy-bet-arrow">▼</span>' +
+        '<span class="gspy-bet-text">أقل</span>' +
+      '</button>';
+
+    let muchHtml = '';
+    if (d.hasMuch) {
+      muchHtml =
+        '<div class="gspy-much-label mt-4">🎲 أو راهن أكبر!</div>' +
+        '<div class="gspy-bet-buttons gspy-bet-buttons--much">' +
+          '<button class="gspy-bet-btn gspy-bet-btn--much-higher" data-action="submitGuess" data-bet="much_higher" aria-label="الجواب أعلى بكثير">' +
+            '<span class="gspy-bet-arrow">▲▲</span>' +
+            '<span class="gspy-bet-text">أعلى بكثير</span>' +
+            '<span class="gspy-bet-sub">+2000 أو 0!</span>' +
+          '</button>' +
+          '<button class="gspy-bet-btn gspy-bet-btn--much-lower" data-action="submitGuess" data-bet="much_lower" aria-label="الجواب أقل بكثير">' +
+            '<span class="gspy-bet-arrow">▼▼</span>' +
+            '<span class="gspy-bet-text">أقل بكثير</span>' +
+            '<span class="gspy-bet-sub">+2000 أو 0!</span>' +
+          '</button>' +
+        '</div>';
+    }
+
     document.getElementById('gameContent').innerHTML =
       '<div class="gspy-challenge-container">' +
         '<div class="gspy-question-card gspy-question-card--sm">' +
@@ -718,16 +761,8 @@ const App = {
           '<div class="gspy-featured-number">' + d.featuredGuess + '%</div>' +
         '</div>' +
         '<div class="gspy-challenge-prompt">الجواب الصحيح أعلى أو أقل؟</div>' +
-        '<div class="gspy-bet-buttons">' +
-          '<button class="gspy-bet-btn gspy-bet-btn--higher" data-action="submitGuess" data-bet="higher" aria-label="الجواب أعلى من التخمين">' +
-            '<span class="gspy-bet-arrow">▲</span>' +
-            '<span class="gspy-bet-text">أعلى</span>' +
-          '</button>' +
-          '<button class="gspy-bet-btn gspy-bet-btn--lower" data-action="submitGuess" data-bet="lower" aria-label="الجواب أقل من التخمين">' +
-            '<span class="gspy-bet-arrow">▼</span>' +
-            '<span class="gspy-bet-text">أقل</span>' +
-          '</button>' +
-        '</div>' +
+        '<div class="gspy-bet-buttons">' + buttonsHtml + '</div>' +
+        muchHtml +
         '<p class="text-muted mt-4" id="waitingCount"></p>' +
       '</div>';
   },
@@ -798,12 +833,32 @@ const App = {
   handleFakinItTask(d) {
     document.getElementById('gameRound').textContent = 'الجولة ' + d.round + ' من ' + d.maxRounds;
     this.startTimer(d.timeLimit);
+    if (d.commentary) this.showCommentary(d.commentary);
+
+    // Task type icons/instructions per category
+    const categoryIcons = {
+      handsOfTruth: '✋',
+      numberPressure: '🔢',
+      faceValue: '😀',
+      youGottaPoint: '👉'
+    };
+    const categoryHints = {
+      handsOfTruth: 'ارفع يدك إذا ينطبق عليك!',
+      numberPressure: 'ارفع أصابع حسب جوابك!',
+      faceValue: 'وريّنا تعبير وجهك!',
+      youGottaPoint: 'أشر على اللاعب!'
+    };
+    const catIcon = categoryIcons[d.categoryKey] || '🎭';
+    const catHint = categoryHints[d.categoryKey] || '';
+
     let html;
     if (d.isFaker) {
       html =
         '<div class="panel" style="max-width:600px;background:linear-gradient(135deg,#8B0000,#4a0000)">' +
           '<div class="badge badge--error mb-4">🕵️ أنت المزيّف!</div>' +
+          '<div class="text-4xl mb-4">' + catIcon + '</div>' +
           '<p class="text-2xl font-bold mb-4">ما تعرف المهمة!</p>' +
+          '<p class="text-muted mb-2">النوع: ' + escapeHtml(d.category) + '</p>' +
           '<p class="text-muted">حاول تتصرف طبيعي وما ينكشف أمرك!</p>' +
           '<button class="btn btn--secondary btn--full mt-6" data-action="submitFakinAction">جاهز! 🎭</button>' +
         '</div>';
@@ -811,6 +866,8 @@ const App = {
       html =
         '<div class="panel" style="max-width:600px">' +
           '<div class="badge badge--warning mb-4">' + escapeHtml(d.category) + '</div>' +
+          '<div class="text-4xl mb-4">' + catIcon + '</div>' +
+          (catHint ? '<p class="text-sm text-muted mb-2">' + catHint + '</p>' : '') +
           '<p class="text-sm text-muted mb-2">' + escapeHtml(d.instruction) + '</p>' +
           '<p class="text-2xl font-bold mb-6">' + escapeHtml(d.task) + '</p>' +
           '<button class="btn btn--primary btn--full" data-action="submitFakinAction">جاهز! ✅</button>' +
@@ -1371,7 +1428,8 @@ const App = {
             if (pr.isFeatured) {
               info = '🎯 ' + (pr.accuracy || '') + ' (فرق ' + pr.diff + '%)';
             } else if (pr.bet) {
-              info = (pr.bet === 'higher' ? '▲ أعلى' : '▼ أقل') + ' ' + (pr.betCorrect ? '✅' : '❌');
+              const betLabels = { higher: '▲ أعلى', lower: '▼ أقل', much_higher: '▲▲ أعلى بكثير', much_lower: '▼▼ أقل بكثير' };
+              info = (betLabels[pr.bet] || pr.bet) + ' ' + (pr.betCorrect ? '✅' : '❌');
             } else {
               info = '⏱️ ما جاوب';
             }
@@ -1617,6 +1675,94 @@ const App = {
     el.style.bottom = '0';
     container.appendChild(el);
     setTimeout(() => el.remove(), 2000);
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 🧔🏻 Abu Abed Commentary Display
+  // ═══════════════════════════════════════════════════════════════
+
+  showCommentary(commentary) {
+    if (!commentary) return;
+    const items = Array.isArray(commentary) ? commentary : [commentary];
+    const bar = document.getElementById('commentaryBar');
+    if (!bar) return;
+    let delay = 0;
+    items.forEach(c => {
+      if (!c || !c.text) return;
+      setTimeout(() => {
+        bar.innerHTML =
+          '<div class="commentary-bubble">' +
+            '<span class="commentary-icon">' + (c.icon || '🧔🏻') + '</span>' +
+            '<span class="commentary-text">' + escapeHtml(c.text) + '</span>' +
+          '</div>';
+        bar.classList.remove('hidden');
+        bar.classList.add('commentary-enter');
+        setTimeout(() => {
+          bar.classList.remove('commentary-enter');
+          bar.classList.add('commentary-leave');
+          setTimeout(() => { bar.classList.add('hidden'); bar.classList.remove('commentary-leave'); }, 500);
+        }, 4000);
+      }, delay);
+      delay += 4500;
+    });
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 📊 Guesspionage Final Round (Pick Top 3)
+  // ═══════════════════════════════════════════════════════════════
+
+  handleGuesspionageFinalRound(d) {
+    document.getElementById('gameRound').textContent = '🏆 الجولة الأخيرة!';
+    document.getElementById('gameHint').textContent = '🎯 اختر الـ 3 الأكثر شعبية!';
+    this.startTimer(d.timeLimit);
+    if (d.commentary) this.showCommentary(d.commentary);
+
+    const optionsHtml = d.options.map(o =>
+      '<button class="gspy-final-option" data-pick-id="' + o.id + '">' +
+        escapeHtml(o.text) +
+      '</button>'
+    ).join('');
+
+    document.getElementById('gameContent').innerHTML =
+      '<div class="gspy-final-container">' +
+        '<div class="gspy-badge gspy-badge--featured">🏆 الجولة الأخيرة</div>' +
+        '<p class="text-xl font-bold mb-4">اختر 3 إجابات تعتقد إنها الأكثر شعبية</p>' +
+        '<div class="gspy-final-grid" id="finalPicksGrid">' + optionsHtml + '</div>' +
+        '<p class="text-muted mt-2" id="pickCount">اخترت 0 من 3</p>' +
+        '<button class="btn btn--primary btn--lg btn--full mt-4" data-action="submitFinalPicks" id="submitFinalBtn" disabled>تأكيد اختياراتي! 📊</button>' +
+      '</div>';
+
+    // Toggle picks
+    this._finalPicks = new Set();
+    document.getElementById('finalPicksGrid')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-pick-id]');
+      if (!btn || this._submitting) return;
+      const pickId = parseInt(btn.getAttribute('data-pick-id'));
+
+      if (this._finalPicks.has(pickId)) {
+        this._finalPicks.delete(pickId);
+        btn.classList.remove('gspy-final-option--selected');
+      } else if (this._finalPicks.size < 3) {
+        this._finalPicks.add(pickId);
+        btn.classList.add('gspy-final-option--selected');
+      }
+
+      const count = this._finalPicks.size;
+      document.getElementById('pickCount').textContent = 'اخترت ' + count + ' من 3';
+      const submitBtn = document.getElementById('submitFinalBtn');
+      if (submitBtn) submitBtn.disabled = count !== 3;
+    });
+  },
+
+  submitFinalPicks() {
+    if (this._submitting || !this._finalPicks || this._finalPicks.size !== 3) return;
+    this._submitting = true;
+    AudioEngine.submit();
+    this.socket.emit('submitAnswer', {
+      code: this.currentRoom,
+      answer: JSON.stringify(Array.from(this._finalPicks))
+    });
+    this.showWaiting('تم إرسال اختياراتك...');
   },
 
   // ═══════════════════════════════════════════════════════════════
