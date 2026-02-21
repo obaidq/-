@@ -318,6 +318,11 @@ const App = {
     document.querySelectorAll('.confetti-particle').forEach(el => el.remove());
     // إعادة تعيين حالة الإرسال
     this._submitting = false;
+    // مسح مؤقت اللعبة عند مغادرة شاشة اللعبة
+    if (this.gameTimer && id !== 'gameScreen') {
+      clearInterval(this.gameTimer);
+      this.gameTimer = null;
+    }
 
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('is-active'));
     const screen = document.getElementById(id);
@@ -395,16 +400,66 @@ const App = {
     document.getElementById('playerCount').textContent = players.length;
     const grid = document.getElementById('playersGrid');
     if (!grid) return;
-    grid.innerHTML = players.map(p =>
-      '<div class="player-avatar' + (p.isReady ? ' player-avatar--ready' : '') + (!p.isAlive ? ' player-avatar--dead' : '') + '" aria-label="' + escapeHtml(p.name) + (p.isReady ? ' - جاهز' : '') + (!p.isAlive ? ' - ميت' : '') + '">' +
-        '<div class="player-avatar__face" style="background:' + escapeHtml(p.color) + '">' + escapeHtml(p.avatar) +
-          (p.isHost ? '<span class="player-avatar__crown">👑</span>' : '') +
-          (!p.isAlive ? '<span style="position:absolute;font-size:32px">💀</span>' : '') +
-        '</div>' +
-        '<span class="player-avatar__name">' + escapeHtml(p.name) + (p.isReady ? ' ✓' : '') + '</span>' +
-        '<span class="player-avatar__score">' + p.score + ' نقطة</span>' +
-      '</div>'
-    ).join('');
+
+    const existingIds = new Set();
+
+    players.forEach(p => {
+      existingIds.add(p.id);
+      let el = grid.querySelector('[data-player-id="' + p.id + '"]');
+
+      if (!el) {
+        // إنشاء عنصر جديد
+        el = document.createElement('div');
+        el.dataset.playerId = p.id;
+        el.className = 'player-avatar';
+
+        const face = document.createElement('div');
+        face.className = 'player-avatar__face';
+        face.style.background = p.color;
+        face.appendChild(document.createTextNode(p.avatar));
+        el._face = face;
+
+        const crown = document.createElement('span');
+        crown.className = 'player-avatar__crown';
+        crown.textContent = '👑';
+        crown.style.display = 'none';
+        face.appendChild(crown);
+        el._crown = crown;
+
+        const skull = document.createElement('span');
+        skull.style.cssText = 'position:absolute;font-size:32px;display:none';
+        skull.textContent = '💀';
+        face.appendChild(skull);
+        el._skull = skull;
+
+        el.appendChild(face);
+
+        const name = document.createElement('span');
+        name.className = 'player-avatar__name';
+        el.appendChild(name);
+        el._name = name;
+
+        const score = document.createElement('span');
+        score.className = 'player-avatar__score';
+        el.appendChild(score);
+        el._score = score;
+
+        grid.appendChild(el);
+      }
+
+      // تحديث الحالات
+      el.className = 'player-avatar' + (p.isReady ? ' player-avatar--ready' : '') + (!p.isAlive ? ' player-avatar--dead' : '');
+      el.setAttribute('aria-label', p.name + (p.isReady ? ' - جاهز' : '') + (!p.isAlive ? ' - ميت' : ''));
+      el._crown.style.display = p.isHost ? '' : 'none';
+      el._skull.style.display = !p.isAlive ? '' : 'none';
+      el._name.textContent = p.name + (p.isReady ? ' ✓' : '');
+      el._score.textContent = p.score + ' نقطة';
+    });
+
+    // حذف اللاعبين اللي طلعوا
+    grid.querySelectorAll('[data-player-id]').forEach(el => {
+      if (!existingIds.has(el.dataset.playerId)) el.remove();
+    });
   },
 
   updateHostUI() {

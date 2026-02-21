@@ -396,6 +396,7 @@ io.on('connection', (socket) => {
   // تبديل حالة الجاهزية
   // ─────────────────────────────────────────────
   socket.on('playerReady', (code) => {
+    if (typeof code !== 'string' || !/^[A-Z2-9]{4}$/.test(code)) return;
     const room = rooms.get(code);
     if (!room) return;
 
@@ -588,6 +589,7 @@ io.on('connection', (socket) => {
   // طلب الجولة التالية
   // ─────────────────────────────────────────────
   socket.on('requestNextRound', (code) => {
+    if (typeof code !== 'string' || !/^[A-Z2-9]{4}$/.test(code)) return;
     const room = rooms.get(code);
     if (!room) return;
     if (socket.id !== room.hostId) return socket.emit('error', { message: 'بس المضيف يقدر يتحكم!' });
@@ -611,6 +613,7 @@ io.on('connection', (socket) => {
   // العودة إلى اللوبي
   // ─────────────────────────────────────────────
   socket.on('backToLobby', (code) => {
+    if (typeof code !== 'string' || !/^[A-Z2-9]{4}$/.test(code)) return;
     const room = rooms.get(code);
     if (!room) return;
 

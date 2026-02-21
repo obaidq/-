@@ -277,19 +277,21 @@ const AudioEngine = {
   // Whoosh (transition)
   whoosh() {
     if (!this.enabled || !this.ctx) return;
-    const t = this.ctx.currentTime;
-    const osc = this.ctx.createOscillator();
-    const g = this.ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(200, t);
-    osc.frequency.exponentialRampToValueAtTime(2000, t + 0.15);
-    osc.frequency.exponentialRampToValueAtTime(100, t + 0.3);
-    g.gain.setValueAtTime(0.1, t);
-    g.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
-    osc.connect(g);
-    g.connect(this.sfxGain);
-    osc.start(t);
-    osc.stop(t + 0.3);
+    try {
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(200, t);
+      osc.frequency.exponentialRampToValueAtTime(2000, t + 0.15);
+      osc.frequency.exponentialRampToValueAtTime(100, t + 0.3);
+      g.gain.setValueAtTime(0.1, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+      osc.connect(g);
+      g.connect(this.sfxGain);
+      osc.start(t);
+      osc.stop(t + 0.3);
+    } catch (e) { /* تجاهل أخطاء الصوت */ }
   },
 
   // ═══ Background Music (procedural loops) ═══
@@ -316,47 +318,48 @@ const AudioEngine = {
 
   _playMusicLoop(theme) {
     if (!this.musicPlaying || !this.ctx) return;
+    try {
+      const bpm = theme === 'triviamurder' ? 100 : theme === 'quiplash' ? 130 : 120;
+      const beatDur = 60 / bpm;
+      const barDur = beatDur * 4;
 
-    const bpm = theme === 'triviamurder' ? 100 : theme === 'quiplash' ? 130 : 120;
-    const beatDur = 60 / bpm;
-    const barDur = beatDur * 4;
+      // Simple 4-bar chord progression per theme
+      const chords = {
+        hub: [[261, 329, 392], [293, 369, 440], [329, 415, 493], [261, 329, 392]],
+        quiplash: [[349, 440, 523], [392, 493, 587], [329, 415, 523], [349, 440, 523]],
+        guesspionage: [[261, 311, 392], [293, 349, 440], [261, 329, 415], [261, 311, 392]],
+        fakinit: [[293, 349, 440], [261, 329, 415], [311, 392, 466], [293, 349, 440]],
+        triviamurder: [[220, 261, 329], [196, 246, 293], [207, 261, 311], [220, 261, 329]],
+        fibbage: [[277, 349, 415], [261, 329, 392], [293, 369, 440], [277, 349, 415]],
+        drawful: [[329, 415, 493], [349, 440, 523], [293, 369, 440], [329, 415, 493]]
+      };
 
-    // Simple 4-bar chord progression per theme
-    const chords = {
-      hub: [[261, 329, 392], [293, 369, 440], [329, 415, 493], [261, 329, 392]],
-      quiplash: [[349, 440, 523], [392, 493, 587], [329, 415, 523], [349, 440, 523]],
-      guesspionage: [[261, 311, 392], [293, 349, 440], [261, 329, 415], [261, 311, 392]],
-      fakinit: [[293, 349, 440], [261, 329, 415], [311, 392, 466], [293, 349, 440]],
-      triviamurder: [[220, 261, 329], [196, 246, 293], [207, 261, 311], [220, 261, 329]],
-      fibbage: [[277, 349, 415], [261, 329, 392], [293, 369, 440], [277, 349, 415]],
-      drawful: [[329, 415, 493], [349, 440, 523], [293, 369, 440], [329, 415, 493]]
-    };
+      const prog = chords[theme] || chords.hub;
+      const now = this.ctx.currentTime;
 
-    const prog = chords[theme] || chords.hub;
-    const now = this.ctx.currentTime;
-
-    prog.forEach((chord, bar) => {
-      chord.forEach(freq => {
-        const osc = this.ctx.createOscillator();
-        const g = this.ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.value = freq;
-        const startTime = now + bar * barDur;
-        g.gain.setValueAtTime(0, startTime);
-        g.gain.linearRampToValueAtTime(0.04, startTime + 0.1);
-        g.gain.setValueAtTime(0.04, startTime + barDur - 0.1);
-        g.gain.linearRampToValueAtTime(0, startTime + barDur);
-        osc.connect(g);
-        g.connect(this.musicGain);
-        osc.start(startTime);
-        osc.stop(startTime + barDur);
+      prog.forEach((chord, bar) => {
+        chord.forEach(freq => {
+          const osc = this.ctx.createOscillator();
+          const g = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = freq;
+          const startTime = now + bar * barDur;
+          g.gain.setValueAtTime(0, startTime);
+          g.gain.linearRampToValueAtTime(0.04, startTime + 0.1);
+          g.gain.setValueAtTime(0.04, startTime + barDur - 0.1);
+          g.gain.linearRampToValueAtTime(0, startTime + barDur);
+          osc.connect(g);
+          g.connect(this.musicGain);
+          osc.start(startTime);
+          osc.stop(startTime + barDur);
+        });
       });
-    });
 
-    // Loop
-    const totalDur = prog.length * barDur;
-    this._musicTimeout = setTimeout(() => {
-      if (this.musicPlaying) this._playMusicLoop(theme);
-    }, totalDur * 1000);
+      // Loop
+      const totalDur = prog.length * barDur;
+      this._musicTimeout = setTimeout(() => {
+        if (this.musicPlaying) this._playMusicLoop(theme);
+      }, totalDur * 1000);
+    } catch (e) { /* تجاهل أخطاء الموسيقى */ }
   }
 };
