@@ -497,6 +497,36 @@ io.on('connection', (socket) => {
     player.currentAnswer = typeof answer === 'string' ? answer.trim().substring(0, 200) : answer;
     touchRoom(room);
 
+    // ── حالة خاصة: Guesspionage مرحلة اللاعب المميز ──
+    if (room.currentGame === 'guesspionage' && room.gameData.phase === 'featured_guess') {
+      // فقط اللاعب المميز يجاوب في هذي المرحلة
+      if (socket.id === room.gameData.featuredPlayerId) {
+        clearRoundTimer(room);
+        setTimeout(() => handleGuesspionageFeaturedAnswer(room), 1000);
+      }
+      return;
+    }
+
+    // ── حالة خاصة: Guesspionage مرحلة التحدي (أعلى/أقل) ──
+    if (room.currentGame === 'guesspionage' && room.gameData.phase === 'challenge') {
+      // نحسب فقط اللاعبين ما عدا المميز
+      const challengers = Array.from(room.players.entries())
+        .filter(([id]) => id !== room.gameData.featuredPlayerId);
+      const answeredCount = challengers.filter(([, p]) => p.currentAnswer !== null).length;
+
+      io.to(code).emit('playerAnswered', {
+        playerId: socket.id,
+        count: answeredCount,
+        total: challengers.length
+      });
+
+      if (answeredCount >= challengers.length) {
+        clearRoundTimer(room);
+        setTimeout(() => calculateGuesspionageResults(room), 800);
+      }
+      return;
+    }
+
     // إبلاغ الجميع بعدد المجيبين
     const totalExpected = room.currentGame === 'triviamurder'
       ? Array.from(room.players.values()).filter(p => p.isAlive).length
@@ -775,7 +805,11 @@ function handleAllAnswered(room) {
       startQuiplashVoting(room);
       break;
     case 'guesspionage':
-      calculateGuesspionageResults(room);
+      if (room.gameData.phase === 'featured_guess') {
+        handleGuesspionageFeaturedAnswer(room);
+      } else {
+        calculateGuesspionageResults(room);
+      }
       break;
     case 'fakinit':
       startFakinItVoting(room);
@@ -1120,28 +1154,134 @@ function finalizeQuiplashRound(room) {
 // ═══════════════════════════════════════════════════════════════════
 
 /**
- * بدء جولة خمّن النسبة
- * - سؤال واحد مع إجابة نسبة مئوية
- * - اللاعبين يخمنون رقم من 0 إلى 100
- * - النقاط حسب القرب من الإجابة الصحيحة
+ * بدء جولة خمّن النسبة (Guesspionage) - ميكانيكيات كاملة
+ *
+ * الميكانيكية الحقيقية:
+ * 1. لاعب مميز (featured) يخمّن النسبة أولاً
+ * 2. باقي اللاعبين يراهنون: أعلى أو أقل من تخمين اللاعب المميز
+ * 3. النقاط حسب القرب + مكافأة "أعلى/أقل" الصحيحة
+ * 4. كل جولة فيها لاعب مميز مختلف
  */
 function startGuesspionageRound(room) {
   const question = pickQuestion(room, content.guesspionage.questions);
-
   room.gameData.question = question;
+  room.gameData.phase = 'featured_guess'; // المرحلة: تخمين اللاعب المميز
+  room.gameData.challengeBets = new Map(); // رهانات أعلى/أقل
+
+  // اختيار اللاعب المميز (يدور بين اللاعبين)
+  const playerIds = Array.from(room.players.keys());
+  const featuredIndex = (room.currentRound) % playerIds.length;
+  const featuredId = playerIds[featuredIndex];
+  room.gameData.featuredPlayerId = featuredId;
+
+  const featuredPlayer = room.players.get(featuredId);
 
   const timeLimit = 30;
 
-  io.to(room.code).emit('guesspionageQuestion', {
-    round: room.currentRound + 1,
-    maxRounds: room.maxRounds,
-    question: question.q,
-    timeLimit
+  // اللاعب المميز يشوف سؤال + سلايدر
+  const featuredSocket = io.sockets.sockets.get(featuredId);
+  if (featuredSocket) {
+    featuredSocket.emit('guesspionageFeatured', {
+      round: room.currentRound + 1,
+      maxRounds: room.maxRounds,
+      question: question.q,
+      playerName: featuredPlayer.name,
+      timeLimit
+    });
+  }
+
+  // باقي اللاعبين يشوفون شاشة انتظار مع السؤال
+  room.players.forEach((p, id) => {
+    if (id !== featuredId) {
+      const sock = io.sockets.sockets.get(id);
+      if (sock) {
+        sock.emit('guesspionageWaitFeatured', {
+          round: room.currentRound + 1,
+          maxRounds: room.maxRounds,
+          question: question.q,
+          featuredPlayerName: featuredPlayer.name,
+          timeLimit
+        });
+      }
+    }
   });
 
-  // مؤقت الإجابات
+  // مؤقت - لو اللاعب المميز ما جاوب
+  setRoundTimer(room, timeLimit, () => {
+    if (room.gameData.phase === 'featured_guess') {
+      // اللاعب المميز ما جاوب - نحط 50 كتخمين افتراضي
+      const fp = room.players.get(room.gameData.featuredPlayerId);
+      if (fp && fp.currentAnswer === null) {
+        fp.currentAnswer = '50';
+      }
+      startGuesspionageChallenge(room);
+    }
+  });
+}
+
+/**
+ * بدء مرحلة التحدي - باقي اللاعبين يراهنون أعلى أو أقل
+ */
+function startGuesspionageChallenge(room) {
+  room.gameData.phase = 'challenge';
+  resetAnswersExcept(room, room.gameData.featuredPlayerId);
+
+  const featuredPlayer = room.players.get(room.gameData.featuredPlayerId);
+  const featuredGuess = parseInt(featuredPlayer.currentAnswer) || 50;
+  room.gameData.featuredGuess = Math.max(0, Math.min(100, featuredGuess));
+
+  const timeLimit = 20;
+
+  // كل اللاعبين (ما عدا المميز) يراهنون: أعلى أو أقل
+  room.players.forEach((p, id) => {
+    const sock = io.sockets.sockets.get(id);
+    if (!sock) return;
+
+    if (id === room.gameData.featuredPlayerId) {
+      // اللاعب المميز يشوف نتيجة تخمينه وينتظر
+      sock.emit('guesspionageFeaturedWaiting', {
+        round: room.currentRound + 1,
+        maxRounds: room.maxRounds,
+        question: room.gameData.question.q,
+        yourGuess: room.gameData.featuredGuess,
+        timeLimit
+      });
+    } else {
+      // باقي اللاعبين يشوفون التخمين ويراهنون
+      sock.emit('guesspionageChallenge', {
+        round: room.currentRound + 1,
+        maxRounds: room.maxRounds,
+        question: room.gameData.question.q,
+        featuredPlayerName: featuredPlayer.name,
+        featuredGuess: room.gameData.featuredGuess,
+        timeLimit
+      });
+    }
+  });
+
   setRoundTimer(room, timeLimit, () => {
     calculateGuesspionageResults(room);
+  });
+}
+
+/**
+ * معالجة إجابة اللاعب المميز (تنتقل لمرحلة التحدي)
+ */
+function handleGuesspionageFeaturedAnswer(room) {
+  if (room.gameData.phase !== 'featured_guess') return;
+  clearRoundTimer(room);
+  setTimeout(() => startGuesspionageChallenge(room), 1500);
+}
+
+/**
+ * مساعد: إعادة تعيين الإجابات ما عدا لاعب معين
+ */
+function resetAnswersExcept(room, exceptId) {
+  room.players.forEach((p, id) => {
+    if (id !== exceptId) {
+      p.currentAnswer = null;
+      p.currentVote = null;
+    }
   });
 }
 
@@ -1150,37 +1290,87 @@ function startGuesspionageRound(room) {
  */
 function calculateGuesspionageResults(room) {
   const correctAnswer = room.gameData.question.a;
+  const featuredGuess = room.gameData.featuredGuess || 50;
+  const featuredId = room.gameData.featuredPlayerId;
   const playerResults = [];
 
-  room.players.forEach(p => {
+  // حساب نقاط اللاعب المميز (حسب القرب من الإجابة)
+  const featuredPlayer = room.players.get(featuredId);
+  if (featuredPlayer) {
+    const diff = Math.abs(featuredGuess - correctAnswer);
     let points = 0;
-    let guess = null;
+    let accuracy = '';
+
+    if (diff === 0) {
+      points = 3000; accuracy = 'مثالي!';
+    } else if (diff <= 3) {
+      points = 2000; accuracy = 'ممتاز!';
+    } else if (diff <= 5) {
+      points = 1500; accuracy = 'قريب جداً!';
+    } else if (diff <= 10) {
+      points = 1000; accuracy = 'قريب!';
+    } else if (diff <= 15) {
+      points = 500; accuracy = 'مش بعيد';
+    } else if (diff <= 25) {
+      points = 250; accuracy = 'بعيد شوي';
+    }
+
+    // مكافأة السلسلة
+    if (points > 0) {
+      featuredPlayer.streak = (featuredPlayer.streak || 0) + 1;
+      if (featuredPlayer.streak > 1) points += featuredPlayer.streak * 100;
+    } else {
+      featuredPlayer.streak = 0;
+    }
+
+    featuredPlayer.score += points;
+
+    playerResults.push({
+      playerId: featuredId,
+      playerName: featuredPlayer.name,
+      guess: featuredGuess,
+      isFeatured: true,
+      bet: null,
+      betCorrect: null,
+      points,
+      accuracy,
+      streak: featuredPlayer.streak || 0,
+      diff
+    });
+  }
+
+  // حساب نقاط باقي اللاعبين (أعلى/أقل)
+  room.players.forEach((p, id) => {
+    if (id === featuredId) return;
+
+    let points = 0;
+    let bet = null;
+    let betCorrect = null;
 
     if (p.currentAnswer !== null && p.currentAnswer !== '__timeout__') {
-      guess = parseInt(p.currentAnswer);
+      bet = p.currentAnswer; // 'higher' أو 'lower'
 
-      if (!isNaN(guess)) {
-        // تحديد القيمة بين 0 و 100
-        guess = Math.max(0, Math.min(100, guess));
-        const diff = Math.abs(guess - correctAnswer);
+      const actualIsHigher = correctAnswer > featuredGuess;
+      const actualIsLower = correctAnswer < featuredGuess;
+      const actualIsSame = correctAnswer === featuredGuess;
 
-        if (diff === 0) {
-          points = 1000; // تخمين مثالي!
-        } else if (diff <= 5) {
-          points = 500;  // قريب جداً
-        } else if (diff <= 10) {
-          points = 300;  // قريب
-        } else if (diff <= 20) {
-          points = 100;  // مش بعيد
-        }
-        // أكثر من 20 = 0 نقاط
+      if (actualIsSame) {
+        // لو الإجابة = التخمين بالضبط، الكل يكسب
+        betCorrect = true;
+        points = 1000;
+      } else if ((bet === 'higher' && actualIsHigher) || (bet === 'lower' && actualIsLower)) {
+        betCorrect = true;
+        points = 1500;
+      } else {
+        betCorrect = false;
+        points = 0;
       }
     }
 
     // مكافأة السلسلة
     if (points > 0) {
       p.streak = (p.streak || 0) + 1;
-      if (p.streak > 1) points += p.streak * 50;
+      if (p.streak > 1) points += p.streak * 100;
     } else {
       p.streak = 0;
     }
@@ -1188,20 +1378,24 @@ function calculateGuesspionageResults(room) {
     p.score += points;
 
     playerResults.push({
-      playerId: p.id,
+      playerId: id,
       playerName: p.name,
-      guess,
+      guess: null,
+      isFeatured: false,
+      bet,
+      betCorrect,
       points,
+      accuracy: null,
       streak: p.streak || 0,
-      diff: guess !== null ? Math.abs(guess - correctAnswer) : null
+      diff: null
     });
   });
 
-  // ترتيب حسب القرب من الإجابة
+  // ترتيب: المميز أولاً ثم حسب النقاط
   playerResults.sort((a, b) => {
-    if (a.diff === null) return 1;
-    if (b.diff === null) return -1;
-    return a.diff - b.diff;
+    if (a.isFeatured) return -1;
+    if (b.isFeatured) return 1;
+    return b.points - a.points;
   });
 
   io.to(room.code).emit('roundResults', {
@@ -1210,6 +1404,8 @@ function calculateGuesspionageResults(room) {
     maxRounds: room.maxRounds,
     question: room.gameData.question.q,
     correctAnswer,
+    featuredGuess,
+    featuredPlayerName: featuredPlayer ? featuredPlayer.name : '',
     playerResults,
     players: getPlayerList(room),
     isLastRound: room.currentRound >= room.maxRounds - 1

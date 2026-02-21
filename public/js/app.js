@@ -135,7 +135,7 @@ const App = {
         case 'guessFibbage': this.guessFibbage(id, target); break;
         case 'submitTriviaAnswer': this.submitTriviaAnswer(parseInt(id), target); break;
         case 'submitAnswer': this.submitAnswer(); break;
-        case 'submitGuess': this.submitGuess(); break;
+        case 'submitGuess': this.submitGuess(e); break;
         case 'submitFakinAction': this.submitFakinAction(); break;
         case 'submitDeathAnswer': this.submitDeathAnswer(); break;
         case 'submitLie': this.submitLie(); break;
@@ -272,8 +272,12 @@ const App = {
       this.handleQuiplashMatchupResult(data);
     });
 
-    // ── خمّن النسبة (Guesspionage) ──
+    // ── خمّن النسبة (Guesspionage) - نظام كامل ──
     s.on('guesspionageQuestion', data => this.handleGuesspionageQuestion(data));
+    s.on('guesspionageFeatured', data => this.handleGuesspionageFeatured(data));
+    s.on('guesspionageWaitFeatured', data => this.handleGuesspionageWaitFeatured(data));
+    s.on('guesspionageFeaturedWaiting', data => this.handleGuesspionageFeaturedWaiting(data));
+    s.on('guesspionageChallenge', data => this.handleGuesspionageChallenge(data));
 
     // ── المزيّف (Fakin' It) ──
     s.on('fakinItTask', data => this.handleFakinItTask(data));
@@ -615,33 +619,170 @@ const App = {
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // 📊 خمّن النسبة (Guesspionage)
+  // 📊 خمّن النسبة (Guesspionage) - نظام كامل بالميكانيكيات الحقيقية
   // ═══════════════════════════════════════════════════════════════
 
-  handleGuesspionageQuestion(d) {
+  // اللاعب المميز يخمّن النسبة
+  handleGuesspionageFeatured(d) {
     document.getElementById('gameRound').textContent = 'الجولة ' + d.round + ' من ' + d.maxRounds;
     this.startTimer(d.timeLimit);
     document.getElementById('gameContent').innerHTML =
-      '<div class="panel" style="max-width:600px;width:100%">' +
-        '<div class="badge badge--info mb-4">📊 خمّن</div>' +
-        '<p class="text-2xl font-bold mb-6">' + escapeHtml(d.question) + '</p>' +
-        '<div class="text-center">' +
-          '<div class="percent-display mb-4" id="percentDisplay">50%</div>' +
-          '<input type="range" class="slider-track" id="percentSlider" min="0" max="100" value="50" ' +
-            'oninput="document.getElementById(\'percentDisplay\').textContent=this.value+\'%\'">' +
-          '<button class="btn btn--primary btn--full mt-6" data-action="submitGuess">تأكيد 📊</button>' +
+      '<div class="gspy-featured-container">' +
+        '<div class="gspy-badge gspy-badge--featured">🎯 أنت اللاعب المميز!</div>' +
+        '<div class="gspy-question-card">' +
+          '<div class="gspy-question-icon">📊</div>' +
+          '<p class="gspy-question-text">' + escapeHtml(d.question) + '</p>' +
+        '</div>' +
+        '<div class="gspy-gauge-container">' +
+          '<div class="gspy-gauge" id="gspyGauge">' +
+            '<svg viewBox="0 0 200 120" class="gspy-gauge-svg">' +
+              '<defs>' +
+                '<linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">' +
+                  '<stop offset="0%" style="stop-color:#ff4444"/>' +
+                  '<stop offset="50%" style="stop-color:#FFD93D"/>' +
+                  '<stop offset="100%" style="stop-color:#00e676"/>' +
+                '</linearGradient>' +
+              '</defs>' +
+              '<path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="12" stroke-linecap="round"/>' +
+              '<path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="url(#gaugeGrad)" stroke-width="12" stroke-linecap="round" id="gaugeArc"/>' +
+              '<circle cx="100" cy="100" r="6" fill="#fff" id="gaugeNeedle" class="gspy-needle"/>' +
+              '<line x1="100" y1="100" x2="100" y2="30" stroke="#fff" stroke-width="3" stroke-linecap="round" id="gaugeLine" class="gspy-needle-line"/>' +
+            '</svg>' +
+          '</div>' +
+          '<div class="gspy-percent-display" id="percentDisplay">50%</div>' +
+          '<input type="range" class="gspy-slider" id="percentSlider" min="0" max="100" value="50" oninput="App._updateGauge(this.value)">' +
+          '<div class="gspy-slider-labels"><span>0%</span><span>50%</span><span>100%</span></div>' +
+        '</div>' +
+        '<button class="btn btn--primary btn--lg btn--full gspy-submit-btn" data-action="submitGuess">تأكيد تخميني! 📊</button>' +
+      '</div>';
+    this._updateGauge(50);
+  },
+
+  // باقي اللاعبين ينتظرون اللاعب المميز
+  handleGuesspionageWaitFeatured(d) {
+    document.getElementById('gameRound').textContent = 'الجولة ' + d.round + ' من ' + d.maxRounds;
+    this.startTimer(d.timeLimit);
+    document.getElementById('gameContent').innerHTML =
+      '<div class="gspy-wait-container">' +
+        '<div class="gspy-question-card">' +
+          '<div class="gspy-question-icon">📊</div>' +
+          '<p class="gspy-question-text">' + escapeHtml(d.question) + '</p>' +
+        '</div>' +
+        '<div class="gspy-featured-spotlight">' +
+          '<div class="gspy-spotlight-icon">🎯</div>' +
+          '<p class="gspy-spotlight-name">' + escapeHtml(d.featuredPlayerName) + '</p>' +
+          '<p class="gspy-spotlight-label">يخمّن النسبة...</p>' +
+          '<div class="spinner mt-4"></div>' +
         '</div>' +
       '</div>';
   },
 
-  submitGuess() {
+  // اللاعب المميز ينتظر بعد ما خمّن
+  handleGuesspionageFeaturedWaiting(d) {
+    document.getElementById('gameRound').textContent = 'الجولة ' + d.round + ' من ' + d.maxRounds;
+    this.startTimer(d.timeLimit);
+    document.getElementById('gameContent').innerHTML =
+      '<div class="gspy-result-container">' +
+        '<div class="gspy-badge gspy-badge--featured">🎯 تخمينك</div>' +
+        '<div class="gspy-question-card gspy-question-card--sm">' +
+          '<p class="gspy-question-text">' + escapeHtml(d.question) + '</p>' +
+        '</div>' +
+        '<div class="gspy-your-guess">' +
+          '<div class="gspy-guess-number">' + d.yourGuess + '%</div>' +
+          '<p class="gspy-guess-label">تخمينك</p>' +
+        '</div>' +
+        '<div class="gspy-waiting-others">' +
+          '<div class="spinner"></div>' +
+          '<p>الباقين يراهنون أعلى أو أقل...</p>' +
+        '</div>' +
+      '</div>';
+  },
+
+  // مرحلة التحدي - أعلى أو أقل
+  handleGuesspionageChallenge(d) {
+    document.getElementById('gameRound').textContent = 'الجولة ' + d.round + ' من ' + d.maxRounds;
+    this.startTimer(d.timeLimit);
+    document.getElementById('gameContent').innerHTML =
+      '<div class="gspy-challenge-container">' +
+        '<div class="gspy-question-card gspy-question-card--sm">' +
+          '<p class="gspy-question-text">' + escapeHtml(d.question) + '</p>' +
+        '</div>' +
+        '<div class="gspy-featured-guess-display">' +
+          '<p class="gspy-featured-label">' + escapeHtml(d.featuredPlayerName) + ' خمّن:</p>' +
+          '<div class="gspy-featured-number">' + d.featuredGuess + '%</div>' +
+        '</div>' +
+        '<div class="gspy-challenge-prompt">الجواب الصحيح أعلى أو أقل؟</div>' +
+        '<div class="gspy-bet-buttons">' +
+          '<button class="gspy-bet-btn gspy-bet-btn--higher" data-action="submitGuess" data-bet="higher">' +
+            '<span class="gspy-bet-arrow">▲</span>' +
+            '<span class="gspy-bet-text">أعلى</span>' +
+          '</button>' +
+          '<button class="gspy-bet-btn gspy-bet-btn--lower" data-action="submitGuess" data-bet="lower">' +
+            '<span class="gspy-bet-arrow">▼</span>' +
+            '<span class="gspy-bet-text">أقل</span>' +
+          '</button>' +
+        '</div>' +
+        '<p class="text-muted mt-4" id="waitingCount"></p>' +
+      '</div>';
+  },
+
+  // مساعد: تحديث مقياس الدائرة
+  _updateGauge(val) {
+    const display = document.getElementById('percentDisplay');
+    if (display) display.textContent = val + '%';
+
+    // تحديث الإبرة
+    const angle = -90 + (val / 100) * 180; // من -90 (يسار) إلى 90 (يمين)
+    const radians = (angle * Math.PI) / 180;
+    const needleLen = 65;
+    const cx = 100, cy = 100;
+    const nx = cx + needleLen * Math.cos(radians);
+    const ny = cy + needleLen * Math.sin(radians);
+
+    const line = document.getElementById('gaugeLine');
+    if (line) {
+      line.setAttribute('x2', nx);
+      line.setAttribute('y2', ny);
+    }
+  },
+
+  // backward compat - old handler
+  handleGuesspionageQuestion(d) {
+    this.handleGuesspionageFeatured(d);
+  },
+
+  submitGuess(e) {
     if (this._submitting) return;
-    const val = document.getElementById('percentSlider')?.value;
-    if (val === undefined) return;
-    this._submitting = true;
-    AudioEngine.submit();
-    this.socket.emit('submitAnswer', { code: this.currentRoom, answer: val });
-    this.showWaiting('ننتظر التخمينات...');
+    // التحقق إذا كان رهان أعلى/أقل
+    const clickedBet = e?.target?.closest('[data-bet]');
+
+    if (clickedBet) {
+      // مرحلة التحدي - أعلى أو أقل
+      const bet = clickedBet.getAttribute('data-bet');
+      this._submitting = true;
+      AudioEngine.submit();
+
+      // تمييز الزر المختار
+      document.querySelectorAll('.gspy-bet-btn').forEach(b => b.classList.remove('gspy-bet-btn--selected'));
+      clickedBet.classList.add('gspy-bet-btn--selected');
+
+      this.socket.emit('submitAnswer', { code: this.currentRoom, answer: bet });
+
+      // عرض حالة الانتظار
+      clickedBet.innerHTML = '<span class="gspy-bet-text">✓ تم!</span>';
+      document.querySelectorAll('.gspy-bet-btn:not(.gspy-bet-btn--selected)').forEach(b => {
+        b.style.opacity = '0.3';
+        b.style.pointerEvents = 'none';
+      });
+    } else {
+      // مرحلة التخمين - اللاعب المميز
+      const val = document.getElementById('percentSlider')?.value;
+      if (val === undefined) return;
+      this._submitting = true;
+      AudioEngine.submit();
+      this.socket.emit('submitAnswer', { code: this.currentRoom, answer: val });
+      this.showWaiting('جاري إرسال تخمينك...');
+    }
   },
 
   // ═══════════════════════════════════════════════════════════════
@@ -1192,21 +1333,53 @@ const App = {
     switch (d.game) {
       case 'guesspionage':
         resultHtml =
-          '<div class="percent-display mb-4">' + d.correctAnswer + '%</div>' +
-          '<p class="text-xl mb-4">الإجابة الصحيحة</p>';
+          '<div class="gspy-results">' +
+            '<div class="gspy-results-answer">' +
+              '<div class="gspy-results-label">الإجابة الصحيحة</div>' +
+              '<div class="gspy-results-number">' + d.correctAnswer + '%</div>' +
+            '</div>';
+        if (d.featuredGuess !== undefined) {
+          const featDiff = Math.abs(d.featuredGuess - d.correctAnswer);
+          resultHtml +=
+            '<div class="gspy-results-comparison">' +
+              '<div class="gspy-results-vs">' +
+                '<div class="gspy-results-vs-item">' +
+                  '<span class="gspy-results-vs-label">' + escapeHtml(d.featuredPlayerName || '') + ' خمّن</span>' +
+                  '<span class="gspy-results-vs-value">' + d.featuredGuess + '%</span>' +
+                '</div>' +
+                '<div class="gspy-results-vs-arrow">' + (d.correctAnswer > d.featuredGuess ? '▲ أعلى' : d.correctAnswer < d.featuredGuess ? '▼ أقل' : '= متساوي') + '</div>' +
+                '<div class="gspy-results-vs-item">' +
+                  '<span class="gspy-results-vs-label">الإجابة الصحيحة</span>' +
+                  '<span class="gspy-results-vs-value">' + d.correctAnswer + '%</span>' +
+                '</div>' +
+              '</div>' +
+              '<div class="gspy-results-diff">الفرق: ' + featDiff + '%</div>' +
+            '</div>';
+        }
         if (d.playerResults) {
-          resultHtml += '<div class="flex flex-col gap-2 mb-4" style="max-width:400px;width:100%">';
+          resultHtml += '<div class="gspy-results-players">';
           d.playerResults.forEach(pr => {
-            if (pr.guess !== null) {
-              resultHtml +=
-                '<div class="flex justify-between items-center p-2" style="background:rgba(255,255,255,0.05);border-radius:8px">' +
-                  '<span>' + escapeHtml(pr.playerName) + ': ' + pr.guess + '%</span>' +
-                  '<span style="color:#FFD93D">+' + pr.points + '</span>' +
-                '</div>';
+            let info = '';
+            if (pr.isFeatured) {
+              info = '🎯 ' + (pr.accuracy || '') + ' (فرق ' + pr.diff + '%)';
+            } else if (pr.bet) {
+              info = (pr.bet === 'higher' ? '▲ أعلى' : '▼ أقل') + ' ' + (pr.betCorrect ? '✅' : '❌');
+            } else {
+              info = '⏱️ ما جاوب';
             }
+            const rowClass = pr.points > 0 ? 'gspy-results-row--correct' : 'gspy-results-row--wrong';
+            resultHtml +=
+              '<div class="gspy-results-row ' + rowClass + '">' +
+                '<div class="gspy-results-row-info">' +
+                  '<span class="gspy-results-row-name">' + escapeHtml(pr.playerName) + '</span>' +
+                  '<span class="gspy-results-row-detail">' + info + '</span>' +
+                '</div>' +
+                '<span class="gspy-results-row-points">+' + pr.points + '</span>' +
+              '</div>';
           });
           resultHtml += '</div>';
         }
+        resultHtml += '</div>';
         break;
 
       case 'fakinit':

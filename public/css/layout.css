@@ -114,7 +114,7 @@ body {
 .bg__overlay {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at center, transparent 0%, var(--theme-bg-secondary) 100%);
+  background: radial-gradient(ellipse at center, transparent 0%, var(--theme-bg-secondary) 80%);
 }
 
 /* ─────────────────────────────────────────────────────────────

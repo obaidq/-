@@ -71,12 +71,13 @@
 
 /* Button Variants */
 .btn--primary {
-  background: var(--color-accent-green);
+  background: linear-gradient(135deg, #00C853, #00E676);
   color: var(--color-neutral-black);
+  text-shadow: none;
 }
 
 .btn--secondary {
-  background: var(--color-accent-yellow);
+  background: linear-gradient(135deg, #FFD93D, #FF8C42);
   color: var(--color-neutral-black);
 }
 
@@ -190,11 +191,12 @@
  * ───────────────────────────────────────────────────────────── */
 
 .panel {
-  background: rgba(0, 0, 0, 0.7);
-  border: var(--border-thick) solid var(--color-neutral-black);
+  background: rgba(0, 20, 10, 0.75);
+  border: var(--border-thick) solid rgba(0, 200, 83, 0.15);
   border-radius: var(--radius-2xl);
   padding: var(--space-8);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .panel--solid {
@@ -204,7 +206,7 @@
 
 .panel--accent {
   border-color: var(--theme-accent);
-  box-shadow: 0 0 0 2px var(--theme-accent);
+  box-shadow: 0 0 0 2px var(--theme-accent), 0 0 20px rgba(0, 230, 118, 0.15);
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -235,7 +237,7 @@
 .input:focus {
   outline: none;
   border-color: var(--theme-accent);
-  box-shadow: 0 0 0 4px rgba(255, 217, 61, 0.3);
+  box-shadow: 0 0 0 4px rgba(0, 230, 118, 0.25);
 }
 
 .input::placeholder {
@@ -288,17 +290,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  
+
   width: 80px;
   height: 80px;
-  
+
   font-size: var(--text-3xl);
   font-weight: var(--font-black);
   font-family: var(--font-display), var(--font-primary);
-  
-  background: var(--color-accent-yellow);
+
+  background: var(--color-accent-green);
   color: var(--color-neutral-black);
-  
+
   border: var(--border-thick) solid var(--color-neutral-black);
   border-radius: var(--radius-full);
   box-shadow: var(--shadow-md);
@@ -703,13 +705,13 @@
  * ───────────────────────────────────────────────────────────── */
 
 .tip-box {
-  background: rgba(255, 217, 61, 0.1);
-  border: 2px solid rgba(255, 217, 61, 0.3);
+  background: rgba(0, 200, 83, 0.08);
+  border: 2px solid rgba(0, 200, 83, 0.25);
   border-radius: 12px;
   padding: 16px;
 }
 
-.tip-box__text { color: #FFD93D; }
+.tip-box__text { color: #69F0AE; }
 
 /* ─────────────────────────────────────────────────────────────
  * LOBBY CONTAINER
@@ -722,7 +724,7 @@
  * ───────────────────────────────────────────────────────────── */
 
 .game-card__banner--quiplash { background: linear-gradient(135deg, #667eea, #764ba2); }
-.game-card__banner--guesspionage { background: linear-gradient(135deg, #11998e, #38ef7d); }
+.game-card__banner--guesspionage { background: linear-gradient(135deg, #004d40, #00897b, #00D4AA); }
 .game-card__banner--fakinit { background: linear-gradient(135deg, #fa709a, #fee140); }
 .game-card__banner--triviamurder { background: linear-gradient(135deg, #434343, #000); }
 .game-card__banner--fibbage { background: linear-gradient(135deg, #f093fb, #f5576c); }
