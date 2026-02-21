@@ -1144,9 +1144,15 @@ function setRoundTimer(room, timeLimit, onTimeout) {
     console.log('⏰ انتهى الوقت! - غرفة:', room.code);
 
     // تقديم تلقائي للاعبين اللي ما أجابوا
+    // For Quiplash: use safety quip instead of __timeout__ if available
+    const safetyQuips = room.gameData && room.gameData.safetyQuips;
     room.players.forEach(p => {
       if (p.currentAnswer === null) {
-        p.currentAnswer = '__timeout__';
+        if (room.currentGame === 'quiplash' && safetyQuips && safetyQuips.length > 0) {
+          p.currentAnswer = safetyQuips[Math.floor(Math.random() * safetyQuips.length)];
+        } else {
+          p.currentAnswer = '__timeout__';
+        }
       }
     });
 
@@ -1200,12 +1206,16 @@ function setVoteTimer(room, timeLimit, onTimeout) {
  * - 100 نقطة لكل صوت + 200 بونص للإجماع
  */
 function startQuiplashRound(room) {
-  const question = pickQuestion(room, content.quiplash.questions);
+  const questionData = pickQuestion(room, content.quiplash.questions);
+  // Support both string questions and object questions with safety quips
+  const question = typeof questionData === 'object' ? questionData.q : questionData;
+  const safetyQuips = typeof questionData === 'object' && questionData.safetyQuips ? questionData.safetyQuips : [];
 
   room.gameData.question = question;
   room.gameData.phase = 'answering';
   room.gameData.matchups = [];
   room.gameData.currentMatchupIndex = 0;
+  room.gameData.safetyQuips = safetyQuips;
 
   const timeLimit = 60;
 
@@ -1213,7 +1223,8 @@ function startQuiplashRound(room) {
     round: room.currentRound + 1,
     maxRounds: room.maxRounds,
     question,
-    timeLimit
+    timeLimit,
+    safetyQuips: safetyQuips.slice(0, 2)
   });
 
   // مؤقت الإجابات
@@ -1314,9 +1325,10 @@ function calculateQuiplashResults(room) {
   const matchup = room.gameData.currentMatchup;
   if (!matchup || matchup.length < 2) return;
 
-  // حساب الأصوات
+  // حساب الأصوات + تتبع المصوتين لكل إجابة
   const votes = {};
-  matchup.forEach(id => { votes[id] = 0; });
+  const voterBreakdown = {}; // { playerId: [{ name, avatar, color }] }
+  matchup.forEach(id => { votes[id] = 0; voterBreakdown[id] = []; });
 
   let totalVoters = 0;
 
@@ -1332,6 +1344,12 @@ function calculateQuiplashResults(room) {
           votes[p.currentVote]++;
           totalVoters++;
         }
+        // Track voter for stacking bar visualization
+        voterBreakdown[p.currentVote].push({
+          name: p.name,
+          avatar: p.avatar,
+          color: p.color
+        });
       }
     }
   });
@@ -1341,6 +1359,9 @@ function calculateQuiplashResults(room) {
     votes[id] = (votes[id] || 0) + Math.round(audienceVotes[id]);
   });
 
+  // Escalating points per round: R1=100, R2=150, R3+=200
+  const pointsPerVote = room.currentRound === 0 ? 100 : room.currentRound === 1 ? 150 : 200;
+
   // حساب النقاط
   const matchupResult = {};
   matchup.forEach(id => {
@@ -1348,7 +1369,7 @@ function calculateQuiplashResults(room) {
     if (!player) return;
 
     const voteCount = votes[id] || 0;
-    let points = voteCount * 100;
+    let points = voteCount * pointsPerVote;
     let quiplash = false;
 
     // بونص الإجماع: لو كل الأصوات لك (و فيه أصوات أصلاً)
@@ -1368,18 +1389,22 @@ function calculateQuiplashResults(room) {
     matchupResult[id] = {
       playerId: id,
       playerName: player.name,
+      playerAvatar: player.avatar,
       answer: player.currentAnswer,
       votes: voteCount,
       points,
-      quiplash
+      quiplash,
+      avatar: player.avatar
     };
   });
 
   room.gameData.matchupResults.push(matchupResult);
 
-  // إرسال نتيجة المواجهة
+  // إرسال نتيجة المواجهة مع تفاصيل المصوتين
   io.to(room.code).emit('quiplashMatchupResult', {
     results: Object.values(matchupResult),
+    voterBreakdown,
+    question: room.gameData.question,
     players: getPlayerList(room)
   });
 
