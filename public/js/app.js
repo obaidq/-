@@ -331,7 +331,7 @@ const App = {
     });
 
     // ── إجابات وتصويتات ──
-    s.on('playerAnswered', data => this.updateWaitingCount(data.count, data.total));
+    s.on('playerAnswered', data => this.updateWaitingCount(data.count, data.total, null, data.answered));
     s.on('playerVoted', data => this.updateWaitingCount(data.count, data.total, 'صوّتوا'));
 
     // ── رد سريع (Quiplash) ──
@@ -685,23 +685,48 @@ const App = {
     }, 1000);
   },
 
+  _waitingTips: [
+    'هل تعلم؟ أبو عابد ما ينام إلا بعد ما يخلّص اللعبة!',
+    'نصيحة: الإجابة السريعة مش دايم الأفضل!',
+    'أبو عابد يقول: الصبر حلو... بس بسرعة!',
+    'فكرة: جرب تكتب إجابة غريبة... ممكن تضحّكهم!',
+    'ترى أبو عابد يسجل كل شي... 📝',
+    'هل تعلم؟ أكثر لاعب فاز هو اللي يضحك أكثر!',
+    'نصيحة: لا تنسخ إجابة صاحبك... ما ينفع! 😅',
+    'أبو عابد يفكر بالسؤال الجاي...',
+  ],
+
   showWaiting(msg) {
     const gc = document.getElementById('gameContent');
+    const tip = this._waitingTips[Math.floor(Math.random() * this._waitingTips.length)];
     if (gc) gc.innerHTML =
       '<div class="text-center">' +
         '<div class="spinner mb-4"></div>' +
         '<p class="text-2xl font-bold">' + escapeHtml(msg) + '</p>' +
+        '<div id="waitingAvatars" class="waiting-avatars mt-4"></div>' +
         '<p class="text-muted mt-2" id="waitingCount">ننتظر...</p>' +
+        '<p class="waiting-tip mt-3">' + escapeHtml(tip) + '</p>' +
       '</div>';
   },
 
-  updateWaitingCount(count, total, label) {
+  updateWaitingCount(count, total, label, answered) {
     const el = document.getElementById('waitingCount');
     if (el) el.textContent = count + ' من ' + total + ' ' + (label || 'أجابوا');
     const ac = document.getElementById('answeredCount');
     if (ac) {
       ac.style.display = 'block';
       ac.textContent = count + '/' + total;
+    }
+
+    // عرض أفاتارات اللاعبين المجيبين
+    const avatarsEl = document.getElementById('waitingAvatars');
+    if (avatarsEl && answered && answered.length > 0) {
+      avatarsEl.innerHTML = answered.map(a =>
+        '<div class="waiting-avatar" style="background:' + escapeHtml(a.color) + '" title="' + escapeHtml(a.name) + '">' +
+          escapeHtml(a.avatar) +
+          '<div class="waiting-avatar__check">✓</div>' +
+        '</div>'
+      ).join('');
     }
   },
 
@@ -1810,10 +1835,18 @@ const App = {
       ? '<button class="btn btn--primary btn--lg mt-6" data-action="requestNextRound">' + (d.isLastRound ? 'النتائج 🏆' : 'التالي ➡️') + '</button>'
       : '<p class="text-muted mt-4">انتظر المضيف...</p>';
 
+    const quipHtml = d.transitionQuip
+      ? '<div class="transition-quip mt-4">' +
+          '<span class="transition-quip__icon">' + d.transitionQuip.icon + '</span>' +
+          '<span class="transition-quip__text">' + escapeHtml(d.transitionQuip.text) + '</span>' +
+        '</div>'
+      : '';
+
     document.getElementById('gameContent').innerHTML =
       '<div class="text-center" style="max-width:500px;width:100%">' +
         resultHtml +
         '<div class="scoreboard mt-6">' + scores + '</div>' +
+        quipHtml +
         nextBtn +
       '</div>';
 
@@ -1862,6 +1895,23 @@ const App = {
     ).join('');
 
     document.getElementById('finalScoreboard').innerHTML = scores;
+
+    // عرض الجوائز
+    const awardsEl = document.getElementById('gameAwards');
+    if (awardsEl && d.awards && d.awards.length > 0) {
+      awardsEl.innerHTML = '<h3 class="awards__title">جوائز اللعبة</h3>' +
+        d.awards.map(a =>
+          '<div class="award-card">' +
+            '<span class="award-card__icon">' + a.icon + '</span>' +
+            '<div class="award-card__info">' +
+              '<div class="award-card__title">' + escapeHtml(a.title) + '</div>' +
+              '<div class="award-card__name">' + escapeHtml(a.name) + '</div>' +
+              '<div class="award-card__detail">' + escapeHtml(a.detail) + '</div>' +
+            '</div>' +
+          '</div>'
+        ).join('');
+      awardsEl.classList.remove('hidden');
+    }
 
     const actionsEl = document.getElementById('resultsActions');
     if (actionsEl) {

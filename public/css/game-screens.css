@@ -571,4 +571,55 @@
   .gspy-question-text { font-size:18px; }
   .gspy-final-grid { grid-template-columns:1fr; }
   .commentary-text { font-size:14px; }
+  .award-card { padding:10px 14px; }
+  .award-card__icon { font-size:28px; }
+  .award-card__title { font-size:13px; }
+  .award-card__name { font-size:15px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ * GAME AWARDS - جوائز نهاية اللعبة
+ * ═══════════════════════════════════════════════════════════════ */
+.awards { margin-top:24px; max-width:500px; width:100%; }
+.awards__title { text-align:center; font-size:22px; font-weight:800; color:#FFD93D; margin-bottom:14px; font-family:'Tajawal',sans-serif; text-shadow:2px 2px 0 rgba(0,0,0,0.4); }
+.award-card { display:flex; align-items:center; gap:14px; background:linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03)); border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:14px 18px; margin-bottom:8px; animation:awardSlide 0.4s ease-out backwards; }
+.award-card:nth-child(2) { animation-delay:0.1s; }
+.award-card:nth-child(3) { animation-delay:0.2s; }
+.award-card:nth-child(4) { animation-delay:0.3s; }
+.award-card:nth-child(5) { animation-delay:0.4s; }
+.award-card:nth-child(6) { animation-delay:0.5s; }
+.award-card__icon { font-size:36px; flex-shrink:0; }
+.award-card__info { flex:1; min-width:0; }
+.award-card__title { font-size:14px; font-weight:700; color:#FFD93D; text-transform:uppercase; letter-spacing:1px; }
+.award-card__name { font-size:18px; font-weight:800; color:#fff; }
+.award-card__detail { font-size:13px; color:rgba(255,255,255,0.6); margin-top:2px; }
+
+@keyframes awardSlide {
+  from { opacity:0; transform:translateX(20px); }
+  to { opacity:1; transform:translateX(0); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ * TRANSITION QUIP - تعليق أبو عابد بين الجولات
+ * ═══════════════════════════════════════════════════════════════ */
+.transition-quip { display:flex; align-items:center; gap:10px; justify-content:center; background:linear-gradient(135deg,rgba(255,217,61,0.12),rgba(255,217,61,0.04)); border:1px solid rgba(255,217,61,0.2); border-radius:50px; padding:10px 20px; animation:quipFade 0.5s ease-out; }
+.transition-quip__icon { font-size:28px; }
+.transition-quip__text { font-size:15px; font-weight:600; color:rgba(255,255,255,0.85); font-family:'Tajawal',sans-serif; }
+
+@keyframes quipFade {
+  from { opacity:0; transform:translateY(8px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ * WAITING SCREEN - شاشة الانتظار المحسّنة
+ * ═══════════════════════════════════════════════════════════════ */
+.waiting-avatars { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+.waiting-avatar { width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; position:relative; animation:avatarPop 0.3s ease-out; border:2px solid rgba(255,255,255,0.3); }
+.waiting-avatar__check { position:absolute; bottom:-2px; right:-2px; background:#00e676; color:#fff; width:16px; height:16px; border-radius:50%; font-size:10px; display:flex; align-items:center; justify-content:center; font-weight:900; }
+.waiting-tip { font-size:13px; color:rgba(255,255,255,0.5); font-style:italic; max-width:300px; margin-left:auto; margin-right:auto; }
+
+@keyframes avatarPop {
+  from { opacity:0; transform:scale(0.5); }
+  to { opacity:1; transform:scale(1); }
 }
