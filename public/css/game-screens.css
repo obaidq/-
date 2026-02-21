@@ -1110,6 +1110,34 @@
   75% { content:'...'; }
 }
 
+/* ─── JINX Display ─── */
+.ql-jinx {
+  display:flex; flex-direction:column; align-items:center; gap:16px;
+  padding:32px; animation:ql-fade-up 0.4s ease-out;
+}
+.ql-jinx__icon {
+  font-size:80px; animation:ql-shake-sad 0.5s ease-in-out infinite;
+}
+.ql-jinx__text {
+  font-size:72px; font-weight:900; font-family:'Bangers',sans-serif;
+  color:#ff3f7f; text-shadow:4px 4px 0 #000, 0 0 40px rgba(255,63,127,0.4);
+  animation:ql-slam-in 0.5s cubic-bezier(0.68,-0.55,0.265,1.55);
+}
+.ql-jinx__subtitle {
+  font-size:20px; font-weight:700; color:rgba(255,255,255,0.7);
+  font-family:'Tajawal',sans-serif;
+}
+.ql-jinx__answer {
+  font-size:24px; font-weight:700; color:#fff;
+  background:rgba(255,63,127,0.15); border:3px solid rgba(255,63,127,0.3);
+  padding:16px 32px; border-radius:16px;
+  font-family:'Tajawal',sans-serif;
+}
+.ql-jinx__players {
+  display:flex; align-items:center; gap:8px;
+  font-size:18px; font-weight:700; color:rgba(255,255,255,0.8);
+}
+
 /* ═══ QUIPLASH RESPONSIVE ═══ */
 @media(max-width:768px) {
   .ql-interstitial__round-num { font-size:80px; }

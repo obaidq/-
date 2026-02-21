@@ -491,6 +491,9 @@ io.on('connection', (socket) => {
       fastestAnswer: null,     // { playerId, name, ms }
       votesReceived: new Map(), // playerId → total votes received
       streaks: new Map(),       // playerId → max streak
+      quiplashCount: new Map(), // playerId → total QUIPLASH moments (100% votes)
+      matchupWins: new Map(),   // playerId → total matchup wins
+      zeroVotes: new Map(),     // playerId → total 0% results
     };
     room.players.forEach((p, id) => {
       room.gameStats.roundScores.set(id, []);
@@ -498,6 +501,9 @@ io.on('connection', (socket) => {
       room.gameStats.correctGuesses.set(id, 0);
       room.gameStats.votesReceived.set(id, 0);
       room.gameStats.streaks.set(id, 0);
+      room.gameStats.quiplashCount.set(id, 0);
+      room.gameStats.matchupWins.set(id, 0);
+      room.gameStats.zeroVotes.set(id, 0);
     });
 
     const gameNames = {
@@ -1359,6 +1365,13 @@ function calculateQuiplashResults(room) {
     votes[id] = (votes[id] || 0) + Math.round(audienceVotes[id]);
   });
 
+  // JINX detection: identical answers = 0 points for both
+  const answers = matchup.map(id => {
+    const p = room.players.get(id);
+    return p ? (p.currentAnswer || '').trim().toLowerCase() : '';
+  });
+  const isJinx = answers.length === 2 && answers[0] === answers[1] && answers[0] !== '' && answers[0] !== '__timeout__';
+
   // Escalating points per round: R1=100, R2=150, R3+=200
   const pointsPerVote = room.currentRound === 0 ? 100 : room.currentRound === 1 ? 150 : 200;
 
@@ -1369,11 +1382,11 @@ function calculateQuiplashResults(room) {
     if (!player) return;
 
     const voteCount = votes[id] || 0;
-    let points = voteCount * pointsPerVote;
+    let points = isJinx ? 0 : voteCount * pointsPerVote;
     let quiplash = false;
 
-    // بونص الإجماع: لو كل الأصوات لك (و فيه أصوات أصلاً)
-    if (totalVoters > 0 && voteCount === totalVoters) {
+    // بونص الإجماع: لو كل الأصوات لك (و فيه أصوات أصلاً) - لا ينطبق في حالة الجينكس
+    if (!isJinx && totalVoters > 0 && voteCount === totalVoters) {
       points += 200;
       quiplash = true;
     }
@@ -1384,6 +1397,12 @@ function calculateQuiplashResults(room) {
     if (room.gameStats) {
       const prev = room.gameStats.votesReceived.get(id) || 0;
       room.gameStats.votesReceived.set(id, prev + voteCount);
+      if (quiplash) {
+        room.gameStats.quiplashCount.set(id, (room.gameStats.quiplashCount.get(id) || 0) + 1);
+      }
+      if (!isJinx && voteCount === 0 && totalVoters > 0) {
+        room.gameStats.zeroVotes.set(id, (room.gameStats.zeroVotes.get(id) || 0) + 1);
+      }
     }
 
     matchupResult[id] = {
@@ -1394,9 +1413,20 @@ function calculateQuiplashResults(room) {
       votes: voteCount,
       points,
       quiplash,
+      jinx: isJinx,
       avatar: player.avatar
     };
   });
+
+  // Track matchup winner
+  if (!isJinx && room.gameStats && matchup.length === 2) {
+    const r0 = matchupResult[matchup[0]];
+    const r1 = matchupResult[matchup[1]];
+    if (r0 && r1 && r0.votes !== r1.votes) {
+      const winnerId = r0.votes > r1.votes ? matchup[0] : matchup[1];
+      room.gameStats.matchupWins.set(winnerId, (room.gameStats.matchupWins.get(winnerId) || 0) + 1);
+    }
+  }
 
   room.gameData.matchupResults.push(matchupResult);
 
@@ -1405,6 +1435,7 @@ function calculateQuiplashResults(room) {
     results: Object.values(matchupResult),
     voterBreakdown,
     question: room.gameData.question,
+    jinx: isJinx,
     players: getPlayerList(room)
   });
 
@@ -2757,6 +2788,38 @@ function computeGameAwards(room) {
   if (topStreak && topStreakCount > 1) {
     const p = players.get(topStreak);
     if (p) awards.push({ icon: '🔥', title: 'سلسلة نارية', name: p.name, detail: topStreakCount + ' إجابات متتالية' });
+  }
+
+  // ملك الكويبلاش - أكثر QUIPLASH moments (Quiplash-specific)
+  if (room.currentGame === 'quiplash') {
+    let topQl = null, topQlCount = 0;
+    stats.quiplashCount.forEach((count, id) => {
+      if (count > topQlCount) { topQlCount = count; topQl = id; }
+    });
+    if (topQl && topQlCount > 0) {
+      const p = players.get(topQl);
+      if (p) awards.push({ icon: '⚡', title: 'ملك الكويبلاش', name: p.name, detail: topQlCount + ' إجماع تام' });
+    }
+
+    // أكثر فوز في المواجهات
+    let topWins = null, topWinsCount = 0;
+    stats.matchupWins.forEach((count, id) => {
+      if (count > topWinsCount) { topWinsCount = count; topWins = id; }
+    });
+    if (topWins && topWinsCount > 1) {
+      const p = players.get(topWins);
+      if (p) awards.push({ icon: '🏆', title: 'بطل المواجهات', name: p.name, detail: 'فاز ' + topWinsCount + ' مواجهات' });
+    }
+
+    // أكثر صفر أصوات
+    let topZero = null, topZeroCount = 0;
+    stats.zeroVotes.forEach((count, id) => {
+      if (count > topZeroCount) { topZeroCount = count; topZero = id; }
+    });
+    if (topZero && topZeroCount > 1) {
+      const p = players.get(topZero);
+      if (p) awards.push({ icon: '💀', title: 'ما أحد يبيك', name: p.name, detail: topZeroCount + ' مرات صفر أصوات' });
+    }
   }
 
   // عودة قوية - اللي كان آخر واحد وطلع بنتيجة أعلى

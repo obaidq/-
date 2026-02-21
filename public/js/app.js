@@ -921,6 +921,14 @@ const App = {
     try {
       clearInterval(this.gameTimer);
       const results = d.results || [];
+      const isJinx = d.jinx;
+
+      // JINX: identical answers - special display
+      if (isJinx && results.length >= 2) {
+        this._showQuiplashJinx(d);
+        return;
+      }
+
       const sorted = [...results].sort((a, b) => b.votes - a.votes);
       const r0 = sorted[0] || {};
       const r1 = sorted[1] || {};
@@ -1003,6 +1011,11 @@ const App = {
         setTimeout(() => this._showQuiplashMoment(), 1800);
       }
 
+      // Show mini leaderboard after a delay
+      if (d.players && d.players.length > 0) {
+        setTimeout(() => this._showQuiplashMiniLeaderboard(d.players), 3000);
+      }
+
     } catch (e) {
       console.error('handleQuiplashMatchupResult error:', e);
       this.showToast('حصل خطأ، حاول مرة ثانية', 'error');
@@ -1044,6 +1057,64 @@ const App = {
       overlay.style.transition = 'opacity 0.5s';
       setTimeout(() => overlay.remove(), 500);
     }, 2000);
+  },
+
+  /**
+   * Show mini leaderboard after matchup result
+   */
+  _showQuiplashMiniLeaderboard(players) {
+    const gc = document.getElementById('gameContent');
+    if (!gc) return;
+    // Sort by score descending, only non-audience players
+    const sorted = [...players].filter(p => !p.isAudience).sort((a, b) => b.score - a.score);
+    if (sorted.length === 0) return;
+
+    const rows = sorted.map((p, i) => {
+      const rank = i === 0 ? '👑' : (i + 1).toString();
+      return '<div class="ql-mini-lb__row">' +
+        '<div class="ql-mini-lb__rank">' + rank + '</div>' +
+        '<div class="ql-mini-lb__avatar">' + escapeHtml(p.avatar || '👤') + '</div>' +
+        '<div class="ql-mini-lb__name">' + escapeHtml(p.name || '') + '</div>' +
+        '<div class="ql-mini-lb__score">' + (p.score || 0) + '</div>' +
+      '</div>';
+    }).join('');
+
+    gc.innerHTML =
+      '<div style="display:flex;flex-direction:column;align-items:center;gap:16px">' +
+        '<div class="ql-mini-lb">' +
+          '<div class="ql-mini-lb__title">📊 الترتيب الحالي</div>' +
+          rows +
+        '</div>' +
+      '</div>';
+  },
+
+  /**
+   * Show JINX display when both players submit identical answers
+   */
+  _showQuiplashJinx(d) {
+    const results = d.results || [];
+    const r0 = results[0] || {};
+    const r1 = results[1] || {};
+    const gc = document.getElementById('gameContent');
+    if (!gc) return;
+
+    gc.innerHTML =
+      '<div class="ql-results" style="text-align:center">' +
+        '<div class="ql-results__question">' + escapeHtml(d.question || '') + '</div>' +
+        '<div class="ql-jinx">' +
+          '<div class="ql-jinx__icon">🔗</div>' +
+          '<div class="ql-jinx__text">JINX!</div>' +
+          '<div class="ql-jinx__subtitle">نفس الإجابة! صفر نقاط للاثنين!</div>' +
+          '<div class="ql-jinx__answer">"' + escapeHtml(r0.answer || r1.answer || '') + '"</div>' +
+          '<div class="ql-jinx__players">' +
+            '<span>' + escapeHtml(r0.avatar || '👤') + ' ' + escapeHtml(r0.playerName || '') + '</span>' +
+            '<span style="margin:0 12px;color:#ff3f7f;font-weight:900">=</span>' +
+            '<span>' + escapeHtml(r1.avatar || '👤') + ' ' + escapeHtml(r1.playerName || '') + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    AudioEngine.timesUp();
   },
 
   // ═══════════════════════════════════════════════════════════════
