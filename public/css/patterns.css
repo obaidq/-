@@ -16,7 +16,7 @@
     var(--theme-bg-primary) 0deg 10deg,
     var(--theme-bg-secondary) 10deg 20deg
   );
-  animation: pattern-rotate 120s linear infinite;
+  animation: pattern-rotate 90s linear infinite;
 }
 
 @keyframes pattern-rotate {
@@ -326,16 +326,16 @@
  * كل لعبة لها هوية بصرية فريدة
  * ═══════════════════════════════════════════════════════════════ */
 
-/* Hub / Menu Theme - القائمة الرئيسية */
+/* Hub / Menu Theme - القائمة الرئيسية (Saudi Green) */
 [data-theme="hub"] {
-  --theme-bg-primary: #0a1628;
-  --theme-bg-secondary: #162d4a;
-  --theme-accent: var(--color-accent-yellow);
+  --theme-bg-primary: #001a0e;
+  --theme-bg-secondary: #003d1f;
+  --theme-accent: #00e676;
   --theme-text-primary: #ffffff;
-  --theme-text-secondary: #b0bec5;
-  --theme-glow: rgba(255, 217, 61, 0.3);
-  --theme-card-bg: rgba(255,255,255,0.08);
-  --theme-card-border: rgba(255,255,255,0.15);
+  --theme-text-secondary: #a5d6a7;
+  --theme-glow: rgba(0, 230, 118, 0.3);
+  --theme-card-bg: rgba(0,230,118,0.06);
+  --theme-card-border: rgba(0,230,118,0.15);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -701,8 +701,8 @@
  * ═══════════════════════════════════════════════════════════════ */
 
 [data-theme="victory"] {
-  --theme-bg-primary: #0a2410;
-  --theme-bg-secondary: #1b5e20;
+  --theme-bg-primary: #001a0e;
+  --theme-bg-secondary: #003d1f;
   --theme-accent: #FFD93D;
   --theme-text-primary: #ffffff;
   --theme-text-secondary: #a5d6a7;
@@ -712,8 +712,9 @@
 }
 
 [data-theme="victory"] .bg {
-  background: radial-gradient(ellipse at 50% 30%, rgba(255,217,61,0.15) 0%, transparent 50%),
-              linear-gradient(180deg, #0a2410 0%, #1b5e20 50%, #0a2410 100%);
+  background: radial-gradient(ellipse at 50% 30%, rgba(255,217,61,0.2) 0%, transparent 50%),
+              radial-gradient(ellipse at 50% 80%, rgba(0,200,83,0.15) 0%, transparent 50%),
+              linear-gradient(180deg, #001a0e 0%, #003d1f 50%, #001a0e 100%);
 }
 
 /* ═══════════════════════════════════════════════════════════════

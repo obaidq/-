@@ -10,23 +10,23 @@
    * COLOR PALETTE - الألوان الأساسية
    * ───────────────────────────────────────────────────────────── */
   
-  /* Primary - اللون الرئيسي (أزرق داكن) */
-  --color-primary-900: #0a1628;
-  --color-primary-800: #0f2137;
-  --color-primary-700: #162d4a;
-  --color-primary-600: #1e3a5f;
-  --color-primary-500: #2a4a73;
-  --color-primary-400: #3d6090;
-  --color-primary-300: #5a7fad;
-  
-  /* Secondary - اللون الثانوي (تركواز) */
-  --color-secondary-500: #00d4aa;
-  --color-secondary-400: #00e6bb;
-  --color-secondary-300: #33ecc9;
-  
+  /* Primary - اللون الرئيسي (أخضر داكن - سعودي) */
+  --color-primary-900: #001a0e;
+  --color-primary-800: #002815;
+  --color-primary-700: #003d1f;
+  --color-primary-600: #00522a;
+  --color-primary-500: #006633;
+  --color-primary-400: #008040;
+  --color-primary-300: #00994d;
+
+  /* Secondary - اللون الثانوي (ذهبي سعودي) */
+  --color-secondary-500: #00C853;
+  --color-secondary-400: #00E676;
+  --color-secondary-300: #69F0AE;
+
   /* Accent Colors - ألوان التمييز */
-  --color-accent-yellow: #ffd93d;
-  --color-accent-orange: #ff8c42;
+  --color-accent-yellow: #FFD93D;
+  --color-accent-orange: #FF8C42;
   --color-accent-pink: #ff3f7f;
   --color-accent-red: #ff2d55;
   --color-accent-purple: #9d4edd;
@@ -180,10 +180,10 @@
  * هذه تتغير حسب اللعبة النشطة
  * ═══════════════════════════════════════════════════════════════ */
 :root {
-  /* Current theme (defaults to hub) */
-  --theme-bg-primary: var(--color-primary-700);
-  --theme-bg-secondary: var(--color-primary-800);
-  --theme-accent: var(--color-accent-yellow);
+  /* Current theme (defaults to hub - Saudi green) */
+  --theme-bg-primary: #001a0e;
+  --theme-bg-secondary: #002815;
+  --theme-accent: #00e676;
   --theme-text-primary: var(--color-neutral-white);
   --theme-text-secondary: var(--color-neutral-300);
   --theme-pattern: none;

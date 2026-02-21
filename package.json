@@ -1,6 +1,6 @@
 {
   "name": "abu-abed-box",
-  "version": "4.0.0",
+  "version": "6.0.0",
   "description": "أبو عابد بوكس - منصة ألعاب جماعية سعودية",
   "main": "server.js",
   "scripts": {
