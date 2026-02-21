@@ -86,6 +86,13 @@ const App = {
   init() {
     this.socket = io();
     this.myId = this.socket.id;
+
+    // استعادة بيانات الاتصال من sessionStorage (للعودة بعد refresh)
+    try {
+      this._savedRoom = sessionStorage.getItem('abuabed_room') || null;
+      this._savedName = sessionStorage.getItem('abuabed_name') || null;
+    } catch (e) { /* sessionStorage not available */ }
+
     this.setupSocketEvents();
 
     // تهيئة نظام الصوت
@@ -125,6 +132,13 @@ const App = {
 
     // ── Event Delegation لمحتوى اللعبة (بدلاً من inline onclick) ──
     document.getElementById('gameContent')?.addEventListener('click', (e) => {
+      // Stepper buttons for compound input
+      const stepBtn = e.target.closest('[data-step]');
+      if (stepBtn) {
+        const delta = parseInt(stepBtn.getAttribute('data-step'));
+        this._stepGauge(delta);
+        return;
+      }
       const target = e.target.closest('[data-action]');
       if (!target) return;
       const action = target.getAttribute('data-action');
@@ -192,6 +206,10 @@ const App = {
     s.on('connect', () => {
       this.myId = s.id;
       this._updateConnectionState('connected');
+      // Auto-rejoin if we had an active room
+      if (this._savedRoom && this._savedName) {
+        s.emit('rejoinRoom', { code: this._savedRoom, playerName: this._savedName });
+      }
     });
 
     s.on('disconnect', () => {
@@ -207,9 +225,53 @@ const App = {
       this._updateConnectionState('reconnecting');
     });
 
+    // ── إعادة الانضمام + متفرج ──
+    s.on('rejoinedRoom', data => {
+      this.currentRoom = data.code;
+      this.isHost = data.isHost;
+      this._savedRoom = data.code;
+      document.getElementById('displayRoomCode').textContent = data.code;
+      this.updatePlayers(data.players);
+      if (data.state === 'playing' && data.game) {
+        this.currentGame = data.game;
+        this.setTheme(data.game);
+        this.updateGameHeader(data.game);
+        this.showScreen('gameScreen');
+        document.getElementById('emojiBar')?.classList.remove('hidden');
+        document.getElementById('gameRound').textContent = 'الجولة ' + data.round + ' من ' + data.maxRounds;
+        this.showWaiting('رجعت! ننتظر الجولة الجاية...');
+      } else {
+        this.showScreen('lobbyScreen');
+        this.updateHostUI();
+      }
+      this.showToast('رجعت للغرفة!', 'success');
+      AudioEngine.playerJoin();
+    });
+
+    s.on('joinedAsAudience', data => {
+      this.currentRoom = data.code;
+      this._savedRoom = data.code;
+      this.isHost = false;
+      this._isAudience = true;
+      if (data.game) {
+        this.currentGame = data.game;
+        this.setTheme(data.game);
+        this.updateGameHeader(data.game);
+        this.showScreen('gameScreen');
+        document.getElementById('emojiBar')?.classList.remove('hidden');
+        this.showWaiting('أنت متفرج! شارك بالتصويت والإيموجي');
+      } else {
+        this.showScreen('lobbyScreen');
+      }
+      this.showToast('انضممت كمتفرج!', 'success');
+    });
+
     // ── الغرفة ──
     s.on('roomCreated', data => {
       this.currentRoom = data.code;
+      this._savedRoom = data.code;
+      this._savedName = document.getElementById('hostNameInput')?.value?.trim();
+      this._persistSession();
       this.isHost = true;
       document.getElementById('displayRoomCode').textContent = data.code;
       this.updatePlayers(data.players);
@@ -221,6 +283,9 @@ const App = {
 
     s.on('roomJoined', data => {
       this.currentRoom = data.code;
+      this._savedRoom = data.code;
+      this._savedName = document.getElementById('playerNameInput')?.value?.trim();
+      this._persistSession();
       document.getElementById('displayRoomCode').textContent = data.code;
       this.updatePlayers(data.players);
       this.showScreen('lobbyScreen');
@@ -246,6 +311,9 @@ const App = {
 
     s.on('playerUpdated', data => this.updatePlayers(data.players));
     s.on('error', data => this.showToast(data.message, 'error'));
+
+    // ── Standalone commentary (timer warnings, hype) ──
+    s.on('commentary', data => this.showCommentary(data));
 
     // ── بدء اللعبة ──
     s.on('gameStarted', data => {
@@ -326,6 +394,25 @@ const App = {
     // ── الإيموجي ──
     s.on('emojiReaction', data => this.showEmojiFloat(data.emoji));
 
+    // ── وضع العائلة ──
+    s.on('familyModeChanged', data => {
+      this._familyMode = data.familyMode;
+      const btn = document.getElementById('familyModeBtn');
+      if (btn) btn.textContent = data.familyMode ? '🏠 وضع العائلة: مفعّل ✅' : '🏠 وضع العائلة: معطّل';
+      this.showToast(data.message, 'success');
+    });
+
+    s.on('extendedTimersChanged', data => {
+      const btn = document.getElementById('extendedTimersBtn');
+      if (btn) btn.textContent = data.extendedTimers ? '⏳ مؤقتات ممتدة: مفعّلة ✅' : '⏱️ مؤقتات ممتدة: معطّلة';
+      this.showToast(data.message, 'success');
+    });
+
+    // ── Audience ──
+    s.on('audienceJoined', data => {
+      this.showToast(escapeHtml(data.name) + ' انضم كمتفرج! 👀', 'success');
+    });
+
     // ── Guesspionage Final Round ──
     s.on('guesspionageFinalRound', data => this.handleGuesspionageFinalRound(data));
 
@@ -394,6 +481,23 @@ const App = {
     }
   },
 
+  // حفظ بيانات الجلسة لإعادة الاتصال
+  _persistSession() {
+    try {
+      if (this._savedRoom) sessionStorage.setItem('abuabed_room', this._savedRoom);
+      if (this._savedName) sessionStorage.setItem('abuabed_name', this._savedName);
+    } catch (e) { /* sessionStorage not available */ }
+  },
+
+  _clearSession() {
+    try {
+      sessionStorage.removeItem('abuabed_room');
+      sessionStorage.removeItem('abuabed_name');
+    } catch (e) {}
+    this._savedRoom = null;
+    this._savedName = null;
+  },
+
   // ═══════════════════════════════════════════════════════════════
   // إجراءات الغرفة
   // ═══════════════════════════════════════════════════════════════
@@ -411,7 +515,22 @@ const App = {
     if (!code || code.length !== 4) return this.showToast('كود خاطئ!', 'error');
     if (!name) return this.showToast('أدخل اسمك!', 'error');
     AudioEngine.click();
+    this._savedName = name;
+    this._savedRoom = code;
+    this._persistSession();
     this.socket.emit('joinRoom', { code, playerName: name });
+  },
+
+  joinAsAudience() {
+    const code = document.getElementById('roomCodeInput').value.trim().toUpperCase();
+    const name = document.getElementById('playerNameInput').value.trim();
+    if (!code || code.length !== 4) return this.showToast('كود خاطئ!', 'error');
+    if (!name) return this.showToast('أدخل اسمك!', 'error');
+    AudioEngine.click();
+    this._savedName = name;
+    this._savedRoom = code;
+    this._persistSession();
+    this.socket.emit('joinAsAudience', { code, playerName: name });
   },
 
   toggleReady() {
@@ -439,6 +558,21 @@ const App = {
     } else {
       this.showToast('الكود: ' + code, 'success');
     }
+  },
+
+  toggleHideRoomCode() {
+    this._roomCodeHidden = !this._roomCodeHidden;
+    const codeEl = document.getElementById('roomCode');
+    if (codeEl) {
+      codeEl.style.filter = this._roomCodeHidden ? 'blur(8px)' : 'none';
+      codeEl.setAttribute('aria-hidden', this._roomCodeHidden ? 'true' : 'false');
+    }
+    this.showToast(this._roomCodeHidden ? 'كود الغرفة مخفي (للبث)' : 'كود الغرفة ظاهر', 'success');
+  },
+
+  toggleExtendedTimers() {
+    if (!this.isHost || !this.currentRoom) return;
+    this.socket.emit('toggleExtendedTimers', this.currentRoom);
   },
 
   // ═══════════════════════════════════════════════════════════════
@@ -514,8 +648,15 @@ const App = {
   updateHostUI() {
     const gamesSection = document.getElementById('gamesSection');
     const waitingMessage = document.getElementById('waitingMessage');
+    const familySection = document.getElementById('familyModeSection');
     if (gamesSection) gamesSection.style.display = this.isHost ? 'block' : 'none';
     if (waitingMessage) waitingMessage.style.display = this.isHost ? 'none' : 'block';
+    if (familySection) familySection.style.display = this.isHost ? 'block' : 'none';
+  },
+
+  toggleFamilyMode() {
+    if (!this.isHost || !this.currentRoom) return;
+    this.socket.emit('toggleFamilyMode', this.currentRoom);
   },
 
   // ═══════════════════════════════════════════════════════════════
@@ -664,7 +805,13 @@ const App = {
             '</svg>' +
           '</div>' +
           '<div class="gspy-percent-display" id="percentDisplay" aria-live="polite" role="status">50%</div>' +
-          '<input type="range" class="gspy-slider" id="percentSlider" min="0" max="100" value="50" aria-label="اختر نسبة تخمينك من 0 إلى 100" oninput="App._updateGauge(this.value)">' +
+          '<div class="gspy-compound-input">' +
+            '<button class="gspy-step-btn" data-step="-5" aria-label="ناقص 5">-5</button>' +
+            '<button class="gspy-step-btn" data-step="-1" aria-label="ناقص 1">-1</button>' +
+            '<input type="range" class="gspy-slider" id="percentSlider" min="0" max="100" value="50" aria-label="اختر نسبة تخمينك من 0 إلى 100" oninput="App._updateGauge(this.value)">' +
+            '<button class="gspy-step-btn" data-step="1" aria-label="زائد 1">+1</button>' +
+            '<button class="gspy-step-btn" data-step="5" aria-label="زائد 5">+5</button>' +
+          '</div>' +
           '<div class="gspy-slider-labels"><span>0%</span><span>50%</span><span>100%</span></div>' +
         '</div>' +
         '<button class="btn btn--primary btn--lg btn--full gspy-submit-btn" data-action="submitGuess">تأكيد تخميني! 📊</button>' +
@@ -767,13 +914,26 @@ const App = {
       '</div>';
   },
 
-  // مساعد: تحديث مقياس الدائرة
+  // مساعد: تحديث مقياس الدائرة (مع throttle 50ms)
+  _gaugeTimer: null,
   _updateGauge(val) {
+    val = Math.max(0, Math.min(100, parseInt(val) || 0));
+    const slider = document.getElementById('percentSlider');
+    if (slider && parseInt(slider.value) !== val) slider.value = val;
+
+    if (this._gaugeTimer) return;
+    this._gaugeTimer = setTimeout(() => {
+      this._gaugeTimer = null;
+      this._renderGaugeNeedle(val);
+    }, 50);
+    this._renderGaugeNeedle(val);
+  },
+
+  _renderGaugeNeedle(val) {
     const display = document.getElementById('percentDisplay');
     if (display) display.textContent = val + '%';
 
-    // تحديث الإبرة
-    const angle = -90 + (val / 100) * 180; // من -90 (يسار) إلى 90 (يمين)
+    const angle = -90 + (val / 100) * 180;
     const radians = (angle * Math.PI) / 180;
     const needleLen = 65;
     const cx = 100, cy = 100;
@@ -785,6 +945,14 @@ const App = {
       line.setAttribute('x2', nx);
       line.setAttribute('y2', ny);
     }
+  },
+
+  _stepGauge(delta) {
+    const slider = document.getElementById('percentSlider');
+    if (!slider) return;
+    const newVal = Math.max(0, Math.min(100, parseInt(slider.value) + delta));
+    slider.value = newVal;
+    this._updateGauge(newVal);
   },
 
   // backward compat - old handler
@@ -831,7 +999,8 @@ const App = {
   // ═══════════════════════════════════════════════════════════════
 
   handleFakinItTask(d) {
-    document.getElementById('gameRound').textContent = 'الجولة ' + d.round + ' من ' + d.maxRounds;
+    const subInfo = d.maxSubRounds ? ' (مهمة ' + d.subRound + '/' + d.maxSubRounds + ')' : '';
+    document.getElementById('gameRound').textContent = 'الجولة ' + d.round + ' من ' + d.maxRounds + subInfo;
     this.startTimer(d.timeLimit);
     if (d.commentary) this.showCommentary(d.commentary);
 
@@ -1397,16 +1566,73 @@ const App = {
       case 'guesspionage':
         AudioEngine.drumRoll(1.5);
         setTimeout(() => AudioEngine.reveal(), 1600);
+
+        // Final round has different display
+        if (d.isFinalRound && d.options) {
+          resultHtml = '<div class="gspy-results">' +
+            '<div class="gspy-badge gspy-badge--featured mb-4">🏆 نتائج الجولة الأخيرة</div>' +
+            '<div class="gspy-final-grid" style="margin-bottom:16px">';
+          const rankIcons = { 1: '🥇', 2: '🥈', 3: '🥉' };
+          d.options.forEach(o => {
+            const cls = o.isTop3 ? 'gspy-final-option--selected' : '';
+            const rankBadge = o.rank ? '<div class="gspy-rank-badge">' + rankIcons[o.rank] + ' #' + o.rank + ' (+' + o.rankPoints + ')</div>' : '';
+            resultHtml +=
+              '<div class="gspy-final-option ' + cls + '" style="cursor:default">' +
+                rankBadge +
+                escapeHtml(o.text) +
+                '<div class="text-sm mt-1" style="opacity:0.7">' + o.percentage + '%</div>' +
+              '</div>';
+          });
+          resultHtml += '</div>';
+          if (d.playerResults) {
+            resultHtml += '<div class="gspy-results-players">';
+            d.playerResults.forEach(pr => {
+              const rowClass = pr.correctPicks > 0 ? 'gspy-results-row--correct' : 'gspy-results-row--wrong';
+              resultHtml +=
+                '<div class="gspy-results-row ' + rowClass + '">' +
+                  '<div class="gspy-results-row-info">' +
+                    '<span class="gspy-results-row-name">' + escapeHtml(pr.playerName) + '</span>' +
+                    '<span class="gspy-results-row-detail">' + pr.correctPicks + '/3 صح ✅</span>' +
+                  '</div>' +
+                  '<span class="gspy-results-row-points">+' + pr.points + '</span>' +
+                '</div>';
+            });
+            resultHtml += '</div>';
+          }
+          resultHtml += '</div>';
+          break;
+        }
+
+        // Staged reveal: Beat 1 — question + gauge placeholder
         resultHtml =
           '<div class="gspy-results">' +
             '<div class="gspy-results-answer">' +
-              '<div class="gspy-results-label">الإجابة الصحيحة</div>' +
-              '<div class="gspy-results-number">' + d.correctAnswer + '%</div>' +
+              '<div class="gspy-results-label">الإجابة الصحيحة...</div>' +
+              '<div class="gspy-reveal-gauge" id="revealGauge">' +
+                '<svg viewBox="0 0 200 120" class="gspy-gauge-svg" aria-hidden="true">' +
+                  '<defs>' +
+                    '<linearGradient id="revealGaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">' +
+                      '<stop offset="0%" style="stop-color:#ff4444"/>' +
+                      '<stop offset="50%" style="stop-color:#FFD93D"/>' +
+                      '<stop offset="100%" style="stop-color:#00e676"/>' +
+                    '</linearGradient>' +
+                  '</defs>' +
+                  '<path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="12" stroke-linecap="round"/>' +
+                  '<path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="url(#revealGaugeGrad)" stroke-width="12" stroke-linecap="round"/>' +
+                  '<circle cx="100" cy="100" r="6" fill="#fff"/>' +
+                  '<line x1="100" y1="100" x2="100" y2="35" stroke="#fff" stroke-width="3" stroke-linecap="round" id="revealNeedle" class="gspy-needle-line" style="transition:all 1.5s ease-out"/>' +
+                  (d.featuredGuess !== undefined ? '<line x1="100" y1="100" x2="100" y2="40" stroke="#FFD93D" stroke-width="2" stroke-linecap="round" id="revealGuessMarker" style="opacity:0.5;transition:all 0.5s ease-out"/>' : '') +
+                '</svg>' +
+              '</div>' +
+              '<div class="gspy-results-number gspy-reveal-number" id="revealNumber" style="opacity:0;transform:scale(0)">?</div>' +
             '</div>';
+
+        // Pre-build comparison and player rows (hidden initially)
+        let comparisonHtml = '';
         if (d.featuredGuess !== undefined) {
           const featDiff = Math.abs(d.featuredGuess - d.correctAnswer);
-          resultHtml +=
-            '<div class="gspy-results-comparison">' +
+          comparisonHtml =
+            '<div class="gspy-results-comparison gspy-reveal-beat" id="revealComparison" style="opacity:0;transform:translateY(20px)">' +
               '<div class="gspy-results-vs">' +
                 '<div class="gspy-results-vs-item">' +
                   '<span class="gspy-results-vs-label">' + escapeHtml(d.featuredPlayerName || '') + ' خمّن</span>' +
@@ -1421,9 +1647,11 @@ const App = {
               '<div class="gspy-results-diff">الفرق: ' + featDiff + '%</div>' +
             '</div>';
         }
+        resultHtml += comparisonHtml;
+
         if (d.playerResults) {
-          resultHtml += '<div class="gspy-results-players">';
-          d.playerResults.forEach(pr => {
+          resultHtml += '<div class="gspy-results-players" id="revealPlayers" style="opacity:0;transform:translateY(20px)">';
+          d.playerResults.forEach((pr, idx) => {
             let info = '';
             if (pr.isFeatured) {
               info = '🎯 ' + (pr.accuracy || '') + ' (فرق ' + pr.diff + '%)';
@@ -1435,7 +1663,7 @@ const App = {
             }
             const rowClass = pr.points > 0 ? 'gspy-results-row--correct' : 'gspy-results-row--wrong';
             resultHtml +=
-              '<div class="gspy-results-row ' + rowClass + '">' +
+              '<div class="gspy-results-row ' + rowClass + '" style="opacity:0;transform:translateY(10px);transition:all 0.3s ease-out ' + (idx * 100) + 'ms">' +
                 '<div class="gspy-results-row-info">' +
                   '<span class="gspy-results-row-name">' + escapeHtml(pr.playerName) + '</span>' +
                   '<span class="gspy-results-row-detail">' + info + '</span>' +
@@ -1446,6 +1674,56 @@ const App = {
           resultHtml += '</div>';
         }
         resultHtml += '</div>';
+
+        // Schedule staged reveal animations after DOM render
+        setTimeout(() => {
+          // Beat 2 (1600ms): Animate gauge needle to truth
+          const needle = document.getElementById('revealNeedle');
+          if (needle) {
+            const truthAngle = -90 + (d.correctAnswer / 100) * 180;
+            const truthRad = (truthAngle * Math.PI) / 180;
+            const nx = 100 + 65 * Math.cos(truthRad);
+            const ny = 100 + 65 * Math.sin(truthRad);
+            needle.setAttribute('x2', nx);
+            needle.setAttribute('y2', ny);
+          }
+          // Position guess marker
+          if (d.featuredGuess !== undefined) {
+            const marker = document.getElementById('revealGuessMarker');
+            if (marker) {
+              const guessAngle = -90 + (d.featuredGuess / 100) * 180;
+              const guessRad = (guessAngle * Math.PI) / 180;
+              marker.setAttribute('x2', 100 + 55 * Math.cos(guessRad));
+              marker.setAttribute('y2', 100 + 55 * Math.sin(guessRad));
+            }
+          }
+          // Number reveal
+          const numEl = document.getElementById('revealNumber');
+          if (numEl) {
+            numEl.textContent = d.correctAnswer + '%';
+            numEl.style.opacity = '1';
+            numEl.style.transform = 'scale(1)';
+          }
+          // Update label
+          const labelEl = document.querySelector('.gspy-results-label');
+          if (labelEl) labelEl.textContent = 'الإجابة الصحيحة';
+        }, 1600);
+
+        // Beat 3 (3000ms): Fade in comparison + player rows
+        setTimeout(() => {
+          const comp = document.getElementById('revealComparison');
+          if (comp) { comp.style.opacity = '1'; comp.style.transform = 'translateY(0)'; }
+          const players = document.getElementById('revealPlayers');
+          if (players) {
+            players.style.opacity = '1';
+            players.style.transform = 'translateY(0)';
+            // Stagger each row
+            players.querySelectorAll('.gspy-results-row').forEach(row => {
+              row.style.opacity = '1';
+              row.style.transform = 'translateY(0)';
+            });
+          }
+        }, 3000);
         break;
 
       case 'fakinit':

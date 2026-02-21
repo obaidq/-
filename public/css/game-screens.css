@@ -253,6 +253,21 @@
   font-size:13px; color:rgba(255,255,255,0.5); font-weight:600; padding:0 4px;
 }
 
+/* ─── Compound Input (Slider + Steppers) ─── */
+.gspy-compound-input {
+  display:flex; align-items:center; gap:8px; width:100%; max-width:440px;
+}
+.gspy-step-btn {
+  width:48px; height:48px; border-radius:50%; border:3px solid #000;
+  background:rgba(255,255,255,0.12); color:#fff; font-size:18px; font-weight:900;
+  cursor:pointer; box-shadow:3px 3px 0 #000; transition:all 0.15s;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  font-family:inherit;
+}
+.gspy-step-btn:hover { background:rgba(0,212,170,0.25); transform:translate(-1px,-1px); box-shadow:4px 4px 0 #000; }
+.gspy-step-btn:active { transform:translate(1px,1px); box-shadow:2px 2px 0 #000; }
+.gspy-compound-input .gspy-slider { flex:1; min-width:0; }
+
 .gspy-submit-btn { margin-top:12px; }
 
 /* ─── Wait for Featured Player ─── */
@@ -355,6 +370,9 @@
   font-size:72px; font-weight:900; font-family:'Bangers',sans-serif;
   color:#00D4AA; text-shadow:4px 4px 0 #000, 0 0 30px rgba(0,212,170,0.4);
 }
+.gspy-reveal-number { transition:opacity 0.6s ease-out, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.gspy-reveal-gauge { max-width:220px; margin:0 auto 12px; }
+.gspy-reveal-beat { transition:opacity 0.6s ease-out, transform 0.6s ease-out; }
 .gspy-results-comparison {
   display:flex; flex-direction:column; align-items:center; gap:12px;
   width:100%; padding:16px; background:rgba(0,50,40,0.5);
@@ -464,6 +482,10 @@
   background:rgba(0,212,170,0.2); border-color:#00D4AA;
   box-shadow:0 0 20px rgba(0,212,170,0.3), 0 4px 12px rgba(0,0,0,0.2);
   color:#00D4AA;
+}
+.gspy-rank-badge {
+  font-size:16px; font-weight:900; margin-bottom:4px;
+  color:#FFD700; text-shadow:0 1px 3px rgba(0,0,0,0.5);
 }
 
 /* ═══════════════════════════════════════════════════════════════
