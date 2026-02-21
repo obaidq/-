@@ -111,7 +111,14 @@ const App = {
     this.reducedMotion = localStorage.getItem('reducedMotion') === 'true';
     if (this.reducedMotion) {
       document.getElementById('reducedMotion')?.setAttribute('checked', 'checked');
+      document.body.setAttribute('data-reduced-motion', 'true');
     }
+
+    // تحميل مستوى الحيوية
+    const savedIntensity = localStorage.getItem('intensity') || 'party';
+    this.setIntensity(savedIntensity);
+    const intensitySelect = document.getElementById('intensitySelect');
+    if (intensitySelect) intensitySelect.value = savedIntensity;
 
     // نصيحة عشوائية
     const tipEl = document.getElementById('bootTip');
@@ -477,8 +484,16 @@ const App = {
     if (bg) {
       bg.className = 'bg__pattern';
       const game = GAMES[theme];
-      bg.classList.add(game ? game.pattern : (theme === 'victory' ? 'pattern-confetti' : 'pattern-rays'));
+      bg.classList.add(game ? game.pattern : (theme === 'victory' ? 'pattern-confetti' : 'pattern-arabesque'));
     }
+  },
+
+  setIntensity(level) {
+    const valid = ['calm', 'party', 'chaos'];
+    if (!valid.includes(level)) level = 'party';
+    document.body.setAttribute('data-intensity', level);
+    this._intensity = level;
+    localStorage.setItem('intensity', level);
   },
 
   // حفظ بيانات الجلسة لإعادة الاتصال
@@ -2170,6 +2185,7 @@ const App = {
   toggleReducedMotion(checked) {
     this.reducedMotion = checked;
     localStorage.setItem('reducedMotion', checked);
+    document.body.setAttribute('data-reduced-motion', checked ? 'true' : 'false');
   },
 
   // ═══════════════════════════════════════════════════════════════
