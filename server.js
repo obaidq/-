@@ -112,9 +112,11 @@ function createPlayer(id, name, isHost = false) {
     avatar: AVATARS[index],
     color: COLORS[index % COLORS.length],
     score: 0,
+    streak: 0,
     isHost,
     isReady: false,
     isAlive: true,
+    isAudience: false,
     currentAnswer: null,
     currentVote: null,
     connectedAt: Date.now()
@@ -134,12 +136,13 @@ function sanitizeName(name) {
  * الحصول على قائمة اللاعبين بصيغة قابلة للإرسال
  */
 function getPlayerList(room) {
-  return Array.from(room.players.values()).map(p => ({
+  return Array.from(room.players.values()).filter(p => !p.isAudience).map(p => ({
     id: p.id,
     name: p.name,
     avatar: p.avatar,
     color: p.color,
     score: p.score,
+    streak: p.streak || 0,
     isHost: p.isHost,
     isReady: p.isReady,
     isAlive: p.isAlive
@@ -566,6 +569,45 @@ io.on('connection', (socket) => {
     });
 
     console.log('🔄 الغرفة رجعت للوبي:', code);
+  });
+
+  // ─────────────────────────────────────────────
+  // إيموجي ردود الفعل
+  // ─────────────────────────────────────────────
+  socket.on('sendEmoji', ({ code, emoji }) => {
+    const room = rooms.get(code);
+    if (!room || !room.players.has(socket.id)) return;
+    const validEmojis = ['😂', '🔥', '👏', '😱', '💀', '❤️', '👎', '🤣'];
+    if (!validEmojis.includes(emoji)) return;
+    socket.to(code).emit('emojiReaction', { emoji, playerId: socket.id });
+  });
+
+  // ─────────────────────────────────────────────
+  // الانضمام كمتفرج (أثناء اللعب)
+  // ─────────────────────────────────────────────
+  socket.on('joinAsAudience', ({ code, playerName }) => {
+    if (!code || typeof code !== 'string') return;
+    if (!playerName || typeof playerName !== 'string') return;
+
+    const roomCode = code.toUpperCase().trim();
+    const room = rooms.get(roomCode);
+    if (!room) return socket.emit('error', { message: 'الغرفة غير موجودة!' });
+
+    const player = createPlayer(socket.id, playerName);
+    player.isAudience = true;
+    room.players.set(socket.id, player);
+    socket.join(roomCode);
+
+    socket.emit('joinedAsAudience', {
+      code: room.code,
+      players: getPlayerList(room),
+      game: room.currentGame
+    });
+
+    io.to(roomCode).emit('audienceJoined', {
+      name: player.name,
+      audienceCount: Array.from(room.players.values()).filter(p => p.isAudience).length
+    });
   });
 
   // ─────────────────────────────────────────────
@@ -1063,6 +1105,14 @@ function calculateGuesspionageResults(room) {
       }
     }
 
+    // مكافأة السلسلة
+    if (points > 0) {
+      p.streak = (p.streak || 0) + 1;
+      if (p.streak > 1) points += p.streak * 50;
+    } else {
+      p.streak = 0;
+    }
+
     p.score += points;
 
     playerResults.push({
@@ -1070,6 +1120,7 @@ function calculateGuesspionageResults(room) {
       playerName: p.name,
       guess,
       points,
+      streak: p.streak || 0,
       diff: guess !== null ? Math.abs(guess - correctAnswer) : null
     });
   });
@@ -1257,7 +1308,22 @@ const deathChallenges = [
   'اكتب اسم أي مدينة سعودية!',
   'اكتب أي رقم زوجي!',
   'اكتب اسم أي أكلة سعودية!',
-  'اكتب اسم أي كوكب!'
+  'اكتب اسم أي كوكب!',
+  'اكتب اسم لاعب كرة قدم سعودي!',
+  'اكتب رقم فردي!',
+  'اكتب اسم تطبيق في جوالك!',
+  'اكتب اسم فيلم عربي!',
+  'اكتب شي لونه أحمر!',
+  'اكتب اسم أغنية سعودية أو عربية!',
+  'اكتب اسم محل أكل تحبه!',
+  'اكتب أي كلمة تبدأ بحرف العين!',
+  'اكتب شي تلقاه في المطبخ!',
+  'اكتب اسم بحر أو محيط!',
+  'اكتب اسم لعبة فيديو!',
+  'اكتب اسم مادة دراسية!',
+  'اكتب شي تلبسه!',
+  'اكتب اسم عاصمة عربية!',
+  'اكتب رقم أكبر من 100!'
 ];
 
 /**
@@ -1327,11 +1393,15 @@ function calculateTriviaMurderResults(room) {
 
     if (p.currentAnswer !== null && p.currentAnswer !== '__timeout__' && parseInt(p.currentAnswer) === correctIndex) {
       // إجابة صحيحة!
-      p.score += 100;
-      survivors.push({ id: p.id, name: p.name });
+      p.streak = (p.streak || 0) + 1;
+      let points = 100;
+      if (p.streak > 1) points += p.streak * 25; // مكافأة السلسلة
+      p.score += points;
+      survivors.push({ id: p.id, name: p.name, streak: p.streak });
     } else {
       // إجابة خطأ أو ما جاوب = الموت
       p.isAlive = false;
+      p.streak = 0;
       newlyDead.push({ id: p.id, name: p.name });
     }
   });

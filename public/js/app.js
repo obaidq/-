@@ -32,7 +32,7 @@ const GAMES = {
   drawful:      { icon: '🎨', name: 'ارسم لي',       hint: 'ارسم الكلمة!',           pattern: 'pattern-paint' }
 };
 
-const DRAW_COLORS = ['#000000', '#ff0000', '#0066ff', '#00aa00', '#ff8800', '#9900cc', '#ffffff'];
+const DRAW_COLORS = ['#000000', '#ff0000', '#0066ff', '#00aa00', '#ff8800', '#9900cc', '#ff69b4', '#8B4513', '#FFD700', '#00CED1', '#808080', '#ffffff'];
 const DRAW_SIZES = [4, 8, 16];
 
 // ═══════════════════════════════════════════════════════════════════
@@ -67,6 +67,10 @@ const App = {
   strokes: [],
   currentStroke: null,
 
+  // حالة الإيموجي والإعدادات
+  lastEmojiTime: 0,
+  reducedMotion: false,
+
   // ─────────────────────────────────────────────
   // التهيئة
   // ─────────────────────────────────────────────
@@ -74,6 +78,25 @@ const App = {
     this.socket = io();
     this.myId = this.socket.id;
     this.setupSocketEvents();
+
+    // تهيئة نظام الصوت
+    if (typeof AudioEngine !== 'undefined') {
+      AudioEngine.init();
+      // استئناف الصوت عند أول تفاعل
+      const resumeAudio = () => {
+        AudioEngine.resume();
+        document.removeEventListener('click', resumeAudio);
+        document.removeEventListener('touchstart', resumeAudio);
+      };
+      document.addEventListener('click', resumeAudio);
+      document.addEventListener('touchstart', resumeAudio);
+    }
+
+    // تحميل إعدادات من localStorage
+    this.reducedMotion = localStorage.getItem('reducedMotion') === 'true';
+    if (this.reducedMotion) {
+      document.getElementById('reducedMotion')?.setAttribute('checked', 'checked');
+    }
 
     // نصيحة عشوائية
     const tipEl = document.getElementById('bootTip');
@@ -110,6 +133,7 @@ const App = {
       this.showScreen('lobbyScreen');
       this.updateHostUI();
       this.showToast('تم إنشاء الغرفة!', 'success');
+      AudioEngine.playerJoin();
     });
 
     s.on('roomJoined', data => {
@@ -119,11 +143,13 @@ const App = {
       this.showScreen('lobbyScreen');
       this.updateHostUI();
       this.showToast('انضممت للغرفة!', 'success');
+      AudioEngine.playerJoin();
     });
 
     s.on('playerJoined', data => {
       this.updatePlayers(data.players);
       if (data.newPlayer) this.showToast(escapeHtml(data.newPlayer) + ' انضم!', 'success');
+      AudioEngine.playerJoin();
     });
 
     s.on('playerLeft', data => {
@@ -131,6 +157,7 @@ const App = {
       const me = data.players.find(p => p.id === this.myId);
       if (me?.isHost) { this.isHost = true; this.updateHostUI(); }
       if (data.leftPlayer) this.showToast(escapeHtml(data.leftPlayer) + ' طلع', 'error');
+      AudioEngine.playerLeave();
     });
 
     s.on('playerUpdated', data => this.updatePlayers(data.players));
@@ -140,8 +167,14 @@ const App = {
     s.on('gameStarted', data => {
       this.currentGame = data.game;
       this.setTheme(data.game);
-      this.showScreen('gameScreen');
       this.updateGameHeader(data.game);
+      AudioEngine.gameStart();
+      AudioEngine.startMusic(data.game);
+      // عد تنازلي ثم عرض شاشة اللعبة
+      this.showCountdown(() => {
+        this.showScreen('gameScreen');
+        document.getElementById('emojiBar')?.classList.remove('hidden');
+      });
     });
 
     // ── إجابات وتصويتات ──
@@ -151,7 +184,11 @@ const App = {
     // ── رد سريع (Quiplash) ──
     s.on('quiplashQuestion', data => this.handleQuiplashQuestion(data));
     s.on('quiplashVoting', data => this.handleQuiplashVoting(data));
-    s.on('quiplashMatchupResult', data => this.handleQuiplashMatchupResult(data));
+    s.on('quiplashMatchupResult', data => {
+      const hasQuiplash = data.results?.some(r => r.quiplash);
+      if (hasQuiplash) AudioEngine.quiplash(); else AudioEngine.reveal();
+      this.handleQuiplashMatchupResult(data);
+    });
 
     // ── خمّن النسبة (Guesspionage) ──
     s.on('guesspionageQuestion', data => this.handleGuesspionageQuestion(data));
@@ -162,10 +199,16 @@ const App = {
 
     // ── حفلة القاتل (Trivia Murder) ──
     s.on('triviaMurderQuestion', data => this.handleTriviaMurderQuestion(data));
-    s.on('triviaMurderResults', data => this.handleTriviaMurderResults(data));
+    s.on('triviaMurderResults', data => {
+      if (data.newlyDead && data.newlyDead.length > 0) AudioEngine.death(); else AudioEngine.correct();
+      this.handleTriviaMurderResults(data);
+    });
     s.on('deathChallenge', data => this.handleDeathChallenge(data));
     s.on('deathChallengeStarted', data => this.handleDeathChallengeStarted(data));
-    s.on('deathChallengeResult', data => this.handleDeathChallengeResult(data));
+    s.on('deathChallengeResult', data => {
+      if (data.revived && data.revived.length > 0) AudioEngine.revive(); else AudioEngine.death();
+      this.handleDeathChallengeResult(data);
+    });
 
     // ── كشف الكذاب (Fibbage) ──
     s.on('fibbageQuestion', data => this.handleFibbageQuestion(data));
@@ -178,22 +221,34 @@ const App = {
     s.on('drawfulVoting', data => this.handleDrawfulVoting(data));
 
     // ── النتائج ──
-    s.on('roundResults', data => this.handleRoundResults(data));
-    s.on('gameEnded', data => this.handleGameEnded(data));
+    s.on('roundResults', data => { AudioEngine.reveal(); this.handleRoundResults(data); });
+    s.on('gameEnded', data => {
+      AudioEngine.stopMusic();
+      AudioEngine.drumRoll(2);
+      setTimeout(() => { AudioEngine.victory(); AudioEngine.applause(); }, 2000);
+      this.handleGameEnded(data);
+    });
+
+    // ── الإيموجي ──
+    s.on('emojiReaction', data => this.showEmojiFloat(data.emoji));
 
     // ── الرجوع والإلغاء ──
     s.on('returnedToLobby', data => {
       this.setTheme('hub');
+      AudioEngine.stopMusic();
       this.updatePlayers(data.players);
       this.showScreen('lobbyScreen');
       this.showToast('رجعنا للوبي!', 'success');
+      document.getElementById('emojiBar')?.classList.add('hidden');
     });
 
     s.on('gameCancelled', data => {
       this.setTheme('hub');
+      AudioEngine.stopMusic();
       this.updatePlayers(data.players);
       this.showScreen('lobbyScreen');
       this.showToast(data.message, 'error');
+      document.getElementById('emojiBar')?.classList.add('hidden');
     });
 
     s.on('roomExpired', data => {
@@ -212,7 +267,11 @@ const App = {
 
   showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('is-active'));
-    document.getElementById(id)?.classList.add('is-active');
+    const screen = document.getElementById(id);
+    if (screen) {
+      screen.classList.add('is-active');
+      AudioEngine.whoosh();
+    }
   },
 
   setTheme(theme) {
@@ -232,6 +291,7 @@ const App = {
   createRoom() {
     const name = document.getElementById('hostNameInput').value.trim();
     if (!name) return this.showToast('أدخل اسمك!', 'error');
+    AudioEngine.click();
     this.socket.emit('createRoom', name);
   },
 
@@ -240,15 +300,18 @@ const App = {
     const name = document.getElementById('playerNameInput').value.trim();
     if (!code || code.length !== 4) return this.showToast('كود خاطئ!', 'error');
     if (!name) return this.showToast('أدخل اسمك!', 'error');
+    AudioEngine.click();
     this.socket.emit('joinRoom', { code, playerName: name });
   },
 
   toggleReady() {
+    AudioEngine.click();
     this.socket.emit('playerReady', this.currentRoom);
   },
 
   selectGame(game) {
     if (!this.isHost) return this.showToast('المضيف فقط!', 'error');
+    AudioEngine.click();
     this.socket.emit('startGame', { code: this.currentRoom, game });
   },
 
@@ -315,9 +378,9 @@ const App = {
     this.gameTimer = setInterval(() => {
       t--;
       el.textContent = Math.max(0, t);
-      if (t <= 10) el.classList.add('game-timer--warning');
-      if (t <= 5) { el.classList.remove('game-timer--warning'); el.classList.add('game-timer--danger'); }
-      if (t <= 0) clearInterval(this.gameTimer);
+      if (t <= 10) { el.classList.add('game-timer--warning'); AudioEngine.tick(); }
+      if (t <= 5) { el.classList.remove('game-timer--warning'); el.classList.add('game-timer--danger'); AudioEngine.tickUrgent(); }
+      if (t <= 0) { clearInterval(this.gameTimer); AudioEngine.timesUp(); }
     }, 1000);
   },
 
@@ -425,6 +488,7 @@ const App = {
   submitGuess() {
     const val = document.getElementById('percentSlider')?.value;
     if (val === undefined) return;
+    AudioEngine.submit();
     this.socket.emit('submitAnswer', { code: this.currentRoom, answer: val });
     this.showWaiting('ننتظر التخمينات...');
   },
@@ -484,6 +548,7 @@ const App = {
   votePlayer(id, el) {
     document.querySelectorAll('.player-avatar').forEach(c => c.style.borderColor = 'transparent');
     el.style.borderColor = '#00e676';
+    AudioEngine.vote();
     this.socket.emit('submitVote', { code: this.currentRoom, voteId: id });
   },
 
@@ -614,6 +679,7 @@ const App = {
   submitLie() {
     const lie = document.getElementById('lieInput')?.value?.trim();
     if (!lie) return this.showToast('اكتب كذبة!', 'error');
+    AudioEngine.submit();
     this.socket.emit('submitAnswer', { code: this.currentRoom, answer: lie });
     this.showWaiting('ننتظر الكذابين...');
   },
@@ -638,6 +704,7 @@ const App = {
   guessFibbage(id, el) {
     document.querySelectorAll('.vote-option').forEach(c => c.classList.remove('vote-option--selected'));
     el.classList.add('vote-option--selected');
+    AudioEngine.vote();
     this.socket.emit('submitVote', { code: this.currentRoom, voteId: id });
   },
 
@@ -669,6 +736,9 @@ const App = {
           colors +
           '<div style="width:2px;height:30px;background:rgba(255,255,255,0.3);margin:0 8px"></div>' +
           sizes +
+          '<div style="width:2px;height:30px;background:rgba(255,255,255,0.3);margin:0 8px"></div>' +
+          '<button class="btn--undo" onclick="App.undoStroke()">↩️ تراجع</button>' +
+          '<button class="btn--undo" onclick="App.setDrawColor(\'#ffffff\',this);App.currentSize=20">🧹 ممحاة</button>' +
           '<button class="btn btn--ghost btn--sm" onclick="App.clearCanvas()" style="margin-right:8px">🗑️</button>' +
         '</div>' +
         '<button class="btn btn--primary btn--full mt-4" onclick="App.submitDrawing()">أرسل الرسمة 🎨</button>' +
@@ -830,6 +900,7 @@ const App = {
 
   submitDrawing() {
     if (this.strokes.length === 0) return this.showToast('ارسم شي!', 'error');
+    AudioEngine.submit();
     this.socket.emit('submitDrawing', {
       code: this.currentRoom,
       drawing: JSON.stringify(this.strokes)
@@ -880,6 +951,7 @@ const App = {
   submitAnswer() {
     const ans = document.getElementById('answerInput')?.value?.trim();
     if (!ans) return this.showToast('اكتب إجابة!', 'error');
+    AudioEngine.submit();
     this.socket.emit('submitAnswer', { code: this.currentRoom, answer: ans });
     this.showWaiting('ننتظر الإجابات...');
   },
@@ -887,6 +959,7 @@ const App = {
   voteAnswer(id, el) {
     document.querySelectorAll('.vote-option').forEach(c => c.classList.remove('vote-option--selected'));
     el.classList.add('vote-option--selected');
+    AudioEngine.vote();
     this.socket.emit('submitVote', { code: this.currentRoom, voteId: id });
   },
 
@@ -1026,6 +1099,7 @@ const App = {
   handleGameEnded(d) {
     clearInterval(this.gameTimer);
     this.setTheme('victory');
+    document.getElementById('emojiBar')?.classList.add('hidden');
     this.confetti();
 
     const w = d.finalResults[0];
@@ -1083,6 +1157,147 @@ const App = {
       setTimeout(() => t.remove(), 300);
     }, 3000);
   },
+
+  // ═══════════════════════════════════════════════════════════════
+  // العد التنازلي (3, 2, 1, يلا!)
+  // ═══════════════════════════════════════════════════════════════
+
+  showCountdown(callback) {
+    if (this.reducedMotion) { if (callback) callback(); return; }
+    const overlay = document.getElementById('countdownOverlay');
+    const numEl = document.getElementById('countdownNumber');
+    if (!overlay || !numEl) { if (callback) callback(); return; }
+
+    overlay.classList.remove('hidden');
+    const steps = ['3', '2', '1', 'يلا!'];
+    let i = 0;
+
+    const next = () => {
+      if (i >= steps.length) {
+        overlay.classList.add('hidden');
+        if (callback) callback();
+        return;
+      }
+      numEl.textContent = steps[i];
+      numEl.style.animation = 'none';
+      numEl.offsetHeight; // reflow
+      numEl.style.animation = 'countdown-pop 0.5s ease-out';
+      if (i < 3) AudioEngine.countdownBeep(); else AudioEngine.countdownGo();
+      i++;
+      setTimeout(next, 800);
+    };
+    next();
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // نظام الإيموجي
+  // ═══════════════════════════════════════════════════════════════
+
+  sendEmoji(emoji) {
+    const now = Date.now();
+    if (now - this.lastEmojiTime < 500) return; // throttle
+    this.lastEmojiTime = now;
+    AudioEngine.emojiPop();
+    this.showEmojiFloat(emoji);
+    if (this.currentRoom) {
+      this.socket.emit('sendEmoji', { code: this.currentRoom, emoji });
+    }
+  },
+
+  showEmojiFloat(emoji) {
+    const container = document.getElementById('emojiFloatContainer');
+    if (!container) return;
+    const el = document.createElement('div');
+    el.className = 'emoji-float';
+    el.textContent = emoji;
+    el.style.left = (10 + Math.random() * 80) + '%';
+    el.style.bottom = '0';
+    container.appendChild(el);
+    setTimeout(() => el.remove(), 2000);
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // أنيميشن النقاط
+  // ═══════════════════════════════════════════════════════════════
+
+  showPointsPopup(points) {
+    if (!points || this.reducedMotion) return;
+    const el = document.createElement('div');
+    el.className = 'points-popup';
+    el.textContent = '+' + points;
+    el.style.left = '50%';
+    el.style.top = '40%';
+    el.style.transform = 'translateX(-50%)';
+    document.body.appendChild(el);
+    AudioEngine.points(points);
+    setTimeout(() => el.remove(), 1500);
+  },
+
+  animateScore(element, from, to) {
+    if (!element || this.reducedMotion) { if (element) element.textContent = to; return; }
+    const duration = 800;
+    const start = performance.now();
+    const step = (timestamp) => {
+      const progress = Math.min((timestamp - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      element.textContent = Math.round(from + (to - from) * eased);
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    element.classList.add('score-animate');
+    requestAnimationFrame(step);
+    setTimeout(() => element.classList.remove('score-animate'), duration);
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // تحسينات الرسم (تراجع / ممحاة)
+  // ═══════════════════════════════════════════════════════════════
+
+  undoStroke() {
+    if (!this.strokes || this.strokes.length === 0) return;
+    this.strokes.pop();
+    this.redrawCanvas();
+  },
+
+  redrawCanvas() {
+    if (!this.ctx || !this.canvas) return;
+    this.ctx.fillStyle = '#ffffff';
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    this.strokes.forEach(stroke => {
+      if (!stroke.points || stroke.points.length === 0) return;
+      this.ctx.beginPath();
+      this.ctx.strokeStyle = stroke.color || '#000';
+      this.ctx.lineWidth = stroke.size || 4;
+      this.ctx.lineCap = 'round';
+      this.ctx.lineJoin = 'round';
+      this.ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+      for (let i = 1; i < stroke.points.length; i++) {
+        this.ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
+      }
+      this.ctx.stroke();
+    });
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // الإعدادات
+  // ═══════════════════════════════════════════════════════════════
+
+  toggleSettings() {
+    const modal = document.getElementById('settingsModal');
+    if (modal) modal.classList.toggle('hidden');
+  },
+
+  updateVolume(type, value) {
+    AudioEngine.setVolume(type, value / 100);
+  },
+
+  toggleReducedMotion(checked) {
+    this.reducedMotion = checked;
+    localStorage.setItem('reducedMotion', checked);
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // الأدوات المساعدة
+  // ═══════════════════════════════════════════════════════════════
 
   confetti() {
     const colors = ['#FFD93D', '#E91E8C', '#00d4ff', '#00e676', '#7c4dff', '#FF8C42', '#f093fb'];

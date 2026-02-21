@@ -138,6 +138,47 @@
     .winner-showcase__name { font-size:48px; font-weight:900; color:#FFD93D; text-shadow:4px 4px 0 #000; margin-top:16px; }
     .winner-showcase__score { font-size:32px; font-weight:700; color:#fff; margin-top:8px; }
 
+    /* Countdown Overlay */
+    .countdown-overlay { position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; }
+    .countdown-overlay.hidden { display:none !important; }
+    .countdown-number { font-size:200px; font-weight:900; font-family:'Bangers',sans-serif; color:#FFD93D; text-shadow:0 0 60px rgba(255,217,61,0.6),8px 8px 0 #000; animation:countdown-pop 0.5s ease-out; }
+    @keyframes countdown-pop { 0%{transform:scale(3);opacity:0} 50%{transform:scale(0.9);opacity:1} 100%{transform:scale(1);opacity:1} }
+
+    /* Emoji Reaction System */
+    .emoji-bar { position:fixed; bottom:0; left:0; right:0; z-index:100; display:flex; justify-content:center; gap:4px; padding:8px; background:linear-gradient(transparent,rgba(0,0,0,0.8)); }
+    .emoji-bar.hidden { display:none !important; }
+    .emoji-btn { width:44px; height:44px; border:none; background:rgba(255,255,255,0.15); border-radius:50%; font-size:22px; cursor:pointer; transition:transform 0.15s,background 0.15s; display:flex; align-items:center; justify-content:center; }
+    .emoji-btn:hover { transform:scale(1.3); background:rgba(255,255,255,0.3); }
+    .emoji-btn:active { transform:scale(0.9); }
+    .emoji-float-container { position:fixed; inset:0; pointer-events:none; z-index:99; overflow:hidden; }
+    .emoji-float { position:absolute; font-size:36px; animation:emoji-rise 2s ease-out forwards; pointer-events:none; }
+    @keyframes emoji-rise { 0%{opacity:1;transform:translateY(0) scale(1)} 50%{opacity:0.8;transform:translateY(-40vh) scale(1.3)} 100%{opacity:0;transform:translateY(-80vh) scale(0.5)} }
+
+    /* Settings Modal */
+    .settings-modal { position:fixed; inset:0; z-index:10001; display:flex; align-items:center; justify-content:center; }
+    .settings-modal.hidden { display:none !important; }
+    .settings-modal__backdrop { position:absolute; inset:0; background:rgba(0,0,0,0.7); }
+    .settings-modal__content { position:relative; background:linear-gradient(135deg,#1a2a4a,#0a1628); border:3px solid rgba(255,255,255,0.15); border-radius:24px; padding:32px; max-width:420px; width:90%; max-height:80vh; overflow-y:auto; }
+    .settings-group { margin-bottom:20px; }
+    .settings-label { display:block; font-size:15px; font-weight:600; margin-bottom:8px; color:#ccc; }
+    .settings-slider { -webkit-appearance:none; width:100%; height:8px; background:rgba(255,255,255,0.2); border-radius:4px; outline:none; }
+    .settings-slider::-webkit-slider-thumb { -webkit-appearance:none; width:24px; height:24px; background:#FFD93D; border:3px solid #000; border-radius:50%; cursor:pointer; }
+    .settings-slider::-moz-range-thumb { width:24px; height:24px; background:#FFD93D; border:3px solid #000; border-radius:50%; cursor:pointer; }
+
+    /* Score Animation */
+    .score-animate { display:inline-block; animation:score-count 0.8s ease-out; }
+    @keyframes score-count { 0%{transform:scale(1.5);color:#FFD93D} 50%{transform:scale(1.2)} 100%{transform:scale(1)} }
+    .points-popup { position:fixed; font-size:28px; font-weight:900; color:#FFD93D; text-shadow:2px 2px 0 #000; pointer-events:none; z-index:200; animation:points-fly 1.5s ease-out forwards; }
+    @keyframes points-fly { 0%{opacity:1;transform:translateY(0) scale(1)} 100%{opacity:0;transform:translateY(-100px) scale(1.5)} }
+
+    /* Streak Badge */
+    .streak-badge { display:inline-flex; align-items:center; gap:4px; background:linear-gradient(135deg,#ff6b35,#ff4444); padding:4px 12px; border-radius:20px; font-size:13px; font-weight:700; animation:streak-glow 1s ease-in-out infinite alternate; }
+    @keyframes streak-glow { from{box-shadow:0 0 5px rgba(255,107,53,0.5)} to{box-shadow:0 0 20px rgba(255,107,53,0.8)} }
+
+    /* Drawing Undo Button */
+    .drawing-tools .btn--undo { background:rgba(255,255,255,0.15); border:2px solid rgba(255,255,255,0.3); color:#fff; border-radius:8px; padding:4px 12px; cursor:pointer; font-size:14px; }
+    .drawing-tools .btn--undo:hover { background:rgba(255,255,255,0.25); }
+
     /* Responsive */
     @media(max-width:768px) {
       .logo__box { font-size:28px; padding:10px 20px; }
@@ -403,6 +444,7 @@
       <!-- Lobby Actions -->
       <div class="flex gap-3 mt-2">
         <button class="btn btn--secondary" id="readyBtn" onclick="App.toggleReady()">✋ جاهز!</button>
+        <button class="btn btn--ghost btn--sm" onclick="App.toggleSettings()">⚙️</button>
         <button class="btn btn--danger" onclick="if(confirm('متأكد تبي تطلع؟'))location.reload()">🚪 خروج</button>
       </div>
     </div>
@@ -426,6 +468,7 @@
         <div id="answeredCount" class="text-sm text-muted" style="display:none"></div>
       </div>
       <div class="game-hud__end">
+        <button class="btn btn--ghost btn--sm btn--icon" onclick="App.toggleSettings()" style="font-size:20px">⚙️</button>
         <div class="game-timer" id="gameTimer">30</div>
       </div>
     </div>
@@ -448,10 +491,63 @@
     <div class="flex justify-center gap-4 mt-6" id="resultsActions"></div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════════
+   * COUNTDOWN OVERLAY - 3, 2, 1, يلا!
+   * ═══════════════════════════════════════════════════════════ -->
+  <div id="countdownOverlay" class="countdown-overlay hidden">
+    <div class="countdown-number" id="countdownNumber">3</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+   * EMOJI REACTION BAR - ردود فعل
+   * ═══════════════════════════════════════════════════════════ -->
+  <div id="emojiBar" class="emoji-bar hidden">
+    <button class="emoji-btn" onclick="App.sendEmoji('😂')">😂</button>
+    <button class="emoji-btn" onclick="App.sendEmoji('🔥')">🔥</button>
+    <button class="emoji-btn" onclick="App.sendEmoji('👏')">👏</button>
+    <button class="emoji-btn" onclick="App.sendEmoji('😱')">😱</button>
+    <button class="emoji-btn" onclick="App.sendEmoji('💀')">💀</button>
+    <button class="emoji-btn" onclick="App.sendEmoji('❤️')">❤️</button>
+    <button class="emoji-btn" onclick="App.sendEmoji('👎')">👎</button>
+    <button class="emoji-btn" onclick="App.sendEmoji('🤣')">🤣</button>
+  </div>
+  <div id="emojiFloatContainer" class="emoji-float-container"></div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+   * SETTINGS MODAL - الإعدادات
+   * ═══════════════════════════════════════════════════════════ -->
+  <div id="settingsModal" class="settings-modal hidden">
+    <div class="settings-modal__backdrop" onclick="App.toggleSettings()"></div>
+    <div class="settings-modal__content">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-black">⚙️ الإعدادات</h2>
+        <button class="btn btn--ghost btn--sm" onclick="App.toggleSettings()">✕</button>
+      </div>
+      <div class="settings-group">
+        <label class="settings-label">🔊 الصوت الرئيسي</label>
+        <input type="range" class="settings-slider" id="volMaster" min="0" max="100" value="70" oninput="App.updateVolume('master',this.value)">
+      </div>
+      <div class="settings-group">
+        <label class="settings-label">🎵 الموسيقى</label>
+        <input type="range" class="settings-slider" id="volMusic" min="0" max="100" value="40" oninput="App.updateVolume('music',this.value)">
+      </div>
+      <div class="settings-group">
+        <label class="settings-label">🔔 المؤثرات</label>
+        <input type="range" class="settings-slider" id="volSfx" min="0" max="100" value="80" oninput="App.updateVolume('sfx',this.value)">
+      </div>
+      <div class="settings-group">
+        <label class="settings-label">
+          <input type="checkbox" id="reducedMotion" onchange="App.toggleReducedMotion(this.checked)"> تقليل الحركة
+        </label>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Container -->
   <div id="toastContainer"></div>
 
-  <!-- App Script -->
+  <!-- App Scripts -->
+  <script src="/js/audio.js"></script>
   <script src="/js/app.js"></script>
 </body>
 </html>
