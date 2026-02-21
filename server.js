@@ -452,7 +452,7 @@ io.on('connection', (socket) => {
     // تحديد عدد الجولات حسب اللعبة
     // Round count: Guesspionage scales with player count
     const playerCount = room.players.size;
-    const guesspionageRounds = playerCount <= 5
+    const guesspionageRounds = playerCount <= 6
       ? playerCount * 2 + 1  // Each player twice + final
       : playerCount + 1;      // Each player once + final
     const roundsByGame = {
@@ -1372,9 +1372,11 @@ function getGuesspionagePhaseType(room) {
   const round = room.currentRound;
   const isFinal = round >= room.maxRounds - 1;
   if (isFinal) return 'final';
-  if (playerCount <= 5) {
+  if (playerCount <= 6) {
+    // ≤6 players: first rotation = round1, second rotation = round2
     return round < playerCount ? 'round1' : 'round2';
   }
+  // ≥7 players: single rotation, first half round1, second half round2
   return round < Math.floor(playerCount / 2) ? 'round1' : 'round2';
 }
 
@@ -1658,8 +1660,8 @@ function startGuesspionageFinalRound(room) {
 
   // Sort by answer percentage — top 3 are the "most popular" (ranked #1, #2, #3)
   const sorted = [...picked].sort((a, b) => b.a - a.a);
-  // Real Jackbox scoring: #1=4000, #2=2000, #3=1000
-  const rankPoints = { 0: 4000, 1: 2000, 2: 1000 };
+  // Real Jackbox scoring: #1=3000, #2=2000, #3=1000
+  const rankPoints = { 0: 3000, 1: 2000, 2: 1000 };
   const top3Map = new Map(); // question text → { rank, points }
   sorted.slice(0, 3).forEach((q, i) => {
     top3Map.set(q.q, { rank: i + 1, points: rankPoints[i] });
