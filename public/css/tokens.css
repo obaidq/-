@@ -142,12 +142,24 @@
   --duration-normal: 200ms;
   --duration-slow: 300ms;
   --duration-slower: 500ms;
-  
+
   --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
   --ease-elastic: cubic-bezier(0.68, -0.6, 0.32, 1.6);
+
+  /* ─────────────────────────────────────────────────────────────
+   * INTENSITY SYSTEM - مستوى الحيوية
+   * calm = هادي | party = حفلة (default) | chaos = جنون
+   * ───────────────────────────────────────────────────────────── */
+  --intensity-pattern-opacity: 0.15;
+  --intensity-glow-opacity: 0.3;
+  --intensity-glow-spread: 30px;
+  --intensity-bg-speed: 90s;
+  --intensity-pulse-speed: 4s;
+  --intensity-pattern-speed: 30s;
+  --intensity-overlay-vignette: 80%;
   
   /* ─────────────────────────────────────────────────────────────
    * Z-INDEX - الطبقات
@@ -187,6 +199,43 @@
   --theme-text-primary: var(--color-neutral-white);
   --theme-text-secondary: var(--color-neutral-300);
   --theme-pattern: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ * INTENSITY VARIANTS - مستويات الحيوية
+ * ═══════════════════════════════════════════════════════════════ */
+
+/* Calm - هادي: minimal motion, softer glow, muted patterns */
+[data-intensity="calm"] {
+  --intensity-pattern-opacity: 0.08;
+  --intensity-glow-opacity: 0.15;
+  --intensity-glow-spread: 15px;
+  --intensity-bg-speed: 180s;
+  --intensity-pulse-speed: 8s;
+  --intensity-pattern-speed: 60s;
+  --intensity-overlay-vignette: 70%;
+}
+
+/* Party - حفلة (default): balanced energy */
+[data-intensity="party"] {
+  --intensity-pattern-opacity: 0.15;
+  --intensity-glow-opacity: 0.3;
+  --intensity-glow-spread: 30px;
+  --intensity-bg-speed: 90s;
+  --intensity-pulse-speed: 4s;
+  --intensity-pattern-speed: 30s;
+  --intensity-overlay-vignette: 80%;
+}
+
+/* Chaos - جنون: maximum energy, faster motion, stronger glow */
+[data-intensity="chaos"] {
+  --intensity-pattern-opacity: 0.25;
+  --intensity-glow-opacity: 0.5;
+  --intensity-glow-spread: 50px;
+  --intensity-bg-speed: 45s;
+  --intensity-pulse-speed: 2s;
+  --intensity-pattern-speed: 15s;
+  --intensity-overlay-vignette: 90%;
 }
 
 /* ═══════════════════════════════════════════════════════════════

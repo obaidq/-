@@ -17,10 +17,11 @@
   <link rel="stylesheet" href="/css/patterns.css">
   <link rel="stylesheet" href="/css/game-screens.css">
 </head>
-<body data-theme="hub">
-  <!-- Background System -->
+<body data-theme="hub" data-intensity="party">
+  <!-- Background System: base → pattern → glow → overlay -->
   <div class="bg">
     <div class="bg__pattern pattern-rays"></div>
+    <div class="bg__glow"></div>
     <div class="bg__overlay"></div>
   </div>
 
@@ -362,6 +363,14 @@
       <div class="settings-group">
         <label class="settings-label" for="volSfx">🔔 المؤثرات</label>
         <input type="range" class="settings-slider" id="volSfx" min="0" max="100" value="80" aria-label="مستوى المؤثرات" oninput="App.updateVolume('sfx',this.value)">
+      </div>
+      <div class="settings-group">
+        <label class="settings-label" for="intensitySelect">🎨 مستوى الحيوية</label>
+        <select class="settings-select" id="intensitySelect" onchange="App.setIntensity(this.value)" aria-label="مستوى الحيوية">
+          <option value="calm">هادي 🌙</option>
+          <option value="party" selected>حفلة 🎉</option>
+          <option value="chaos">جنون 🔥</option>
+        </select>
       </div>
       <div class="settings-group">
         <label class="settings-label">

@@ -111,7 +111,14 @@ const App = {
     this.reducedMotion = localStorage.getItem('reducedMotion') === 'true';
     if (this.reducedMotion) {
       document.getElementById('reducedMotion')?.setAttribute('checked', 'checked');
+      document.body.setAttribute('data-reduced-motion', 'true');
     }
+
+    // تحميل مستوى الحيوية
+    const savedIntensity = localStorage.getItem('intensity') || 'party';
+    this.setIntensity(savedIntensity);
+    const intensitySelect = document.getElementById('intensitySelect');
+    if (intensitySelect) intensitySelect.value = savedIntensity;
 
     // نصيحة عشوائية
     const tipEl = document.getElementById('bootTip');
@@ -160,6 +167,12 @@ const App = {
         case 'backToLobby': this.backToLobby(); break;
         case 'undoStroke': this.undoStroke(); break;
         case 'clearCanvas': this.clearCanvas(); break;
+        case 'useSafetyQuip': {
+          const quip = target.getAttribute('data-quip');
+          const inp = document.getElementById('answerInput');
+          if (inp && quip) { inp.value = quip; inp.dispatchEvent(new Event('input')); inp.focus(); }
+          break;
+        }
         case 'setDrawColor': {
           const color = target.getAttribute('data-color');
           this.setDrawColor(color, target);
@@ -323,11 +336,22 @@ const App = {
       AudioEngine.gameStart();
       AudioEngine.startMusic(data.game);
       if (data.commentary) this.showCommentary(data.commentary);
-      // عد تنازلي ثم عرض شاشة اللعبة
-      this.showCountdown(() => {
-        this.showScreen('gameScreen');
-        document.getElementById('emojiBar')?.classList.remove('hidden');
-      });
+
+      // Quiplash gets a special game splash before countdown
+      if (data.game === 'quiplash') {
+        this._showQuiplashGameSplash(() => {
+          this.showCountdown(() => {
+            this.showScreen('gameScreen');
+            document.getElementById('emojiBar')?.classList.remove('hidden');
+          });
+        });
+      } else {
+        // عد تنازلي ثم عرض شاشة اللعبة
+        this.showCountdown(() => {
+          this.showScreen('gameScreen');
+          document.getElementById('emojiBar')?.classList.remove('hidden');
+        });
+      }
     });
 
     // ── إجابات وتصويتات ──
@@ -477,8 +501,16 @@ const App = {
     if (bg) {
       bg.className = 'bg__pattern';
       const game = GAMES[theme];
-      bg.classList.add(game ? game.pattern : (theme === 'victory' ? 'pattern-confetti' : 'pattern-rays'));
+      bg.classList.add(game ? game.pattern : (theme === 'victory' ? 'pattern-confetti' : 'pattern-arabesque'));
     }
+  },
+
+  setIntensity(level) {
+    const valid = ['calm', 'party', 'chaos'];
+    if (!valid.includes(level)) level = 'party';
+    document.body.setAttribute('data-intensity', level);
+    this._intensity = level;
+    localStorage.setItem('intensity', level);
   },
 
   // حفظ بيانات الجلسة لإعادة الاتصال
@@ -731,68 +763,358 @@ const App = {
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // ⚡ رد سريع (Quiplash)
+  // ⚡ رد سريع (Quiplash) - Cinematic Jackbox-Style
   // ═══════════════════════════════════════════════════════════════
 
+  // Round interstitial labels
+  /**
+   * Show Quiplash game splash (intro screen before countdown)
+   */
+  _showQuiplashGameSplash(callback) {
+    const el = document.createElement('div');
+    el.className = 'ql-game-splash';
+    el.innerHTML =
+      '<div class="ql-game-splash__icon">⚡</div>' +
+      '<div class="ql-game-splash__title">رد سريع</div>' +
+      '<div class="ql-game-splash__subtitle">اكتب أطرف إجابة... واقنع ربعك!</div>';
+    document.body.appendChild(el);
+
+    setTimeout(() => {
+      el.classList.add('ql-game-splash--exit');
+      setTimeout(() => {
+        el.remove();
+        if (callback) callback();
+      }, 600);
+    }, 2500);
+  },
+
+  _qlRoundLabels: ['الأولى', 'الثانية', 'الثالثة', 'الرابعة', 'الخامسة'],
+  _qlRoundColors: ['r1', 'r2', 'r3', 'r3', 'r3'],
+  _qlRoundSubtitles: ['يلا نبدأ! ⚡', 'الحين الجد! 🔥', 'آخر فرصة... كل شي مضاعف! 💥', 'لا تضيعها!', 'الجولة الأخيرة!'],
+
+  /**
+   * Show Quiplash round interstitial (ROUND ONE / ROUND TWO / etc.)
+   */
+  _showQuiplashInterstitial(round, maxRounds, callback) {
+    const idx = Math.min(round - 1, 4);
+    const isFinal = round === maxRounds;
+    const colorClass = 'ql-interstitial__round-num--' + this._qlRoundColors[idx];
+    const label = 'الجولة ' + this._qlRoundLabels[idx];
+    const subtitle = isFinal ? 'النقاط مضاعفة! 🔥🔥' : this._qlRoundSubtitles[idx];
+
+    const el = document.createElement('div');
+    el.className = 'ql-interstitial';
+    el.innerHTML =
+      '<div class="ql-interstitial__round-label">⚡ رد سريع</div>' +
+      '<div class="ql-interstitial__round-num ' + colorClass + '">' + label + '</div>' +
+      (isFinal ? '<div class="ql-interstitial__final-badge">🔥 النقاط مضاعفة!</div>' : '') +
+      '<div class="ql-interstitial__subtitle">' + escapeHtml(subtitle) + '</div>';
+
+    document.body.appendChild(el);
+    AudioEngine.reveal();
+
+    setTimeout(() => {
+      el.classList.add('ql-interstitial--exit');
+      setTimeout(() => {
+        el.remove();
+        if (callback) callback();
+      }, 500);
+    }, 2000);
+  },
+
   handleQuiplashQuestion(d) {
-    document.getElementById('gameRound').textContent = 'الجولة ' + d.round + ' من ' + d.maxRounds;
-    this.startTimer(d.timeLimit);
-    document.getElementById('gameContent').innerHTML =
-      '<div class="panel" style="max-width:600px;width:100%">' +
-        '<div class="badge badge--primary mb-4">السؤال ' + d.round + '</div>' +
-        '<p class="text-2xl font-bold mb-6">' + escapeHtml(d.question) + '</p>' +
-        '<input type="text" class="input mb-4" id="answerInput" placeholder="إجابتك..." maxlength="100">' +
-        '<button class="btn btn--primary btn--full" data-action="submitAnswer">إرسال ⚡</button>' +
+    // Show round interstitial first, then the question
+    this._showQuiplashInterstitial(d.round, d.maxRounds, () => {
+      document.getElementById('gameRound').textContent = 'الجولة ' + d.round + ' من ' + d.maxRounds;
+      this.startTimer(d.timeLimit);
+
+      const safetyQuips = d.safetyQuips || [];
+      const safetyBtn = safetyQuips.length > 0
+        ? '<button class="ql-safety-quip" data-action="useSafetyQuip" data-quip="' + escapeHtml(safetyQuips[0]) + '">🎲 مساعدة أبو عابد</button>'
+        : '';
+
+      document.getElementById('gameContent').innerHTML =
+        '<div class="ql-prompt-card">' +
+          '<div class="ql-prompt-card__badge">⚡ السؤال ' + d.round + '</div>' +
+          '<p class="ql-prompt-card__question">' + escapeHtml(d.question) + '</p>' +
+          '<div class="ql-prompt-card__input-wrap">' +
+            '<input type="text" class="ql-prompt-card__input" id="answerInput" placeholder="اكتب إجابتك الأسطورية..." maxlength="100" autocomplete="off">' +
+            '<span class="ql-prompt-card__char-count" id="qlCharCount">0/100</span>' +
+          '</div>' +
+          '<button class="ql-prompt-card__submit" data-action="submitAnswer">إرسال ⚡</button>' +
+          safetyBtn +
+        '</div>';
+
+      const input = document.getElementById('answerInput');
+      if (input) {
+        input.focus();
+        input.addEventListener('input', () => {
+          const len = input.value.length;
+          const counter = document.getElementById('qlCharCount');
+          if (counter) {
+            counter.textContent = len + '/100';
+            counter.className = 'ql-prompt-card__char-count' +
+              (len >= 90 ? ' ql-prompt-card__char-count--danger' : len >= 70 ? ' ql-prompt-card__char-count--warn' : '');
+          }
+        });
+        input.addEventListener('keypress', e => {
+          if (e.key === 'Enter') this.submitAnswer();
+        });
+      }
+    });
+  },
+
+  // Override submitAnswer to show submitted state for Quiplash
+  _qlAnswerSubmitted: false,
+
+  /**
+   * Show the submitted answer in a nice bubble after submitting
+   */
+  _showQuiplashSubmitted(answer) {
+    this._qlAnswerSubmitted = true;
+    const gc = document.getElementById('gameContent');
+    if (!gc) return;
+    gc.innerHTML =
+      '<div class="ql-prompt-card">' +
+        '<div class="ql-prompt-card__submitted">' +
+          '<div class="ql-prompt-card__submitted-check">✅</div>' +
+          '<div class="ql-prompt-card__submitted-answer">"' + escapeHtml(answer) + '"</div>' +
+        '</div>' +
+        '<div class="ql-waiting" style="margin-top:20px">' +
+          '<div class="ql-waiting__text">ننتظر الباقين<span class="ql-waiting__dots"></span></div>' +
+          '<div id="waitingAvatars" class="ql-waiting__avatars"></div>' +
+          '<p class="text-muted text-center" id="waitingCount"></p>' +
+        '</div>' +
       '</div>';
-    document.getElementById('answerInput')?.focus();
   },
 
   handleQuiplashVoting(d) {
+    this._qlAnswerSubmitted = false;
     document.getElementById('gameRound').textContent = 'مواجهة ' + d.matchupNumber + ' من ' + d.totalMatchups;
     this.startTimer(d.timeLimit);
-    const answers = d.answers.map(a =>
-      '<div class="vote-option" data-action="voteAnswer" data-id="' + escapeHtml(a.playerId) + '">' +
-        '<div class="vote-option__text">"' + escapeHtml(a.answer) + '"</div>' +
-      '</div>'
-    ).join('<div class="text-3xl font-black text-accent" style="margin:12px 0">VS</div>');
+
+    // Determine side A and side B
+    const a0 = d.answers[0] || {};
+    const a1 = d.answers[1] || {};
 
     document.getElementById('gameContent').innerHTML =
-      '<div style="max-width:800px;width:100%">' +
-        '<p class="text-xl text-center mb-2">' + escapeHtml(d.question) + '</p>' +
-        '<h3 class="text-2xl font-bold text-center text-accent mb-6">🗳️ صوّت!</h3>' +
-        '<div class="flex flex-col items-center gap-2">' + answers + '</div>' +
-        '<p class="text-muted text-center mt-4" id="waitingCount"></p>' +
+      '<div class="ql-split-screen">' +
+        '<div class="ql-split-screen__question">' + escapeHtml(d.question) + '</div>' +
+        '<div class="ql-split-screen__matchup-info">مواجهة ' + d.matchupNumber + ' من ' + d.totalMatchups + '</div>' +
+        '<div class="ql-split-screen__arena">' +
+          '<div class="ql-bubble ql-bubble--a" data-action="voteAnswer" data-id="' + escapeHtml(a0.playerId) + '">' +
+            '<div class="ql-bubble__text">"' + escapeHtml(a0.answer) + '"</div>' +
+          '</div>' +
+          '<div class="ql-vs"><div class="ql-vs__badge">VS</div></div>' +
+          '<div class="ql-bubble ql-bubble--b" data-action="voteAnswer" data-id="' + escapeHtml(a1.playerId) + '">' +
+            '<div class="ql-bubble__text">"' + escapeHtml(a1.answer) + '"</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ql-vote-progress" id="waitingCount">🗳️ صوّت لإجابتك المفضلة!</div>' +
       '</div>';
+
+    // Store answer data for results
+    this._qlCurrentMatchup = { a: a0, b: a1 };
   },
 
   handleQuiplashMatchupResult(d) {
     try {
       clearInterval(this.gameTimer);
-      const results = d.results.sort((a, b) => b.votes - a.votes);
-      const winner = results[0];
+      const results = d.results || [];
+      const isJinx = d.jinx;
 
-      let html = '<div class="text-center" style="max-width:600px">';
-
-      if (winner && winner.quiplash) {
-        html += '<div class="text-4xl font-black mb-4" style="color:#FFD93D;text-shadow:0 0 20px rgba(255,217,61,0.5)">⚡ QUIPLASH! ⚡</div>';
+      // JINX: identical answers - special display
+      if (isJinx && results.length >= 2) {
+        this._showQuiplashJinx(d);
+        return;
       }
 
-      results.forEach((r, i) => {
-        const isWinner = i === 0 && r.votes > (results[1]?.votes || 0);
-        html +=
-          '<div class="panel mb-4" style="' + (isWinner ? 'border-color:#FFD93D;box-shadow:0 0 20px rgba(255,217,61,0.3)' : 'opacity:0.7') + '">' +
-            '<p class="text-xl font-bold">"' + escapeHtml(r.answer) + '"</p>' +
-            '<p class="text-muted mt-1">' + escapeHtml(r.playerName) + '</p>' +
-            '<p class="text-lg font-bold mt-2" style="color:#FFD93D">' + r.votes + ' صوت • +' + r.points + '</p>' +
-          '</div>';
-      });
+      const sorted = [...results].sort((a, b) => b.votes - a.votes);
+      const r0 = sorted[0] || {};
+      const r1 = sorted[1] || {};
+      const totalVotes = (r0.votes || 0) + (r1.votes || 0);
+      const hasQuiplash = r0.quiplash;
+      const isTie = r0.votes === r1.votes;
 
-      html += '</div>';
-      document.getElementById('gameContent').innerHTML = html;
+      // Determine which side each result maps to (A=cyan, B=yellow)
+      const matchup = this._qlCurrentMatchup || {};
+      const isR0SideA = matchup.a && r0.playerId === matchup.a.playerId;
+      const sideA = isR0SideA ? r0 : r1;
+      const sideB = isR0SideA ? r1 : r0;
+      const sideAVotes = sideA.votes || 0;
+      const sideBVotes = sideB.votes || 0;
+      const sideAPct = totalVotes > 0 ? Math.round((sideAVotes / totalVotes) * 100) : 0;
+      const sideBPct = totalVotes > 0 ? 100 - sideAPct : 0;
+      const aWins = sideAVotes > sideBVotes;
+      const bWins = sideBVotes > sideAVotes;
+
+      // Build vote bars for each side
+      const voterBreakdown = d.voterBreakdown || {};
+      const aBars = (voterBreakdown[sideA.playerId] || []).map((v, i) =>
+        '<div class="ql-vote-bar" style="background:' + escapeHtml(v.color || '#444') + ';animation-delay:' + (i * 0.2) + 's">' +
+          '<span class="ql-vote-bar__avatar">' + escapeHtml(v.avatar || '👤') + '</span>' +
+          '<span class="ql-vote-bar__name">' + escapeHtml(v.name || '') + '</span>' +
+        '</div>'
+      ).join('');
+      const bBars = (voterBreakdown[sideB.playerId] || []).map((v, i) =>
+        '<div class="ql-vote-bar" style="background:' + escapeHtml(v.color || '#444') + ';animation-delay:' + (i * 0.2) + 's">' +
+          '<span class="ql-vote-bar__avatar">' + escapeHtml(v.avatar || '👤') + '</span>' +
+          '<span class="ql-vote-bar__name">' + escapeHtml(v.name || '') + '</span>' +
+        '</div>'
+      ).join('');
+
+      // Build the results HTML
+      const gc = document.getElementById('gameContent');
+      if (!gc) return;
+
+      gc.innerHTML =
+        '<div class="ql-results">' +
+          '<div class="ql-results__question">' + escapeHtml(d.question || '') + '</div>' +
+          '<div class="ql-results__split">' +
+            // Side A
+            '<div class="ql-results__side' + (aWins ? ' ql-results__side--winner' : bWins ? ' ql-results__side--loser' : '') + '">' +
+              '<div class="ql-results__answer ql-results__answer--a' + (aWins ? ' ql-results__answer--winner-a' : '') + '">' +
+                '<div class="ql-results__answer-text">"' + escapeHtml(sideA.answer || '') + '"</div>' +
+              '</div>' +
+              '<div class="ql-vote-stack" id="qlStackA">' + aBars + '</div>' +
+              '<div class="ql-percentage ql-percentage--a' + (aWins ? ' ql-percentage--winner' : '') + (sideAPct === 0 ? ' ql-percentage--zero' : '') + '" id="qlPctA">0%</div>' +
+              '<div class="ql-results__player">' +
+                '<div class="ql-results__player-avatar' + (aWins ? ' ql-results__player-avatar--happy' : bWins ? ' ql-results__player-avatar--sad' : '') + '">' + escapeHtml(sideA.avatar || '👤') + '</div>' +
+                '<div class="ql-results__player-name">' + escapeHtml(sideA.playerName || '') + '</div>' +
+              '</div>' +
+              '<div class="ql-points' + (sideA.quiplash ? ' ql-points--quiplash' : '') + '">+' + (sideA.points || 0) + '</div>' +
+            '</div>' +
+            // VS divider
+            '<div class="ql-vs"><div class="ql-vs__badge">⚡</div></div>' +
+            // Side B
+            '<div class="ql-results__side' + (bWins ? ' ql-results__side--winner' : aWins ? ' ql-results__side--loser' : '') + '">' +
+              '<div class="ql-results__answer ql-results__answer--b' + (bWins ? ' ql-results__answer--winner-b' : '') + '">' +
+                '<div class="ql-results__answer-text">"' + escapeHtml(sideB.answer || '') + '"</div>' +
+              '</div>' +
+              '<div class="ql-vote-stack" id="qlStackB">' + bBars + '</div>' +
+              '<div class="ql-percentage ql-percentage--b' + (bWins ? ' ql-percentage--winner' : '') + (sideBPct === 0 ? ' ql-percentage--zero' : '') + '" id="qlPctB">0%</div>' +
+              '<div class="ql-results__player">' +
+                '<div class="ql-results__player-avatar' + (bWins ? ' ql-results__player-avatar--happy' : aWins ? ' ql-results__player-avatar--sad' : '') + '">' + escapeHtml(sideB.avatar || '👤') + '</div>' +
+                '<div class="ql-results__player-name">' + escapeHtml(sideB.playerName || '') + '</div>' +
+              '</div>' +
+              '<div class="ql-points' + (sideB.quiplash ? ' ql-points--quiplash' : '') + '">+' + (sideB.points || 0) + '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+
+      // Animate percentages counting up
+      this._animatePercentage('qlPctA', sideAPct, 1500);
+      this._animatePercentage('qlPctB', sideBPct, 1500);
+
+      // QUIPLASH moment overlay
+      if (hasQuiplash) {
+        setTimeout(() => this._showQuiplashMoment(), 1800);
+      }
+
+      // Show mini leaderboard after a delay
+      if (d.players && d.players.length > 0) {
+        setTimeout(() => this._showQuiplashMiniLeaderboard(d.players), 3000);
+      }
+
     } catch (e) {
       console.error('handleQuiplashMatchupResult error:', e);
       this.showToast('حصل خطأ، حاول مرة ثانية', 'error');
     }
+  },
+
+  /**
+   * Animate a percentage element counting from 0 to target
+   */
+  _animatePercentage(elId, target, duration) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    const start = performance.now();
+    const animate = (now) => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(eased * target);
+      el.textContent = current + '%';
+      if (progress < 1) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  },
+
+  /**
+   * Show the QUIPLASH! moment full-screen flash overlay
+   */
+  _showQuiplashMoment() {
+    const overlay = document.createElement('div');
+    overlay.className = 'ql-quiplash-moment';
+    overlay.innerHTML = '<div class="ql-quiplash-moment__text">⚡ QUIPLASH! ⚡</div>';
+    document.body.appendChild(overlay);
+    AudioEngine.quiplash();
+    // Trigger confetti
+    this.confetti();
+    setTimeout(() => {
+      overlay.style.opacity = '0';
+      overlay.style.transition = 'opacity 0.5s';
+      setTimeout(() => overlay.remove(), 500);
+    }, 2000);
+  },
+
+  /**
+   * Show mini leaderboard after matchup result
+   */
+  _showQuiplashMiniLeaderboard(players) {
+    const gc = document.getElementById('gameContent');
+    if (!gc) return;
+    // Sort by score descending, only non-audience players
+    const sorted = [...players].filter(p => !p.isAudience).sort((a, b) => b.score - a.score);
+    if (sorted.length === 0) return;
+
+    const rows = sorted.map((p, i) => {
+      const rank = i === 0 ? '👑' : (i + 1).toString();
+      return '<div class="ql-mini-lb__row">' +
+        '<div class="ql-mini-lb__rank">' + rank + '</div>' +
+        '<div class="ql-mini-lb__avatar">' + escapeHtml(p.avatar || '👤') + '</div>' +
+        '<div class="ql-mini-lb__name">' + escapeHtml(p.name || '') + '</div>' +
+        '<div class="ql-mini-lb__score">' + (p.score || 0) + '</div>' +
+      '</div>';
+    }).join('');
+
+    gc.innerHTML =
+      '<div style="display:flex;flex-direction:column;align-items:center;gap:16px">' +
+        '<div class="ql-mini-lb">' +
+          '<div class="ql-mini-lb__title">📊 الترتيب الحالي</div>' +
+          rows +
+        '</div>' +
+      '</div>';
+  },
+
+  /**
+   * Show JINX display when both players submit identical answers
+   */
+  _showQuiplashJinx(d) {
+    const results = d.results || [];
+    const r0 = results[0] || {};
+    const r1 = results[1] || {};
+    const gc = document.getElementById('gameContent');
+    if (!gc) return;
+
+    gc.innerHTML =
+      '<div class="ql-results" style="text-align:center">' +
+        '<div class="ql-results__question">' + escapeHtml(d.question || '') + '</div>' +
+        '<div class="ql-jinx">' +
+          '<div class="ql-jinx__icon">🔗</div>' +
+          '<div class="ql-jinx__text">JINX!</div>' +
+          '<div class="ql-jinx__subtitle">نفس الإجابة! صفر نقاط للاثنين!</div>' +
+          '<div class="ql-jinx__answer">"' + escapeHtml(r0.answer || r1.answer || '') + '"</div>' +
+          '<div class="ql-jinx__players">' +
+            '<span>' + escapeHtml(r0.avatar || '👤') + ' ' + escapeHtml(r0.playerName || '') + '</span>' +
+            '<span style="margin:0 12px;color:#ff3f7f;font-weight:900">=</span>' +
+            '<span>' + escapeHtml(r1.avatar || '👤') + ' ' + escapeHtml(r1.playerName || '') + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    AudioEngine.timesUp();
   },
 
   // ═══════════════════════════════════════════════════════════════
@@ -1557,10 +1879,38 @@ const App = {
     this._submitting = true;
     AudioEngine.submit();
     this.socket.emit('submitAnswer', { code: this.currentRoom, answer: ans });
-    this.showWaiting('ننتظر الإجابات...');
+    // Show Quiplash-specific submitted state if in quiplash
+    if (this.currentGame === 'quiplash') {
+      this._showQuiplashSubmitted(ans);
+    } else {
+      this.showWaiting('ننتظر الإجابات...');
+    }
   },
 
   voteAnswer(id, el) {
+    // Handle new Quiplash bubble voting
+    const bubble = el.closest('.ql-bubble');
+    if (bubble) {
+      document.querySelectorAll('.ql-bubble').forEach(b => {
+        b.classList.remove('ql-bubble--selected', 'ql-bubble--dimmed');
+      });
+      bubble.classList.add('ql-bubble--selected');
+      // Dim the other bubble
+      document.querySelectorAll('.ql-bubble').forEach(b => {
+        if (b !== bubble) b.classList.add('ql-bubble--dimmed');
+      });
+      // Show lock
+      if (!bubble.querySelector('.ql-bubble__lock')) {
+        const lock = document.createElement('div');
+        lock.className = 'ql-bubble__lock';
+        lock.textContent = '🔒 صوّت!';
+        bubble.appendChild(lock);
+      }
+      AudioEngine.vote();
+      this.socket.emit('submitVote', { code: this.currentRoom, voteId: id });
+      return;
+    }
+    // Fallback for other games
     document.querySelectorAll('.vote-option').forEach(c => c.classList.remove('vote-option--selected'));
     el.classList.add('vote-option--selected');
     AudioEngine.vote();
@@ -2170,6 +2520,7 @@ const App = {
   toggleReducedMotion(checked) {
     this.reducedMotion = checked;
     localStorage.setItem('reducedMotion', checked);
+    document.body.setAttribute('data-reduced-motion', checked ? 'true' : 'false');
   },
 
   // ═══════════════════════════════════════════════════════════════

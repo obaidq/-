@@ -16,7 +16,7 @@
     var(--theme-bg-primary) 0deg 10deg,
     var(--theme-bg-secondary) 10deg 20deg
   );
-  animation: pattern-rotate 90s linear infinite;
+  animation: pattern-rotate var(--intensity-bg-speed, 90s) linear infinite;
 }
 
 @keyframes pattern-rotate {
@@ -34,7 +34,7 @@
     transparent 2px
   );
   background-size: 40px 40px;
-  animation: pattern-drift 30s linear infinite;
+  animation: pattern-drift var(--intensity-pattern-speed, 30s) linear infinite;
 }
 
 @keyframes pattern-drift {
@@ -65,7 +65,7 @@
     linear-gradient(45deg, var(--theme-bg-secondary) 25%, transparent 25%);
   background-size: 100px 50px;
   background-color: var(--theme-bg-primary);
-  animation: zigzag-shift 15s linear infinite;
+  animation: zigzag-shift var(--intensity-pattern-speed, 15s) linear infinite;
 }
 
 @keyframes zigzag-shift {
@@ -114,7 +114,7 @@
     radial-gradient(circle at 10% 50%, var(--color-accent-yellow) 2px, transparent 2px),
     radial-gradient(circle at 90% 90%, var(--color-accent-pink) 3px, transparent 3px);
   background-size: 200px 200px;
-  animation: confetti-float 15s linear infinite;
+  animation: confetti-float var(--intensity-pattern-speed, 15s) linear infinite;
 }
 
 @keyframes confetti-float {
@@ -130,7 +130,7 @@
 .pattern-noise {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
   opacity: 0.12;
-  animation: noise-flicker 0.15s steps(5) infinite;
+  animation: noise-flicker calc(var(--intensity-pulse-speed, 4s) * 0.04) steps(5) infinite;
 }
 
 @keyframes noise-flicker {
@@ -150,7 +150,7 @@
     radial-gradient(ellipse 150% 80% at 50% -20%, rgba(255,159,67,0.2) 0%, transparent 50%),
     radial-gradient(ellipse 120% 60% at 20% 80%, rgba(78,205,196,0.15) 0%, transparent 50%),
     radial-gradient(ellipse 100% 50% at 80% 60%, rgba(255,107,107,0.15) 0%, transparent 50%);
-  animation: waves-breathe 8s ease-in-out infinite alternate;
+  animation: waves-breathe var(--intensity-pulse-speed, 8s) ease-in-out infinite alternate;
 }
 
 @keyframes waves-breathe {
@@ -210,7 +210,7 @@
     radial-gradient(ellipse 4% 25% at 65% 0%, rgba(160,0,0,0.3) 0%, transparent 100%),
     radial-gradient(ellipse 7% 18% at 85% 0%, rgba(200,0,0,0.4) 0%, transparent 100%),
     radial-gradient(ellipse 60% 50% at 50% 100%, rgba(100,0,0,0.3) 0%, transparent 80%);
-  animation: blood-pulse 4s ease-in-out infinite alternate;
+  animation: blood-pulse var(--intensity-pulse-speed, 4s) ease-in-out infinite alternate;
 }
 
 @keyframes blood-pulse {
@@ -263,7 +263,7 @@
     radial-gradient(circle 2px at 90% 40%, rgba(0,212,170,0.4) 0%, transparent 100%),
     linear-gradient(180deg, transparent 0%, transparent 49%, rgba(0,212,170,0.05) 50%, transparent 51%, transparent 100%);
   background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 40px;
-  animation: matrix-rain 3s linear infinite;
+  animation: matrix-rain calc(var(--intensity-pulse-speed, 4s) * 0.75) linear infinite;
 }
 
 @keyframes matrix-rain {
@@ -322,11 +322,113 @@
 
 
 /* ═══════════════════════════════════════════════════════════════
+ * SAUDI/GULF-INSPIRED PATTERNS - أنماط خليجية
+ * Abstract, respectful, playful, non-literal
+ * ═══════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────
+ * PATTERN: ARABESQUE - زخرفة عربية (Islamic geometric - 8-point star)
+ * SVG-based interlocking star pattern, tiled seamlessly
+ * ───────────────────────────────────────────────────────────── */
+
+.pattern-arabesque {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cpath d='M40 0L50 15L65 10L55 25L70 30L55 35L65 50L50 45L40 60L30 45L15 50L25 35L10 30L25 25L15 10L30 15Z' fill='none' stroke='rgba(255,255,255,0.12)' stroke-width='1'/%3E%3Cpath d='M0 40L10 25L0 10L15 15L20 0' fill='none' stroke='rgba(255,255,255,0.06)' stroke-width='0.5'/%3E%3Cpath d='M80 40L70 55L80 70L65 65L60 80' fill='none' stroke='rgba(255,255,255,0.06)' stroke-width='0.5'/%3E%3Cpath d='M0 80L10 65L0 50' fill='none' stroke='rgba(255,255,255,0.06)' stroke-width='0.5'/%3E%3Cpath d='M80 0L70 15L80 30' fill='none' stroke='rgba(255,255,255,0.06)' stroke-width='0.5'/%3E%3C/svg%3E");
+  background-size: 80px 80px;
+  animation: pattern-drift var(--intensity-pattern-speed, 30s) linear infinite;
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * PATTERN: SADU - سدو (Traditional Gulf textile weave)
+ * Geometric diamond-cross pattern inspired by Bedouin textiles
+ * ───────────────────────────────────────────────────────────── */
+
+.pattern-sadu {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Crect x='25' y='2' width='10' height='10' rx='1' fill='none' stroke='rgba(255,217,61,0.15)' stroke-width='1'/%3E%3Crect x='25' y='48' width='10' height='10' rx='1' fill='none' stroke='rgba(255,217,61,0.15)' stroke-width='1'/%3E%3Crect x='2' y='25' width='10' height='10' rx='1' fill='none' stroke='rgba(255,217,61,0.1)' stroke-width='1'/%3E%3Crect x='48' y='25' width='10' height='10' rx='1' fill='none' stroke='rgba(255,217,61,0.1)' stroke-width='1'/%3E%3Cline x1='30' y1='12' x2='30' y2='48' stroke='rgba(255,255,255,0.06)' stroke-width='0.5'/%3E%3Cline x1='12' y1='30' x2='48' y2='30' stroke='rgba(255,255,255,0.06)' stroke-width='0.5'/%3E%3Cline x1='12' y1='12' x2='48' y2='48' stroke='rgba(255,217,61,0.04)' stroke-width='0.5'/%3E%3Cline x1='48' y1='12' x2='12' y2='48' stroke='rgba(255,217,61,0.04)' stroke-width='0.5'/%3E%3C/svg%3E");
+  background-size: 60px 60px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * PATTERN: DUNES - كثبان (Desert sand dunes / layered horizon)
+ * Soft flowing curves inspired by Arabian desert landscape
+ * ───────────────────────────────────────────────────────────── */
+
+.pattern-dunes {
+  background:
+    radial-gradient(ellipse 200% 15% at 50% 85%, rgba(255,200,100,0.08) 0%, transparent 100%),
+    radial-gradient(ellipse 180% 12% at 30% 75%, rgba(255,180,80,0.06) 0%, transparent 100%),
+    radial-gradient(ellipse 160% 10% at 70% 65%, rgba(255,160,60,0.05) 0%, transparent 100%),
+    radial-gradient(ellipse 140% 8% at 50% 55%, rgba(255,140,40,0.04) 0%, transparent 100%);
+  animation: dunes-sway var(--intensity-pulse-speed, 4s) ease-in-out infinite alternate;
+}
+
+@keyframes dunes-sway {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(8px); }
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * PATTERN: NEON RIYADH - نيون الرياض (Saudi city nightlife glow)
+ * Warm neon strips + urban glow, inspired by Boulevard/Seasons
+ * ───────────────────────────────────────────────────────────── */
+
+.pattern-neonriyadh {
+  background:
+    linear-gradient(90deg, transparent 0%, rgba(255,217,61,0.04) 20%, transparent 40%),
+    linear-gradient(90deg, transparent 50%, rgba(255,140,66,0.03) 70%, transparent 90%),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 120px,
+      rgba(255,217,61,0.02) 120px,
+      rgba(255,217,61,0.02) 121px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 200px,
+      rgba(255,140,66,0.015) 200px,
+      rgba(255,140,66,0.015) 201px
+    );
+  animation: neon-pulse var(--intensity-pulse-speed, 4s) ease-in-out infinite alternate;
+}
+
+@keyframes neon-pulse {
+  0% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * PATTERN: MASHRABIYA - مشربية (Lattice screen / geometric mesh)
+ * SVG interlocking hexagonal lattice inspired by traditional screens
+ * ───────────────────────────────────────────────────────────── */
+
+.pattern-mashrabiya {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66ZM28 100L0 84L0 50L28 34L56 50L56 84L28 100Z' fill='none' stroke='rgba(255,255,255,0.08)' stroke-width='0.8'/%3E%3Ccircle cx='28' cy='33' r='3' fill='none' stroke='rgba(255,255,255,0.05)' stroke-width='0.5'/%3E%3Ccircle cx='28' cy='67' r='3' fill='none' stroke='rgba(255,255,255,0.05)' stroke-width='0.5'/%3E%3C/svg%3E");
+  background-size: 56px 100px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * PATTERN: CALLIGRAPHY FLOW - خط عربي (Flowing curves)
+ * Abstract flowing lines inspired by Arabic calligraphy strokes
+ * ───────────────────────────────────────────────────────────── */
+
+.pattern-calliflow {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Cpath d='M0 100 Q50 40 100 100 Q150 160 200 100' fill='none' stroke='rgba(255,255,255,0.06)' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M0 60 Q60 20 120 60 Q180 100 200 50' fill='none' stroke='rgba(255,255,255,0.04)' stroke-width='1.5' stroke-linecap='round'/%3E%3Cpath d='M0 150 Q40 120 80 140 Q140 170 200 140' fill='none' stroke='rgba(255,255,255,0.04)' stroke-width='1' stroke-linecap='round'/%3E%3Ccircle cx='100' cy='100' r='2' fill='rgba(255,255,255,0.04)'/%3E%3Ccircle cx='50' cy='60' r='1.5' fill='rgba(255,255,255,0.03)'/%3E%3Ccircle cx='160' cy='140' r='1.5' fill='rgba(255,255,255,0.03)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  animation: calliflow-drift var(--intensity-pattern-speed, 30s) linear infinite;
+}
+
+@keyframes calliflow-drift {
+  0% { background-position: 0 0; }
+  100% { background-position: 200px -100px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
  * GAME THEMES - ثيمات الألعاب
  * كل لعبة لها هوية بصرية فريدة
  * ═══════════════════════════════════════════════════════════════ */
 
-/* Hub / Menu Theme - القائمة الرئيسية (Saudi Green) */
+/* Hub / Menu Theme - القائمة الرئيسية (Saudi Green + Arabesque) */
 [data-theme="hub"] {
   --theme-bg-primary: #001a0e;
   --theme-bg-secondary: #003d1f;
@@ -717,6 +819,13 @@
               linear-gradient(180deg, #001a0e 0%, #003d1f 50%, #001a0e 100%);
 }
 
+/* Hub background - Saudi green with warm accents */
+[data-theme="hub"] .bg {
+  background: radial-gradient(ellipse at 50% 20%, rgba(0,230,118,0.1) 0%, transparent 50%),
+              radial-gradient(ellipse at 50% 90%, rgba(255,217,61,0.05) 0%, transparent 40%),
+              linear-gradient(180deg, #001a0e 0%, #002815 50%, #001a0e 100%);
+}
+
 /* ═══════════════════════════════════════════════════════════════
  * SHARED GAME EFFECTS
  * ═══════════════════════════════════════════════════════════════ */
@@ -730,14 +839,33 @@
   transition: background 0.8s ease;
 }
 
+/* Per-theme glow customization */
+[data-theme="triviamurder"] .bg__glow {
+  background:
+    radial-gradient(ellipse 40% 30% at 50% 0%, rgba(220,20,60,0.25) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 50% 100%, rgba(100,0,0,0.2) 0%, transparent 70%);
+}
+
+[data-theme="quiplash"] .bg__glow {
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 30%, rgba(255,217,61,0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 30% 70%, rgba(102,126,234,0.1) 0%, transparent 60%);
+}
+
+[data-theme="victory"] .bg__glow {
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 30%, rgba(255,217,61,0.3) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 50% 80%, rgba(0,200,83,0.2) 0%, transparent 60%);
+}
+
 /* Glow effects per theme */
 [data-theme] .game-timer {
-  box-shadow: 0 0 15px var(--theme-glow, rgba(255,217,61,0.3)), 4px 4px 0 #000;
+  box-shadow: 0 0 var(--intensity-glow-spread, 15px) var(--theme-glow, rgba(255,217,61,0.3)), 4px 4px 0 #000;
 }
 
 /* Panel glow on focus */
 [data-theme] .panel:focus-within {
-  box-shadow: 0 0 25px var(--theme-glow, rgba(255,255,255,0.1));
+  box-shadow: 0 0 var(--intensity-glow-spread, 25px) var(--theme-glow, rgba(255,255,255,0.1));
 }
 
 /* Input focus glow matches theme */
@@ -750,7 +878,7 @@
  * REDUCED MOTION - احترام إعدادات المستخدم
  * ═══════════════════════════════════════════════════════════════ */
 
-@media (prefers-reduced-motion: reduce) {
+@media (prefers-reduced-motion: reduce), (prefers-reduced-motion: reduce) {
   .pattern-rays,
   .pattern-dots,
   .pattern-zigzag,
@@ -758,11 +886,41 @@
   .pattern-noise,
   .pattern-waves,
   .pattern-matrix,
-  .pattern-blood {
+  .pattern-blood,
+  .pattern-arabesque,
+  .pattern-dunes,
+  .pattern-neonriyadh,
+  .pattern-calliflow {
     animation: none !important;
   }
 
-  .bg {
+  .bg,
+  .bg__pattern,
+  .bg__glow {
     transition: none !important;
+    animation: none !important;
   }
+}
+
+/* Manual reduced-motion toggle (JS-controlled) */
+[data-reduced-motion="true"] .pattern-rays,
+[data-reduced-motion="true"] .pattern-dots,
+[data-reduced-motion="true"] .pattern-zigzag,
+[data-reduced-motion="true"] .pattern-confetti,
+[data-reduced-motion="true"] .pattern-noise,
+[data-reduced-motion="true"] .pattern-waves,
+[data-reduced-motion="true"] .pattern-matrix,
+[data-reduced-motion="true"] .pattern-blood,
+[data-reduced-motion="true"] .pattern-arabesque,
+[data-reduced-motion="true"] .pattern-dunes,
+[data-reduced-motion="true"] .pattern-neonriyadh,
+[data-reduced-motion="true"] .pattern-calliflow {
+  animation: none !important;
+}
+
+[data-reduced-motion="true"] .bg,
+[data-reduced-motion="true"] .bg__pattern,
+[data-reduced-motion="true"] .bg__glow {
+  transition: none !important;
+  animation: none !important;
 }
