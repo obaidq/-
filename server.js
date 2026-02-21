@@ -23,7 +23,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
 const fs = require('fs');
-const { generateCommentary, generateResultCommentary } = require('./commentary');
+const { generateCommentary, generateResultCommentary, generateTransitionQuip } = require('./commentary');
 const { filterText } = require('./profanity');
 
 // ── Platform config (feature flags) ──
@@ -483,6 +483,23 @@ io.on('connection', (socket) => {
       p.isReady = false;
     });
 
+    // إعداد تتبع الإحصائيات للجوائز النهائية
+    room.gameStats = {
+      roundScores: new Map(),  // playerId → [score per round]
+      fooledCounts: new Map(), // playerId → total fooled
+      correctGuesses: new Map(), // playerId → total correct
+      fastestAnswer: null,     // { playerId, name, ms }
+      votesReceived: new Map(), // playerId → total votes received
+      streaks: new Map(),       // playerId → max streak
+    };
+    room.players.forEach((p, id) => {
+      room.gameStats.roundScores.set(id, []);
+      room.gameStats.fooledCounts.set(id, 0);
+      room.gameStats.correctGuesses.set(id, 0);
+      room.gameStats.votesReceived.set(id, 0);
+      room.gameStats.streaks.set(id, 0);
+    });
+
     const gameNames = {
       quiplash: '⚡ رد سريع',
       guesspionage: '📊 خمّن النسبة',
@@ -598,10 +615,19 @@ io.on('connection', (socket) => {
       ? countAliveAnswered(room)
       : countAnswered(room);
 
+    // جمع أسماء المجيبين لعرضها في شاشة الانتظار
+    const answeredNames = [];
+    room.players.forEach((p, id) => {
+      if (p.currentAnswer !== null) {
+        answeredNames.push({ name: p.name, avatar: p.avatar || '🎮', color: p.color || '#4FC3F7' });
+      }
+    });
+
     io.to(code).emit('playerAnswered', {
       playerId: socket.id,
       count: currentCount,
-      total: totalExpected
+      total: totalExpected,
+      answered: answeredNames
     });
 
     // التحقق إذا كل اللاعبين أجابوا
@@ -1333,6 +1359,12 @@ function calculateQuiplashResults(room) {
 
     player.score += points;
 
+    // تتبع الإحصائيات
+    if (room.gameStats) {
+      const prev = room.gameStats.votesReceived.get(id) || 0;
+      room.gameStats.votesReceived.set(id, prev + voteCount);
+    }
+
     matchupResult[id] = {
       playerId: id,
       playerName: player.name,
@@ -1621,6 +1653,11 @@ function calculateGuesspionageResults(room) {
     // Audience gets weighted points
     const effectivePoints = p.isAudience ? Math.round(points * CONFIG.audienceVoteWeight) : points;
     p.score += effectivePoints;
+
+    // تتبع الإحصائيات
+    if (room.gameStats && betCorrect) {
+      room.gameStats.correctGuesses.set(id, (room.gameStats.correctGuesses.get(id) || 0) + 1);
+    }
 
     playerResults.push({
       playerId: id,
@@ -2077,6 +2114,15 @@ function calculateTriviaMurderResults(room) {
       if (p.streak > 1) points += p.streak * 25; // مكافأة السلسلة
       p.score += points;
       survivors.push({ id: p.id, name: p.name, streak: p.streak });
+
+      // تتبع الإحصائيات
+      if (room.gameStats) {
+        room.gameStats.correctGuesses.set(p.id, (room.gameStats.correctGuesses.get(p.id) || 0) + 1);
+        const currentMax = room.gameStats.streaks.get(p.id) || 0;
+        if (p.streak > currentMax) {
+          room.gameStats.streaks.set(p.id, p.streak);
+        }
+      }
     } else {
       // إجابة خطأ أو ما جاوب = الموت
       p.isAlive = false;
@@ -2309,6 +2355,16 @@ function calculateFibbageResults(room) {
 
     p.score += points;
 
+    // تتبع الإحصائيات
+    if (room.gameStats) {
+      if (guessedCorrect) {
+        room.gameStats.correctGuesses.set(id, (room.gameStats.correctGuesses.get(id) || 0) + 1);
+      }
+      if (fooledCount > 0) {
+        room.gameStats.fooledCounts.set(id, (room.gameStats.fooledCounts.get(id) || 0) + fooledCount);
+      }
+    }
+
     playerResults.push({
       playerId: id,
       playerName: p.name,
@@ -2521,6 +2577,16 @@ function calculateDrawfulResults(room) {
 
     p.score += points;
 
+    // تتبع الإحصائيات
+    if (room.gameStats) {
+      if (guessedCorrect) {
+        room.gameStats.correctGuesses.set(id, (room.gameStats.correctGuesses.get(id) || 0) + 1);
+      }
+      if (fooledCount > 0) {
+        room.gameStats.fooledCounts.set(id, (room.gameStats.fooledCounts.get(id) || 0) + fooledCount);
+      }
+    }
+
     playerResults.push({
       playerId: id,
       playerName: p.name,
@@ -2572,6 +2638,14 @@ function calculateDrawfulResults(room) {
  * إرسال نتائج الجولة العامة
  */
 function sendRoundResults(room, extraData = {}) {
+  // تتبع نقاط كل جولة للجوائز
+  if (room.gameStats) {
+    room.players.forEach((p, id) => {
+      const scores = room.gameStats.roundScores.get(id);
+      if (scores) scores.push(p.score);
+    });
+  }
+
   const resultData = {
     game: room.currentGame,
     round: room.currentRound + 1,
@@ -2583,7 +2657,109 @@ function sendRoundResults(room, extraData = {}) {
   if (CONFIG.commentaryEnabled && !resultData.commentary) {
     resultData.commentary = generateResultCommentary(room.currentGame, resultData);
   }
+
+  // إضافة تعليق انتقالي بين الجولات
+  if (CONFIG.commentaryEnabled && !resultData.isLastRound) {
+    const sorted = resultData.players ? [...resultData.players].sort((a, b) => b.score - a.score) : [];
+    const isClose = sorted.length >= 2 && (sorted[0].score - sorted[1].score) < 500;
+    resultData.transitionQuip = generateTransitionQuip({ isClose });
+  }
+
   io.to(room.code).emit('roundResults', resultData);
+}
+
+/**
+ * حساب جوائز نهاية اللعبة
+ */
+function computeGameAwards(room) {
+  if (!room.gameStats) return [];
+
+  const awards = [];
+  const stats = room.gameStats;
+  const players = room.players;
+
+  // أكبر كذاب - اللي خدع أكثر ناس
+  let topFooled = null;
+  let topFooledCount = 0;
+  stats.fooledCounts.forEach((count, id) => {
+    if (count > topFooledCount) {
+      topFooledCount = count;
+      topFooled = id;
+    }
+  });
+  if (topFooled && topFooledCount > 0) {
+    const p = players.get(topFooled);
+    if (p) awards.push({ icon: '🎭', title: 'أكبر كذاب', name: p.name, detail: 'خدع ' + topFooledCount + ' مرة' });
+  }
+
+  // صاحب الإجابات الصحيحة
+  let topCorrect = null;
+  let topCorrectCount = 0;
+  stats.correctGuesses.forEach((count, id) => {
+    if (count > topCorrectCount) {
+      topCorrectCount = count;
+      topCorrect = id;
+    }
+  });
+  if (topCorrect && topCorrectCount > 0) {
+    const p = players.get(topCorrect);
+    if (p) awards.push({ icon: '🧠', title: 'عقل كبير', name: p.name, detail: topCorrectCount + ' إجابة صحيحة' });
+  }
+
+  // نجم التصويت - أكثر أصوات في Quiplash
+  let topVotes = null;
+  let topVotesCount = 0;
+  stats.votesReceived.forEach((count, id) => {
+    if (count > topVotesCount) {
+      topVotesCount = count;
+      topVotes = id;
+    }
+  });
+  if (topVotes && topVotesCount > 0) {
+    const p = players.get(topVotes);
+    if (p) awards.push({ icon: '⭐', title: 'نجم الجمهور', name: p.name, detail: topVotesCount + ' صوت' });
+  }
+
+  // ملك السلسلة - أطول streak
+  let topStreak = null;
+  let topStreakCount = 0;
+  stats.streaks.forEach((count, id) => {
+    if (count > topStreakCount) {
+      topStreakCount = count;
+      topStreak = id;
+    }
+  });
+  if (topStreak && topStreakCount > 1) {
+    const p = players.get(topStreak);
+    if (p) awards.push({ icon: '🔥', title: 'سلسلة نارية', name: p.name, detail: topStreakCount + ' إجابات متتالية' });
+  }
+
+  // عودة قوية - اللي كان آخر واحد وطلع بنتيجة أعلى
+  const sortedPlayers = getPlayerList(room).sort((a, b) => b.score - a.score);
+  const roundScores = stats.roundScores;
+  if (sortedPlayers.length >= 3 && roundScores.size > 0) {
+    // نشوف اللي تحسّن أكثر شي من النص الأول للنص الثاني
+    let bestComeback = null;
+    let bestImp = 0;
+    sortedPlayers.forEach(sp => {
+      const scores = roundScores.get(sp.id);
+      if (scores && scores.length >= 2) {
+        const mid = Math.floor(scores.length / 2);
+        const firstHalf = scores.slice(0, mid).reduce((a, b) => a + b, 0);
+        const secondHalf = scores.slice(mid).reduce((a, b) => a + b, 0);
+        const improvement = secondHalf - firstHalf;
+        if (improvement > bestImp) {
+          bestImp = improvement;
+          bestComeback = sp;
+        }
+      }
+    });
+    if (bestComeback && bestImp > 200) {
+      awards.push({ icon: '💪', title: 'عودة قوية', name: bestComeback.name, detail: '+' + bestImp + ' نقطة في النص الثاني' });
+    }
+  }
+
+  return awards;
 }
 
 /**
@@ -2597,6 +2773,9 @@ function endGame(room) {
   const finalResults = getPlayerList(room).sort((a, b) => b.score - a.score);
   const winner = finalResults[0];
 
+  // حساب الجوائز
+  const awards = computeGameAwards(room);
+
   // نصيحة عشوائية
   const tip = content.tips[Math.floor(Math.random() * content.tips.length)];
 
@@ -2608,6 +2787,7 @@ function endGame(room) {
     game: room.currentGame,
     finalResults,
     winner,
+    awards,
     tip,
     commentary: winComment
   });

@@ -268,6 +268,52 @@ const COMMENTARY = {
       'الجولات الأخيرة! لا أحد يتساهل!',
     ],
   },
+
+  // ─── Between-round transitions (Abu Abed quips) ───
+  transition: {
+    general: [
+      'أبو عابد يقول: اللي ما يغامر ما يكسب!',
+      'خلوكم جاهزين... الجاي أحلى!',
+      'حركة سريعة... واللعبة مستمرة!',
+      'شدوا حيلكم يا شباب!',
+      'لا تنامون علي... الجولة الجاية حامية!',
+      'أبو عابد يشرب شاهي ويراقبكم... 🍵',
+      'من يقدر يقلب الطاولة؟',
+      'اللي يضحك أخير يضحك كثير!',
+      'الحين الجد بدأ... لا أحد يستهبل!',
+      'نصيحة أبو عابد: لا تثق بأحد! 😏',
+      'ترى أبو عابد شاف كل شي... لا تحاولون!',
+      'اللي فات مات... ركزوا على الجاي!',
+      'كل جولة فرصة جديدة... استغلوها!',
+      'أبو عابد فخور فيكم... بس شوي! 😅',
+      'بين الجولات نتنفس... وبعدين نرجع للحرب!',
+    ],
+    encouragement: [
+      'ما فيه خسارة نهائية... فيه دروس! 📚',
+      'حتى لو نقاطك قليلة... فيه أمل!',
+      'أبو عابد يقول: الصبر مفتاح الفوز!',
+      'لا تيأسون... أقوى اللاعبين يرجعون من بعيد!',
+      'كل بطل عنده لحظة ضعف... المهم الرجعة!',
+    ],
+    competitive: [
+      'من الأول؟ من الأخير؟ كله بيتغير! 🔄',
+      'الفارق بسيط... كل نقطة تفرق!',
+      'المركز الأول ما هو ضمان... أي واحد يقدر يقلبها!',
+      'الحين وش رأيكم... من بيفاجئنا؟',
+      'أبو عابد يتوقع مفاجأة... 🤔',
+      'ترتيب اليوم ما يبين ترتيب باكر!',
+    ],
+    funny: [
+      'أبو عابد راح يسوي فاصل إعلاني... بس ما عنده رعاة! 😂',
+      'لو كان فيه جائزة لأحسن وجه مستغرب كان فاز الكل!',
+      'ترى أبو عابد يعرف الإجابة... بس ما بيقول! 🤫',
+      'نصيحة: لا تغشون... أبو عابد يراقب! 👀',
+      'بسرعة قبل لا أبو عابد ينام! 😴',
+      'هل تعلم؟ أبو عابد ما خسر أبداً... لأنه ما لعب! 😂',
+      'أبو عابد: أنا بس أعلق... ما ألعب... الضغط كبير! 🤣',
+      'تذكروا: المهم المشاركة... بس الفوز أحلى! 😏',
+    ],
+  },
 };
 
 /**
@@ -388,4 +434,31 @@ function generateResultCommentary(game, data) {
   return comments.filter(Boolean);
 }
 
-module.exports = { COMMENTARY, pickLine, generateCommentary, generateResultCommentary };
+/**
+ * Generate a between-round transition quip from Abu Abed
+ */
+function generateTransitionQuip(context) {
+  const trans = COMMENTARY.transition;
+  if (!trans) return null;
+
+  // Pick category based on context
+  let pool;
+  if (context && context.isLosing) {
+    pool = trans.encouragement;
+  } else if (context && context.isClose) {
+    pool = trans.competitive;
+  } else {
+    // Mix general + funny for variety
+    const r = Math.random();
+    if (r < 0.4) pool = trans.general;
+    else if (r < 0.7) pool = trans.funny;
+    else if (r < 0.85) pool = trans.competitive;
+    else pool = trans.encouragement;
+  }
+
+  const text = pickLine(pool, context);
+  if (!text) return null;
+  return { text, icon: '🧔🏻' };
+}
+
+module.exports = { COMMENTARY, pickLine, generateCommentary, generateResultCommentary, generateTransitionQuip };
