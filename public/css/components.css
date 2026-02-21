@@ -683,3 +683,53 @@
 .divider--light {
   background: var(--color-neutral-300);
 }
+
+/* ─────────────────────────────────────────────────────────────
+ * PANEL VARIANTS - أحجام اللوحات
+ * ───────────────────────────────────────────────────────────── */
+
+.panel--narrow { max-width: 450px; width: 100%; }
+.panel--medium { max-width: 500px; width: 100%; }
+.panel--wide { max-width: 600px; width: 100%; }
+
+/* ─────────────────────────────────────────────────────────────
+ * PANEL ICON - أيقونة العنوان
+ * ───────────────────────────────────────────────────────────── */
+
+.panel__icon { font-size: 50px; }
+
+/* ─────────────────────────────────────────────────────────────
+ * TIP BOX - صندوق النصيحة
+ * ───────────────────────────────────────────────────────────── */
+
+.tip-box {
+  background: rgba(255, 217, 61, 0.1);
+  border: 2px solid rgba(255, 217, 61, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.tip-box__text { color: #FFD93D; }
+
+/* ─────────────────────────────────────────────────────────────
+ * LOBBY CONTAINER
+ * ───────────────────────────────────────────────────────────── */
+
+.lobby-container { width: 100%; max-width: 1200px; margin: 0 auto; }
+
+/* ─────────────────────────────────────────────────────────────
+ * GAME CARD BANNERS - ألوان كروت الألعاب
+ * ───────────────────────────────────────────────────────────── */
+
+.game-card__banner--quiplash { background: linear-gradient(135deg, #667eea, #764ba2); }
+.game-card__banner--guesspionage { background: linear-gradient(135deg, #11998e, #38ef7d); }
+.game-card__banner--fakinit { background: linear-gradient(135deg, #fa709a, #fee140); }
+.game-card__banner--triviamurder { background: linear-gradient(135deg, #434343, #000); }
+.game-card__banner--fibbage { background: linear-gradient(135deg, #f093fb, #f5576c); }
+.game-card__banner--drawful { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+
+/* ─────────────────────────────────────────────────────────────
+ * SETTINGS BUTTON SIZE
+ * ───────────────────────────────────────────────────────────── */
+
+.btn--icon-lg { font-size: 20px; }

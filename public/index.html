@@ -69,9 +69,9 @@
    * CREATE ROOM SCREEN - إنشاء غرفة
    * ═══════════════════════════════════════════════════════════ -->
   <div id="createScreen" class="screen screen--centered">
-    <div class="panel" style="max-width:450px;width:100%">
+    <div class="panel panel--narrow">
       <div class="text-center mb-6">
-        <span style="font-size:50px">🏠</span>
+        <span class="panel__icon">🏠</span>
         <h2 class="text-2xl font-black mt-2">أنشئ غرفة</h2>
       </div>
       <div class="mb-4">
@@ -87,9 +87,9 @@
    * JOIN ROOM SCREEN - انضم لغرفة
    * ═══════════════════════════════════════════════════════════ -->
   <div id="joinScreen" class="screen screen--centered">
-    <div class="panel" style="max-width:450px;width:100%">
+    <div class="panel panel--narrow">
       <div class="text-center mb-6">
-        <span style="font-size:50px">🚪</span>
+        <span class="panel__icon">🚪</span>
         <h2 class="text-2xl font-black mt-2">انضم لغرفة</h2>
       </div>
       <div class="mb-4">
@@ -109,9 +109,9 @@
    * HOW TO PLAY SCREEN - كيف ألعب؟
    * ═══════════════════════════════════════════════════════════ -->
   <div id="howToPlayScreen" class="screen screen--centered">
-    <div class="panel" style="max-width:500px;width:100%">
+    <div class="panel panel--medium">
       <div class="text-center mb-4">
-        <span style="font-size:50px">❓</span>
+        <span class="panel__icon">❓</span>
         <h2 class="text-2xl font-black mt-2">كيف ألعب؟</h2>
       </div>
       <div class="how-steps">
@@ -120,8 +120,8 @@
         <div class="how-step"><span class="how-step__num">3</span><span class="how-step__text">المضيف يختار لعبة من ٦ ألعاب مختلفة</span></div>
         <div class="how-step"><span class="how-step__num">4</span><span class="how-step__text">كل لعبة لها أسلوبها الخاص - استمتعوا! 🎉</span></div>
       </div>
-      <div class="mt-4" style="background:rgba(255,217,61,0.1);border:2px solid rgba(255,217,61,0.3);border-radius:12px;padding:16px;">
-        <p class="text-sm" style="color:#FFD93D;">💡 نصيحة: العب على شاشة كبيرة (تلفزيون أو لابتوب) وكل لاعب يستخدم جواله!</p>
+      <div class="mt-4 tip-box">
+        <p class="text-sm tip-box__text">💡 نصيحة: العب على شاشة كبيرة (تلفزيون أو لابتوب) وكل لاعب يستخدم جواله!</p>
       </div>
       <button class="btn btn--secondary btn--lg btn--full mt-6" onclick="App.showScreen('menuScreen')">فهمت! 👍</button>
     </div>
@@ -131,7 +131,7 @@
    * LOBBY SCREEN - غرفة الانتظار
    * ═══════════════════════════════════════════════════════════ -->
   <div id="lobbyScreen" class="screen">
-    <div class="flex flex-col items-center gap-4 p-4" style="width:100%;max-width:1200px;margin:0 auto;">
+    <div class="flex flex-col items-center gap-4 p-4 lobby-container">
       <!-- Logo (small) -->
       <div class="logo logo--sm">
         <span class="logo__box">أبو عابد</span>
@@ -157,7 +157,7 @@
         <div class="games-grid">
           <!-- Quiplash -->
           <div class="game-card" onclick="App.selectGame('quiplash')" role="button" tabindex="0" aria-label="لعبة رد سريع" onkeydown="if(event.key==='Enter')this.click()">
-            <div class="game-card__banner" style="background:linear-gradient(135deg,#667eea,#764ba2)">
+            <div class="game-card__banner game-card__banner--quiplash">
               <span class="game-card__icon">⚡</span>
             </div>
             <div class="game-card__content">
@@ -173,7 +173,7 @@
 
           <!-- Guesspionage -->
           <div class="game-card" onclick="App.selectGame('guesspionage')" role="button" tabindex="0" aria-label="لعبة خمّن النسبة" onkeydown="if(event.key==='Enter')this.click()">
-            <div class="game-card__banner" style="background:linear-gradient(135deg,#11998e,#38ef7d)">
+            <div class="game-card__banner game-card__banner--guesspionage">
               <span class="game-card__icon">📊</span>
             </div>
             <div class="game-card__content">
@@ -189,7 +189,7 @@
 
           <!-- Fakin' It -->
           <div class="game-card" onclick="App.selectGame('fakinit')" role="button" tabindex="0" aria-label="لعبة المزيّف" onkeydown="if(event.key==='Enter')this.click()">
-            <div class="game-card__banner" style="background:linear-gradient(135deg,#fa709a,#fee140)">
+            <div class="game-card__banner game-card__banner--fakinit">
               <span class="game-card__icon">🕵️</span>
             </div>
             <div class="game-card__content">
@@ -205,7 +205,7 @@
 
           <!-- Trivia Murder Party -->
           <div class="game-card" onclick="App.selectGame('triviamurder')" role="button" tabindex="0" aria-label="لعبة حفلة القاتل" onkeydown="if(event.key==='Enter')this.click()">
-            <div class="game-card__banner" style="background:linear-gradient(135deg,#434343,#000)">
+            <div class="game-card__banner game-card__banner--triviamurder">
               <span class="game-card__icon">💀</span>
             </div>
             <div class="game-card__content">
@@ -221,7 +221,7 @@
 
           <!-- Fibbage -->
           <div class="game-card" onclick="App.selectGame('fibbage')" role="button" tabindex="0" aria-label="لعبة كشف الكذاب" onkeydown="if(event.key==='Enter')this.click()">
-            <div class="game-card__banner" style="background:linear-gradient(135deg,#f093fb,#f5576c)">
+            <div class="game-card__banner game-card__banner--fibbage">
               <span class="game-card__icon">🎭</span>
             </div>
             <div class="game-card__content">
@@ -237,7 +237,7 @@
 
           <!-- Drawful -->
           <div class="game-card" onclick="App.selectGame('drawful')" role="button" tabindex="0" aria-label="لعبة ارسم لي" onkeydown="if(event.key==='Enter')this.click()">
-            <div class="game-card__banner" style="background:linear-gradient(135deg,#4facfe,#00f2fe)">
+            <div class="game-card__banner game-card__banner--drawful">
               <span class="game-card__icon">🎨</span>
             </div>
             <div class="game-card__content">
@@ -285,7 +285,7 @@
         <div id="answeredCount" class="text-sm text-muted" style="display:none"></div>
       </div>
       <div class="game-hud__end">
-        <button class="btn btn--ghost btn--sm btn--icon" onclick="App.toggleSettings()" style="font-size:20px">⚙️</button>
+        <button class="btn btn--ghost btn--sm btn--icon btn--icon-lg" onclick="App.toggleSettings()">⚙️</button>
         <div class="game-timer" id="gameTimer" role="timer" aria-live="polite" aria-label="المؤقت">30</div>
       </div>
     </div>

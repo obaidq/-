@@ -123,7 +123,7 @@ const App = {
       if (e.key === 'Enter') this.joinRoom();
     });
 
-    // ── Event Delegation لمحتوى اللعبة (بدلاً من inline onclick مع بيانات مستخدم) ──
+    // ── Event Delegation لمحتوى اللعبة (بدلاً من inline onclick) ──
     document.getElementById('gameContent')?.addEventListener('click', (e) => {
       const target = e.target.closest('[data-action]');
       if (!target) return;
@@ -134,7 +134,41 @@ const App = {
         case 'votePlayer': this.votePlayer(id, target); break;
         case 'guessFibbage': this.guessFibbage(id, target); break;
         case 'submitTriviaAnswer': this.submitTriviaAnswer(parseInt(id), target); break;
+        case 'submitAnswer': this.submitAnswer(); break;
+        case 'submitGuess': this.submitGuess(); break;
+        case 'submitFakinAction': this.submitFakinAction(); break;
+        case 'submitDeathAnswer': this.submitDeathAnswer(); break;
+        case 'submitLie': this.submitLie(); break;
+        case 'submitDrawing': this.submitDrawing(); break;
+        case 'submitGuessDrawful': this.submitGuessDrawful(); break;
+        case 'requestNextRound': this.requestNextRound(); break;
+        case 'backToLobby': this.backToLobby(); break;
+        case 'undoStroke': this.undoStroke(); break;
+        case 'clearCanvas': this.clearCanvas(); break;
+        case 'setDrawColor': {
+          const color = target.getAttribute('data-color');
+          this.setDrawColor(color, target);
+          break;
+        }
+        case 'setEraser': {
+          this.setDrawColor('#ffffff', target);
+          this.currentSize = 20;
+          break;
+        }
+        case 'setBrushSize': {
+          const size = parseInt(target.getAttribute('data-size'));
+          this.setBrushSize(size, target);
+          break;
+        }
       }
+    });
+
+    // ── Event Delegation لشاشة النتائج النهائية ──
+    document.getElementById('resultsActions')?.addEventListener('click', (e) => {
+      const target = e.target.closest('[data-action]');
+      if (!target) return;
+      const action = target.getAttribute('data-action');
+      if (action === 'backToLobby') this.backToLobby();
     });
 
     // ── Escape لإغلاق الإعدادات ──
@@ -527,7 +561,7 @@ const App = {
         '<div class="badge badge--primary mb-4">السؤال ' + d.round + '</div>' +
         '<p class="text-2xl font-bold mb-6">' + escapeHtml(d.question) + '</p>' +
         '<input type="text" class="input mb-4" id="answerInput" placeholder="إجابتك..." maxlength="100">' +
-        '<button class="btn btn--primary btn--full" onclick="App.submitAnswer()">إرسال ⚡</button>' +
+        '<button class="btn btn--primary btn--full" data-action="submitAnswer">إرسال ⚡</button>' +
       '</div>';
     document.getElementById('answerInput')?.focus();
   },
@@ -551,29 +585,33 @@ const App = {
   },
 
   handleQuiplashMatchupResult(d) {
-    clearInterval(this.gameTimer);
-    const results = d.results.sort((a, b) => b.votes - a.votes);
-    const winner = results[0];
-    const loser = results[1];
+    try {
+      clearInterval(this.gameTimer);
+      const results = d.results.sort((a, b) => b.votes - a.votes);
+      const winner = results[0];
 
-    let html = '<div class="text-center" style="max-width:600px">';
+      let html = '<div class="text-center" style="max-width:600px">';
 
-    if (winner && winner.quiplash) {
-      html += '<div class="text-4xl font-black mb-4" style="color:#FFD93D;text-shadow:0 0 20px rgba(255,217,61,0.5)">⚡ QUIPLASH! ⚡</div>';
+      if (winner && winner.quiplash) {
+        html += '<div class="text-4xl font-black mb-4" style="color:#FFD93D;text-shadow:0 0 20px rgba(255,217,61,0.5)">⚡ QUIPLASH! ⚡</div>';
+      }
+
+      results.forEach((r, i) => {
+        const isWinner = i === 0 && r.votes > (results[1]?.votes || 0);
+        html +=
+          '<div class="panel mb-4" style="' + (isWinner ? 'border-color:#FFD93D;box-shadow:0 0 20px rgba(255,217,61,0.3)' : 'opacity:0.7') + '">' +
+            '<p class="text-xl font-bold">"' + escapeHtml(r.answer) + '"</p>' +
+            '<p class="text-muted mt-1">' + escapeHtml(r.playerName) + '</p>' +
+            '<p class="text-lg font-bold mt-2" style="color:#FFD93D">' + r.votes + ' صوت • +' + r.points + '</p>' +
+          '</div>';
+      });
+
+      html += '</div>';
+      document.getElementById('gameContent').innerHTML = html;
+    } catch (e) {
+      console.error('handleQuiplashMatchupResult error:', e);
+      this.showToast('حصل خطأ، حاول مرة ثانية', 'error');
     }
-
-    results.forEach((r, i) => {
-      const isWinner = i === 0 && r.votes > (results[1]?.votes || 0);
-      html +=
-        '<div class="panel mb-4" style="' + (isWinner ? 'border-color:#FFD93D;box-shadow:0 0 20px rgba(255,217,61,0.3)' : 'opacity:0.7') + '">' +
-          '<p class="text-xl font-bold">"' + escapeHtml(r.answer) + '"</p>' +
-          '<p class="text-muted mt-1">' + escapeHtml(r.playerName) + '</p>' +
-          '<p class="text-lg font-bold mt-2" style="color:#FFD93D">' + r.votes + ' صوت • +' + r.points + '</p>' +
-        '</div>';
-    });
-
-    html += '</div>';
-    document.getElementById('gameContent').innerHTML = html;
   },
 
   // ═══════════════════════════════════════════════════════════════
@@ -591,7 +629,7 @@ const App = {
           '<div class="percent-display mb-4" id="percentDisplay">50%</div>' +
           '<input type="range" class="slider-track" id="percentSlider" min="0" max="100" value="50" ' +
             'oninput="document.getElementById(\'percentDisplay\').textContent=this.value+\'%\'">' +
-          '<button class="btn btn--primary btn--full mt-6" onclick="App.submitGuess()">تأكيد 📊</button>' +
+          '<button class="btn btn--primary btn--full mt-6" data-action="submitGuess">تأكيد 📊</button>' +
         '</div>' +
       '</div>';
   },
@@ -620,7 +658,7 @@ const App = {
           '<div class="badge badge--error mb-4">🕵️ أنت المزيّف!</div>' +
           '<p class="text-2xl font-bold mb-4">ما تعرف المهمة!</p>' +
           '<p class="text-muted">حاول تتصرف طبيعي وما ينكشف أمرك!</p>' +
-          '<button class="btn btn--secondary btn--full mt-6" onclick="App.submitFakinAction()">جاهز! 🎭</button>' +
+          '<button class="btn btn--secondary btn--full mt-6" data-action="submitFakinAction">جاهز! 🎭</button>' +
         '</div>';
     } else {
       html =
@@ -628,7 +666,7 @@ const App = {
           '<div class="badge badge--warning mb-4">' + escapeHtml(d.category) + '</div>' +
           '<p class="text-sm text-muted mb-2">' + escapeHtml(d.instruction) + '</p>' +
           '<p class="text-2xl font-bold mb-6">' + escapeHtml(d.task) + '</p>' +
-          '<button class="btn btn--primary btn--full" onclick="App.submitFakinAction()">جاهز! ✅</button>' +
+          '<button class="btn btn--primary btn--full" data-action="submitFakinAction">جاهز! ✅</button>' +
         '</div>';
     }
     document.getElementById('gameContent').innerHTML = html;
@@ -692,28 +730,33 @@ const App = {
   },
 
   handleTriviaMurderResults(d) {
-    clearInterval(this.gameTimer);
-    let html = '<div class="text-center" style="max-width:600px">';
-    html += '<div class="text-2xl text-accent mb-4">✅ ' + escapeHtml(d.correctAnswer) + '</div>';
+    try {
+      clearInterval(this.gameTimer);
+      let html = '<div class="text-center" style="max-width:600px">';
+      html += '<div class="text-2xl text-accent mb-4">✅ ' + escapeHtml(d.correctAnswer) + '</div>';
 
-    if (d.newlyDead.length > 0) {
-      html += '<div class="death-panel mt-4 mb-4">';
-      html += '<p class="text-xl font-bold mb-2">💀 ماتوا!</p>';
-      html += '<p class="text-lg">' + d.newlyDead.map(p => escapeHtml(p.name)).join('، ') + '</p>';
-      if (d.hasDeathChallenge) {
-        html += '<p class="text-muted mt-2">⏳ تحدي الموت قادم...</p>';
+      if (d.newlyDead.length > 0) {
+        html += '<div class="death-panel mt-4 mb-4">';
+        html += '<p class="text-xl font-bold mb-2">💀 ماتوا!</p>';
+        html += '<p class="text-lg">' + d.newlyDead.map(p => escapeHtml(p.name)).join('، ') + '</p>';
+        if (d.hasDeathChallenge) {
+          html += '<p class="text-muted mt-2">⏳ تحدي الموت قادم...</p>';
+        }
+        html += '</div>';
+      } else {
+        html += '<p class="text-lg" style="color:#00e676">✅ الكل نجا!</p>';
       }
+
+      if (d.survivors.length > 0) {
+        html += '<p class="text-muted mt-2">الأحياء: ' + d.survivors.map(p => escapeHtml(p.name)).join('، ') + '</p>';
+      }
+
       html += '</div>';
-    } else {
-      html += '<p class="text-lg" style="color:#00e676">✅ الكل نجا!</p>';
+      document.getElementById('gameContent').innerHTML = html;
+    } catch (e) {
+      console.error('handleTriviaMurderResults error:', e);
+      this.showToast('حصل خطأ، حاول مرة ثانية', 'error');
     }
-
-    if (d.survivors.length > 0) {
-      html += '<p class="text-muted mt-2">الأحياء: ' + d.survivors.map(p => escapeHtml(p.name)).join('، ') + '</p>';
-    }
-
-    html += '</div>';
-    document.getElementById('gameContent').innerHTML = html;
   },
 
   handleDeathChallenge(d) {
@@ -725,7 +768,7 @@ const App = {
         '<h3 class="text-2xl font-bold mb-2">تحدي الموت!</h3>' +
         '<p class="text-xl mb-6">' + escapeHtml(d.challenge) + '</p>' +
         '<input type="text" class="input mb-4" id="deathInput" placeholder="إجابتك السريعة..." maxlength="50" style="background:rgba(255,255,255,0.1);color:#fff;border-color:#DC143C">' +
-        '<button class="btn btn--primary btn--full" onclick="App.submitDeathAnswer()" style="background:#DC143C">أنقذ نفسك! 🏃</button>' +
+        '<button class="btn btn--primary btn--full" data-action="submitDeathAnswer" style="background:#DC143C">أنقذ نفسك! 🏃</button>' +
       '</div>';
     document.getElementById('deathInput')?.focus();
   },
@@ -755,23 +798,28 @@ const App = {
   },
 
   handleDeathChallengeResult(d) {
-    clearInterval(this.gameTimer);
-    let html = '<div class="text-center" style="max-width:500px">';
+    try {
+      clearInterval(this.gameTimer);
+      let html = '<div class="text-center" style="max-width:500px">';
 
-    if (d.revived.length > 0) {
-      html += '<div class="text-3xl mb-4">🎉</div>';
-      html += '<p class="text-xl font-bold" style="color:#00e676">نجوا من الموت!</p>';
-      html += '<p class="text-lg mt-2">' + d.revived.map(p => escapeHtml(p.name)).join('، ') + '</p>';
+      if (d.revived.length > 0) {
+        html += '<div class="text-3xl mb-4">🎉</div>';
+        html += '<p class="text-xl font-bold" style="color:#00e676">نجوا من الموت!</p>';
+        html += '<p class="text-lg mt-2">' + d.revived.map(p => escapeHtml(p.name)).join('، ') + '</p>';
+      }
+
+      if (d.stillDead.length > 0) {
+        html += '<div class="text-3xl mt-4 mb-2">💀</div>';
+        html += '<p class="text-xl font-bold" style="color:#ff4444">ما نجوا...</p>';
+        html += '<p class="text-lg mt-2">' + d.stillDead.map(p => escapeHtml(p.name)).join('، ') + '</p>';
+      }
+
+      html += '</div>';
+      document.getElementById('gameContent').innerHTML = html;
+    } catch (e) {
+      console.error('handleDeathChallengeResult error:', e);
+      this.showToast('حصل خطأ، حاول مرة ثانية', 'error');
     }
-
-    if (d.stillDead.length > 0) {
-      html += '<div class="text-3xl mt-4 mb-2">💀</div>';
-      html += '<p class="text-xl font-bold" style="color:#ff4444">ما نجوا...</p>';
-      html += '<p class="text-lg mt-2">' + d.stillDead.map(p => escapeHtml(p.name)).join('، ') + '</p>';
-    }
-
-    html += '</div>';
-    document.getElementById('gameContent').innerHTML = html;
   },
 
   // ═══════════════════════════════════════════════════════════════
@@ -786,7 +834,7 @@ const App = {
         '<div class="badge badge--warning mb-4">🎭 اكتب كذبة</div>' +
         '<p class="text-2xl font-bold mb-6">' + escapeHtml(d.question) + '</p>' +
         '<input type="text" class="input mb-4" id="lieInput" placeholder="كذبتك المقنعة..." maxlength="50">' +
-        '<button class="btn btn--primary btn--full" onclick="App.submitLie()">إرسال 🎭</button>' +
+        '<button class="btn btn--primary btn--full" data-action="submitLie">إرسال 🎭</button>' +
       '</div>';
     document.getElementById('lieInput')?.focus();
   },
@@ -835,11 +883,11 @@ const App = {
 
     // إنشاء الكانفاس وأدوات الرسم
     const colors = DRAW_COLORS.map((c, i) =>
-      '<div class="color-swatch' + (i === 0 ? ' active' : '') + '" style="background:' + c + '" onclick="App.setDrawColor(\'' + c + '\',this)"></div>'
+      '<div class="color-swatch' + (i === 0 ? ' active' : '') + '" style="background:' + c + '" data-action="setDrawColor" data-color="' + c + '"></div>'
     ).join('');
 
     const sizes = DRAW_SIZES.map((s, i) =>
-      '<div class="brush-size' + (i === 1 ? ' active' : '') + '" onclick="App.setBrushSize(' + s + ',this)">' +
+      '<div class="brush-size' + (i === 1 ? ' active' : '') + '" data-action="setBrushSize" data-size="' + s + '">' +
         '<div style="width:' + Math.min(s, 20) + 'px;height:' + Math.min(s, 20) + 'px;background:currentColor;border-radius:50%"></div>' +
       '</div>'
     ).join('');
@@ -854,11 +902,11 @@ const App = {
           '<div style="width:2px;height:30px;background:rgba(255,255,255,0.3);margin:0 8px"></div>' +
           sizes +
           '<div style="width:2px;height:30px;background:rgba(255,255,255,0.3);margin:0 8px"></div>' +
-          '<button class="btn--undo" onclick="App.undoStroke()">↩️ تراجع</button>' +
-          '<button class="btn--undo" onclick="App.setDrawColor(\'#ffffff\',this);App.currentSize=20">🧹 ممحاة</button>' +
-          '<button class="btn btn--ghost btn--sm" onclick="App.clearCanvas()" style="margin-right:8px">🗑️</button>' +
+          '<button class="btn--undo" data-action="undoStroke">↩️ تراجع</button>' +
+          '<button class="btn--undo" data-action="setEraser">🧹 ممحاة</button>' +
+          '<button class="btn btn--ghost btn--sm" data-action="clearCanvas" style="margin-right:8px">🗑️</button>' +
         '</div>' +
-        '<button class="btn btn--primary btn--full mt-4" onclick="App.submitDrawing()">أرسل الرسمة 🎨</button>' +
+        '<button class="btn btn--primary btn--full mt-4" data-action="submitDrawing">أرسل الرسمة 🎨</button>' +
       '</div>';
 
     this.initCanvas();
@@ -894,7 +942,7 @@ const App = {
           '<div class="badge badge--info mb-4">🤔 ما هذي الرسمة؟</div>' +
           '<div id="drawingDisplay" style="max-width:400px;margin:0 auto;margin-bottom:20px"></div>' +
           '<input type="text" class="input mb-4" id="guessInput" placeholder="تخمينك..." maxlength="50">' +
-          '<button class="btn btn--primary btn--full" onclick="App.submitGuessDrawful()">إرسال 🤔</button>' +
+          '<button class="btn btn--primary btn--full" data-action="submitGuessDrawful">إرسال 🤔</button>' +
         '</div>';
       document.getElementById('guessInput')?.focus();
     }
@@ -1242,7 +1290,7 @@ const App = {
     ).join('');
 
     const nextBtn = this.isHost
-      ? '<button class="btn btn--primary btn--lg mt-6" onclick="App.requestNextRound()">' + (d.isLastRound ? 'النتائج 🏆' : 'التالي ➡️') + '</button>'
+      ? '<button class="btn btn--primary btn--lg mt-6" data-action="requestNextRound">' + (d.isLastRound ? 'النتائج 🏆' : 'التالي ➡️') + '</button>'
       : '<p class="text-muted mt-4">انتظر المضيف...</p>';
 
     document.getElementById('gameContent').innerHTML =
@@ -1301,7 +1349,7 @@ const App = {
     const actionsEl = document.getElementById('resultsActions');
     if (actionsEl) {
       actionsEl.innerHTML = this.isHost
-        ? '<button class="btn btn--primary btn--lg" onclick="App.backToLobby()">🔄 مرة ثانية</button>'
+        ? '<button class="btn btn--primary btn--lg" data-action="backToLobby">🔄 مرة ثانية</button>'
         : '<p class="text-muted">انتظر المضيف...</p>';
     }
 
