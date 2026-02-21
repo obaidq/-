@@ -288,12 +288,20 @@ function resetAnswers(room) {
 }
 
 /**
- * مسح مؤقت الجولة
+ * مسح مؤقت الجولة (بما فيها مؤقتات التعليق)
  */
 function clearRoundTimer(room) {
   if (room.roundTimer) {
     clearTimeout(room.roundTimer);
     room.roundTimer = null;
+  }
+  if (room._halfTimeTimer) {
+    clearTimeout(room._halfTimeTimer);
+    room._halfTimeTimer = null;
+  }
+  if (room._lastSecondsTimer) {
+    clearTimeout(room._lastSecondsTimer);
+    room._lastSecondsTimer = null;
   }
 }
 
@@ -602,6 +610,10 @@ io.on('connection', (socket) => {
 
     if (allDone) {
       clearRoundTimer(room);
+      if (CONFIG.commentaryEnabled) {
+        const c = generateCommentary('timer', 'allAnswered');
+        if (c) io.to(code).emit('commentary', c);
+      }
       setTimeout(() => handleAllAnswered(room), 800);
     }
   });
@@ -970,12 +982,8 @@ function handleAllAnswered(room) {
       }
       break;
     case 'fakinit':
-      if (room.gameData.phase === 'action' && room.gameData.subRound < room.gameData.maxSubRounds) {
-        clearRoundTimer(room);
-        setTimeout(() => startFakinItSubRound(room), 1500);
-      } else {
-        startFakinItVoting(room);
-      }
+      // After each task, vote (real Jackbox votes after every task)
+      startFakinItVoting(room);
       break;
     case 'triviamurder':
       calculateTriviaMurderResults(room);
@@ -1072,6 +1080,24 @@ function checkIfRoundCanProceed(room) {
 function setRoundTimer(room, timeLimit, onTimeout) {
   clearRoundTimer(room);
 
+  // Half-time commentary (only for rounds >= 15s)
+  if (CONFIG.commentaryEnabled && timeLimit >= 15) {
+    const halfMs = Math.floor(timeLimit / 2) * 1000;
+    room._halfTimeTimer = setTimeout(() => {
+      const c = generateCommentary('timer', 'halfTime');
+      if (c) io.to(room.code).emit('commentary', c);
+    }, halfMs);
+  }
+
+  // Last 5 seconds commentary (only for rounds >= 10s)
+  if (CONFIG.commentaryEnabled && timeLimit >= 10) {
+    const lastMs = (timeLimit - 5) * 1000;
+    room._lastSecondsTimer = setTimeout(() => {
+      const c = generateCommentary('timer', 'lastSeconds');
+      if (c) io.to(room.code).emit('commentary', c);
+    }, lastMs);
+  }
+
   room.roundTimer = setTimeout(() => {
     console.log('⏰ انتهى الوقت! - غرفة:', room.code);
 
@@ -1093,6 +1119,15 @@ function setRoundTimer(room, timeLimit, onTimeout) {
  */
 function setVoteTimer(room, timeLimit, onTimeout) {
   clearRoundTimer(room);
+
+  // Last 5 seconds commentary for voting (only for >= 10s)
+  if (CONFIG.commentaryEnabled && timeLimit >= 10) {
+    const lastMs = (timeLimit - 5) * 1000;
+    room._lastSecondsTimer = setTimeout(() => {
+      const c = generateCommentary('timer', 'lastSeconds');
+      if (c) io.to(room.code).emit('commentary', c);
+    }, lastMs);
+  }
 
   room.roundTimer = setTimeout(() => {
     console.log('⏰ انتهى وقت التصويت! - غرفة:', room.code);
@@ -1621,19 +1656,25 @@ function startGuesspionageFinalRound(room) {
   const sourcePool = pool.length >= 9 ? pool : allQuestions;
   const picked = shuffle(sourcePool).slice(0, 9);
 
-  // Sort by answer percentage — top 3 are the "most popular"
+  // Sort by answer percentage — top 3 are the "most popular" (ranked #1, #2, #3)
   const sorted = [...picked].sort((a, b) => b.a - a.a);
-  const top3Ids = new Set(sorted.slice(0, 3).map(q => q.q));
+  // Real Jackbox scoring: #1=4000, #2=2000, #3=1000
+  const rankPoints = { 0: 4000, 1: 2000, 2: 1000 };
+  const top3Map = new Map(); // question text → { rank, points }
+  sorted.slice(0, 3).forEach((q, i) => {
+    top3Map.set(q.q, { rank: i + 1, points: rankPoints[i] });
+  });
 
   const options = shuffle(picked.map(q => ({
     text: q.q.replace(/كم نسبة /, '').replace(/؟$/, ''),
     percentage: q.a,
-    isTop3: top3Ids.has(q.q)
+    isTop3: top3Map.has(q.q),
+    rank: top3Map.has(q.q) ? top3Map.get(q.q).rank : 0,
+    rankPoints: top3Map.has(q.q) ? top3Map.get(q.q).points : 0
   })));
 
   room.gameData.phase = 'final';
   room.gameData.finalOptions = options;
-  room.gameData.top3Ids = Array.from(top3Ids);
 
   resetAnswers(room);
   const timeLimit = 30;
@@ -1674,7 +1715,7 @@ function calculateGuesspionageFinalResults(room) {
       picks.forEach(pickIdx => {
         if (options[pickIdx] && options[pickIdx].isTop3) {
           correctPicks++;
-          points += Math.round(options[pickIdx].percentage * 10); // Higher % = more points
+          points += options[pickIdx].rankPoints; // #1=4000, #2=2000, #3=1000
         }
       });
     }
@@ -1700,7 +1741,9 @@ function calculateGuesspionageFinalResults(room) {
       id: i,
       text: o.text,
       percentage: o.percentage,
-      isTop3: o.isTop3
+      isTop3: o.isTop3,
+      rank: o.rank || 0,
+      rankPoints: o.rankPoints || 0
     })),
     playerResults,
     players: getPlayerList(room),
@@ -1773,15 +1816,9 @@ function startFakinItSubRound(room) {
     });
   });
 
-  // بعد انتهاء وقت المهمة
+  // After task timer, go to voting for this sub-round (real Jackbox: vote after every task)
   room.roundTimer = setTimeout(() => {
-    if (room.gameData.subRound < room.gameData.maxSubRounds) {
-      // More sub-rounds to go
-      startFakinItSubRound(room);
-    } else {
-      // All sub-rounds done, time to vote
-      startFakinItVoting(room);
-    }
+    startFakinItVoting(room);
   }, (timeLimit * 1000) + 2000);
 }
 
@@ -1839,20 +1876,36 @@ function calculateFakinItResults(room) {
     }
   });
 
-  const caught = mostVotedId === fakerId;
+  // Real Jackbox (original): unanimous vote catches faker
+  // Real Jackbox (All Night Long): majority vote catches faker
+  // We use majority for better gameplay
+  const totalVoters = Array.from(room.players.values()).filter(p => p.currentVote && p.currentVote !== '__timeout__').length;
+  const fakerVotes = votes[fakerId] || 0;
+  const caught = fakerVotes > totalVoters / 2; // Majority catches faker
+
+  // Escalating points per sub-round (real Jackbox: +25 per task)
+  const subRound = room.gameData.subRound || 1;
+  const sleuthBase = 75 + (subRound * 25); // 100, 125, 150...
+  const fakerEscapeBase = 75 + (subRound * 25);
 
   if (caught) {
-    // المزيّف انكشف! كل اللي صوتوا عليه ياخذون 500
+    // Sleuth bonus: everyone who correctly voted for faker
     room.players.forEach(p => {
       if (p.currentVote === fakerId) {
-        p.score += 500;
+        p.score += sleuthBase + (5 * fakerVotes); // caught bonus
       }
     });
   } else {
-    // المزيّف نجا! ياخذ 1000 نقطة
+    // Faker escapes this task
     if (faker) {
-      faker.score += 1000;
+      faker.score += fakerEscapeBase;
     }
+    // Sleuth bonus still awarded to those who guessed right (even if not caught)
+    room.players.forEach(p => {
+      if (p.currentVote === fakerId) {
+        p.score += Math.round(sleuthBase * 0.5);
+      }
+    });
   }
 
   // النتائج التفصيلية
@@ -1866,6 +1919,10 @@ function calculateFakinItResults(room) {
     };
   });
 
+  // If caught OR all sub-rounds done: show round results
+  // If not caught and more sub-rounds: show interim result then continue
+  const hasMoreTasks = room.gameData.subRound < room.gameData.maxSubRounds;
+
   io.to(room.code).emit('roundResults', {
     game: 'fakinit',
     round: room.currentRound + 1,
@@ -1875,10 +1932,21 @@ function calculateFakinItResults(room) {
     fakerName: faker ? faker.name : 'مجهول',
     task: room.gameData.task,
     category: room.gameData.categoryName,
+    subRound: room.gameData.subRound,
+    maxSubRounds: room.gameData.maxSubRounds,
+    hasMoreTasks: !caught && hasMoreTasks,
     voteDetails: Object.values(voteDetails),
     players: getPlayerList(room),
     isLastRound: room.currentRound >= room.maxRounds - 1
   });
+
+  // If not caught and more sub-rounds remain, auto-continue after delay
+  if (!caught && hasMoreTasks) {
+    room.roundTimer = setTimeout(() => {
+      resetAnswers(room);
+      startFakinItSubRound(room);
+    }, 4000); // 4s to see results before next task
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════

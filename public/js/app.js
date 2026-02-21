@@ -86,6 +86,13 @@ const App = {
   init() {
     this.socket = io();
     this.myId = this.socket.id;
+
+    // استعادة بيانات الاتصال من sessionStorage (للعودة بعد refresh)
+    try {
+      this._savedRoom = sessionStorage.getItem('abuabed_room') || null;
+      this._savedName = sessionStorage.getItem('abuabed_name') || null;
+    } catch (e) { /* sessionStorage not available */ }
+
     this.setupSocketEvents();
 
     // تهيئة نظام الصوت
@@ -257,6 +264,7 @@ const App = {
       this.currentRoom = data.code;
       this._savedRoom = data.code;
       this._savedName = document.getElementById('hostNameInput')?.value?.trim();
+      this._persistSession();
       this.isHost = true;
       document.getElementById('displayRoomCode').textContent = data.code;
       this.updatePlayers(data.players);
@@ -270,6 +278,7 @@ const App = {
       this.currentRoom = data.code;
       this._savedRoom = data.code;
       this._savedName = document.getElementById('playerNameInput')?.value?.trim();
+      this._persistSession();
       document.getElementById('displayRoomCode').textContent = data.code;
       this.updatePlayers(data.players);
       this.showScreen('lobbyScreen');
@@ -295,6 +304,9 @@ const App = {
 
     s.on('playerUpdated', data => this.updatePlayers(data.players));
     s.on('error', data => this.showToast(data.message, 'error'));
+
+    // ── Standalone commentary (timer warnings, hype) ──
+    s.on('commentary', data => this.showCommentary(data));
 
     // ── بدء اللعبة ──
     s.on('gameStarted', data => {
@@ -456,6 +468,23 @@ const App = {
     }
   },
 
+  // حفظ بيانات الجلسة لإعادة الاتصال
+  _persistSession() {
+    try {
+      if (this._savedRoom) sessionStorage.setItem('abuabed_room', this._savedRoom);
+      if (this._savedName) sessionStorage.setItem('abuabed_name', this._savedName);
+    } catch (e) { /* sessionStorage not available */ }
+  },
+
+  _clearSession() {
+    try {
+      sessionStorage.removeItem('abuabed_room');
+      sessionStorage.removeItem('abuabed_name');
+    } catch (e) {}
+    this._savedRoom = null;
+    this._savedName = null;
+  },
+
   // ═══════════════════════════════════════════════════════════════
   // إجراءات الغرفة
   // ═══════════════════════════════════════════════════════════════
@@ -475,6 +504,7 @@ const App = {
     AudioEngine.click();
     this._savedName = name;
     this._savedRoom = code;
+    this._persistSession();
     this.socket.emit('joinRoom', { code, playerName: name });
   },
 
@@ -486,6 +516,7 @@ const App = {
     AudioEngine.click();
     this._savedName = name;
     this._savedRoom = code;
+    this._persistSession();
     this.socket.emit('joinAsAudience', { code, playerName: name });
   },
 
@@ -1486,12 +1517,15 @@ const App = {
           resultHtml = '<div class="gspy-results">' +
             '<div class="gspy-badge gspy-badge--featured mb-4">🏆 نتائج الجولة الأخيرة</div>' +
             '<div class="gspy-final-grid" style="margin-bottom:16px">';
+          const rankIcons = { 1: '🥇', 2: '🥈', 3: '🥉' };
           d.options.forEach(o => {
             const cls = o.isTop3 ? 'gspy-final-option--selected' : '';
+            const rankBadge = o.rank ? '<div class="gspy-rank-badge">' + rankIcons[o.rank] + ' #' + o.rank + ' (+' + o.rankPoints + ')</div>' : '';
             resultHtml +=
               '<div class="gspy-final-option ' + cls + '" style="cursor:default">' +
+                rankBadge +
                 escapeHtml(o.text) +
-                '<div class="text-sm mt-1" style="opacity:0.7">' + o.percentage + '% ' + (o.isTop3 ? '⭐' : '') + '</div>' +
+                '<div class="text-sm mt-1" style="opacity:0.7">' + o.percentage + '%</div>' +
               '</div>';
           });
           resultHtml += '</div>';
