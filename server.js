@@ -26,14 +26,72 @@ const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
+
+// ── CORS: تقييد الأصول المسموحة ──
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim())
+  : null; // null = السماح لكل الأصول في التطوير فقط
+
 const io = new Server(server, {
   cors: {
-    origin: '*',
+    origin: ALLOWED_ORIGINS || '*',
     methods: ['GET', 'POST']
   },
   pingTimeout: 60000,
   pingInterval: 25000
 });
+
+// ── Rate Limiter لأحداث Socket ──
+function createRateLimiter(maxPerSecond) {
+  const clients = new Map();
+  return function(socketId) {
+    const now = Date.now();
+    const record = clients.get(socketId);
+    if (!record) {
+      clients.set(socketId, { count: 1, resetAt: now + 1000 });
+      return true;
+    }
+    if (now > record.resetAt) {
+      record.count = 1;
+      record.resetAt = now + 1000;
+      return true;
+    }
+    record.count++;
+    return record.count <= maxPerSecond;
+  };
+}
+
+const rateLimiters = {
+  submitAnswer: createRateLimiter(3),
+  submitVote: createRateLimiter(3),
+  sendEmoji: createRateLimiter(2),
+  createRoom: createRateLimiter(1),
+  joinRoom: createRateLimiter(2),
+  submitDrawing: createRateLimiter(2)
+};
+
+/**
+ * التحقق من صحة بيانات الرسم
+ */
+function validateDrawingData(drawing) {
+  if (!drawing || typeof drawing !== 'string') return false;
+  // حد أقصى 2MB للبيانات
+  if (drawing.length > 2 * 1024 * 1024) return false;
+  try {
+    const strokes = JSON.parse(drawing);
+    if (!Array.isArray(strokes)) return false;
+    if (strokes.length > 500) return false;
+    for (const stroke of strokes) {
+      if (!stroke || !Array.isArray(stroke.points)) return false;
+      if (stroke.points.length > 5000) return false;
+      if (typeof stroke.color !== 'string' || stroke.color.length > 20) return false;
+      if (typeof stroke.size !== 'number' || stroke.size < 1 || stroke.size > 50) return false;
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
 
 // تقديم الملفات الثابتة
 app.use(express.static(path.join(__dirname, 'public')));
@@ -112,9 +170,11 @@ function createPlayer(id, name, isHost = false) {
     avatar: AVATARS[index],
     color: COLORS[index % COLORS.length],
     score: 0,
+    streak: 0,
     isHost,
     isReady: false,
     isAlive: true,
+    isAudience: false,
     currentAnswer: null,
     currentVote: null,
     connectedAt: Date.now()
@@ -134,12 +194,13 @@ function sanitizeName(name) {
  * الحصول على قائمة اللاعبين بصيغة قابلة للإرسال
  */
 function getPlayerList(room) {
-  return Array.from(room.players.values()).map(p => ({
+  return Array.from(room.players.values()).filter(p => !p.isAudience).map(p => ({
     id: p.id,
     name: p.name,
     avatar: p.avatar,
     color: p.color,
     score: p.score,
+    streak: p.streak || 0,
     isHost: p.isHost,
     isReady: p.isReady,
     isAlive: p.isAlive
@@ -244,6 +305,7 @@ io.on('connection', (socket) => {
   // إنشاء غرفة جديدة
   // ─────────────────────────────────────────────
   socket.on('createRoom', (playerName) => {
+    if (!rateLimiters.createRoom(socket.id)) return;
     // التحقق من صحة الاسم
     if (!playerName || typeof playerName !== 'string' || playerName.trim().length === 0) {
       return socket.emit('error', { message: 'الرجاء إدخال اسم صحيح!' });
@@ -282,6 +344,7 @@ io.on('connection', (socket) => {
   // الانضمام لغرفة موجودة
   // ─────────────────────────────────────────────
   socket.on('joinRoom', ({ code, playerName }) => {
+    if (!rateLimiters.joinRoom(socket.id)) return;
     // التحقق من المدخلات
     if (!code || typeof code !== 'string') {
       return socket.emit('error', { message: 'كود الغرفة غير صحيح!' });
@@ -333,6 +396,7 @@ io.on('connection', (socket) => {
   // تبديل حالة الجاهزية
   // ─────────────────────────────────────────────
   socket.on('playerReady', (code) => {
+    if (typeof code !== 'string' || !/^[A-Z2-9]{4}$/.test(code)) return;
     const room = rooms.get(code);
     if (!room) return;
 
@@ -417,6 +481,7 @@ io.on('connection', (socket) => {
   // إرسال إجابة
   // ─────────────────────────────────────────────
   socket.on('submitAnswer', ({ code, answer }) => {
+    if (!rateLimiters.submitAnswer(socket.id)) return;
     const room = rooms.get(code);
     if (!room || room.state !== 'playing') return;
 
@@ -462,6 +527,7 @@ io.on('connection', (socket) => {
   // إرسال تصويت
   // ─────────────────────────────────────────────
   socket.on('submitVote', ({ code, voteId }) => {
+    if (!rateLimiters.submitVote(socket.id)) return;
     const room = rooms.get(code);
     if (!room || room.state !== 'playing') return;
 
@@ -495,6 +561,7 @@ io.on('connection', (socket) => {
   // إرسال رسمة (لعبة ارسم لي)
   // ─────────────────────────────────────────────
   socket.on('submitDrawing', ({ code, drawing }) => {
+    if (!rateLimiters.submitDrawing(socket.id)) return;
     const room = rooms.get(code);
     if (!room || room.state !== 'playing' || room.currentGame !== 'drawful') return;
 
@@ -503,6 +570,11 @@ io.on('connection', (socket) => {
 
     // التحقق أن هذا اللاعب هو الرسام
     if (room.gameData.drawerId !== socket.id) return;
+
+    // التحقق من صحة بيانات الرسم
+    if (!validateDrawingData(drawing)) {
+      return socket.emit('error', { message: 'بيانات الرسمة غير صالحة!' });
+    }
 
     room.gameData.drawing = drawing;
     touchRoom(room);
@@ -517,6 +589,7 @@ io.on('connection', (socket) => {
   // طلب الجولة التالية
   // ─────────────────────────────────────────────
   socket.on('requestNextRound', (code) => {
+    if (typeof code !== 'string' || !/^[A-Z2-9]{4}$/.test(code)) return;
     const room = rooms.get(code);
     if (!room) return;
     if (socket.id !== room.hostId) return socket.emit('error', { message: 'بس المضيف يقدر يتحكم!' });
@@ -540,6 +613,7 @@ io.on('connection', (socket) => {
   // العودة إلى اللوبي
   // ─────────────────────────────────────────────
   socket.on('backToLobby', (code) => {
+    if (typeof code !== 'string' || !/^[A-Z2-9]{4}$/.test(code)) return;
     const room = rooms.get(code);
     if (!room) return;
 
@@ -566,6 +640,46 @@ io.on('connection', (socket) => {
     });
 
     console.log('🔄 الغرفة رجعت للوبي:', code);
+  });
+
+  // ─────────────────────────────────────────────
+  // إيموجي ردود الفعل
+  // ─────────────────────────────────────────────
+  socket.on('sendEmoji', ({ code, emoji }) => {
+    if (!rateLimiters.sendEmoji(socket.id)) return;
+    const room = rooms.get(code);
+    if (!room || !room.players.has(socket.id)) return;
+    const validEmojis = ['😂', '🔥', '👏', '😱', '💀', '❤️', '👎', '🤣'];
+    if (!validEmojis.includes(emoji)) return;
+    socket.to(code).emit('emojiReaction', { emoji, playerId: socket.id });
+  });
+
+  // ─────────────────────────────────────────────
+  // الانضمام كمتفرج (أثناء اللعب)
+  // ─────────────────────────────────────────────
+  socket.on('joinAsAudience', ({ code, playerName }) => {
+    if (!code || typeof code !== 'string') return;
+    if (!playerName || typeof playerName !== 'string') return;
+
+    const roomCode = code.toUpperCase().trim();
+    const room = rooms.get(roomCode);
+    if (!room) return socket.emit('error', { message: 'الغرفة غير موجودة!' });
+
+    const player = createPlayer(socket.id, playerName);
+    player.isAudience = true;
+    room.players.set(socket.id, player);
+    socket.join(roomCode);
+
+    socket.emit('joinedAsAudience', {
+      code: room.code,
+      players: getPlayerList(room),
+      game: room.currentGame
+    });
+
+    io.to(roomCode).emit('audienceJoined', {
+      name: player.name,
+      audienceCount: Array.from(room.players.values()).filter(p => p.isAudience).length
+    });
   });
 
   // ─────────────────────────────────────────────
@@ -1063,6 +1177,14 @@ function calculateGuesspionageResults(room) {
       }
     }
 
+    // مكافأة السلسلة
+    if (points > 0) {
+      p.streak = (p.streak || 0) + 1;
+      if (p.streak > 1) points += p.streak * 50;
+    } else {
+      p.streak = 0;
+    }
+
     p.score += points;
 
     playerResults.push({
@@ -1070,6 +1192,7 @@ function calculateGuesspionageResults(room) {
       playerName: p.name,
       guess,
       points,
+      streak: p.streak || 0,
       diff: guess !== null ? Math.abs(guess - correctAnswer) : null
     });
   });
@@ -1257,7 +1380,22 @@ const deathChallenges = [
   'اكتب اسم أي مدينة سعودية!',
   'اكتب أي رقم زوجي!',
   'اكتب اسم أي أكلة سعودية!',
-  'اكتب اسم أي كوكب!'
+  'اكتب اسم أي كوكب!',
+  'اكتب اسم لاعب كرة قدم سعودي!',
+  'اكتب رقم فردي!',
+  'اكتب اسم تطبيق في جوالك!',
+  'اكتب اسم فيلم عربي!',
+  'اكتب شي لونه أحمر!',
+  'اكتب اسم أغنية سعودية أو عربية!',
+  'اكتب اسم محل أكل تحبه!',
+  'اكتب أي كلمة تبدأ بحرف العين!',
+  'اكتب شي تلقاه في المطبخ!',
+  'اكتب اسم بحر أو محيط!',
+  'اكتب اسم لعبة فيديو!',
+  'اكتب اسم مادة دراسية!',
+  'اكتب شي تلبسه!',
+  'اكتب اسم عاصمة عربية!',
+  'اكتب رقم أكبر من 100!'
 ];
 
 /**
@@ -1327,11 +1465,15 @@ function calculateTriviaMurderResults(room) {
 
     if (p.currentAnswer !== null && p.currentAnswer !== '__timeout__' && parseInt(p.currentAnswer) === correctIndex) {
       // إجابة صحيحة!
-      p.score += 100;
-      survivors.push({ id: p.id, name: p.name });
+      p.streak = (p.streak || 0) + 1;
+      let points = 100;
+      if (p.streak > 1) points += p.streak * 25; // مكافأة السلسلة
+      p.score += points;
+      survivors.push({ id: p.id, name: p.name, streak: p.streak });
     } else {
       // إجابة خطأ أو ما جاوب = الموت
       p.isAlive = false;
+      p.streak = 0;
       newlyDead.push({ id: p.id, name: p.name });
     }
   });
