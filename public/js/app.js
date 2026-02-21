@@ -625,7 +625,9 @@ const App = {
   // اللاعب المميز يخمّن النسبة
   handleGuesspionageFeatured(d) {
     document.getElementById('gameRound').textContent = 'الجولة ' + d.round + ' من ' + d.maxRounds;
+    document.getElementById('gameHint').textContent = '🎯 أنت المميز! خمّن النسبة بدقة';
     this.startTimer(d.timeLimit);
+    AudioEngine.reveal();
     document.getElementById('gameContent').innerHTML =
       '<div class="gspy-featured-container">' +
         '<div class="gspy-badge gspy-badge--featured">🎯 أنت اللاعب المميز!</div>' +
@@ -634,8 +636,8 @@ const App = {
           '<p class="gspy-question-text">' + escapeHtml(d.question) + '</p>' +
         '</div>' +
         '<div class="gspy-gauge-container">' +
-          '<div class="gspy-gauge" id="gspyGauge">' +
-            '<svg viewBox="0 0 200 120" class="gspy-gauge-svg">' +
+          '<div class="gspy-gauge" id="gspyGauge" role="img" aria-label="مقياس النسبة المئوية">' +
+            '<svg viewBox="0 0 200 120" class="gspy-gauge-svg" aria-hidden="true">' +
               '<defs>' +
                 '<linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">' +
                   '<stop offset="0%" style="stop-color:#ff4444"/>' +
@@ -649,8 +651,8 @@ const App = {
               '<line x1="100" y1="100" x2="100" y2="30" stroke="#fff" stroke-width="3" stroke-linecap="round" id="gaugeLine" class="gspy-needle-line"/>' +
             '</svg>' +
           '</div>' +
-          '<div class="gspy-percent-display" id="percentDisplay">50%</div>' +
-          '<input type="range" class="gspy-slider" id="percentSlider" min="0" max="100" value="50" oninput="App._updateGauge(this.value)">' +
+          '<div class="gspy-percent-display" id="percentDisplay" aria-live="polite" role="status">50%</div>' +
+          '<input type="range" class="gspy-slider" id="percentSlider" min="0" max="100" value="50" aria-label="اختر نسبة تخمينك من 0 إلى 100" oninput="App._updateGauge(this.value)">' +
           '<div class="gspy-slider-labels"><span>0%</span><span>50%</span><span>100%</span></div>' +
         '</div>' +
         '<button class="btn btn--primary btn--lg btn--full gspy-submit-btn" data-action="submitGuess">تأكيد تخميني! 📊</button>' +
@@ -661,6 +663,7 @@ const App = {
   // باقي اللاعبين ينتظرون اللاعب المميز
   handleGuesspionageWaitFeatured(d) {
     document.getElementById('gameRound').textContent = 'الجولة ' + d.round + ' من ' + d.maxRounds;
+    document.getElementById('gameHint').textContent = '⏳ انتظر ' + escapeHtml(d.featuredPlayerName) + ' يخمّن...';
     this.startTimer(d.timeLimit);
     document.getElementById('gameContent').innerHTML =
       '<div class="gspy-wait-container">' +
@@ -680,6 +683,7 @@ const App = {
   // اللاعب المميز ينتظر بعد ما خمّن
   handleGuesspionageFeaturedWaiting(d) {
     document.getElementById('gameRound').textContent = 'الجولة ' + d.round + ' من ' + d.maxRounds;
+    document.getElementById('gameHint').textContent = '📊 تخمينك: ' + d.yourGuess + '% — الباقين يراهنون الحين';
     this.startTimer(d.timeLimit);
     document.getElementById('gameContent').innerHTML =
       '<div class="gspy-result-container">' +
@@ -701,7 +705,9 @@ const App = {
   // مرحلة التحدي - أعلى أو أقل
   handleGuesspionageChallenge(d) {
     document.getElementById('gameRound').textContent = 'الجولة ' + d.round + ' من ' + d.maxRounds;
+    document.getElementById('gameHint').textContent = '🔮 الجواب أعلى أو أقل من ' + d.featuredGuess + '%؟';
     this.startTimer(d.timeLimit);
+    AudioEngine.whoosh();
     document.getElementById('gameContent').innerHTML =
       '<div class="gspy-challenge-container">' +
         '<div class="gspy-question-card gspy-question-card--sm">' +
@@ -713,11 +719,11 @@ const App = {
         '</div>' +
         '<div class="gspy-challenge-prompt">الجواب الصحيح أعلى أو أقل؟</div>' +
         '<div class="gspy-bet-buttons">' +
-          '<button class="gspy-bet-btn gspy-bet-btn--higher" data-action="submitGuess" data-bet="higher">' +
+          '<button class="gspy-bet-btn gspy-bet-btn--higher" data-action="submitGuess" data-bet="higher" aria-label="الجواب أعلى من التخمين">' +
             '<span class="gspy-bet-arrow">▲</span>' +
             '<span class="gspy-bet-text">أعلى</span>' +
           '</button>' +
-          '<button class="gspy-bet-btn gspy-bet-btn--lower" data-action="submitGuess" data-bet="lower">' +
+          '<button class="gspy-bet-btn gspy-bet-btn--lower" data-action="submitGuess" data-bet="lower" aria-label="الجواب أقل من التخمين">' +
             '<span class="gspy-bet-arrow">▼</span>' +
             '<span class="gspy-bet-text">أقل</span>' +
           '</button>' +
@@ -1332,6 +1338,8 @@ const App = {
 
     switch (d.game) {
       case 'guesspionage':
+        AudioEngine.drumRoll(1.5);
+        setTimeout(() => AudioEngine.reveal(), 1600);
         resultHtml =
           '<div class="gspy-results">' +
             '<div class="gspy-results-answer">' +
@@ -1762,22 +1770,8 @@ const App = {
 // حقن الرسوم المتحركة
 // ═══════════════════════════════════════════════════════════════════
 
-const animStyle = document.createElement('style');
-animStyle.textContent = `
-  @keyframes slideIn { from { transform: translateY(-100%); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
-  @keyframes slideOut { from { transform: translateY(0); opacity: 1 } to { transform: translateY(-100%); opacity: 0 } }
-  @keyframes confettiFall {
-    0% { top: -20px; transform: rotate(0deg) scale(1) }
-    100% { top: 100vh; transform: rotate(720deg) scale(0.5) }
-  }
-  @keyframes bounce { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-20px) } }
-  #toastContainer { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; align-items: center; pointer-events: none }
-  #toastContainer > * { pointer-events: auto }
-  .spinner { width: 48px; height: 48px; border: 4px solid rgba(255,255,255,0.2); border-top-color: var(--theme-accent, #FFD93D); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto }
-  @keyframes spin { to { transform: rotate(360deg) } }
-  .player-avatar--dead { opacity: 0.5; filter: grayscale(0.8) }
-`;
-document.head.appendChild(animStyle);
+// All animations, spinner, confetti, toast, dead-player styles
+// are now defined in game-screens.css (no more inline style injection)
 
 // ═══════════════════════════════════════════════════════════════════
 // تشغيل التطبيق
