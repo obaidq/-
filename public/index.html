@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="/css/layout.css">
   <link rel="stylesheet" href="/css/patterns.css">
   <link rel="stylesheet" href="/css/game-screens.css">
+  <link rel="stylesheet" href="/css/avatars.css">
 </head>
 <body data-theme="hub" data-intensity="party">
   <!-- Background System: base → pattern → glow → overlay -->
@@ -79,6 +80,16 @@
         <label class="text-sm text-muted mb-1 block">اسمك</label>
         <input type="text" id="hostNameInput" class="input" placeholder="مثال: أبو فهد..." maxlength="12" autocomplete="off">
       </div>
+      <div class="mb-4">
+        <label class="text-sm text-muted mb-1 block">شخصيتك</label>
+        <button type="button" class="avatar-select-btn" id="hostAvatarBtn" onclick="App.openAvatarPicker('host')">
+          <div class="avatar-select-btn__preview" id="hostAvatarPreview"><span style="font-size:28px">🎭</span></div>
+          <div class="avatar-select-btn__text">
+            <span class="avatar-select-btn__label">اضغط لاختيار شخصية</span>
+            <span class="avatar-select-btn__name" id="hostAvatarName">اختر شخصيتك!</span>
+          </div>
+        </button>
+      </div>
       <button class="btn btn--primary btn--lg btn--full mb-3" onclick="App.createRoom()">يلا نبدأ! 🎉</button>
       <button class="btn btn--ghost btn--full" onclick="App.showScreen('menuScreen')">← رجوع</button>
     </div>
@@ -100,6 +111,16 @@
       <div class="mb-4">
         <label class="text-sm text-muted mb-1 block">اسمك</label>
         <input type="text" id="playerNameInput" class="input" placeholder="مثال: أبو سعود..." maxlength="12" autocomplete="off">
+      </div>
+      <div class="mb-4">
+        <label class="text-sm text-muted mb-1 block">شخصيتك</label>
+        <button type="button" class="avatar-select-btn" id="joinAvatarBtn" onclick="App.openAvatarPicker('join')">
+          <div class="avatar-select-btn__preview" id="joinAvatarPreview"><span style="font-size:28px">🎭</span></div>
+          <div class="avatar-select-btn__text">
+            <span class="avatar-select-btn__label">اضغط لاختيار شخصية</span>
+            <span class="avatar-select-btn__name" id="joinAvatarName">اختر شخصيتك!</span>
+          </div>
+        </button>
       </div>
       <button class="btn btn--primary btn--lg btn--full mb-3" onclick="App.joinRoom()">انضم! 🎮</button>
       <button class="btn btn--secondary btn--full mb-3" onclick="App.joinAsAudience()">👀 انضم كمتفرج</button>
@@ -388,6 +409,7 @@
 
   <!-- App Scripts -->
   <script src="/js/audio.js"></script>
+  <script src="/js/avatars.js"></script>
   <script src="/js/app.js"></script>
 </body>
 </html>

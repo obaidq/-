@@ -173,9 +173,9 @@ function shuffle(array) {
 /**
  * إنشاء كائن لاعب جديد
  */
-function createPlayer(id, name, isHost = false) {
+function createPlayer(id, name, isHost = false, avatarData = null) {
   const index = Math.floor(Math.random() * AVATARS.length);
-  return {
+  const player = {
     id,
     name: sanitizeName(name),
     avatar: AVATARS[index],
@@ -190,6 +190,33 @@ function createPlayer(id, name, isHost = false) {
     currentVote: null,
     connectedAt: Date.now()
   };
+  // Rich avatar data from the new character selection system
+  if (avatarData && typeof avatarData === 'object') {
+    player.avatarData = sanitizeAvatarData(avatarData);
+    if (avatarData.color) player.color = String(avatarData.color).replace(/[^#a-fA-F0-9]/g, '').substring(0, 7);
+    if (avatarData.icon) player.avatar = String(avatarData.icon).substring(0, 4);
+  }
+  return player;
+}
+
+/**
+ * تنظيف بيانات الأفاتار من المدخلات الخطيرة
+ */
+function sanitizeAvatarData(data) {
+  if (!data || typeof data !== 'object') return null;
+  const safe = {};
+  const allowedTypes = ['dicebear', 'animal', 'pixel', 'notion', 'emoji'];
+  safe.type = allowedTypes.includes(data.type) ? data.type : 'emoji';
+  if (data.style) safe.style = String(data.style).replace(/[^a-z-]/g, '').substring(0, 30);
+  if (data.seed) safe.seed = String(data.seed).replace(/[<>&"'/\\]/g, '').substring(0, 50);
+  if (data.color) safe.color = String(data.color).replace(/[^#a-fA-F0-9]/g, '').substring(0, 7);
+  if (data.icon) safe.icon = String(data.icon).substring(0, 4);
+  if (data.nameAr) safe.nameAr = String(data.nameAr).replace(/[<>&"'/\\]/g, '').substring(0, 20);
+  if (typeof data.animalIndex === 'number') safe.animalIndex = Math.max(0, Math.min(11, Math.floor(data.animalIndex)));
+  if (typeof data.classIndex === 'number') safe.classIndex = Math.max(0, Math.min(7, Math.floor(data.classIndex)));
+  if (typeof data.faceIndex === 'number') safe.faceIndex = Math.max(0, Math.min(7, Math.floor(data.faceIndex)));
+  if (data.emoji) safe.emoji = String(data.emoji).substring(0, 4);
+  return safe;
 }
 
 /**
@@ -209,6 +236,7 @@ function getPlayerList(room) {
     id: p.id,
     name: p.name,
     avatar: p.avatar,
+    avatarData: p.avatarData || null,
     color: p.color,
     score: p.score,
     streak: p.streak || 0,
@@ -323,8 +351,12 @@ io.on('connection', (socket) => {
   // ─────────────────────────────────────────────
   // إنشاء غرفة جديدة
   // ─────────────────────────────────────────────
-  socket.on('createRoom', (playerName) => {
+  socket.on('createRoom', (data) => {
     if (!rateLimiters.createRoom(socket.id)) return;
+    // دعم الصيغة القديمة (string) والجديدة (object)
+    const playerName = typeof data === 'string' ? data : (data && data.playerName);
+    const avatarData = typeof data === 'object' ? data.avatarData : null;
+
     // التحقق من صحة الاسم
     if (!playerName || typeof playerName !== 'string' || playerName.trim().length === 0) {
       return socket.emit('error', { message: 'الرجاء إدخال اسم صحيح!' });
@@ -347,7 +379,7 @@ io.on('connection', (socket) => {
     };
 
     // إضافة المضيف كأول لاعب
-    room.players.set(socket.id, createPlayer(socket.id, playerName, true));
+    room.players.set(socket.id, createPlayer(socket.id, playerName, true, avatarData));
     rooms.set(code, room);
     socket.join(code);
 
@@ -362,7 +394,7 @@ io.on('connection', (socket) => {
   // ─────────────────────────────────────────────
   // الانضمام لغرفة موجودة
   // ─────────────────────────────────────────────
-  socket.on('joinRoom', ({ code, playerName }) => {
+  socket.on('joinRoom', ({ code, playerName, avatarData }) => {
     if (!rateLimiters.joinRoom(socket.id)) return;
     // التحقق من المدخلات
     if (!code || typeof code !== 'string') {
@@ -393,7 +425,7 @@ io.on('connection', (socket) => {
     }
 
     // إضافة اللاعب
-    room.players.set(socket.id, createPlayer(socket.id, playerName));
+    room.players.set(socket.id, createPlayer(socket.id, playerName, false, avatarData));
     socket.join(roomCode);
     touchRoom(room);
 
@@ -625,7 +657,7 @@ io.on('connection', (socket) => {
     const answeredNames = [];
     room.players.forEach((p, id) => {
       if (p.currentAnswer !== null) {
-        answeredNames.push({ name: p.name, avatar: p.avatar || '🎮', color: p.color || '#4FC3F7' });
+        answeredNames.push({ name: p.name, avatar: p.avatar || '🎮', avatarData: p.avatarData || null, color: p.color || '#4FC3F7' });
       }
     });
 
@@ -816,7 +848,7 @@ io.on('connection', (socket) => {
   // ─────────────────────────────────────────────
   // الانضمام كمتفرج (أثناء اللعب)
   // ─────────────────────────────────────────────
-  socket.on('joinAsAudience', ({ code, playerName }) => {
+  socket.on('joinAsAudience', ({ code, playerName, avatarData }) => {
     if (!code || typeof code !== 'string') return;
     if (!playerName || typeof playerName !== 'string') return;
 
@@ -824,7 +856,7 @@ io.on('connection', (socket) => {
     const room = rooms.get(roomCode);
     if (!room) return socket.emit('error', { message: 'الغرفة غير موجودة!' });
 
-    const player = createPlayer(socket.id, playerName);
+    const player = createPlayer(socket.id, playerName, false, avatarData);
     player.isAudience = true;
     room.players.set(socket.id, player);
     socket.join(roomCode);
@@ -1354,6 +1386,7 @@ function calculateQuiplashResults(room) {
         voterBreakdown[p.currentVote].push({
           name: p.name,
           avatar: p.avatar,
+          avatarData: p.avatarData || null,
           color: p.color
         });
       }
@@ -1409,12 +1442,14 @@ function calculateQuiplashResults(room) {
       playerId: id,
       playerName: player.name,
       playerAvatar: player.avatar,
+      playerAvatarData: player.avatarData || null,
       answer: player.currentAnswer,
       votes: voteCount,
       points,
       quiplash,
       jinx: isJinx,
-      avatar: player.avatar
+      avatar: player.avatar,
+      avatarData: player.avatarData || null
     };
   });
 

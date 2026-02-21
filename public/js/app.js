@@ -534,11 +534,40 @@ const App = {
   // إجراءات الغرفة
   // ═══════════════════════════════════════════════════════════════
 
+  // ═══════════════════════════════════════════════════════════════
+  // Avatar Selection Integration
+  // ═══════════════════════════════════════════════════════════════
+
+  _hostAvatarData: null,
+  _joinAvatarData: null,
+
+  openAvatarPicker(context) {
+    if (typeof AudioEngine !== 'undefined') AudioEngine.click();
+    AvatarSystem.openPicker((avatarData) => {
+      if (context === 'host') {
+        this._hostAvatarData = avatarData;
+        this._updateAvatarButton('host', avatarData);
+      } else {
+        this._joinAvatarData = avatarData;
+        this._updateAvatarButton('join', avatarData);
+      }
+    });
+  },
+
+  _updateAvatarButton(context, avatarData) {
+    const previewEl = document.getElementById(context + 'AvatarPreview');
+    const nameEl = document.getElementById(context + 'AvatarName');
+    if (!previewEl || !nameEl || !avatarData) return;
+    previewEl.innerHTML = AvatarSystem.getAvatarHtml(avatarData, 48);
+    nameEl.textContent = (avatarData.icon || '') + ' ' + (avatarData.nameAr || 'شخصية');
+  },
+
   createRoom() {
     const name = document.getElementById('hostNameInput').value.trim();
     if (!name) return this.showToast('أدخل اسمك!', 'error');
     AudioEngine.click();
-    this.socket.emit('createRoom', name);
+    const avatarData = this._hostAvatarData || AvatarSystem.getRandomAvatarData();
+    this.socket.emit('createRoom', { playerName: name, avatarData: AvatarSystem.getAvatarData() || avatarData });
   },
 
   joinRoom() {
@@ -550,7 +579,8 @@ const App = {
     this._savedName = name;
     this._savedRoom = code;
     this._persistSession();
-    this.socket.emit('joinRoom', { code, playerName: name });
+    const avatarData = this._joinAvatarData || AvatarSystem.getRandomAvatarData();
+    this.socket.emit('joinRoom', { code, playerName: name, avatarData: AvatarSystem.getAvatarData() || avatarData });
   },
 
   joinAsAudience() {
@@ -562,7 +592,7 @@ const App = {
     this._savedName = name;
     this._savedRoom = code;
     this._persistSession();
-    this.socket.emit('joinAsAudience', { code, playerName: name });
+    this.socket.emit('joinAsAudience', { code, playerName: name, avatarData: AvatarSystem.getAvatarData() });
   },
 
   toggleReady() {
@@ -629,9 +659,14 @@ const App = {
         el.className = 'player-avatar';
 
         const face = document.createElement('div');
-        face.className = 'player-avatar__face';
+        face.className = 'player-avatar__face' + (p.avatarData ? ' player-avatar__face--rich' : '');
         face.style.background = p.color;
-        face.appendChild(document.createTextNode(p.avatar));
+        // Render rich avatar if available, otherwise fallback to emoji
+        if (p.avatarData && typeof AvatarSystem !== 'undefined') {
+          face.innerHTML = AvatarSystem.getAvatarHtml(p.avatarData, 56);
+        } else {
+          face.appendChild(document.createTextNode(p.avatar));
+        }
         el._face = face;
 
         const crown = document.createElement('span');
