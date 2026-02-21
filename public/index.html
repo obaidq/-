@@ -259,9 +259,13 @@
         <p class="text-muted">⏳ انتظر المضيف يختار لعبة...</p>
       </div>
 
-      <!-- Family Mode Toggle (Host only) -->
+      <!-- Host Controls (Family Mode, Extended Timers, Hide Code) -->
       <div id="familyModeSection" class="w-full text-center mt-2" style="display:none">
-        <button class="btn btn--ghost btn--sm" id="familyModeBtn" onclick="App.toggleFamilyMode()">🏠 وضع العائلة: معطّل</button>
+        <div class="flex gap-2 justify-center flex-wrap">
+          <button class="btn btn--ghost btn--sm" id="familyModeBtn" onclick="App.toggleFamilyMode()">🏠 وضع العائلة: معطّل</button>
+          <button class="btn btn--ghost btn--sm" id="extendedTimersBtn" onclick="App.toggleExtendedTimers()">⏱️ مؤقتات ممتدة: معطّلة</button>
+          <button class="btn btn--ghost btn--sm" onclick="App.toggleHideRoomCode()">📺 إخفاء الكود</button>
+        </div>
       </div>
 
       <!-- Lobby Actions -->

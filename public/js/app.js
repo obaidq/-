@@ -402,6 +402,12 @@ const App = {
       this.showToast(data.message, 'success');
     });
 
+    s.on('extendedTimersChanged', data => {
+      const btn = document.getElementById('extendedTimersBtn');
+      if (btn) btn.textContent = data.extendedTimers ? '⏳ مؤقتات ممتدة: مفعّلة ✅' : '⏱️ مؤقتات ممتدة: معطّلة';
+      this.showToast(data.message, 'success');
+    });
+
     // ── Audience ──
     s.on('audienceJoined', data => {
       this.showToast(escapeHtml(data.name) + ' انضم كمتفرج! 👀', 'success');
@@ -552,6 +558,21 @@ const App = {
     } else {
       this.showToast('الكود: ' + code, 'success');
     }
+  },
+
+  toggleHideRoomCode() {
+    this._roomCodeHidden = !this._roomCodeHidden;
+    const codeEl = document.getElementById('roomCode');
+    if (codeEl) {
+      codeEl.style.filter = this._roomCodeHidden ? 'blur(8px)' : 'none';
+      codeEl.setAttribute('aria-hidden', this._roomCodeHidden ? 'true' : 'false');
+    }
+    this.showToast(this._roomCodeHidden ? 'كود الغرفة مخفي (للبث)' : 'كود الغرفة ظاهر', 'success');
+  },
+
+  toggleExtendedTimers() {
+    if (!this.isHost || !this.currentRoom) return;
+    this.socket.emit('toggleExtendedTimers', this.currentRoom);
   },
 
   // ═══════════════════════════════════════════════════════════════

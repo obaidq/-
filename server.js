@@ -32,6 +32,7 @@ const CONFIG = {
   audienceVoteWeight: 0.5,  // audience votes count at 50%
   commentaryEnabled: true,
   familyMode: false, // when true: strict profanity + skip adult-themed questions
+  // Note: extendedTimers is per-room (room._extendedTimers), toggled by host
 };
 
 const app = express();
@@ -754,6 +755,21 @@ io.on('connection', (socket) => {
   });
 
   // ─────────────────────────────────────────────
+  // تبديل المؤقتات الممتدة (Extended Timers)
+  // ─────────────────────────────────────────────
+  socket.on('toggleExtendedTimers', (code) => {
+    if (typeof code !== 'string') return;
+    const room = rooms.get(code);
+    if (!room || socket.id !== room.hostId) return;
+    if (!room._extendedTimers) room._extendedTimers = false;
+    room._extendedTimers = !room._extendedTimers;
+    io.to(code).emit('extendedTimersChanged', {
+      extendedTimers: room._extendedTimers,
+      message: room._extendedTimers ? '⏳ المؤقتات الممتدة مفعّلة (×1.5)' : '⏱️ المؤقتات العادية'
+    });
+  });
+
+  // ─────────────────────────────────────────────
   // إيموجي ردود الفعل
   // ─────────────────────────────────────────────
   socket.on('sendEmoji', ({ code, emoji }) => {
@@ -1400,7 +1416,7 @@ function startGuesspionageRound(room) {
   room.gameData.featuredPlayerId = featuredId;
 
   const featuredPlayer = room.players.get(featuredId);
-  const timeLimit = 30;
+  const timeLimit = room._extendedTimers ? 45 : 30;
 
   const commentary = CONFIG.commentaryEnabled
     ? generateCommentary('guesspionage', 'featuredChosen', { name: featuredPlayer.name })
@@ -1452,7 +1468,7 @@ function startGuesspionageChallenge(room) {
   room.gameData.featuredGuess = Math.max(0, Math.min(100, featuredGuess));
 
   const hasMuch = room.gameData.phaseType === 'round2';
-  const timeLimit = 20;
+  const timeLimit = room._extendedTimers ? 30 : 20;
 
   const commentary = (hasMuch && CONFIG.commentaryEnabled)
     ? generateCommentary('guesspionage', 'muchHigherLower')
@@ -1555,7 +1571,7 @@ function calculateGuesspionageResults(room) {
     });
   }
 
-  // Wagerer scoring
+  // Wagerer scoring (audience gets weighted points)
   const exactMatch = correctAnswer === featuredGuess;
 
   room.players.forEach((p, id) => {
@@ -1602,7 +1618,9 @@ function calculateGuesspionageResults(room) {
       }
     }
 
-    p.score += points;
+    // Audience gets weighted points
+    const effectivePoints = p.isAudience ? Math.round(points * CONFIG.audienceVoteWeight) : points;
+    p.score += effectivePoints;
 
     playerResults.push({
       playerId: id,
@@ -1612,7 +1630,8 @@ function calculateGuesspionageResults(room) {
       bet,
       betCorrect,
       betType,
-      points,
+      points: effectivePoints,
+      isAudience: !!p.isAudience,
       accuracy: null,
       diff: null
     });
@@ -1679,7 +1698,7 @@ function startGuesspionageFinalRound(room) {
   room.gameData.finalOptions = options;
 
   resetAnswers(room);
-  const timeLimit = 30;
+  const timeLimit = room._extendedTimers ? 45 : 30;
 
   const commentary = CONFIG.commentaryEnabled
     ? generateCommentary('guesspionage', 'finalRound')
