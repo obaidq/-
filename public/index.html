@@ -94,13 +94,14 @@
       </div>
       <div class="mb-4">
         <label class="text-sm text-muted mb-1 block">كود الغرفة</label>
-        <input type="text" id="roomCodeInput" class="input input--code" placeholder="ABCD" maxlength="4" dir="ltr" autocomplete="off" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z]/g,'')">
+        <input type="text" id="roomCodeInput" class="input input--code" placeholder="ABCD" maxlength="4" dir="ltr" autocomplete="off" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
       </div>
       <div class="mb-4">
         <label class="text-sm text-muted mb-1 block">اسمك</label>
         <input type="text" id="playerNameInput" class="input" placeholder="مثال: أبو سعود..." maxlength="12" autocomplete="off">
       </div>
       <button class="btn btn--primary btn--lg btn--full mb-3" onclick="App.joinRoom()">انضم! 🎮</button>
+      <button class="btn btn--secondary btn--full mb-3" onclick="App.joinAsAudience()">👀 انضم كمتفرج</button>
       <button class="btn btn--ghost btn--full" onclick="App.showScreen('menuScreen')">← رجوع</button>
     </div>
   </div>
@@ -256,6 +257,11 @@
       <!-- Waiting message (non-host) -->
       <div id="waitingMessage" style="display:none">
         <p class="text-muted">⏳ انتظر المضيف يختار لعبة...</p>
+      </div>
+
+      <!-- Family Mode Toggle (Host only) -->
+      <div id="familyModeSection" class="w-full text-center mt-2" style="display:none">
+        <button class="btn btn--ghost btn--sm" id="familyModeBtn" onclick="App.toggleFamilyMode()">🏠 وضع العائلة: معطّل</button>
       </div>
 
       <!-- Lobby Actions -->

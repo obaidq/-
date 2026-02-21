@@ -205,22 +205,67 @@ const COMMENTARY = {
   results: {
     bigLead: [
       '{name} متقدم بفارق كبير! 🏆',
-      '{name} ماسك الصدارة!',
+      '{name} ماسك الصدارة! من يقدر يوقفه؟',
+      '{name} طاير بالنقاط! يا سلام!',
     ],
     comeback: [
       '{name} رجع بقوة! ما استسلم! 🔥',
+      '{name} صاعد! الحين صارت المنافسة حامية!',
     ],
     tie: [
       'تعادل! الأمور حامية! 🔥',
+      'متساوين! من بيكسر التعادل؟',
     ],
     lastRound: [
       'آخر جولة! كل شي ممكن يتغير!',
       'الجولة الأخيرة! من بيفوز؟!',
+      'آخر فرصة! ركزوا يا جماعة!',
     ],
     winner: [
       'مبرووووك يا {name}! أنت البطل! 🏆🎉',
       '{name} فاز! يا وحش! 🎊',
       'الفائز هو... {name}! ألف مبروك!',
+    ],
+    zeroPoints: [
+      'محد جاب نقطة! 😅 كيف يعني؟!',
+      'صفر نقاط! يبيلكم تتمرنون أكثر!',
+    ],
+    scoreSurge: [
+      '{name} جاب {points} نقطة! قوي والله! 💪',
+      'يا رجال! {name} كسب {points} دفعة وحدة!',
+    ],
+    newLeader: [
+      '{name} صار الأول! تبدّل الترتيب! 🔄',
+      'انقلبت الموازين! {name} قفز للصدارة!',
+    ],
+  },
+
+  // ─── Audience ───
+  audience: {
+    joined: [
+      'عندنا جمهور! حياكم الله يا متفرجين! 👀',
+      'الجمهور وصل! الحين صارت الحفلة أحلى!',
+    ],
+    bigAudience: [
+      'يا سلام! {count} متفرجين! صرنا مشاهير! 🌟',
+    ],
+  },
+
+  // ─── General Hype / Random interjections ───
+  hype: {
+    roundStart: [
+      'يلا بسم الله! الجولة الجديدة بدأت!',
+      'استعدوا... انتبهوا... يلا!',
+      'جولة جديدة! فرصة جديدة!',
+    ],
+    midGame: [
+      'الحين بدأت الأمور تحمى! 🔥',
+      'المنافسة على أشدها!',
+      'يا جماعة الخير! وش هالمستوى!',
+    ],
+    lateGame: [
+      'قربنا ننتهي! كل نقطة تفرق!',
+      'الجولات الأخيرة! لا أحد يتساهل!',
     ],
   },
 };
@@ -315,8 +360,24 @@ function generateResultCommentary(game, data) {
     const lead = sorted[0].score - sorted[1].score;
     if (lead > 2000) {
       comments.push(generateCommentary('results', 'bigLead', { name: sorted[0].name }));
-    } else if (lead === 0) {
+    } else if (lead === 0 && sorted[0].score > 0) {
       comments.push(generateCommentary('results', 'tie'));
+    }
+
+    // Detect score surge (someone gained 2000+ in one round)
+    if (data.playerResults) {
+      const topScorer = data.playerResults.reduce((max, pr) => pr.points > max.points ? pr : max, { points: 0 });
+      if (topScorer.points >= 2000) {
+        comments.push(generateCommentary('results', 'scoreSurge', {
+          name: topScorer.playerName,
+          points: topScorer.points
+        }));
+      }
+    }
+
+    // Zero points round
+    if (data.playerResults && data.playerResults.every(pr => pr.points === 0)) {
+      comments.push(generateCommentary('results', 'zeroPoints'));
     }
   }
 

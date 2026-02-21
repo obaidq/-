@@ -31,6 +31,7 @@ const CONFIG = {
   profanityMode: process.env.PROFANITY_MODE || 'moderate', // off | moderate | strict
   audienceVoteWeight: 0.5,  // audience votes count at 50%
   commentaryEnabled: true,
+  familyMode: false, // when true: strict profanity + skip adult-themed questions
 };
 
 const app = express();
@@ -369,7 +370,7 @@ io.on('connection', (socket) => {
       return socket.emit('error', { message: 'الغرفة غير موجودة! تأكد من الكود.' });
     }
     if (room.state !== 'lobby') {
-      return socket.emit('error', { message: 'اللعبة بدأت بالفعل! انتظر لين يخلصون.' });
+      return socket.emit('error', { message: 'اللعبة بدأت! جرب تنضم كمتفرج 👀' });
     }
     if (room.players.size >= MAX_PLAYERS) {
       return socket.emit('error', { message: `الغرفة ممتلئة! الحد الأقصى ${MAX_PLAYERS} لاعبين.` });
@@ -525,7 +526,8 @@ io.on('connection', (socket) => {
       const isFreeText = freeTextGames.includes(room.currentGame) ||
         (room.currentGame === 'triviamurder' && room.gameData.phase === 'deathChallenge');
       if (isFreeText) {
-        const filterResult = filterText(trimmed, CONFIG.profanityMode);
+        const effectiveMode = room.familyMode ? 'strict' : CONFIG.profanityMode;
+        const filterResult = filterText(trimmed, effectiveMode);
         if (!filterResult.allowed) {
           return socket.emit('error', { message: filterResult.message });
         }
@@ -724,6 +726,22 @@ io.on('connection', (socket) => {
   });
 
   // ─────────────────────────────────────────────
+  // تبديل وضع العائلة (Family Mode)
+  // ─────────────────────────────────────────────
+  socket.on('toggleFamilyMode', (code) => {
+    if (typeof code !== 'string') return;
+    const room = rooms.get(code);
+    if (!room || socket.id !== room.hostId) return;
+    room.familyMode = !room.familyMode;
+    const effectiveMode = room.familyMode ? 'strict' : CONFIG.profanityMode;
+    io.to(code).emit('familyModeChanged', {
+      familyMode: room.familyMode,
+      message: room.familyMode ? '🏠 وضع العائلة مفعّل - المحتوى مناسب للجميع' : '🎮 وضع العائلة معطّل'
+    });
+    console.log('🏠 وضع العائلة:', room.familyMode ? 'مفعّل' : 'معطّل', '- غرفة:', code);
+  });
+
+  // ─────────────────────────────────────────────
   // إيموجي ردود الفعل
   // ─────────────────────────────────────────────
   socket.on('sendEmoji', ({ code, emoji }) => {
@@ -764,7 +782,76 @@ io.on('connection', (socket) => {
   });
 
   // ─────────────────────────────────────────────
-  // قطع الاتصال
+  // إعادة الانضمام بعد انقطاع (Reconnection)
+  // ─────────────────────────────────────────────
+  socket.on('rejoinRoom', ({ code, playerName }) => {
+    if (!code || typeof code !== 'string') return;
+    if (!playerName || typeof playerName !== 'string') return;
+
+    const roomCode = code.toUpperCase().trim();
+    const room = rooms.get(roomCode);
+    if (!room) return socket.emit('error', { message: 'الغرفة غير موجودة!' });
+
+    const safeName = sanitizeName(playerName);
+
+    // Check if this player was disconnected (grace period)
+    const dcEntry = room._disconnected && room._disconnected.get(safeName);
+    if (dcEntry) {
+      // Restore player with old state
+      clearTimeout(dcEntry.timer);
+      const restored = dcEntry.player;
+      restored.id = socket.id;
+      room.players.set(socket.id, restored);
+      room._disconnected.delete(safeName);
+      socket.join(roomCode);
+
+      // If they were host, restore host
+      if (dcEntry.wasHost && !Array.from(room.players.values()).some(p => p.isHost && p.id !== socket.id)) {
+        restored.isHost = true;
+        room.hostId = socket.id;
+      }
+
+      socket.emit('rejoinedRoom', {
+        code: room.code,
+        players: getPlayerList(room),
+        game: room.currentGame,
+        state: room.state,
+        isHost: restored.isHost,
+        score: restored.score,
+        round: room.currentRound + 1,
+        maxRounds: room.maxRounds
+      });
+
+      io.to(roomCode).emit('playerJoined', {
+        players: getPlayerList(room),
+        newPlayer: safeName + ' (رجع!)'
+      });
+
+      console.log('🔄 لاعب رجع:', safeName, '→ غرفة:', roomCode);
+      return;
+    }
+
+    // No grace period entry — join as new if in lobby
+    if (room.state === 'lobby') {
+      if (room.players.size >= MAX_PLAYERS) {
+        return socket.emit('error', { message: 'الغرفة ممتلئة!' });
+      }
+      room.players.set(socket.id, createPlayer(socket.id, playerName));
+      socket.join(roomCode);
+      socket.emit('roomJoined', { code: room.code, players: getPlayerList(room) });
+      socket.to(roomCode).emit('playerJoined', { players: getPlayerList(room), newPlayer: safeName });
+    } else {
+      // Game in progress — join as audience
+      const player = createPlayer(socket.id, playerName);
+      player.isAudience = true;
+      room.players.set(socket.id, player);
+      socket.join(roomCode);
+      socket.emit('joinedAsAudience', { code: room.code, players: getPlayerList(room), game: room.currentGame });
+    }
+  });
+
+  // ─────────────────────────────────────────────
+  // قطع الاتصال (with 30s grace period)
   // ─────────────────────────────────────────────
   socket.on('disconnect', () => {
     console.log('🔴 لاعب انقطع:', socket.id);
@@ -773,11 +860,31 @@ io.on('connection', (socket) => {
       if (!room.players.has(socket.id)) return;
 
       const disconnectedPlayer = room.players.get(socket.id);
+
+      // Grace period: keep player data for 30s during active games
+      if (room.state === 'playing' && disconnectedPlayer && !disconnectedPlayer.isAudience) {
+        if (!room._disconnected) room._disconnected = new Map();
+        const timer = setTimeout(() => {
+          // After 30s, permanently remove
+          room._disconnected.delete(disconnectedPlayer.name);
+          if (room.state === 'playing') checkIfRoundCanProceed(room);
+          console.log('⏰ انتهت مهلة الرجوع:', disconnectedPlayer.name, '- غرفة:', code);
+        }, 30000);
+        room._disconnected.set(disconnectedPlayer.name, {
+          player: { ...disconnectedPlayer },
+          wasHost: disconnectedPlayer.isHost,
+          timer
+        });
+      }
+
       room.players.delete(socket.id);
 
       // لو الغرفة فاضية، نحذفها
       if (room.players.size === 0) {
         clearRoundTimer(room);
+        if (room._disconnected) {
+          room._disconnected.forEach(dc => clearTimeout(dc.timer));
+        }
         rooms.delete(code);
         console.log('🗑️ غرفة محذوفة (فاضية):', code);
         return;
@@ -863,7 +970,12 @@ function handleAllAnswered(room) {
       }
       break;
     case 'fakinit':
-      startFakinItVoting(room);
+      if (room.gameData.phase === 'action' && room.gameData.subRound < room.gameData.maxSubRounds) {
+        clearRoundTimer(room);
+        setTimeout(() => startFakinItSubRound(room), 1500);
+      } else {
+        startFakinItVoting(room);
+      }
       break;
     case 'triviamurder':
       calculateTriviaMurderResults(room);
@@ -1604,12 +1716,24 @@ function calculateGuesspionageFinalResults(room) {
 // ═══════════════════════════════════════════════════════════════════
 
 /**
- * بدء جولة المزيّف
- * - اختيار مزيّف عشوائي
- * - كل اللاعبين يشوفون المهمة ما عدا المزيّف
- * - بعد المهمة، التصويت على من هو المزيّف
+ * بدء جولة المزيّف (2 sub-rounds per round, then vote)
+ * Real Jackbox: same faker across sub-rounds, different tasks
  */
 function startFakinItRound(room) {
+  // اختيار المزيّف عشوائياً (stays same for entire round)
+  const playerIds = Array.from(room.players.keys());
+  const fakerId = playerIds[Math.floor(Math.random() * playerIds.length)];
+  room.gameData.fakerId = fakerId;
+  room.gameData.subRound = 0;
+  room.gameData.maxSubRounds = 2; // 2 tasks before voting
+
+  startFakinItSubRound(room);
+}
+
+function startFakinItSubRound(room) {
+  room.gameData.subRound++;
+  resetAnswers(room);
+
   // اختيار فئة عشوائية
   const categoryKeys = Object.keys(content.fakinit.categories);
   const categoryKey = categoryKeys[Math.floor(Math.random() * categoryKeys.length)];
@@ -1618,18 +1742,15 @@ function startFakinItRound(room) {
   // اختيار مهمة من الفئة
   const task = pickQuestion(room, category.tasks);
 
-  // اختيار المزيّف عشوائياً
-  const playerIds = Array.from(room.players.keys());
-  const fakerId = playerIds[Math.floor(Math.random() * playerIds.length)];
-
   room.gameData.categoryKey = categoryKey;
   room.gameData.categoryName = category.name;
   room.gameData.instruction = category.instruction;
   room.gameData.task = task;
-  room.gameData.fakerId = fakerId;
   room.gameData.phase = 'action';
 
+  const fakerId = room.gameData.fakerId;
   const timeLimit = 15;
+  const subLabel = room.gameData.subRound + '/' + room.gameData.maxSubRounds;
 
   const taskCommentary = CONFIG.commentaryEnabled
     ? generateCommentary('fakinit', categoryKey) || generateCommentary('fakinit', 'taskStart')
@@ -1640,6 +1761,8 @@ function startFakinItRound(room) {
     io.to(id).emit('fakinItTask', {
       round: room.currentRound + 1,
       maxRounds: room.maxRounds,
+      subRound: room.gameData.subRound,
+      maxSubRounds: room.gameData.maxSubRounds,
       category: category.name,
       categoryKey,
       instruction: category.instruction,
@@ -1650,9 +1773,15 @@ function startFakinItRound(room) {
     });
   });
 
-  // بعد انتهاء وقت المهمة، ننتقل للتصويت تلقائياً
+  // بعد انتهاء وقت المهمة
   room.roundTimer = setTimeout(() => {
-    startFakinItVoting(room);
+    if (room.gameData.subRound < room.gameData.maxSubRounds) {
+      // More sub-rounds to go
+      startFakinItSubRound(room);
+    } else {
+      // All sub-rounds done, time to vote
+      startFakinItVoting(room);
+    }
   }, (timeLimit * 1000) + 2000);
 }
 

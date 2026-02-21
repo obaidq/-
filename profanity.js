@@ -55,7 +55,7 @@ const STRICT_EXTRA = [
   /انقلع/,
 ];
 
-// Common evasion patterns (letter substitution, spacing)
+// Common evasion patterns (letter substitution, spacing, leetspeak)
 function normalizeArabic(text) {
   return text
     .replace(/[ًٌٍَُِّْ]/g, '')      // remove tashkeel
@@ -66,8 +66,17 @@ function normalizeArabic(text) {
     .replace(/ى/g, 'ي')             // normalize alef maksura
     .replace(/ؤ/g, 'و')             // normalize hamza waw
     .replace(/ئ/g, 'ي')             // normalize hamza ya
+    .replace(/[.·•\-_*]/g, '')       // remove common separators used to evade
+    .replace(/(\w)\1{2,}/g, '$1$1')  // collapse repeated chars (kkkkk → kk)
     .trim();
 }
+
+// Latin-letter evasion of Arabic words (transliteration)
+const LATIN_PROFANITY = [
+  /\bkos\b/i, /\bzeb\b/i, /\bnik\b/i, /\bkhara\b/i,
+  /\b5ara\b/i, /\bn[i1]k\b/i, /\bk[o0]s\b/i,
+  /\bsh[a@]rm[o0]t/i, /\bk[e3]lb/i, /\b7mar/i,
+];
 
 /**
  * Check text for profanity
@@ -96,6 +105,14 @@ function checkProfanity(text, mode) {
       filtered = filtered.replace(new RegExp(pattern.source, 'gi'), (match) => {
         return '✱'.repeat(match.length);
       });
+    }
+  }
+
+  // Also check Latin-letter evasion
+  for (const pattern of LATIN_PROFANITY) {
+    if (pattern.test(text)) {
+      clean = false;
+      filtered = filtered.replace(pattern, (match) => '✱'.repeat(match.length));
     }
   }
 

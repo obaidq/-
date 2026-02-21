@@ -192,6 +192,10 @@ const App = {
     s.on('connect', () => {
       this.myId = s.id;
       this._updateConnectionState('connected');
+      // Auto-rejoin if we had an active room
+      if (this._savedRoom && this._savedName) {
+        s.emit('rejoinRoom', { code: this._savedRoom, playerName: this._savedName });
+      }
     });
 
     s.on('disconnect', () => {
@@ -207,9 +211,52 @@ const App = {
       this._updateConnectionState('reconnecting');
     });
 
+    // ── إعادة الانضمام + متفرج ──
+    s.on('rejoinedRoom', data => {
+      this.currentRoom = data.code;
+      this.isHost = data.isHost;
+      this._savedRoom = data.code;
+      document.getElementById('displayRoomCode').textContent = data.code;
+      this.updatePlayers(data.players);
+      if (data.state === 'playing' && data.game) {
+        this.currentGame = data.game;
+        this.setTheme(data.game);
+        this.updateGameHeader(data.game);
+        this.showScreen('gameScreen');
+        document.getElementById('emojiBar')?.classList.remove('hidden');
+        document.getElementById('gameRound').textContent = 'الجولة ' + data.round + ' من ' + data.maxRounds;
+        this.showWaiting('رجعت! ننتظر الجولة الجاية...');
+      } else {
+        this.showScreen('lobbyScreen');
+        this.updateHostUI();
+      }
+      this.showToast('رجعت للغرفة!', 'success');
+      AudioEngine.playerJoin();
+    });
+
+    s.on('joinedAsAudience', data => {
+      this.currentRoom = data.code;
+      this._savedRoom = data.code;
+      this.isHost = false;
+      this._isAudience = true;
+      if (data.game) {
+        this.currentGame = data.game;
+        this.setTheme(data.game);
+        this.updateGameHeader(data.game);
+        this.showScreen('gameScreen');
+        document.getElementById('emojiBar')?.classList.remove('hidden');
+        this.showWaiting('أنت متفرج! شارك بالتصويت والإيموجي');
+      } else {
+        this.showScreen('lobbyScreen');
+      }
+      this.showToast('انضممت كمتفرج!', 'success');
+    });
+
     // ── الغرفة ──
     s.on('roomCreated', data => {
       this.currentRoom = data.code;
+      this._savedRoom = data.code;
+      this._savedName = document.getElementById('hostNameInput')?.value?.trim();
       this.isHost = true;
       document.getElementById('displayRoomCode').textContent = data.code;
       this.updatePlayers(data.players);
@@ -221,6 +268,8 @@ const App = {
 
     s.on('roomJoined', data => {
       this.currentRoom = data.code;
+      this._savedRoom = data.code;
+      this._savedName = document.getElementById('playerNameInput')?.value?.trim();
       document.getElementById('displayRoomCode').textContent = data.code;
       this.updatePlayers(data.players);
       this.showScreen('lobbyScreen');
@@ -326,6 +375,19 @@ const App = {
     // ── الإيموجي ──
     s.on('emojiReaction', data => this.showEmojiFloat(data.emoji));
 
+    // ── وضع العائلة ──
+    s.on('familyModeChanged', data => {
+      this._familyMode = data.familyMode;
+      const btn = document.getElementById('familyModeBtn');
+      if (btn) btn.textContent = data.familyMode ? '🏠 وضع العائلة: مفعّل ✅' : '🏠 وضع العائلة: معطّل';
+      this.showToast(data.message, 'success');
+    });
+
+    // ── Audience ──
+    s.on('audienceJoined', data => {
+      this.showToast(escapeHtml(data.name) + ' انضم كمتفرج! 👀', 'success');
+    });
+
     // ── Guesspionage Final Round ──
     s.on('guesspionageFinalRound', data => this.handleGuesspionageFinalRound(data));
 
@@ -411,7 +473,20 @@ const App = {
     if (!code || code.length !== 4) return this.showToast('كود خاطئ!', 'error');
     if (!name) return this.showToast('أدخل اسمك!', 'error');
     AudioEngine.click();
+    this._savedName = name;
+    this._savedRoom = code;
     this.socket.emit('joinRoom', { code, playerName: name });
+  },
+
+  joinAsAudience() {
+    const code = document.getElementById('roomCodeInput').value.trim().toUpperCase();
+    const name = document.getElementById('playerNameInput').value.trim();
+    if (!code || code.length !== 4) return this.showToast('كود خاطئ!', 'error');
+    if (!name) return this.showToast('أدخل اسمك!', 'error');
+    AudioEngine.click();
+    this._savedName = name;
+    this._savedRoom = code;
+    this.socket.emit('joinAsAudience', { code, playerName: name });
   },
 
   toggleReady() {
@@ -514,8 +589,15 @@ const App = {
   updateHostUI() {
     const gamesSection = document.getElementById('gamesSection');
     const waitingMessage = document.getElementById('waitingMessage');
+    const familySection = document.getElementById('familyModeSection');
     if (gamesSection) gamesSection.style.display = this.isHost ? 'block' : 'none';
     if (waitingMessage) waitingMessage.style.display = this.isHost ? 'none' : 'block';
+    if (familySection) familySection.style.display = this.isHost ? 'block' : 'none';
+  },
+
+  toggleFamilyMode() {
+    if (!this.isHost || !this.currentRoom) return;
+    this.socket.emit('toggleFamilyMode', this.currentRoom);
   },
 
   // ═══════════════════════════════════════════════════════════════
@@ -831,7 +913,8 @@ const App = {
   // ═══════════════════════════════════════════════════════════════
 
   handleFakinItTask(d) {
-    document.getElementById('gameRound').textContent = 'الجولة ' + d.round + ' من ' + d.maxRounds;
+    const subInfo = d.maxSubRounds ? ' (مهمة ' + d.subRound + '/' + d.maxSubRounds + ')' : '';
+    document.getElementById('gameRound').textContent = 'الجولة ' + d.round + ' من ' + d.maxRounds + subInfo;
     this.startTimer(d.timeLimit);
     if (d.commentary) this.showCommentary(d.commentary);
 
@@ -1397,6 +1480,40 @@ const App = {
       case 'guesspionage':
         AudioEngine.drumRoll(1.5);
         setTimeout(() => AudioEngine.reveal(), 1600);
+
+        // Final round has different display
+        if (d.isFinalRound && d.options) {
+          resultHtml = '<div class="gspy-results">' +
+            '<div class="gspy-badge gspy-badge--featured mb-4">🏆 نتائج الجولة الأخيرة</div>' +
+            '<div class="gspy-final-grid" style="margin-bottom:16px">';
+          d.options.forEach(o => {
+            const cls = o.isTop3 ? 'gspy-final-option--selected' : '';
+            resultHtml +=
+              '<div class="gspy-final-option ' + cls + '" style="cursor:default">' +
+                escapeHtml(o.text) +
+                '<div class="text-sm mt-1" style="opacity:0.7">' + o.percentage + '% ' + (o.isTop3 ? '⭐' : '') + '</div>' +
+              '</div>';
+          });
+          resultHtml += '</div>';
+          if (d.playerResults) {
+            resultHtml += '<div class="gspy-results-players">';
+            d.playerResults.forEach(pr => {
+              const rowClass = pr.correctPicks > 0 ? 'gspy-results-row--correct' : 'gspy-results-row--wrong';
+              resultHtml +=
+                '<div class="gspy-results-row ' + rowClass + '">' +
+                  '<div class="gspy-results-row-info">' +
+                    '<span class="gspy-results-row-name">' + escapeHtml(pr.playerName) + '</span>' +
+                    '<span class="gspy-results-row-detail">' + pr.correctPicks + '/3 صح ✅</span>' +
+                  '</div>' +
+                  '<span class="gspy-results-row-points">+' + pr.points + '</span>' +
+                '</div>';
+            });
+            resultHtml += '</div>';
+          }
+          resultHtml += '</div>';
+          break;
+        }
+
         resultHtml =
           '<div class="gspy-results">' +
             '<div class="gspy-results-answer">' +
