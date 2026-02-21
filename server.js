@@ -1,187 +1,97 @@
 /**
- * أبو عابد بوكس - السيرفر V4
- * Node.js + Express + Socket.IO
+ * ╔═══════════════════════════════════════════════════════════════════╗
+ * ║              أبو عابد بوكس - السيرفر الرئيسي V5                ║
+ * ║         Abu Abed Box - Saudi Arabic Party Game Platform          ║
+ * ║                  Node.js + Express + Socket.IO                   ║
+ * ╚═══════════════════════════════════════════════════════════════════╝
+ *
+ * الألعاب المدعومة:
+ *   ⚡ رد سريع (Quiplash)
+ *   📊 خمّن النسبة (Guesspionage)
+ *   🕵️ المزيّف (Fakin' It)
+ *   💀 حفلة القاتل (Trivia Murder Party)
+ *   🎭 كشف الكذاب (Fibbage)
+ *   🎨 ارسم لي (Drawful)
  */
+
+// ═══════════════════════════════════════════════════════════════════
+// الاعتماديات والإعدادات الأساسية
+// ═══════════════════════════════════════════════════════════════════
 
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: "*", methods: ["GET", "POST"] },
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  },
   pingTimeout: 60000,
   pingInterval: 25000
 });
 
+// تقديم الملفات الثابتة
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
-// ═══════════════════════════════════════════════════════════
-// البيانات والمحتوى
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
+// تحميل المحتوى من ملف اللغة العربية
+// ═══════════════════════════════════════════════════════════════════
+
+const content = JSON.parse(fs.readFileSync(path.join(__dirname, 'content', 'ar-SA.json'), 'utf8'));
+console.log('📦 تم تحميل المحتوى العربي بنجاح - النسخة:', content.meta.version);
+
+// ═══════════════════════════════════════════════════════════════════
+// تخزين الغرف والثوابت
+// ═══════════════════════════════════════════════════════════════════
 
 const rooms = new Map();
-const AVATARS = ['😎', '🤠', '🥳', '😈', '🤖', '👻', '🦊', '🐸', '🦁', '🐼'];
-const COLORS = ['#E91E8C', '#4ECDC4', '#FFD93D', '#6BCB77', '#FF6B35', '#667eea', '#f093fb', '#43e97b', '#fa709a', '#00d4ff'];
 
-// أسئلة رد سريع (Quiplash)
-const quiplashQuestions = [
-  "ما هو أسوأ شي ممكن يقوله لك أبوك بعد ما تفشل في الاختبار؟",
-  "ما هو الشي اللي ما تبي أمك تشوفه في جوالك؟",
-  "ما هو أغرب سبب ممكن يخليك تتأخر عن الدوام؟",
-  "ما هو الشي اللي يسويه السعودي أول ما يصحى من النوم؟",
-  "ما هو أسوأ اسم ممكن تسميه مطعم كبسة؟",
-  "ما هو الشي اللي ما تقوله في مقابلة عمل؟",
-  "ما هو أغرب شي ممكن تلاقيه في ثلاجة جارك؟",
-  "ما هو الشي اللي يفكر فيه البعير وهو ماشي في الصحراء؟",
-  "ما هو أسوأ شي ممكن يصير في حفل زواج سعودي؟",
-  "ما هي أغرب هدية ممكن تجيبها لخالتك؟",
-  "ما هو الشي اللي ما تقوله لشرطي المرور؟",
-  "ما هو أسوأ وقت عشان تطلب زيادة راتب؟",
-  "ما هو الشي اللي يخلي البنك يرفض قرضك؟",
-  "ما هو أغرب شي ممكن تكتبه في السيرة الذاتية؟",
-  "ما هو أسوأ رد على 'كيفك؟'",
-  "ما هو الشي اللي يفكر فيه الموظف الساعة 4:59؟",
-  "ما هو أغرب سبب للغياب عن المدرسة؟",
-  "ما هو أسوأ اسم لتطبيق توصيل طعام؟",
-  "ما هو الشي اللي يسويه السعودي لما يشوف خصم 90%؟",
-  "ما هو أغرب شي ممكن تلاقيه في شنطة معلمك؟"
+// الصور الرمزية للاعبين
+const AVATARS = ['😎', '🤠', '🥳', '😈', '🤖', '👻', '🦊', '🐸', '🦁', '🐼', '🐯', '🦄'];
+
+// ألوان اللاعبين
+const COLORS = [
+  '#E91E8C', '#4ECDC4', '#FFD93D', '#6BCB77',
+  '#FF6B35', '#667eea', '#f093fb', '#43e97b',
+  '#fa709a', '#00d4ff', '#a18cd1', '#fbc2eb'
 ];
 
-// أسئلة خمّن النسبة (Guesspionage)
-const guesspionageQuestions = [
-  { q: "كم نسبة السعوديين اللي يشربون قهوة كل صباح؟", a: 78 },
-  { q: "كم نسبة الناس اللي يستخدمون جوالهم وهم على السفرة؟", a: 65 },
-  { q: "كم نسبة اللي يحبون الكبسة أكثر من المندي؟", a: 52 },
-  { q: "كم نسبة الشباب اللي يلعبون ألعاب فيديو يومياً؟", a: 45 },
-  { q: "كم نسبة اللي يفضلون السفر داخل السعودية على الخارج؟", a: 35 },
-  { q: "كم نسبة اللي يشوفون أنفسهم كريمين جداً؟", a: 82 },
-  { q: "كم نسبة اللي ما يردون على مكالمات أرقام غريبة؟", a: 73 },
-  { q: "كم نسبة اللي يأخرون المنبه كل صباح؟", a: 68 },
-  { q: "كم نسبة اللي يحبون الحر أكثر من البرد؟", a: 28 },
-  { q: "كم نسبة اللي راحوا العلا؟", a: 22 },
-  { q: "كم نسبة اللي يستخدمون كاش بدل البطاقة؟", a: 25 },
-  { q: "كم نسبة اللي يحطون السكر في الشاي؟", a: 71 },
-  { q: "كم نسبة اللي عندهم أكثر من 500 صديق في السوشال ميديا؟", a: 58 },
-  { q: "كم نسبة اللي يفضلون الأكل البيت على المطاعم؟", a: 62 },
-  { q: "كم نسبة اللي ناموا في الدوام أو المحاضرة؟", a: 47 },
-  { q: "كم نسبة اللي يشوفون إن رواتبهم ما تكفي؟", a: 76 },
-  { q: "كم نسبة اللي جربوا الدايت ورجعوا؟", a: 81 },
-  { q: "كم نسبة اللي يحبون القطط أكثر من الكلاب؟", a: 67 },
-  { q: "كم نسبة اللي يقرأون كتب بانتظام؟", a: 18 },
-  { q: "كم نسبة اللي يمارسون رياضة أسبوعياً؟", a: 32 }
-];
+// الحد الأقصى للاعبين في الغرفة
+const MAX_PLAYERS = 10;
 
-// مهام المزيّف (Fakin' It)
-const fakinItTasks = {
-  handsOfTruth: [
-    "ارفع يدك إذا سرقت أكل من الثلاجة وأنكرت",
-    "ارفع يدك إذا كذبت على أهلك عن مكانك",
-    "ارفع يدك إذا تطنشت رسالة عمداً",
-    "ارفع يدك إذا أكلت شي وقلت ما أكلت",
-    "ارفع يدك إذا نمت في محاضرة أو اجتماع",
-    "ارفع يدك إذا سويت نفسك مريض عشان ما تروح",
-    "ارفع يدك إذا خذيت شي من أخوك بدون إذن",
-    "ارفع يدك إذا قلت بجي وما جيت",
-    "ارفع يدك إذا حطيت فلتر مبالغ فيه بصورتك",
-    "ارفع يدك إذا تجسست على جوال أحد"
-  ],
-  numberPressure: [
-    "كم مرة تفتح الثلاجة في اليوم؟",
-    "كم ساعة تقضي على الجوال يومياً؟",
-    "كم صديق مقرب عندك فعلاً؟",
-    "كم مرة سافرت هالسنة؟",
-    "كم كوب قهوة/شاي تشرب باليوم؟",
-    "كم مرة غيرت صورة بروفايلك هالشهر؟",
-    "كم لغة تتكلم؟",
-    "كم مرة تأخرت عن موعد هالأسبوع؟",
-    "كم جهاز إلكتروني عندك؟",
-    "كم ساعة تنام في اليوم؟"
-  ],
-  faceValue: [
-    "سوِّ وجه الواحد لما يشوف الراتب",
-    "سوِّ وجه اللي نسي جواله بالبيت",
-    "سوِّ وجه اللي أكل شي حار",
-    "سوِّ وجه المتفاجئ",
-    "سوِّ وجه اللي ما نام",
-    "سوِّ وجه الخجلان",
-    "سوِّ وجه الزعلان",
-    "سوِّ وجه اللي شاف شي مقرف",
-    "سوِّ وجه الضحكة المزيفة",
-    "سوِّ وجه التفكير العميق"
-  ],
-  youGottaPoint: [
-    "أشر على الشخص اللي يكذب أكثر",
-    "أشر على الشخص الأكثر كرم",
-    "أشر على الشخص اللي يتأخر دايماً",
-    "أشر على الشخص الأذكى",
-    "أشر على الشخص اللي يغضب بسرعة",
-    "أشر على الشخص الأطرف",
-    "أشر على الشخص اللي يحب النوم",
-    "أشر على الشخص الأهدى",
-    "أشر على الشخص اللي يحب الأكل",
-    "أشر على الشخص اللي يسولف كثير"
-  ]
-};
+// مدة بقاء الغرفة بدون نشاط (ساعتين بالميلي ثانية)
+const ROOM_EXPIRY_MS = 2 * 60 * 60 * 1000;
 
-// أسئلة حفلة القاتل (Trivia Murder Party)
-const triviaMurderQuestions = [
-  { q: "ما هي عاصمة المملكة العربية السعودية؟", o: ["الرياض", "جدة", "مكة", "الدمام"], c: 0 },
-  { q: "كم عدد أيام السنة الميلادية؟", o: ["365", "364", "366", "360"], c: 0 },
-  { q: "ما هو أكبر محيط في العالم؟", o: ["المحيط الهادئ", "المحيط الأطلسي", "المحيط الهندي", "المحيط المتجمد"], c: 0 },
-  { q: "من هو مؤسس المملكة العربية السعودية؟", o: ["الملك عبدالعزيز", "الملك سعود", "الملك فيصل", "الملك خالد"], c: 0 },
-  { q: "كم عدد الكواكب في المجموعة الشمسية؟", o: ["8", "9", "7", "10"], c: 0 },
-  { q: "ما هي اللغة الرسمية في البرازيل؟", o: ["البرتغالية", "الإسبانية", "الإنجليزية", "الفرنسية"], c: 0 },
-  { q: "في أي سنة تأسست المملكة العربية السعودية؟", o: ["1932", "1925", "1945", "1950"], c: 0 },
-  { q: "ما هو العنصر الأكثر وفرة في الكون؟", o: ["الهيدروجين", "الأكسجين", "الكربون", "الحديد"], c: 0 },
-  { q: "كم عدد اللاعبين في فريق كرة القدم؟", o: ["11", "10", "12", "9"], c: 0 },
-  { q: "ما هو أطول نهر في العالم؟", o: ["نهر النيل", "نهر الأمازون", "نهر المسيسبي", "نهر اليانغتسي"], c: 0 },
-  { q: "ما هي الدولة الأكبر مساحة في العالم؟", o: ["روسيا", "كندا", "الصين", "أمريكا"], c: 0 },
-  { q: "كم عدد القارات في العالم؟", o: ["7", "6", "5", "8"], c: 0 },
-  { q: "ما هو الحيوان الأسرع في العالم؟", o: ["الفهد", "الأسد", "النمر", "الغزال"], c: 0 },
-  { q: "ما هي عملة اليابان؟", o: ["الين", "الدولار", "اليوان", "الوون"], c: 0 },
-  { q: "كم عدد أركان الإسلام؟", o: ["5", "4", "6", "3"], c: 0 }
-];
+// فاصل تنظيف الغرف (كل 15 دقيقة)
+const CLEANUP_INTERVAL_MS = 15 * 60 * 1000;
 
-// أسئلة كشف الكذاب (Fibbage)
-const fibbageQuestions = [
-  { q: "السعودية تستورد _____ من أستراليا سنوياً.", a: "الجمال" },
-  { q: "أول مطعم ماكدونالدز في السعودية افتتح في مدينة _____.", a: "الرياض" },
-  { q: "مساحة الربع الخالي تعادل مساحة دولة _____.", a: "فرنسا" },
-  { q: "أول فيلم سعودي عُرض في السينما كان اسمه _____.", a: "وجدة" },
-  { q: "أكبر واحة في العالم موجودة في _____.", a: "الأحساء" },
-  { q: "السعودية فيها أكثر من _____ مليون نخلة.", a: "30" },
-  { q: "الملك عبدالعزيز وحّد السعودية وعمره _____ سنة.", a: "31" },
-  { q: "أول قطار في السعودية ربط بين الرياض و_____.", a: "الدمام" },
-  { q: "برج الساعة في مكة فيه أكبر _____ في العالم.", a: "ساعة" },
-  { q: "السعودية تنتج _____ مليون برميل نفط يومياً.", a: "10" }
-];
-
-// كلمات الرسم (Drawful)
-const drawfulPrompts = [
-  "بعير يركب سيارة", "شايب يلعب فورتنايت", "كبسة طايرة",
-  "صقر يشرب قهوة", "شماغ على رأس قطة", "برج المملكة يرقص",
-  "جمل في المول", "مندي يطير في الفضاء", "خروف يقود طيارة",
-  "شيخ يلعب بلايستيشن", "فنجال قهوة عملاق", "نخلة تمشي",
-  "بدوي على سكيت بورد", "فلافل بأجنحة", "شاورما تتكلم"
-];
-
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 // الدوال المساعدة
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 
+/**
+ * توليد كود غرفة عشوائي من 4 أحرف
+ * يستبعد الأحرف المربكة: I, O, 0, 1
+ */
 function generateRoomCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code = '';
   for (let i = 0; i < 4; i++) {
     code += chars.charAt(Math.floor(Math.random() * chars.length));
   }
+  // لو الكود موجود، ولّد واحد جديد
   return rooms.has(code) ? generateRoomCode() : code;
 }
 
+/**
+ * خلط المصفوفة - خوارزمية فيشر-ييتس
+ */
 function shuffle(array) {
   const arr = [...array];
   for (let i = arr.length - 1; i > 0; i--) {
@@ -191,146 +101,434 @@ function shuffle(array) {
   return arr;
 }
 
+/**
+ * إنشاء كائن لاعب جديد
+ */
 function createPlayer(id, name, isHost = false) {
   const index = Math.floor(Math.random() * AVATARS.length);
   return {
-    id, name,
+    id,
+    name: sanitizeName(name),
     avatar: AVATARS[index],
-    color: COLORS[index],
+    color: COLORS[index % COLORS.length],
     score: 0,
     isHost,
     isReady: false,
     isAlive: true,
-    currentAnswer: null
+    currentAnswer: null,
+    currentVote: null,
+    connectedAt: Date.now()
   };
 }
 
+/**
+ * تنظيف اسم اللاعب من المحارف الخطيرة
+ */
+function sanitizeName(name) {
+  if (!name || typeof name !== 'string') return 'لاعب';
+  // إزالة المحارف الخطيرة والحد الأقصى 20 حرف
+  return name.replace(/[<>&"'/\\]/g, '').trim().substring(0, 20) || 'لاعب';
+}
+
+/**
+ * الحصول على قائمة اللاعبين بصيغة قابلة للإرسال
+ */
 function getPlayerList(room) {
   return Array.from(room.players.values()).map(p => ({
-    id: p.id, name: p.name, avatar: p.avatar, color: p.color,
-    score: p.score, isHost: p.isHost, isReady: p.isReady, isAlive: p.isAlive
+    id: p.id,
+    name: p.name,
+    avatar: p.avatar,
+    color: p.color,
+    score: p.score,
+    isHost: p.isHost,
+    isReady: p.isReady,
+    isAlive: p.isAlive
   }));
 }
 
+/**
+ * اختيار سؤال غير مستخدم من المجموعة
+ * يتتبع الأسئلة المستخدمة لمنع التكرار
+ */
+function pickQuestion(room, pool) {
+  // تصفية الأسئلة المستخدمة
+  const available = pool.filter((_, index) => !room.usedQuestions.has(`${room.currentGame}_${index}`));
+
+  // لو خلصت كل الأسئلة، نعيد التعيين
+  if (available.length === 0) {
+    pool.forEach((_, index) => {
+      room.usedQuestions.delete(`${room.currentGame}_${index}`);
+    });
+    return pickFromPool(room, pool);
+  }
+
+  return pickFromPool(room, pool, available);
+}
+
+/**
+ * دالة مساعدة لاختيار سؤال من المجموعة المتاحة
+ */
+function pickFromPool(room, fullPool, availablePool) {
+  const pool = availablePool || fullPool;
+  const shuffled = shuffle(pool);
+  const picked = shuffled[0];
+  // تسجيل الفهرس في المجموعة الكاملة
+  const originalIndex = fullPool.indexOf(picked);
+  room.usedQuestions.add(`${room.currentGame}_${originalIndex}`);
+  return picked;
+}
+
+/**
+ * عدد اللاعبين اللي أجابوا
+ */
 function countAnswered(room) {
   return Array.from(room.players.values()).filter(p => p.currentAnswer !== null).length;
 }
 
+/**
+ * هل كل اللاعبين أجابوا؟
+ */
 function allPlayersAnswered(room) {
   return Array.from(room.players.values()).every(p => p.currentAnswer !== null);
 }
 
-// ═══════════════════════════════════════════════════════════
-// Socket.IO Events
-// ═══════════════════════════════════════════════════════════
+/**
+ * عدد اللاعبين الأحياء اللي أجابوا (لحفلة القاتل)
+ */
+function countAliveAnswered(room) {
+  return Array.from(room.players.values()).filter(p => p.isAlive && p.currentAnswer !== null).length;
+}
+
+/**
+ * هل كل اللاعبين الأحياء أجابوا؟
+ */
+function allAliveAnswered(room) {
+  return Array.from(room.players.values()).filter(p => p.isAlive).every(p => p.currentAnswer !== null);
+}
+
+/**
+ * إعادة تعيين إجابات كل اللاعبين
+ */
+function resetAnswers(room) {
+  room.players.forEach(p => {
+    p.currentAnswer = null;
+    p.currentVote = null;
+  });
+}
+
+/**
+ * مسح مؤقت الجولة
+ */
+function clearRoundTimer(room) {
+  if (room.roundTimer) {
+    clearTimeout(room.roundTimer);
+    room.roundTimer = null;
+  }
+}
+
+/**
+ * تحديث وقت النشاط الأخير للغرفة
+ */
+function touchRoom(room) {
+  room.lastActivity = Date.now();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// اتصالات Socket.IO
+// ═══════════════════════════════════════════════════════════════════
 
 io.on('connection', (socket) => {
-  console.log('✅ لاعب جديد:', socket.id);
+  console.log('🟢 لاعب جديد اتصل:', socket.id);
 
-  // إنشاء غرفة
+  // ─────────────────────────────────────────────
+  // إنشاء غرفة جديدة
+  // ─────────────────────────────────────────────
   socket.on('createRoom', (playerName) => {
+    // التحقق من صحة الاسم
+    if (!playerName || typeof playerName !== 'string' || playerName.trim().length === 0) {
+      return socket.emit('error', { message: 'الرجاء إدخال اسم صحيح!' });
+    }
+
     const code = generateRoomCode();
     const room = {
       code,
       hostId: socket.id,
       players: new Map(),
-      state: 'lobby',
+      state: 'lobby',          // lobby | playing | results
       currentGame: null,
       currentRound: 0,
-      maxRounds: 3,
+      maxRounds: 5,
       gameData: {},
+      usedQuestions: new Set(),
+      roundTimer: null,
+      lastActivity: Date.now(),
       createdAt: Date.now()
     };
+
+    // إضافة المضيف كأول لاعب
     room.players.set(socket.id, createPlayer(socket.id, playerName, true));
     rooms.set(code, room);
     socket.join(code);
-    socket.emit('roomCreated', { code, players: getPlayerList(room) });
-    console.log('🏠 غرفة جديدة:', code);
+
+    socket.emit('roomCreated', {
+      code,
+      players: getPlayerList(room)
+    });
+
+    console.log('🏠 غرفة جديدة تم إنشاؤها:', code, '- المضيف:', sanitizeName(playerName));
   });
 
-  // الانضمام لغرفة
+  // ─────────────────────────────────────────────
+  // الانضمام لغرفة موجودة
+  // ─────────────────────────────────────────────
   socket.on('joinRoom', ({ code, playerName }) => {
-    const room = rooms.get(code?.toUpperCase());
-    if (!room) return socket.emit('error', { message: 'الغرفة غير موجودة!' });
-    if (room.players.size >= 10) return socket.emit('error', { message: 'الغرفة ممتلئة!' });
-    if (room.state !== 'lobby') return socket.emit('error', { message: 'اللعبة بدأت!' });
-    
+    // التحقق من المدخلات
+    if (!code || typeof code !== 'string') {
+      return socket.emit('error', { message: 'كود الغرفة غير صحيح!' });
+    }
+    if (!playerName || typeof playerName !== 'string' || playerName.trim().length === 0) {
+      return socket.emit('error', { message: 'الرجاء إدخال اسم صحيح!' });
+    }
+
+    const roomCode = code.toUpperCase().trim();
+    const room = rooms.get(roomCode);
+
+    if (!room) {
+      return socket.emit('error', { message: 'الغرفة غير موجودة! تأكد من الكود.' });
+    }
+    if (room.state !== 'lobby') {
+      return socket.emit('error', { message: 'اللعبة بدأت بالفعل! انتظر لين يخلصون.' });
+    }
+    if (room.players.size >= MAX_PLAYERS) {
+      return socket.emit('error', { message: `الغرفة ممتلئة! الحد الأقصى ${MAX_PLAYERS} لاعبين.` });
+    }
+    // التحقق من تكرار الاسم
+    const nameExists = Array.from(room.players.values()).some(
+      p => p.name === sanitizeName(playerName)
+    );
+    if (nameExists) {
+      return socket.emit('error', { message: 'الاسم مستخدم! اختر اسم ثاني.' });
+    }
+
+    // إضافة اللاعب
     room.players.set(socket.id, createPlayer(socket.id, playerName));
-    socket.join(code.toUpperCase());
-    socket.emit('roomJoined', { code: room.code, players: getPlayerList(room) });
-    io.to(room.code).emit('playerJoined', { players: getPlayerList(room) });
+    socket.join(roomCode);
+    touchRoom(room);
+
+    socket.emit('roomJoined', {
+      code: room.code,
+      players: getPlayerList(room)
+    });
+
+    // إبلاغ باقي اللاعبين
+    socket.to(room.code).emit('playerJoined', {
+      players: getPlayerList(room),
+      newPlayer: sanitizeName(playerName)
+    });
+
+    console.log('👤 لاعب انضم:', sanitizeName(playerName), '→ غرفة:', roomCode);
   });
 
-  // تجهيز
+  // ─────────────────────────────────────────────
+  // تبديل حالة الجاهزية
+  // ─────────────────────────────────────────────
   socket.on('playerReady', (code) => {
     const room = rooms.get(code);
     if (!room) return;
+
     const player = room.players.get(socket.id);
-    if (player) {
-      player.isReady = !player.isReady;
-      io.to(code).emit('playerUpdated', { players: getPlayerList(room) });
-    }
+    if (!player) return;
+
+    player.isReady = !player.isReady;
+    touchRoom(room);
+
+    io.to(code).emit('playerUpdated', {
+      players: getPlayerList(room)
+    });
   });
 
+  // ─────────────────────────────────────────────
   // بدء اللعبة
+  // ─────────────────────────────────────────────
   socket.on('startGame', ({ code, game }) => {
     const room = rooms.get(code);
-    if (!room || socket.id !== room.hostId) return;
-    if (room.players.size < 2) return socket.emit('error', { message: 'تحتاج لاعبين على الأقل!' });
-    
+    if (!room) return socket.emit('error', { message: 'الغرفة غير موجودة!' });
+    if (socket.id !== room.hostId) return socket.emit('error', { message: 'بس المضيف يقدر يبدأ اللعبة!' });
+    if (room.players.size < 2) return socket.emit('error', { message: 'لازم لاعبين على الأقل عشان نبدأ!' });
+    if (room.state === 'playing') return socket.emit('error', { message: 'اللعبة شغالة بالفعل!' });
+
+    // التحقق من صحة اسم اللعبة
+    const validGames = ['quiplash', 'guesspionage', 'fakinit', 'triviamurder', 'fibbage', 'drawful'];
+    if (!validGames.includes(game)) {
+      return socket.emit('error', { message: 'لعبة غير معروفة!' });
+    }
+
+    // تحديد عدد الجولات حسب اللعبة
+    const roundsByGame = {
+      quiplash: 5,
+      guesspionage: 5,
+      fakinit: 3,
+      triviamurder: 5,
+      fibbage: 3,
+      drawful: 3
+    };
+
+    // إعداد الغرفة للعبة
     room.currentGame = game;
     room.currentRound = 0;
+    room.maxRounds = roundsByGame[game];
     room.state = 'playing';
     room.gameData = {};
+    room.usedQuestions = new Set();
+    touchRoom(room);
+
+    // إعادة تعيين حالة اللاعبين
     room.players.forEach(p => {
+      p.score = 0;
       p.currentAnswer = null;
+      p.currentVote = null;
       p.isAlive = true;
+      p.isReady = false;
     });
-    
-    io.to(code).emit('gameStarted', { game, players: getPlayerList(room) });
-    setTimeout(() => startGameRound(room), 1000);
+
+    const gameNames = {
+      quiplash: '⚡ رد سريع',
+      guesspionage: '📊 خمّن النسبة',
+      fakinit: '🕵️ المزيّف',
+      triviamurder: '💀 حفلة القاتل',
+      fibbage: '🎭 كشف الكذاب',
+      drawful: '🎨 ارسم لي'
+    };
+
+    io.to(code).emit('gameStarted', {
+      game,
+      gameName: gameNames[game],
+      maxRounds: room.maxRounds,
+      players: getPlayerList(room)
+    });
+
+    console.log('🎮 اللعبة بدأت:', gameNames[game], '- غرفة:', code);
+
+    // بدء أول جولة بعد ثانية
+    setTimeout(() => startGameRound(room), 1500);
   });
 
+  // ─────────────────────────────────────────────
   // إرسال إجابة
+  // ─────────────────────────────────────────────
   socket.on('submitAnswer', ({ code, answer }) => {
     const room = rooms.get(code);
-    if (!room) return;
+    if (!room || room.state !== 'playing') return;
+
     const player = room.players.get(socket.id);
-    if (player && player.currentAnswer === null) {
-      player.currentAnswer = answer;
-      io.to(code).emit('playerAnswered', { 
-        playerId: socket.id, 
-        count: countAnswered(room),
-        total: room.players.size
-      });
-      if (allPlayersAnswered(room)) {
-        setTimeout(() => handleAllAnswered(room), 500);
-      }
+    if (!player) return;
+
+    // لا نقبل إجابة مكررة
+    if (player.currentAnswer !== null) return;
+
+    // التحقق من الإجابة
+    if (answer === undefined || answer === null) return;
+
+    player.currentAnswer = typeof answer === 'string' ? answer.trim().substring(0, 200) : answer;
+    touchRoom(room);
+
+    // إبلاغ الجميع بعدد المجيبين
+    const totalExpected = room.currentGame === 'triviamurder'
+      ? Array.from(room.players.values()).filter(p => p.isAlive).length
+      : room.players.size;
+
+    const currentCount = room.currentGame === 'triviamurder'
+      ? countAliveAnswered(room)
+      : countAnswered(room);
+
+    io.to(code).emit('playerAnswered', {
+      playerId: socket.id,
+      count: currentCount,
+      total: totalExpected
+    });
+
+    // التحقق إذا كل اللاعبين أجابوا
+    const allDone = room.currentGame === 'triviamurder'
+      ? allAliveAnswered(room)
+      : allPlayersAnswered(room);
+
+    if (allDone) {
+      clearRoundTimer(room);
+      setTimeout(() => handleAllAnswered(room), 800);
     }
   });
 
+  // ─────────────────────────────────────────────
   // إرسال تصويت
+  // ─────────────────────────────────────────────
   socket.on('submitVote', ({ code, voteId }) => {
     const room = rooms.get(code);
-    if (!room) return;
+    if (!room || room.state !== 'playing') return;
+
     const player = room.players.get(socket.id);
-    if (player) {
-      player.currentAnswer = voteId;
-      if (allPlayersAnswered(room)) {
-        setTimeout(() => calculateResults(room), 500);
-      }
+    if (!player) return;
+
+    // لا نقبل تصويت مكرر
+    if (player.currentVote !== null) return;
+
+    player.currentVote = voteId;
+    touchRoom(room);
+
+    // حساب المصوتين المتوقعين حسب طور اللعبة
+    const voters = getEligibleVoters(room);
+    const votedCount = voters.filter(p => p.currentVote !== null).length;
+
+    io.to(code).emit('playerVoted', {
+      playerId: socket.id,
+      count: votedCount,
+      total: voters.length
+    });
+
+    // لو كل المصوتين صوتوا
+    if (votedCount >= voters.length) {
+      clearRoundTimer(room);
+      setTimeout(() => calculateVoteResults(room), 800);
     }
   });
 
-  // الجولة التالية
+  // ─────────────────────────────────────────────
+  // إرسال رسمة (لعبة ارسم لي)
+  // ─────────────────────────────────────────────
+  socket.on('submitDrawing', ({ code, drawing }) => {
+    const room = rooms.get(code);
+    if (!room || room.state !== 'playing' || room.currentGame !== 'drawful') return;
+
+    const player = room.players.get(socket.id);
+    if (!player) return;
+
+    // التحقق أن هذا اللاعب هو الرسام
+    if (room.gameData.drawerId !== socket.id) return;
+
+    room.gameData.drawing = drawing;
+    touchRoom(room);
+
+    clearRoundTimer(room);
+
+    // الانتقال لمرحلة التخمين
+    startDrawfulGuessing(room);
+  });
+
+  // ─────────────────────────────────────────────
+  // طلب الجولة التالية
+  // ─────────────────────────────────────────────
   socket.on('requestNextRound', (code) => {
     const room = rooms.get(code);
-    if (!room || socket.id !== room.hostId) return;
-    
+    if (!room) return;
+    if (socket.id !== room.hostId) return socket.emit('error', { message: 'بس المضيف يقدر يتحكم!' });
+
+    clearRoundTimer(room);
+    touchRoom(room);
+
     room.currentRound++;
-    room.players.forEach(p => p.currentAnswer = null);
+    resetAnswers(room);
     room.gameData = {};
-    
+
+    // التحقق إذا خلصت الجولات
     if (room.currentRound >= room.maxRounds) {
       endGame(room);
     } else {
@@ -338,369 +536,1439 @@ io.on('connection', (socket) => {
     }
   });
 
-  // العودة للوبي
+  // ─────────────────────────────────────────────
+  // العودة إلى اللوبي
+  // ─────────────────────────────────────────────
   socket.on('backToLobby', (code) => {
     const room = rooms.get(code);
     if (!room) return;
-    
+
+    clearRoundTimer(room);
+
     room.state = 'lobby';
     room.currentGame = null;
     room.currentRound = 0;
     room.gameData = {};
+    room.usedQuestions = new Set();
+    touchRoom(room);
+
+    // إعادة تعيين حالة اللاعبين
     room.players.forEach(p => {
       p.score = 0;
       p.isAlive = true;
+      p.isReady = false;
       p.currentAnswer = null;
+      p.currentVote = null;
     });
-    
-    io.to(code).emit('returnedToLobby', { players: getPlayerList(room) });
+
+    io.to(code).emit('returnedToLobby', {
+      players: getPlayerList(room)
+    });
+
+    console.log('🔄 الغرفة رجعت للوبي:', code);
   });
 
+  // ─────────────────────────────────────────────
   // قطع الاتصال
+  // ─────────────────────────────────────────────
   socket.on('disconnect', () => {
+    console.log('🔴 لاعب انقطع:', socket.id);
+
     rooms.forEach((room, code) => {
-      if (room.players.has(socket.id)) {
-        room.players.delete(socket.id);
-        if (room.players.size === 0) {
-          rooms.delete(code);
-        } else {
-          if (room.hostId === socket.id) {
-            const newHost = room.players.values().next().value;
-            newHost.isHost = true;
-            room.hostId = newHost.id;
-          }
-          io.to(code).emit('playerLeft', { players: getPlayerList(room) });
+      if (!room.players.has(socket.id)) return;
+
+      const disconnectedPlayer = room.players.get(socket.id);
+      room.players.delete(socket.id);
+
+      // لو الغرفة فاضية، نحذفها
+      if (room.players.size === 0) {
+        clearRoundTimer(room);
+        rooms.delete(code);
+        console.log('🗑️ غرفة محذوفة (فاضية):', code);
+        return;
+      }
+
+      // لو المضيف طلع، نعيّن مضيف جديد
+      if (room.hostId === socket.id) {
+        const newHost = room.players.values().next().value;
+        if (newHost) {
+          newHost.isHost = true;
+          room.hostId = newHost.id;
+          console.log('👑 مضيف جديد:', newHost.name, '- غرفة:', code);
         }
+      }
+
+      // إبلاغ الباقين
+      io.to(code).emit('playerLeft', {
+        players: getPlayerList(room),
+        leftPlayer: disconnectedPlayer ? disconnectedPlayer.name : 'لاعب'
+      });
+
+      // لو اللعبة شغالة والتحقق من الإجابات
+      if (room.state === 'playing') {
+        checkIfRoundCanProceed(room);
       }
     });
   });
 });
 
-// ═══════════════════════════════════════════════════════════
-// Game Logic
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
+// محرك الألعاب - التوزيع الرئيسي
+// ═══════════════════════════════════════════════════════════════════
 
+/**
+ * بدء جولة جديدة حسب اللعبة الحالية
+ */
 function startGameRound(room) {
-  room.players.forEach(p => p.currentAnswer = null);
-  
+  resetAnswers(room);
+  clearRoundTimer(room);
+  touchRoom(room);
+
+  console.log('🎯 جولة جديدة:', room.currentRound + 1, '/', room.maxRounds, '- غرفة:', room.code);
+
   switch (room.currentGame) {
-    case 'quiplash': startQuiplashRound(room); break;
-    case 'guesspionage': startGuesspionageRound(room); break;
-    case 'fakinit': startFakinItRound(room); break;
-    case 'triviamurder': startTriviaMurderRound(room); break;
-    case 'fibbage': startFibbageRound(room); break;
-    case 'drawful': startDrawfulRound(room); break;
+    case 'quiplash':
+      startQuiplashRound(room);
+      break;
+    case 'guesspionage':
+      startGuesspionageRound(room);
+      break;
+    case 'fakinit':
+      startFakinItRound(room);
+      break;
+    case 'triviamurder':
+      startTriviaMurderRound(room);
+      break;
+    case 'fibbage':
+      startFibbageRound(room);
+      break;
+    case 'drawful':
+      startDrawfulRound(room);
+      break;
+    default:
+      console.log('❌ لعبة غير معروفة:', room.currentGame);
   }
 }
 
+/**
+ * معالجة وصول كل الإجابات
+ */
+function handleAllAnswered(room) {
+  clearRoundTimer(room);
+
+  switch (room.currentGame) {
+    case 'quiplash':
+      startQuiplashVoting(room);
+      break;
+    case 'guesspionage':
+      calculateGuesspionageResults(room);
+      break;
+    case 'fakinit':
+      startFakinItVoting(room);
+      break;
+    case 'triviamurder':
+      calculateTriviaMurderResults(room);
+      break;
+    case 'fibbage':
+      startFibbageVoting(room);
+      break;
+    case 'drawful':
+      // لا يصل هنا عادة - الرسم يُعالج بشكل منفصل
+      break;
+    default:
+      sendRoundResults(room, {});
+  }
+}
+
+/**
+ * حساب نتائج التصويت
+ */
+function calculateVoteResults(room) {
+  clearRoundTimer(room);
+
+  switch (room.currentGame) {
+    case 'quiplash':
+      calculateQuiplashResults(room);
+      break;
+    case 'fakinit':
+      calculateFakinItResults(room);
+      break;
+    case 'fibbage':
+      calculateFibbageResults(room);
+      break;
+    case 'drawful':
+      calculateDrawfulResults(room);
+      break;
+    default:
+      sendRoundResults(room, {});
+  }
+}
+
+/**
+ * الحصول على المصوتين المؤهلين حسب اللعبة
+ */
+function getEligibleVoters(room) {
+  switch (room.currentGame) {
+    case 'quiplash': {
+      // كل اللاعبين ما عدا المتنافسين في المواجهة
+      const matchup = room.gameData.currentMatchup || [];
+      return Array.from(room.players.values()).filter(p => !matchup.includes(p.id));
+    }
+    case 'fakinit':
+      // كل اللاعبين يصوتون
+      return Array.from(room.players.values());
+    case 'fibbage': {
+      // كل اللاعبين يصوتون
+      return Array.from(room.players.values());
+    }
+    case 'drawful': {
+      // كل اللاعبين ما عدا الرسام
+      return Array.from(room.players.values()).filter(p => p.id !== room.gameData.drawerId);
+    }
+    default:
+      return Array.from(room.players.values());
+  }
+}
+
+/**
+ * التحقق إذا الجولة تقدر تكمل بعد انقطاع لاعب
+ */
+function checkIfRoundCanProceed(room) {
+  if (room.players.size < 2) {
+    clearRoundTimer(room);
+    room.state = 'lobby';
+    room.currentGame = null;
+    io.to(room.code).emit('gameCancelled', {
+      message: 'ما فيه لاعبين كفاية! اللعبة انلغت.',
+      players: getPlayerList(room)
+    });
+    return;
+  }
+
+  // التحقق إذا كل الموجودين أجابوا
+  const allDone = room.currentGame === 'triviamurder'
+    ? allAliveAnswered(room)
+    : allPlayersAnswered(room);
+
+  if (allDone) {
+    clearRoundTimer(room);
+    setTimeout(() => handleAllAnswered(room), 500);
+  }
+}
+
+/**
+ * تعيين مؤقت للجولة مع تقديم تلقائي
+ */
+function setRoundTimer(room, timeLimit, onTimeout) {
+  clearRoundTimer(room);
+
+  room.roundTimer = setTimeout(() => {
+    console.log('⏰ انتهى الوقت! - غرفة:', room.code);
+
+    // تقديم تلقائي للاعبين اللي ما أجابوا
+    room.players.forEach(p => {
+      if (p.currentAnswer === null) {
+        p.currentAnswer = '__timeout__';
+      }
+    });
+
+    if (onTimeout) {
+      onTimeout();
+    }
+  }, (timeLimit * 1000) + 2000); // ثانيتين إضافية كاحتياط
+}
+
+/**
+ * تعيين مؤقت للتصويت مع تقديم تلقائي
+ */
+function setVoteTimer(room, timeLimit, onTimeout) {
+  clearRoundTimer(room);
+
+  room.roundTimer = setTimeout(() => {
+    console.log('⏰ انتهى وقت التصويت! - غرفة:', room.code);
+
+    // تقديم تلقائي للاعبين اللي ما صوتوا
+    const voters = getEligibleVoters(room);
+    voters.forEach(p => {
+      if (p.currentVote === null) {
+        p.currentVote = '__timeout__';
+      }
+    });
+
+    if (onTimeout) {
+      onTimeout();
+    }
+  }, (timeLimit * 1000) + 2000);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ⚡ رد سريع (Quiplash) - 5 جولات
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * بدء جولة رد سريع
+ * - سؤال واحد لكل الجولة
+ * - كل لاعب يكتب إجابته
+ * - مواجهة 1 ضد 1 بالتصويت
+ * - 100 نقطة لكل صوت + 200 بونص للإجماع
+ */
 function startQuiplashRound(room) {
-  const question = quiplashQuestions[Math.floor(Math.random() * quiplashQuestions.length)];
+  const question = pickQuestion(room, content.quiplash.questions);
+
   room.gameData.question = question;
+  room.gameData.phase = 'answering';
+  room.gameData.matchups = [];
+  room.gameData.currentMatchupIndex = 0;
+
+  const timeLimit = 60;
+
   io.to(room.code).emit('quiplashQuestion', {
     round: room.currentRound + 1,
     maxRounds: room.maxRounds,
     question,
-    timeLimit: 60
+    timeLimit
+  });
+
+  // مؤقت الإجابات
+  setRoundTimer(room, timeLimit, () => {
+    handleAllAnswered(room);
   });
 }
 
+/**
+ * بدء مرحلة التصويت في رد سريع
+ * - إنشاء مواجهات بين اللاعبين
+ */
+function startQuiplashVoting(room) {
+  room.gameData.phase = 'voting';
+
+  // جمع الإجابات الصالحة (غير المنتهية بالوقت)
+  const validPlayers = Array.from(room.players.entries())
+    .filter(([, p]) => p.currentAnswer !== null && p.currentAnswer !== '__timeout__');
+
+  if (validPlayers.length < 2) {
+    // ما فيه إجابات كافية، ننتقل للنتائج مباشرة
+    sendRoundResults(room, {
+      question: room.gameData.question,
+      message: 'ما أحد جاوب! 😅'
+    });
+    return;
+  }
+
+  // إنشاء المواجهات - كل لاعب ضد لاعب ثاني
+  const shuffledPlayers = shuffle(validPlayers.map(([id]) => id));
+  const matchups = [];
+
+  for (let i = 0; i < shuffledPlayers.length - 1; i += 2) {
+    matchups.push([shuffledPlayers[i], shuffledPlayers[i + 1]]);
+  }
+
+  // لو فيه لاعب فردي (عدد فردي)، نضيفه لآخر مواجهة
+  if (shuffledPlayers.length % 2 !== 0 && matchups.length > 0) {
+    matchups.push([shuffledPlayers[shuffledPlayers.length - 1], matchups[0][0]]);
+  }
+
+  room.gameData.matchups = matchups;
+  room.gameData.currentMatchupIndex = 0;
+  room.gameData.matchupResults = [];
+
+  // بدء أول مواجهة
+  presentQuiplashMatchup(room);
+}
+
+/**
+ * عرض مواجهة رد سريع للتصويت
+ */
+function presentQuiplashMatchup(room) {
+  const idx = room.gameData.currentMatchupIndex;
+  const matchups = room.gameData.matchups;
+
+  if (idx >= matchups.length) {
+    // كل المواجهات خلصت، نعرض النتائج
+    finalizeQuiplashRound(room);
+    return;
+  }
+
+  const matchup = matchups[idx];
+  room.gameData.currentMatchup = matchup;
+
+  // إعادة تعيين التصويتات
+  room.players.forEach(p => { p.currentVote = null; });
+
+  const answers = matchup.map(id => {
+    const p = room.players.get(id);
+    return {
+      playerId: id,
+      answer: p ? p.currentAnswer : '...'
+    };
+  });
+
+  const timeLimit = 30;
+
+  io.to(room.code).emit('quiplashVoting', {
+    round: room.currentRound + 1,
+    question: room.gameData.question,
+    answers: shuffle(answers), // خلط ترتيب الإجابات
+    matchupNumber: idx + 1,
+    totalMatchups: matchups.length,
+    timeLimit
+  });
+
+  // مؤقت التصويت
+  setVoteTimer(room, timeLimit, () => {
+    calculateQuiplashResults(room);
+  });
+}
+
+/**
+ * حساب نتائج مواجهة رد سريع واحدة
+ */
+function calculateQuiplashResults(room) {
+  const matchup = room.gameData.currentMatchup;
+  if (!matchup || matchup.length < 2) return;
+
+  // حساب الأصوات
+  const votes = {};
+  matchup.forEach(id => { votes[id] = 0; });
+
+  let totalVoters = 0;
+
+  room.players.forEach((p, id) => {
+    // فقط اللي مو في المواجهة يصوتون
+    if (!matchup.includes(id) && p.currentVote && p.currentVote !== '__timeout__') {
+      if (votes.hasOwnProperty(p.currentVote)) {
+        votes[p.currentVote]++;
+        totalVoters++;
+      }
+    }
+  });
+
+  // حساب النقاط
+  const matchupResult = {};
+  matchup.forEach(id => {
+    const player = room.players.get(id);
+    if (!player) return;
+
+    const voteCount = votes[id] || 0;
+    let points = voteCount * 100;
+    let quiplash = false;
+
+    // بونص الإجماع: لو كل الأصوات لك (و فيه أصوات أصلاً)
+    if (totalVoters > 0 && voteCount === totalVoters) {
+      points += 200;
+      quiplash = true;
+    }
+
+    player.score += points;
+
+    matchupResult[id] = {
+      playerId: id,
+      playerName: player.name,
+      answer: player.currentAnswer,
+      votes: voteCount,
+      points,
+      quiplash
+    };
+  });
+
+  room.gameData.matchupResults.push(matchupResult);
+
+  // إرسال نتيجة المواجهة
+  io.to(room.code).emit('quiplashMatchupResult', {
+    results: Object.values(matchupResult),
+    players: getPlayerList(room)
+  });
+
+  // الانتقال للمواجهة التالية بعد ثوان
+  room.gameData.currentMatchupIndex++;
+
+  setTimeout(() => {
+    if (room.gameData.currentMatchupIndex < room.gameData.matchups.length) {
+      presentQuiplashMatchup(room);
+    } else {
+      finalizeQuiplashRound(room);
+    }
+  }, 4000);
+}
+
+/**
+ * إنهاء جولة رد سريع وعرض الملخص
+ */
+function finalizeQuiplashRound(room) {
+  sendRoundResults(room, {
+    question: room.gameData.question,
+    matchupResults: room.gameData.matchupResults
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// 📊 خمّن النسبة (Guesspionage) - 5 جولات
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * بدء جولة خمّن النسبة
+ * - سؤال واحد مع إجابة نسبة مئوية
+ * - اللاعبين يخمنون رقم من 0 إلى 100
+ * - النقاط حسب القرب من الإجابة الصحيحة
+ */
 function startGuesspionageRound(room) {
-  const q = guesspionageQuestions[Math.floor(Math.random() * guesspionageQuestions.length)];
-  room.gameData.question = q;
+  const question = pickQuestion(room, content.guesspionage.questions);
+
+  room.gameData.question = question;
+
+  const timeLimit = 30;
+
   io.to(room.code).emit('guesspionageQuestion', {
     round: room.currentRound + 1,
     maxRounds: room.maxRounds,
-    question: q.q,
-    timeLimit: 30
+    question: question.q,
+    timeLimit
+  });
+
+  // مؤقت الإجابات
+  setRoundTimer(room, timeLimit, () => {
+    calculateGuesspionageResults(room);
   });
 }
 
+/**
+ * حساب نتائج خمّن النسبة
+ */
+function calculateGuesspionageResults(room) {
+  const correctAnswer = room.gameData.question.a;
+  const playerResults = [];
+
+  room.players.forEach(p => {
+    let points = 0;
+    let guess = null;
+
+    if (p.currentAnswer !== null && p.currentAnswer !== '__timeout__') {
+      guess = parseInt(p.currentAnswer);
+
+      if (!isNaN(guess)) {
+        // تحديد القيمة بين 0 و 100
+        guess = Math.max(0, Math.min(100, guess));
+        const diff = Math.abs(guess - correctAnswer);
+
+        if (diff === 0) {
+          points = 1000; // تخمين مثالي!
+        } else if (diff <= 5) {
+          points = 500;  // قريب جداً
+        } else if (diff <= 10) {
+          points = 300;  // قريب
+        } else if (diff <= 20) {
+          points = 100;  // مش بعيد
+        }
+        // أكثر من 20 = 0 نقاط
+      }
+    }
+
+    p.score += points;
+
+    playerResults.push({
+      playerId: p.id,
+      playerName: p.name,
+      guess,
+      points,
+      diff: guess !== null ? Math.abs(guess - correctAnswer) : null
+    });
+  });
+
+  // ترتيب حسب القرب من الإجابة
+  playerResults.sort((a, b) => {
+    if (a.diff === null) return 1;
+    if (b.diff === null) return -1;
+    return a.diff - b.diff;
+  });
+
+  io.to(room.code).emit('roundResults', {
+    game: 'guesspionage',
+    round: room.currentRound + 1,
+    maxRounds: room.maxRounds,
+    question: room.gameData.question.q,
+    correctAnswer,
+    playerResults,
+    players: getPlayerList(room),
+    isLastRound: room.currentRound >= room.maxRounds - 1
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// 🕵️ المزيّف (Fakin' It) - 3 جولات
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * بدء جولة المزيّف
+ * - اختيار مزيّف عشوائي
+ * - كل اللاعبين يشوفون المهمة ما عدا المزيّف
+ * - بعد المهمة، التصويت على من هو المزيّف
+ */
 function startFakinItRound(room) {
-  const categories = Object.keys(fakinItTasks);
-  const category = categories[Math.floor(Math.random() * categories.length)];
-  const tasks = fakinItTasks[category];
-  const task = tasks[Math.floor(Math.random() * tasks.length)];
-  
+  // اختيار فئة عشوائية
+  const categoryKeys = Object.keys(content.fakinit.categories);
+  const categoryKey = categoryKeys[Math.floor(Math.random() * categoryKeys.length)];
+  const category = content.fakinit.categories[categoryKey];
+
+  // اختيار مهمة من الفئة
+  const task = pickQuestion(room, category.tasks);
+
+  // اختيار المزيّف عشوائياً
   const playerIds = Array.from(room.players.keys());
   const fakerId = playerIds[Math.floor(Math.random() * playerIds.length)];
-  
-  room.gameData.category = category;
+
+  room.gameData.categoryKey = categoryKey;
+  room.gameData.categoryName = category.name;
+  room.gameData.instruction = category.instruction;
   room.gameData.task = task;
   room.gameData.fakerId = fakerId;
-  
-  const categoryNames = {
-    handsOfTruth: '✋ يد الحقيقة',
-    numberPressure: '🔢 ضغط الأرقام',
-    faceValue: '😀 قيمة الوجه',
-    youGottaPoint: '👉 أشر عليه'
-  };
-  
+  room.gameData.phase = 'action';
+
+  const timeLimit = 15;
+
+  // إرسال المهمة لكل لاعب بشكل خاص
   room.players.forEach((player, id) => {
     io.to(id).emit('fakinItTask', {
       round: room.currentRound + 1,
       maxRounds: room.maxRounds,
-      category: categoryNames[category],
-      task: id === fakerId ? null : task,
+      category: category.name,
+      instruction: category.instruction,
+      task: id === fakerId ? null : task, // المزيّف ما يشوف المهمة
       isFaker: id === fakerId,
-      timeLimit: 15
+      timeLimit
     });
+  });
+
+  // بعد انتهاء وقت المهمة، ننتقل للتصويت تلقائياً
+  room.roundTimer = setTimeout(() => {
+    startFakinItVoting(room);
+  }, (timeLimit * 1000) + 2000);
+}
+
+/**
+ * بدء التصويت في المزيّف
+ */
+function startFakinItVoting(room) {
+  clearRoundTimer(room);
+  room.gameData.phase = 'voting';
+
+  // إعادة تعيين التصويتات
+  room.players.forEach(p => { p.currentVote = null; });
+
+  const timeLimit = 20;
+
+  io.to(room.code).emit('fakinItVoting', {
+    round: room.currentRound + 1,
+    task: room.gameData.task,
+    category: room.gameData.categoryName,
+    players: getPlayerList(room),
+    timeLimit
+  });
+
+  // مؤقت التصويت
+  setVoteTimer(room, timeLimit, () => {
+    calculateFakinItResults(room);
   });
 }
 
+/**
+ * حساب نتائج المزيّف
+ */
+function calculateFakinItResults(room) {
+  const fakerId = room.gameData.fakerId;
+  const faker = room.players.get(fakerId);
+
+  // حساب الأصوات
+  const votes = {};
+  room.players.forEach((p, id) => { votes[id] = 0; });
+
+  room.players.forEach(p => {
+    if (p.currentVote && p.currentVote !== '__timeout__' && votes.hasOwnProperty(p.currentVote)) {
+      votes[p.currentVote]++;
+    }
+  });
+
+  // من حصل على أكثر أصوات؟
+  let maxVotes = 0;
+  let mostVotedId = null;
+
+  Object.entries(votes).forEach(([id, count]) => {
+    if (count > maxVotes) {
+      maxVotes = count;
+      mostVotedId = id;
+    }
+  });
+
+  const caught = mostVotedId === fakerId;
+
+  if (caught) {
+    // المزيّف انكشف! كل اللي صوتوا عليه ياخذون 500
+    room.players.forEach(p => {
+      if (p.currentVote === fakerId) {
+        p.score += 500;
+      }
+    });
+  } else {
+    // المزيّف نجا! ياخذ 1000 نقطة
+    if (faker) {
+      faker.score += 1000;
+    }
+  }
+
+  // النتائج التفصيلية
+  const voteDetails = {};
+  room.players.forEach((p, id) => {
+    voteDetails[id] = {
+      playerId: id,
+      playerName: p.name,
+      votesReceived: votes[id] || 0,
+      votedFor: p.currentVote
+    };
+  });
+
+  io.to(room.code).emit('roundResults', {
+    game: 'fakinit',
+    round: room.currentRound + 1,
+    maxRounds: room.maxRounds,
+    caught,
+    fakerId,
+    fakerName: faker ? faker.name : 'مجهول',
+    task: room.gameData.task,
+    category: room.gameData.categoryName,
+    voteDetails: Object.values(voteDetails),
+    players: getPlayerList(room),
+    isLastRound: room.currentRound >= room.maxRounds - 1
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// 💀 حفلة القاتل (Trivia Murder Party) - 5 جولات
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * تحديات الموت للاعبين المحذوفين
+ */
+const deathChallenges = [
+  'اكتب اسم أي دولة عربية!',
+  'اكتب رقم من 1 إلى 10!',
+  'اكتب اسم أي فاكهة!',
+  'اكتب اسم أي لون!',
+  'اكتب اسم أي حيوان!',
+  'اكتب أي كلمة تبدأ بحرف الميم!',
+  'اكتب اسم أي مدينة سعودية!',
+  'اكتب أي رقم زوجي!',
+  'اكتب اسم أي أكلة سعودية!',
+  'اكتب اسم أي كوكب!'
+];
+
+/**
+ * بدء جولة حفلة القاتل
+ * - سؤال اختيار من متعدد (4 خيارات)
+ * - الإجابة الصحيحة = 100 نقطة + بقاء حي
+ * - الإجابة الخطأ = الموت (مع فرصة تحدي الموت)
+ */
 function startTriviaMurderRound(room) {
-  const q = triviaMurderQuestions[Math.floor(Math.random() * triviaMurderQuestions.length)];
-  room.gameData.question = q;
+  const question = pickQuestion(room, content.triviamurder.questions);
+
+  room.gameData.question = question;
+  room.gameData.phase = 'question';
+
+  // التحقق من اللاعبين الأحياء
+  const alivePlayers = Array.from(room.players.values()).filter(p => p.isAlive);
+
+  if (alivePlayers.length === 0) {
+    // كلهم ماتوا! ننهي اللعبة
+    endGame(room);
+    return;
+  }
+
+  // لو باقي لاعب واحد حي، يفوز
+  if (alivePlayers.length === 1) {
+    alivePlayers[0].score += 500; // بونص البقاء الأخير
+    endGame(room);
+    return;
+  }
+
+  const timeLimit = 20;
+
   io.to(room.code).emit('triviaMurderQuestion', {
     round: room.currentRound + 1,
     maxRounds: room.maxRounds,
-    question: q.q,
-    options: q.o,
-    timeLimit: 20
+    question: question.q,
+    options: question.o,
+    timeLimit,
+    alivePlayers: alivePlayers.map(p => ({ id: p.id, name: p.name }))
   });
+
+  // مؤقت الإجابات (فقط الأحياء)
+  clearRoundTimer(room);
+  room.roundTimer = setTimeout(() => {
+    // تقديم تلقائي للأحياء اللي ما أجابوا
+    room.players.forEach(p => {
+      if (p.isAlive && p.currentAnswer === null) {
+        p.currentAnswer = '__timeout__';
+      }
+    });
+    calculateTriviaMurderResults(room);
+  }, (timeLimit * 1000) + 2000);
 }
 
+/**
+ * حساب نتائج حفلة القاتل
+ */
+function calculateTriviaMurderResults(room) {
+  clearRoundTimer(room);
+
+  const correctIndex = room.gameData.question.c;
+  const newlyDead = [];
+  const survivors = [];
+
+  room.players.forEach(p => {
+    if (!p.isAlive) return; // اللاعب ميت بالفعل
+
+    if (p.currentAnswer !== null && p.currentAnswer !== '__timeout__' && parseInt(p.currentAnswer) === correctIndex) {
+      // إجابة صحيحة!
+      p.score += 100;
+      survivors.push({ id: p.id, name: p.name });
+    } else {
+      // إجابة خطأ أو ما جاوب = الموت
+      p.isAlive = false;
+      newlyDead.push({ id: p.id, name: p.name });
+    }
+  });
+
+  // التحقق من فرصة تحدي الموت
+  room.gameData.newlyDead = newlyDead;
+
+  io.to(room.code).emit('triviaMurderResults', {
+    round: room.currentRound + 1,
+    maxRounds: room.maxRounds,
+    correctAnswer: room.gameData.question.o[correctIndex],
+    correctIndex,
+    newlyDead,
+    survivors,
+    players: getPlayerList(room),
+    isLastRound: room.currentRound >= room.maxRounds - 1,
+    hasDeathChallenge: newlyDead.length > 0
+  });
+
+  // لو فيه لاعبين ماتوا، نبدأ تحدي الموت
+  if (newlyDead.length > 0) {
+    setTimeout(() => startDeathChallenge(room), 3000);
+  } else {
+    // إرسال نتائج الجولة العادية
+    setTimeout(() => {
+      sendRoundResults(room, {
+        correctAnswer: room.gameData.question.o[correctIndex],
+        newlyDead: [],
+        survivors
+      });
+    }, 2000);
+  }
+}
+
+/**
+ * بدء تحدي الموت
+ * - اللاعبين الميتين يحصلون على فرصة للعودة
+ */
+function startDeathChallenge(room) {
+  const challenge = deathChallenges[Math.floor(Math.random() * deathChallenges.length)];
+  room.gameData.deathChallenge = challenge;
+  room.gameData.phase = 'deathChallenge';
+
+  // إعادة تعيين الإجابات للميتين الجدد فقط
+  const deadIds = room.gameData.newlyDead.map(p => p.id);
+  deadIds.forEach(id => {
+    const p = room.players.get(id);
+    if (p) p.currentAnswer = null;
+  });
+
+  const timeLimit = 10;
+
+  // إرسال التحدي لكل الميتين الجدد
+  deadIds.forEach(id => {
+    io.to(id).emit('deathChallenge', {
+      challenge,
+      timeLimit
+    });
+  });
+
+  // إبلاغ الجميع
+  io.to(room.code).emit('deathChallengeStarted', {
+    deadPlayers: room.gameData.newlyDead,
+    timeLimit
+  });
+
+  // بعد انتهاء الوقت
+  room.roundTimer = setTimeout(() => {
+    resolveDeathChallenge(room);
+  }, (timeLimit * 1000) + 2000);
+}
+
+/**
+ * حل تحدي الموت
+ * - أول لاعب يجيب بإجابة صالحة يعود للحياة
+ */
+function resolveDeathChallenge(room) {
+  clearRoundTimer(room);
+
+  const deadIds = room.gameData.newlyDead.map(p => p.id);
+  const revived = [];
+
+  // كل اللي جاوبوا بإجابة صالحة (مو فاضية ومو timeout) يعودون
+  deadIds.forEach(id => {
+    const p = room.players.get(id);
+    if (p && p.currentAnswer && p.currentAnswer !== '__timeout__' && p.currentAnswer.trim().length > 0) {
+      p.isAlive = true;
+      revived.push({ id: p.id, name: p.name });
+    }
+  });
+
+  io.to(room.code).emit('deathChallengeResult', {
+    revived,
+    stillDead: deadIds.filter(id => !revived.find(r => r.id === id)).map(id => {
+      const p = room.players.get(id);
+      return { id, name: p ? p.name : 'مجهول' };
+    }),
+    players: getPlayerList(room)
+  });
+
+  // إرسال نتائج الجولة النهائية
+  setTimeout(() => {
+    sendRoundResults(room, {
+      correctAnswer: room.gameData.question.o[room.gameData.question.c],
+      newlyDead: room.gameData.newlyDead,
+      revived
+    });
+  }, 2500);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// 🎭 كشف الكذاب (Fibbage) - 3 جولات
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * بدء جولة كشف الكذاب
+ * - سؤال مع فراغ (_____)
+ * - اللاعبين يكتبون إجابات كاذبة
+ * - الكل يصوتون على الإجابة الصحيحة من بين الكذبات
+ * - 500 نقطة للتخمين الصحيح، 250 لخداع أحد
+ */
 function startFibbageRound(room) {
-  const q = fibbageQuestions[Math.floor(Math.random() * fibbageQuestions.length)];
-  room.gameData.question = q;
+  const question = pickQuestion(room, content.fibbage.questions);
+
+  room.gameData.question = question;
+  room.gameData.phase = 'writing';
+
+  const timeLimit = 60;
+
   io.to(room.code).emit('fibbageQuestion', {
     round: room.currentRound + 1,
     maxRounds: room.maxRounds,
-    question: q.q,
-    timeLimit: 60
+    question: question.q,
+    timeLimit
+  });
+
+  // مؤقت كتابة الإجابات الكاذبة
+  setRoundTimer(room, timeLimit, () => {
+    // تقديم إجابات فارغة للي ما كتبوا
+    room.players.forEach(p => {
+      if (p.currentAnswer === null) {
+        p.currentAnswer = '__timeout__';
+      }
+    });
+    startFibbageVoting(room);
   });
 }
 
+/**
+ * بدء التصويت في كشف الكذاب
+ */
+function startFibbageVoting(room) {
+  clearRoundTimer(room);
+  room.gameData.phase = 'voting';
+
+  // جمع الإجابات الكاذبة الصالحة
+  const fakeAnswers = [];
+  room.players.forEach((p, id) => {
+    if (p.currentAnswer && p.currentAnswer !== '__timeout__' && p.currentAnswer.trim().length > 0) {
+      fakeAnswers.push({
+        id: `fake_${id}`,
+        text: p.currentAnswer.trim(),
+        authorId: id,
+        isCorrect: false
+      });
+    }
+  });
+
+  // إضافة الإجابة الصحيحة
+  const correctOption = {
+    id: 'correct',
+    text: room.gameData.question.a,
+    authorId: null,
+    isCorrect: true
+  };
+
+  // خلط كل الخيارات
+  const allOptions = shuffle([...fakeAnswers, correctOption]);
+  room.gameData.options = allOptions;
+
+  // إعادة تعيين التصويتات
+  room.players.forEach(p => { p.currentVote = null; });
+
+  const timeLimit = 30;
+
+  // إرسال الخيارات (بدون كشف أي واحد الصح)
+  io.to(room.code).emit('fibbageVoting', {
+    round: room.currentRound + 1,
+    question: room.gameData.question.q,
+    options: allOptions.map(o => ({ id: o.id, text: o.text })),
+    timeLimit
+  });
+
+  // مؤقت التصويت
+  setVoteTimer(room, timeLimit, () => {
+    calculateFibbageResults(room);
+  });
+}
+
+/**
+ * حساب نتائج كشف الكذاب
+ */
+function calculateFibbageResults(room) {
+  const options = room.gameData.options;
+  const playerResults = [];
+
+  room.players.forEach((p, id) => {
+    let points = 0;
+    let guessedCorrect = false;
+    let fooledCount = 0;
+
+    // التحقق إذا اللاعب خمّن صح
+    if (p.currentVote === 'correct') {
+      points += 500;
+      guessedCorrect = true;
+    }
+
+    // حساب كم لاعب انخدع بإجابتك الكاذبة
+    const myFakeId = `fake_${id}`;
+    room.players.forEach((other, otherId) => {
+      if (otherId !== id && other.currentVote === myFakeId) {
+        points += 250;
+        fooledCount++;
+      }
+    });
+
+    p.score += points;
+
+    playerResults.push({
+      playerId: id,
+      playerName: p.name,
+      fakeAnswer: p.currentAnswer !== '__timeout__' ? p.currentAnswer : null,
+      guessedCorrect,
+      fooledCount,
+      points
+    });
+  });
+
+  io.to(room.code).emit('roundResults', {
+    game: 'fibbage',
+    round: room.currentRound + 1,
+    maxRounds: room.maxRounds,
+    question: room.gameData.question.q,
+    correctAnswer: room.gameData.question.a,
+    options: room.gameData.options.map(o => ({
+      id: o.id,
+      text: o.text,
+      isCorrect: o.isCorrect,
+      authorId: o.authorId,
+      authorName: o.authorId ? (room.players.get(o.authorId) || {}).name : null
+    })),
+    playerResults,
+    players: getPlayerList(room),
+    isLastRound: room.currentRound >= room.maxRounds - 1
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// 🎨 ارسم لي (Drawful) - 3 جولات
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * بدء جولة ارسم لي
+ * - اختيار رسام عشوائي
+ * - الرسام يرسم الكلمة السرية
+ * - الباقين يكتبون تخميناتهم
+ * - الكل يصوتون على التخمين الصحيح
+ */
 function startDrawfulRound(room) {
-  const prompt = drawfulPrompts[Math.floor(Math.random() * drawfulPrompts.length)];
+  const prompt = pickQuestion(room, content.drawful.prompts);
+
+  // اختيار رسام (بالدور)
+  const playerIds = Array.from(room.players.keys());
+  const drawerIndex = room.currentRound % playerIds.length;
+  const drawerId = playerIds[drawerIndex];
+  const drawer = room.players.get(drawerId);
+
   room.gameData.prompt = prompt;
-  io.to(room.code).emit('drawfulPrompt', {
+  room.gameData.drawerId = drawerId;
+  room.gameData.drawing = null;
+  room.gameData.phase = 'drawing';
+
+  const timeLimit = 90;
+
+  // إرسال الكلمة السرية للرسام فقط
+  io.to(drawerId).emit('drawfulYourTurn', {
     round: room.currentRound + 1,
     maxRounds: room.maxRounds,
     prompt,
-    timeLimit: 90
+    timeLimit
   });
+
+  // إبلاغ الباقين أن اللاعب يرسم
+  socket_broadcast(room, drawerId, 'drawfulWaiting', {
+    round: room.currentRound + 1,
+    maxRounds: room.maxRounds,
+    drawerName: drawer ? drawer.name : 'الرسام',
+    timeLimit
+  });
+
+  // مؤقت الرسم
+  clearRoundTimer(room);
+  room.roundTimer = setTimeout(() => {
+    // لو ما رسم، نرسل رسمة فارغة
+    if (!room.gameData.drawing) {
+      room.gameData.drawing = '[]'; // رسمة فارغة
+    }
+    startDrawfulGuessing(room);
+  }, (timeLimit * 1000) + 2000);
 }
 
-function handleAllAnswered(room) {
-  switch (room.currentGame) {
-    case 'quiplash': startVotingPhase(room); break;
-    case 'guesspionage': calculateGuesspionageResults(room); break;
-    case 'fakinit': startFakinItVoting(room); break;
-    case 'triviamurder': calculateTriviaMurderResults(room); break;
-    case 'fibbage': startFibbageVoting(room); break;
-    default: calculateResults(room);
-  }
-}
-
-function startVotingPhase(room) {
-  const players = Array.from(room.players.values()).filter(p => p.currentAnswer);
-  if (players.length < 2) return calculateResults(room);
-  
-  const shuffled = shuffle(players);
-  room.gameData.matchup = [shuffled[0].id, shuffled[1].id];
-  
-  const answers = room.gameData.matchup.map(id => {
-    const p = room.players.get(id);
-    return { playerId: id, answer: p.currentAnswer };
-  });
-  
-  room.players.forEach(p => p.currentAnswer = null);
-  
-  io.to(room.code).emit('votingPhase', {
-    question: room.gameData.question,
-    answers: shuffle(answers),
-    timeLimit: 30
-  });
-}
-
-function startFakinItVoting(room) {
-  room.players.forEach(p => p.currentAnswer = null);
-  io.to(room.code).emit('fakinItVoting', {
-    task: room.gameData.task,
-    players: getPlayerList(room),
-    timeLimit: 20
-  });
-}
-
-function startFibbageVoting(room) {
-  const options = [];
-  room.players.forEach((p, id) => {
-    if (p.currentAnswer) {
-      options.push({ id, text: p.currentAnswer, isCorrect: false });
+/**
+ * دالة مساعدة لإرسال حدث لكل اللاعبين ما عدا واحد
+ */
+function socket_broadcast(room, excludeId, event, data) {
+  room.players.forEach((_, id) => {
+    if (id !== excludeId) {
+      io.to(id).emit(event, data);
     }
   });
-  options.push({ id: 'correct', text: room.gameData.question.a, isCorrect: true });
-  
-  room.gameData.options = shuffle(options);
-  room.players.forEach(p => p.currentAnswer = null);
-  
-  io.to(room.code).emit('fibbageVoting', {
-    question: room.gameData.question.q,
-    options: room.gameData.options.map(o => ({ id: o.id, text: o.text })),
-    timeLimit: 30
-  });
 }
 
-function calculateResults(room) {
-  switch (room.currentGame) {
-    case 'quiplash': calculateQuiplashResults(room); break;
-    case 'fakinit': calculateFakinItResults(room); break;
-    case 'fibbage': calculateFibbageResults(room); break;
-    default: sendRoundResults(room);
-  }
-}
+/**
+ * بدء مرحلة التخمين في ارسم لي
+ */
+function startDrawfulGuessing(room) {
+  clearRoundTimer(room);
+  room.gameData.phase = 'guessing';
 
-function calculateQuiplashResults(room) {
-  const votes = {};
-  room.gameData.matchup.forEach(id => votes[id] = 0);
-  
-  room.players.forEach((p, id) => {
-    if (!room.gameData.matchup.includes(id) && p.currentAnswer) {
-      votes[p.currentAnswer] = (votes[p.currentAnswer] || 0) + 1;
-    }
-  });
-  
-  Object.entries(votes).forEach(([id, count]) => {
-    const player = room.players.get(id);
-    if (player) player.score += count * 100;
-  });
-  
-  sendRoundResults(room);
-}
+  // إعادة تعيين الإجابات
+  resetAnswers(room);
 
-function calculateGuesspionageResults(room) {
-  const correctAnswer = room.gameData.question.a;
-  
-  room.players.forEach(p => {
-    if (p.currentAnswer !== null) {
-      const diff = Math.abs(parseInt(p.currentAnswer) - correctAnswer);
-      if (diff === 0) p.score += 1000;
-      else if (diff <= 5) p.score += 500;
-      else if (diff <= 10) p.score += 300;
-      else if (diff <= 20) p.score += 100;
-    }
-  });
-  
-  io.to(room.code).emit('roundResults', {
-    game: 'guesspionage',
-    correctAnswer,
-    players: getPlayerList(room),
-    isLastRound: room.currentRound >= room.maxRounds - 1
-  });
-}
+  const timeLimit = 45;
 
-function calculateFakinItResults(room) {
-  const votes = {};
-  room.players.forEach(p => {
-    if (p.currentAnswer) {
-      votes[p.currentAnswer] = (votes[p.currentAnswer] || 0) + 1;
-    }
+  // إرسال الرسمة لكل اللاعبين (ما عدا الرسام)
+  io.to(room.code).emit('drawfulGuessing', {
+    round: room.currentRound + 1,
+    drawing: room.gameData.drawing,
+    drawerId: room.gameData.drawerId,
+    timeLimit
   });
-  
-  let maxVotes = 0, mostVotedId = null;
-  Object.entries(votes).forEach(([id, count]) => {
-    if (count > maxVotes) { maxVotes = count; mostVotedId = id; }
-  });
-  
-  const caught = mostVotedId === room.gameData.fakerId;
-  const faker = room.players.get(room.gameData.fakerId);
-  
-  if (caught) {
-    room.players.forEach((p, id) => {
-      if (p.currentAnswer === room.gameData.fakerId) p.score += 500;
-    });
-  } else {
-    faker.score += 1000;
-  }
-  
-  io.to(room.code).emit('roundResults', {
-    game: 'fakinit',
-    caught,
-    fakerName: faker.name,
-    fakerId: room.gameData.fakerId,
-    players: getPlayerList(room),
-    isLastRound: room.currentRound >= room.maxRounds - 1
-  });
-}
 
-function calculateTriviaMurderResults(room) {
-  const correct = room.gameData.question.c;
-  const newlyDead = [];
-  
-  room.players.forEach(p => {
-    if (p.isAlive) {
-      if (p.currentAnswer === correct) {
-        p.score += 100;
-      } else {
-        p.isAlive = false;
-        newlyDead.push(p.name);
+  // مؤقت التخمين
+  setRoundTimer(room, timeLimit, () => {
+    // تقديم تلقائي
+    room.players.forEach(p => {
+      if (p.id !== room.gameData.drawerId && p.currentAnswer === null) {
+        p.currentAnswer = '__timeout__';
       }
-    }
-  });
-  
-  io.to(room.code).emit('roundResults', {
-    game: 'triviamurder',
-    correctAnswer: room.gameData.question.o[correct],
-    newlyDead,
-    players: getPlayerList(room),
-    isLastRound: room.currentRound >= room.maxRounds - 1
+    });
+    startDrawfulVoting(room);
   });
 }
 
-function calculateFibbageResults(room) {
-  room.players.forEach(p => {
-    if (p.currentAnswer === 'correct') {
-      p.score += 500;
+/**
+ * بدء التصويت في ارسم لي
+ */
+function startDrawfulVoting(room) {
+  clearRoundTimer(room);
+  room.gameData.phase = 'voting';
+
+  // جمع التخمينات
+  const guesses = [];
+  room.players.forEach((p, id) => {
+    if (id !== room.gameData.drawerId && p.currentAnswer && p.currentAnswer !== '__timeout__') {
+      guesses.push({
+        id: `guess_${id}`,
+        text: p.currentAnswer.trim(),
+        authorId: id,
+        isCorrect: false
+      });
     }
+  });
+
+  // إضافة الإجابة الصحيحة
+  const correctOption = {
+    id: 'correct',
+    text: room.gameData.prompt,
+    authorId: null,
+    isCorrect: true
+  };
+
+  const allOptions = shuffle([...guesses, correctOption]);
+  room.gameData.guessOptions = allOptions;
+
+  // إعادة تعيين التصويتات
+  room.players.forEach(p => { p.currentVote = null; });
+
+  const timeLimit = 30;
+
+  // إرسال الخيارات للتصويت (ما عدا الرسام)
+  io.to(room.code).emit('drawfulVoting', {
+    round: room.currentRound + 1,
+    drawing: room.gameData.drawing,
+    options: allOptions.map(o => ({ id: o.id, text: o.text })),
+    drawerId: room.gameData.drawerId,
+    timeLimit
+  });
+
+  // مؤقت التصويت
+  setVoteTimer(room, timeLimit, () => {
+    calculateDrawfulResults(room);
+  });
+}
+
+/**
+ * حساب نتائج ارسم لي
+ */
+function calculateDrawfulResults(room) {
+  const options = room.gameData.guessOptions;
+  const playerResults = [];
+  const drawerId = room.gameData.drawerId;
+  const drawer = room.players.get(drawerId);
+  let drawerPoints = 0;
+
+  room.players.forEach((p, id) => {
+    if (id === drawerId) return; // الرسام يُحسب لاحقاً
+
+    let points = 0;
+    let guessedCorrect = false;
+    let fooledCount = 0;
+
+    // التحقق إذا اللاعب خمّن صح
+    if (p.currentVote === 'correct') {
+      points += 500;
+      guessedCorrect = true;
+      drawerPoints += 250; // الرسام ياخذ نقاط لكل من خمّن صح
+    }
+
+    // حساب كم لاعب انخدع بتخمينك
+    const myGuessId = `guess_${id}`;
     room.players.forEach((other, otherId) => {
-      if (other.currentAnswer === p.id && otherId !== p.id) {
-        p.score += 250;
+      if (otherId !== id && otherId !== drawerId && other.currentVote === myGuessId) {
+        points += 250;
+        fooledCount++;
       }
     });
+
+    p.score += points;
+
+    playerResults.push({
+      playerId: id,
+      playerName: p.name,
+      guess: p.currentAnswer !== '__timeout__' ? p.currentAnswer : null,
+      guessedCorrect,
+      fooledCount,
+      points
+    });
   });
-  
-  sendRoundResults(room);
+
+  // نقاط الرسام
+  if (drawer) {
+    drawer.score += drawerPoints;
+  }
+
+  playerResults.push({
+    playerId: drawerId,
+    playerName: drawer ? drawer.name : 'الرسام',
+    isDrawer: true,
+    points: drawerPoints
+  });
+
+  io.to(room.code).emit('roundResults', {
+    game: 'drawful',
+    round: room.currentRound + 1,
+    maxRounds: room.maxRounds,
+    prompt: room.gameData.prompt,
+    drawing: room.gameData.drawing,
+    drawerId,
+    drawerName: drawer ? drawer.name : 'الرسام',
+    options: options.map(o => ({
+      id: o.id,
+      text: o.text,
+      isCorrect: o.isCorrect,
+      authorId: o.authorId,
+      authorName: o.authorId ? (room.players.get(o.authorId) || {}).name : null
+    })),
+    playerResults,
+    players: getPlayerList(room),
+    isLastRound: room.currentRound >= room.maxRounds - 1
+  });
 }
 
-function sendRoundResults(room) {
+// ═══════════════════════════════════════════════════════════════════
+// الدوال المشتركة
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * إرسال نتائج الجولة العامة
+ */
+function sendRoundResults(room, extraData = {}) {
   io.to(room.code).emit('roundResults', {
     game: room.currentGame,
+    round: room.currentRound + 1,
+    maxRounds: room.maxRounds,
     players: getPlayerList(room),
-    isLastRound: room.currentRound >= room.maxRounds - 1
+    isLastRound: room.currentRound >= room.maxRounds - 1,
+    ...extraData
   });
 }
 
+/**
+ * إنهاء اللعبة وعرض النتائج النهائية
+ */
 function endGame(room) {
+  clearRoundTimer(room);
   room.state = 'results';
-  const results = getPlayerList(room).sort((a, b) => b.score - a.score);
-  io.to(room.code).emit('gameEnded', { finalResults: results, winner: results[0] });
+
+  // ترتيب اللاعبين حسب النقاط
+  const finalResults = getPlayerList(room).sort((a, b) => b.score - a.score);
+  const winner = finalResults[0];
+
+  // نصيحة عشوائية
+  const tip = content.tips[Math.floor(Math.random() * content.tips.length)];
+
+  io.to(room.code).emit('gameEnded', {
+    game: room.currentGame,
+    finalResults,
+    winner,
+    tip
+  });
+
+  console.log('🏆 اللعبة انتهت! الفائز:', winner ? winner.name : 'لا يوجد', '- غرفة:', room.code);
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
+// تنظيف الغرف غير النشطة
+// ═══════════════════════════════════════════════════════════════════
+
+setInterval(() => {
+  const now = Date.now();
+  let cleaned = 0;
+
+  rooms.forEach((room, code) => {
+    // حذف الغرف اللي مر عليها أكثر من ساعتين بدون نشاط
+    const lastActive = room.lastActivity || room.createdAt;
+    if (now - lastActive > ROOM_EXPIRY_MS) {
+      clearRoundTimer(room);
+
+      // إبلاغ اللاعبين الموجودين
+      io.to(code).emit('roomExpired', {
+        message: 'الغرفة انتهت بسبب عدم النشاط!'
+      });
+
+      rooms.delete(code);
+      cleaned++;
+    }
+  });
+
+  if (cleaned > 0) {
+    console.log(`🧹 تم تنظيف ${cleaned} غرفة غير نشطة - المتبقي: ${rooms.size} غرفة`);
+  }
+}, CLEANUP_INTERVAL_MS);
+
+// ═══════════════════════════════════════════════════════════════════
+// نقطة وصول API بسيطة (اختياري)
+// ═══════════════════════════════════════════════════════════════════
+
+// حالة السيرفر
+app.get('/api/status', (req, res) => {
+  res.json({
+    status: 'online',
+    rooms: rooms.size,
+    players: Array.from(rooms.values()).reduce((sum, r) => sum + r.players.size, 0),
+    uptime: process.uptime(),
+    version: content.meta.version
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════
 // تشغيل السيرفر
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 
 const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => {
   console.log(`
-╔═══════════════════════════════════════════════════╗
-║                                                   ║
-║     🎮 أبو عابد بوكس V4                          ║
-║                                                   ║
-║     ✅ السيرفر شغال!                             ║
-║     🌐 http://localhost:${PORT}                    ║
-║                                                   ║
-╚═══════════════════════════════════════════════════╝
+  ╔══════════════════════════════════════════════════════════════╗
+  ║                                                              ║
+  ║     ░█▀▀█ ░█▀▀█ ░█─░█   ░█▀▀█ ░█▀▀█ ░█▀▀▀ ░█▀▀▄         ║
+  ║     ░█▄▄█ ░█▀▀▄ ░█─░█   ░█▄▄█ ░█▀▀▄ ░█▀▀▀ ░█─░█         ║
+  ║     ░█─░█ ░█▄▄█ ─▀▄▄▀   ░█─░█ ░█▄▄█ ░█▄▄▄ ░█▄▄▀         ║
+  ║                                                              ║
+  ║     ░█▀▀█ ░█▀▀▀█ ░█─░█                                     ║
+  ║     ░█▀▀▄ ░█──░█ ─▄▀▄─                                     ║
+  ║     ░█▄▄█ ░█▄▄▄█ ▄▀─▀▄                                     ║
+  ║                                                              ║
+  ║─────────────────────────────────────────────────────────────║
+  ║                                                              ║
+  ║     🎮 أبو عابد بوكس - منصة الألعاب الجماعية السعودية     ║
+  ║     📦 النسخة: ${content.meta.version}                                          ║
+  ║                                                              ║
+  ║     ⚡ رد سريع    📊 خمّن النسبة    🕵️ المزيّف             ║
+  ║     💀 حفلة القاتل  🎭 كشف الكذاب    🎨 ارسم لي           ║
+  ║                                                              ║
+  ║     ✅ السيرفر شغال على البورت ${PORT}                       ║
+  ║     🌐 http://localhost:${PORT}                               ║
+  ║     📅 ${new Date().toLocaleDateString('ar-SA')}                                     ║
+  ║                                                              ║
+  ╚══════════════════════════════════════════════════════════════╝
   `);
 });
 
-// تنظيف الغرف القديمة
-setInterval(() => {
-  const oneHourAgo = Date.now() - 3600000;
+// ═══════════════════════════════════════════════════════════════════
+// معالجة الأخطاء غير المتوقعة
+// ═══════════════════════════════════════════════════════════════════
+
+process.on('uncaughtException', (err) => {
+  console.error('❌ خطأ غير متوقع:', err.message);
+  console.error(err.stack);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('❌ وعد مرفوض غير معالج:', reason);
+});
+
+// إغلاق نظيف
+process.on('SIGTERM', () => {
+  console.log('🛑 جاري إغلاق السيرفر...');
+  // إبلاغ كل الغرف
   rooms.forEach((room, code) => {
-    if (room.createdAt < oneHourAgo && room.state === 'lobby') {
-      rooms.delete(code);
-    }
+    clearRoundTimer(room);
+    io.to(code).emit('serverShutdown', { message: 'السيرفر يسكّر! ارجعوا بعدين.' });
   });
-}, 3600000);
+  server.close(() => {
+    console.log('👋 السيرفر مسكّر. الله يسلمكم!');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('\n🛑 جاري إغلاق السيرفر...');
+  rooms.forEach((room, code) => {
+    clearRoundTimer(room);
+  });
+  server.close(() => {
+    console.log('👋 السيرفر مسكّر. الله يسلمكم!');
+    process.exit(0);
+  });
+});

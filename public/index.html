@@ -3,161 +3,455 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#162d4a">
+  <meta name="theme-color" content="#0a1628">
+  <meta name="description" content="أبو عابد بوكس - ألعاب جماعية سعودية مثل جاكبوكس! العب مع ربعك">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>أبو عابد بوكس 🎮</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧔🏻</text></svg>">
-  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&family=Bangers&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&family=Bangers&family=Black+Ops+One&display=swap" rel="stylesheet">
   <script src="/socket.io/socket.io.js"></script>
   <link rel="stylesheet" href="/css/tokens.css">
   <link rel="stylesheet" href="/css/components.css">
   <link rel="stylesheet" href="/css/layout.css">
   <link rel="stylesheet" href="/css/patterns.css">
   <style>
-    .logo-container{display:flex;flex-direction:column;align-items:center;gap:16px}
-    .mascot{font-size:100px;filter:drop-shadow(4px 4px 0 rgba(0,0,0,0.5));animation:mascot-bounce 2s ease-in-out infinite}
-    @keyframes mascot-bounce{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-20px) rotate(5deg)}}
-    .logo{display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:center}
-    .logo__box{background:linear-gradient(135deg,#FFD93D,#FF8C42);color:#000;padding:16px 32px;font-size:48px;font-weight:900;font-family:'Tajawal',sans-serif;border:6px solid #000;border-radius:16px;box-shadow:8px 8px 0 #000;transform:rotate(-3deg)}
-    .logo__name{font-size:56px;font-weight:900;font-family:'Tajawal',sans-serif;color:#fff;text-shadow:4px 4px 0 #000,-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000;transform:rotate(2deg)}
-    .tagline{font-size:20px;color:var(--color-accent-yellow);text-shadow:2px 2px 0 rgba(0,0,0,0.5);margin-top:8px}
-    .menu-actions{display:flex;flex-direction:column;gap:20px;max-width:380px;width:100%;margin-top:40px}
-    .boot-tip{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.6);padding:16px 32px;border-radius:50px;font-size:18px;color:var(--color-accent-yellow);border:2px solid rgba(255,217,61,0.3);max-width:90%;text-align:center}
-    .saudi-footer{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(0,100,0,0.4),rgba(0,60,0,0.6));padding:12px 28px;border-radius:50px;border:2px solid rgba(0,180,0,0.4);font-size:14px;color:#90EE90}
-    .room-display{background:#fff;border:6px solid #000;border-radius:20px;padding:24px 48px;box-shadow:8px 8px 0 #000;text-align:center}
-    .room-display__label{font-size:14px;color:#666;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px}
-    .room-display__code{font-size:64px;font-weight:900;font-family:'Bangers','Rubik',sans-serif;letter-spacing:12px;color:#2a4a73}
-    .room-display__url{font-size:14px;color:#E91E8C;margin-top:8px}
-    .games-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;max-width:1200px;margin:0 auto;padding:0 16px}
-    .game-card{background:#fff;border-radius:20px;overflow:hidden;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,0.3);transition:transform 0.2s;border:4px solid transparent}
-    .game-card:hover{transform:translateY(-8px) scale(1.02);border-color:#FFD93D}
-    .game-card__banner{height:140px;display:flex;align-items:center;justify-content:center}
-    .game-card__icon{font-size:64px;transition:transform 0.3s}
-    .game-card:hover .game-card__icon{transform:scale(1.2) rotate(-10deg)}
-    .game-card__content{padding:20px;text-align:right}
-    .game-card__title{font-size:22px;font-weight:900;color:#1a1a1a;margin-bottom:8px}
-    .game-card__desc{font-size:13px;color:#666;margin-bottom:12px;line-height:1.5}
-    .game-card__tags{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
-    .game-tag{background:#f0f0f0;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;color:#444}
-    .players-area{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;padding:16px}
-    .player-avatar{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:12px;background:rgba(255,255,255,0.1);border:3px solid transparent;min-width:90px}
-    .player-avatar--ready{border-color:#00e676;background:rgba(0,230,118,0.1)}
-    .player-avatar__face{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;border:4px solid #000;box-shadow:3px 3px 0 #000;position:relative}
-    .player-avatar__crown{position:absolute;top:-14px;right:-6px;font-size:20px}
-    .player-avatar__name{font-size:14px;font-weight:700;color:#fff}
-    .player-avatar__score{font-size:12px;color:#FFD93D}
-    .game-timer{width:80px;height:80px;background:#FFD93D;border:5px solid #000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;font-family:'Bangers',sans-serif;color:#000;box-shadow:4px 4px 0 #000}
-    .game-timer--warning{background:#FF8C42;animation:shake 0.5s ease infinite}
-    .game-timer--danger{background:#ff4444;color:#fff;animation:shake 0.2s ease infinite}
-    @keyframes shake{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
-    .how-steps{display:flex;flex-direction:column;gap:12px}
-    .how-step{display:flex;align-items:center;gap:16px;padding:16px;background:rgba(255,255,255,0.1);border-radius:12px}
-    .how-step__num{width:44px;height:44px;background:#FFD93D;color:#000;border:4px solid #000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;flex-shrink:0}
-    .how-step__text{font-size:16px}
-    .percent-display{font-size:72px;font-weight:900;font-family:'Bangers',sans-serif;color:#00d4ff;text-shadow:4px 4px 0 #000}
-    .slider-track{-webkit-appearance:none;width:100%;height:20px;background:linear-gradient(90deg,#ff4444,#ffaa00,#44ff44);border-radius:10px;border:4px solid #000}
-    .slider-track::-webkit-slider-thumb{-webkit-appearance:none;width:44px;height:44px;background:#fff;border:4px solid #000;border-radius:50%;cursor:grab;box-shadow:3px 3px 0 #000}
-    .vote-option{background:#fff;border:4px solid #000;border-radius:14px;padding:20px 28px;cursor:pointer;transition:all 0.2s;min-width:260px;box-shadow:5px 5px 0 #000}
-    .vote-option:hover{transform:translate(-3px,-3px);box-shadow:8px 8px 0 #000}
-    .vote-option--selected{border-color:#00e676;background:#e8f5e9}
-    .vote-option__text{font-size:18px;font-weight:700;color:#1a1a1a;text-align:center}
-    .scoreboard{background:rgba(0,0,0,0.8);border:4px solid #FFD93D;border-radius:16px;padding:20px;max-width:450px;width:100%}
-    .scoreboard__row{display:flex;justify-content:space-between;align-items:center;padding:12px;border-radius:10px;margin-bottom:6px}
-    .scoreboard__row:first-child{background:linear-gradient(90deg,rgba(255,217,61,0.3),transparent)}
-    @media(max-width:768px){.logo__box{font-size:28px;padding:10px 20px}.logo__name{font-size:36px}.mascot{font-size:60px}.room-display__code{font-size:40px;letter-spacing:6px}.games-grid{grid-template-columns:1fr}.game-timer{width:60px;height:60px;font-size:28px}}
+    /* ═══════════════════════════════════════════════════════════════
+     * INLINE CRITICAL STYLES - أنماط حرجة مباشرة
+     * ═══════════════════════════════════════════════════════════════ */
+
+    /* Logo */
+    .logo-container { display:flex; flex-direction:column; align-items:center; gap:16px; }
+    .mascot { font-size:100px; filter:drop-shadow(4px 4px 0 rgba(0,0,0,0.5)); animation:mascot-bounce 2s ease-in-out infinite; }
+    @keyframes mascot-bounce { 0%,100%{transform:translateY(0) rotate(-5deg)} 50%{transform:translateY(-20px) rotate(5deg)} }
+    .logo { display:flex; align-items:center; gap:16px; flex-wrap:wrap; justify-content:center; }
+    .logo__box {
+      background: linear-gradient(135deg, #FFD93D, #FF8C42);
+      color: #000; padding: 16px 32px; font-size: 48px; font-weight: 900;
+      font-family: 'Tajawal', sans-serif; border: 6px solid #000;
+      border-radius: 16px; box-shadow: 8px 8px 0 #000; transform: rotate(-3deg);
+      text-shadow: none;
+    }
+    .logo__name {
+      font-size: 56px; font-weight: 900; font-family: 'Tajawal', sans-serif;
+      color: #fff; text-shadow: 4px 4px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
+      transform: rotate(2deg);
+    }
+    .logo--sm { transform: scale(0.55); transform-origin: center; }
+    .tagline { font-size:20px; color:var(--color-accent-yellow); text-shadow:2px 2px 0 rgba(0,0,0,0.5); margin-top:8px; }
+
+    /* Boot Screen */
+    .boot-animation { display:flex; flex-direction:column; align-items:center; gap:24px; }
+    .boot-bar { width:280px; height:8px; background:rgba(255,255,255,0.15); border-radius:4px; overflow:hidden; }
+    .boot-bar__fill { height:100%; background:linear-gradient(90deg,#FFD93D,#FF8C42); border-radius:4px; animation:boot-load 2.5s ease-in-out forwards; }
+    @keyframes boot-load { 0%{width:0} 20%{width:15%} 50%{width:45%} 80%{width:80%} 100%{width:100%} }
+    .boot-tip { position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.6); padding:16px 32px; border-radius:50px; font-size:18px; color:var(--color-accent-yellow); border:2px solid rgba(255,217,61,0.3); max-width:90%; text-align:center; }
+    .boot-version { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); font-size:12px; color:rgba(255,255,255,0.3); }
+
+    /* Menu */
+    .menu-actions { display:flex; flex-direction:column; gap:20px; max-width:380px; width:100%; margin-top:40px; }
+    .saudi-footer { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:12px; background:linear-gradient(135deg,rgba(0,100,0,0.4),rgba(0,60,0,0.6)); padding:12px 28px; border-radius:50px; border:2px solid rgba(0,180,0,0.4); font-size:14px; color:#90EE90; white-space:nowrap; }
+
+    /* Room Code Display */
+    .room-display { background:#fff; border:6px solid #000; border-radius:20px; padding:24px 48px; box-shadow:8px 8px 0 #000; text-align:center; }
+    .room-display__label { font-size:14px; color:#666; text-transform:uppercase; letter-spacing:2px; margin-bottom:8px; }
+    .room-display__code { font-size:64px; font-weight:900; font-family:'Bangers','Rubik',sans-serif; letter-spacing:12px; color:#2a4a73; direction:ltr; }
+    .room-display__share { font-size:14px; color:#E91E8C; margin-top:8px; cursor:pointer; }
+    .room-display__share:hover { text-decoration:underline; }
+
+    /* Games Grid */
+    .games-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:24px; max-width:1200px; margin:0 auto; padding:0 16px; }
+    .game-card { background:#fff; border-radius:20px; overflow:hidden; cursor:pointer; box-shadow:0 10px 30px rgba(0,0,0,0.3); transition:transform 0.2s,box-shadow 0.2s; border:4px solid transparent; }
+    .game-card:hover { transform:translateY(-8px) scale(1.02); border-color:#FFD93D; box-shadow:0 20px 40px rgba(0,0,0,0.4); }
+    .game-card__banner { height:140px; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
+    .game-card__icon { font-size:64px; transition:transform 0.3s; position:relative; z-index:1; }
+    .game-card:hover .game-card__icon { transform:scale(1.2) rotate(-10deg); }
+    .game-card__content { padding:20px; text-align:right; }
+    .game-card__title { font-size:22px; font-weight:900; color:#1a1a1a; margin-bottom:8px; }
+    .game-card__desc { font-size:13px; color:#666; margin-bottom:12px; line-height:1.5; }
+    .game-card__tags { display:flex; gap:6px; justify-content:flex-end; flex-wrap:wrap; }
+    .game-tag { background:#f0f0f0; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600; color:#444; }
+
+    /* Players */
+    .players-area { display:flex; flex-wrap:wrap; gap:16px; justify-content:center; padding:16px; }
+    .player-avatar { display:flex; flex-direction:column; align-items:center; gap:6px; padding:12px; border-radius:12px; background:rgba(255,255,255,0.08); border:3px solid transparent; min-width:90px; transition:all 0.3s; }
+    .player-avatar--ready { border-color:#00e676; background:rgba(0,230,118,0.1); }
+    .player-avatar__face { width:60px; height:60px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:32px; border:4px solid #000; box-shadow:3px 3px 0 #000; position:relative; }
+    .player-avatar__crown { position:absolute; top:-14px; right:-6px; font-size:20px; }
+    .player-avatar__name { font-size:14px; font-weight:700; color:#fff; }
+    .player-avatar__score { font-size:12px; color:#FFD93D; }
+
+    /* Game Timer */
+    .game-timer { width:80px; height:80px; background:var(--theme-accent,#FFD93D); border:5px solid #000; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:36px; font-weight:900; font-family:'Bangers',sans-serif; color:#000; box-shadow:4px 4px 0 #000; transition:background 0.3s; }
+    .game-timer--warning { background:#FF8C42; animation:shake 0.5s ease infinite; }
+    .game-timer--danger { background:#ff4444; color:#fff; animation:shake 0.2s ease infinite; }
+    @keyframes shake { 0%,100%{transform:rotate(-3deg)} 50%{transform:rotate(3deg)} }
+
+    /* Percentage Display */
+    .percent-display { font-size:72px; font-weight:900; font-family:'Bangers',sans-serif; color:var(--theme-accent,#00d4ff); text-shadow:4px 4px 0 #000; }
+
+    /* Slider */
+    .slider-track { -webkit-appearance:none; width:100%; height:20px; background:linear-gradient(90deg,#ff4444,#ffaa00,#44ff44); border-radius:10px; border:4px solid #000; outline:none; }
+    .slider-track::-webkit-slider-thumb { -webkit-appearance:none; width:44px; height:44px; background:#fff; border:4px solid #000; border-radius:50%; cursor:grab; box-shadow:3px 3px 0 #000; }
+    .slider-track::-moz-range-thumb { width:44px; height:44px; background:#fff; border:4px solid #000; border-radius:50%; cursor:grab; box-shadow:3px 3px 0 #000; }
+
+    /* Vote Options */
+    .vote-option { background:#fff; border:4px solid #000; border-radius:14px; padding:20px 28px; cursor:pointer; transition:all 0.2s; min-width:260px; box-shadow:5px 5px 0 #000; }
+    .vote-option:hover { transform:translate(-3px,-3px); box-shadow:8px 8px 0 #000; }
+    .vote-option--selected { border-color:#00e676; background:#e8f5e9; }
+    .vote-option__text { font-size:18px; font-weight:700; color:#1a1a1a; text-align:center; }
+    .vote-option__author { font-size:12px; color:#888; text-align:center; margin-top:4px; }
+
+    /* Scoreboard */
+    .scoreboard { background:rgba(0,0,0,0.8); border:4px solid var(--theme-accent,#FFD93D); border-radius:16px; padding:20px; max-width:450px; width:100%; }
+    .scoreboard__row { display:flex; justify-content:space-between; align-items:center; padding:12px; border-radius:10px; margin-bottom:6px; transition:background 0.3s; }
+    .scoreboard__row:first-child { background:linear-gradient(90deg,rgba(255,217,61,0.3),transparent); }
+
+    /* How To Play */
+    .how-steps { display:flex; flex-direction:column; gap:12px; }
+    .how-step { display:flex; align-items:center; gap:16px; padding:16px; background:rgba(255,255,255,0.1); border-radius:12px; }
+    .how-step__num { width:44px; height:44px; background:#FFD93D; color:#000; border:4px solid #000; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:900; flex-shrink:0; }
+    .how-step__text { font-size:16px; }
+
+    /* Drawing Canvas (Drawful) */
+    .drawing-area { display:flex; flex-direction:column; align-items:center; gap:16px; width:100%; max-width:500px; }
+    .drawing-canvas { width:100%; aspect-ratio:4/3; background:#fff; border:4px solid #000; border-radius:16px; box-shadow:8px 8px 0 rgba(0,0,0,0.3); touch-action:none; cursor:crosshair; }
+    .drawing-tools { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; align-items:center; }
+    .color-swatch { width:36px; height:36px; border-radius:50%; border:3px solid #000; cursor:pointer; transition:transform 0.15s; }
+    .color-swatch:hover,.color-swatch.active { transform:scale(1.3); box-shadow:0 0 10px rgba(0,0,0,0.3); }
+    .brush-size { width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.15); border:3px solid rgba(255,255,255,0.3); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:700; }
+    .brush-size.active { background:var(--theme-accent); color:#000; border-color:#000; }
+
+    /* Death Challenge (Trivia Murder) */
+    .death-panel { background:linear-gradient(135deg,rgba(139,0,0,0.9),rgba(80,0,0,0.95)); border:4px solid #DC143C; border-radius:20px; padding:32px; text-align:center; box-shadow:0 0 60px rgba(220,20,60,0.3); animation:death-appear 0.5s ease-out; }
+    @keyframes death-appear { from{transform:scale(0.8);opacity:0} to{transform:scale(1);opacity:1} }
+
+    /* Faker Reveal */
+    .faker-reveal { text-align:center; padding:32px; }
+    .faker-reveal__icon { font-size:80px; animation:faker-spin 1s ease-out; }
+    @keyframes faker-spin { from{transform:rotateY(0)} to{transform:rotateY(360deg)} }
+
+    /* Winner Display */
+    .winner-showcase { text-align:center; }
+    .winner-showcase__trophy { font-size:100px; animation:trophy-bounce 1.5s ease-in-out infinite; }
+    @keyframes trophy-bounce { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-20px) scale(1.1)} }
+    .winner-showcase__name { font-size:48px; font-weight:900; color:#FFD93D; text-shadow:4px 4px 0 #000; margin-top:16px; }
+    .winner-showcase__score { font-size:32px; font-weight:700; color:#fff; margin-top:8px; }
+
+    /* Responsive */
+    @media(max-width:768px) {
+      .logo__box { font-size:28px; padding:10px 20px; }
+      .logo__name { font-size:36px; }
+      .mascot { font-size:60px; }
+      .room-display__code { font-size:40px; letter-spacing:6px; }
+      .games-grid { grid-template-columns:1fr; }
+      .game-timer { width:60px; height:60px; font-size:28px; }
+      .percent-display { font-size:56px; }
+      .winner-showcase__trophy { font-size:70px; }
+      .winner-showcase__name { font-size:32px; }
+    }
+
+    @media(max-width:480px) {
+      .logo__box { font-size:22px; padding:8px 16px; }
+      .logo__name { font-size:28px; }
+      .mascot { font-size:48px; }
+      .vote-option { min-width:auto; width:100%; }
+    }
   </style>
 </head>
 <body data-theme="hub">
-  <div class="bg"><div class="bg__pattern pattern-rays"></div><div class="bg__overlay"></div></div>
-
-  <div id="bootScreen" class="screen screen--centered is-active">
-    <div class="logo-container"><div class="mascot">🧔🏻</div><div class="logo"><span class="logo__box">أبو عابد</span><span class="logo__name">بوكس</span></div></div>
-    <div class="spinner mt-8"></div>
-    <div class="boot-tip" id="bootTip">💡 الكذب في اللعب... فن! 🎭</div>
+  <!-- Background System -->
+  <div class="bg">
+    <div class="bg__pattern pattern-rays"></div>
+    <div class="bg__overlay"></div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════════
+   * BOOT SCREEN - شاشة التحميل
+   * Jackbox-style animated loading
+   * ═══════════════════════════════════════════════════════════ -->
+  <div id="bootScreen" class="screen screen--centered is-active">
+    <div class="boot-animation">
+      <div class="mascot">🧔🏻</div>
+      <div class="logo">
+        <span class="logo__box">أبو عابد</span>
+        <span class="logo__name">بوكس</span>
+      </div>
+      <div class="boot-bar"><div class="boot-bar__fill"></div></div>
+    </div>
+    <div class="boot-tip" id="bootTip">💡 الكذب في اللعب... فن! 🎭</div>
+    <div class="boot-version">V5.0 • 2026</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+   * MENU SCREEN - القائمة الرئيسية
+   * ═══════════════════════════════════════════════════════════ -->
   <div id="menuScreen" class="screen screen--centered">
-    <div class="logo-container"><div class="mascot">🧔🏻</div><div class="logo"><span class="logo__box">أبو عابد</span><span class="logo__name">بوكس</span></div><p class="tagline">🇸🇦 ألعاب جماعية سعودية • العب مع ربعك!</p></div>
+    <div class="logo-container">
+      <div class="mascot">🧔🏻</div>
+      <div class="logo">
+        <span class="logo__box">أبو عابد</span>
+        <span class="logo__name">بوكس</span>
+      </div>
+      <p class="tagline">🇸🇦 ألعاب جماعية سعودية • العب مع ربعك!</p>
+    </div>
     <div class="menu-actions">
       <button class="btn btn--primary btn--lg btn--full" onclick="App.showScreen('createScreen')">🏠 أنشئ غرفة</button>
       <button class="btn btn--secondary btn--lg btn--full" onclick="App.showScreen('joinScreen')">🚪 انضم لغرفة</button>
       <button class="btn btn--ghost btn--full" onclick="App.showScreen('howToPlayScreen')">❓ كيف ألعب؟</button>
     </div>
-    <div class="saudi-footer"><span>🇸🇦</span><span>صنع في السعودية بكل حب</span></div>
+    <div class="saudi-footer">
+      <span>🇸🇦</span>
+      <span>صنع في السعودية بكل حب</span>
+      <span>☕</span>
+    </div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════════
+   * CREATE ROOM SCREEN - إنشاء غرفة
+   * ═══════════════════════════════════════════════════════════ -->
   <div id="createScreen" class="screen screen--centered">
     <div class="panel" style="max-width:450px;width:100%">
-      <div class="text-center mb-6"><span style="font-size:50px">🏠</span><h2 class="text-2xl font-black mt-2">أنشئ غرفة</h2></div>
-      <div class="mb-4"><label class="text-sm text-muted mb-1 block">اسمك</label><input type="text" id="hostNameInput" class="input" placeholder="أدخل اسمك..." maxlength="12"></div>
+      <div class="text-center mb-6">
+        <span style="font-size:50px">🏠</span>
+        <h2 class="text-2xl font-black mt-2">أنشئ غرفة</h2>
+      </div>
+      <div class="mb-4">
+        <label class="text-sm text-muted mb-1 block">اسمك</label>
+        <input type="text" id="hostNameInput" class="input" placeholder="مثال: أبو فهد..." maxlength="12" autocomplete="off">
+      </div>
       <button class="btn btn--primary btn--lg btn--full mb-3" onclick="App.createRoom()">يلا نبدأ! 🎉</button>
       <button class="btn btn--ghost btn--full" onclick="App.showScreen('menuScreen')">← رجوع</button>
     </div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════════
+   * JOIN ROOM SCREEN - انضم لغرفة
+   * ═══════════════════════════════════════════════════════════ -->
   <div id="joinScreen" class="screen screen--centered">
     <div class="panel" style="max-width:450px;width:100%">
-      <div class="text-center mb-6"><span style="font-size:50px">🚪</span><h2 class="text-2xl font-black mt-2">انضم لغرفة</h2></div>
-      <div class="mb-4"><label class="text-sm text-muted mb-1 block">كود الغرفة</label><input type="text" id="roomCodeInput" class="input input--code" placeholder="ABCD" maxlength="4" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z]/g,'')"></div>
-      <div class="mb-4"><label class="text-sm text-muted mb-1 block">اسمك</label><input type="text" id="playerNameInput" class="input" placeholder="أدخل اسمك..." maxlength="12"></div>
+      <div class="text-center mb-6">
+        <span style="font-size:50px">🚪</span>
+        <h2 class="text-2xl font-black mt-2">انضم لغرفة</h2>
+      </div>
+      <div class="mb-4">
+        <label class="text-sm text-muted mb-1 block">كود الغرفة</label>
+        <input type="text" id="roomCodeInput" class="input input--code" placeholder="ABCD" maxlength="4" dir="ltr" autocomplete="off" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z]/g,'')">
+      </div>
+      <div class="mb-4">
+        <label class="text-sm text-muted mb-1 block">اسمك</label>
+        <input type="text" id="playerNameInput" class="input" placeholder="مثال: أبو سعود..." maxlength="12" autocomplete="off">
+      </div>
       <button class="btn btn--primary btn--lg btn--full mb-3" onclick="App.joinRoom()">انضم! 🎮</button>
       <button class="btn btn--ghost btn--full" onclick="App.showScreen('menuScreen')">← رجوع</button>
     </div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════════
+   * HOW TO PLAY SCREEN - كيف ألعب؟
+   * ═══════════════════════════════════════════════════════════ -->
   <div id="howToPlayScreen" class="screen screen--centered">
     <div class="panel" style="max-width:500px;width:100%">
-      <div class="text-center mb-4"><span style="font-size:50px">❓</span><h2 class="text-2xl font-black mt-2">كيف ألعب؟</h2></div>
+      <div class="text-center mb-4">
+        <span style="font-size:50px">❓</span>
+        <h2 class="text-2xl font-black mt-2">كيف ألعب؟</h2>
+      </div>
       <div class="how-steps">
-        <div class="how-step"><span class="how-step__num">1</span><span class="how-step__text">أنشئ غرفة أو انضم لغرفة صاحبك</span></div>
-        <div class="how-step"><span class="how-step__num">2</span><span class="how-step__text">شارك الكود مع أصدقائك</span></div>
-        <div class="how-step"><span class="how-step__num">3</span><span class="how-step__text">اختاروا لعبة من 6 ألعاب</span></div>
-        <div class="how-step"><span class="how-step__num">4</span><span class="how-step__text">استمتعوا! 🎉</span></div>
+        <div class="how-step"><span class="how-step__num">1</span><span class="how-step__text">أنشئ غرفة أو انضم لغرفة صاحبك بالكود</span></div>
+        <div class="how-step"><span class="how-step__num">2</span><span class="how-step__text">شارك كود الغرفة مع أصدقائك (٢-١٠ لاعبين)</span></div>
+        <div class="how-step"><span class="how-step__num">3</span><span class="how-step__text">المضيف يختار لعبة من ٦ ألعاب مختلفة</span></div>
+        <div class="how-step"><span class="how-step__num">4</span><span class="how-step__text">كل لعبة لها أسلوبها الخاص - استمتعوا! 🎉</span></div>
+      </div>
+      <div class="mt-4" style="background:rgba(255,217,61,0.1);border:2px solid rgba(255,217,61,0.3);border-radius:12px;padding:16px;">
+        <p class="text-sm" style="color:#FFD93D;">💡 نصيحة: العب على شاشة كبيرة (تلفزيون أو لابتوب) وكل لاعب يستخدم جواله!</p>
       </div>
       <button class="btn btn--secondary btn--lg btn--full mt-6" onclick="App.showScreen('menuScreen')">فهمت! 👍</button>
     </div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════════
+   * LOBBY SCREEN - غرفة الانتظار
+   * ═══════════════════════════════════════════════════════════ -->
   <div id="lobbyScreen" class="screen">
-    <div class="flex flex-col items-center gap-4 p-4">
-      <div class="logo" style="transform:scale(0.6)"><span class="logo__box">أبو عابد</span><span class="logo__name">بوكس</span></div>
-      <div class="room-display"><div class="room-display__label">كود الغرفة</div><div class="room-display__code" id="displayRoomCode">XXXX</div><div class="room-display__url">📤 شارك الكود!</div></div>
-      <div class="w-full text-center"><h3 class="text-lg font-bold mb-2">👥 اللاعبين (<span id="playerCount">0</span>/10)</h3><div class="players-area" id="playersGrid"></div></div>
+    <div class="flex flex-col items-center gap-4 p-4" style="width:100%;max-width:1200px;margin:0 auto;">
+      <!-- Logo (small) -->
+      <div class="logo logo--sm">
+        <span class="logo__box">أبو عابد</span>
+        <span class="logo__name">بوكس</span>
+      </div>
+
+      <!-- Room Code -->
+      <div class="room-display">
+        <div class="room-display__label">كود الغرفة</div>
+        <div class="room-display__code" id="displayRoomCode">XXXX</div>
+        <div class="room-display__share" onclick="App.shareRoom()">📤 انسخ الكود وشاركه!</div>
+      </div>
+
+      <!-- Players -->
+      <div class="w-full text-center">
+        <h3 class="text-lg font-bold mb-2">👥 اللاعبين (<span id="playerCount">0</span>/10)</h3>
+        <div class="players-area" id="playersGrid"></div>
+      </div>
+
+      <!-- Game Selection (Host only) -->
       <div id="gamesSection" class="w-full" style="display:none">
         <h3 class="text-xl font-black text-center mb-4">🎮 اختر لعبة</h3>
         <div class="games-grid">
-          <div class="game-card" onclick="App.selectGame('quiplash')"><div class="game-card__banner" style="background:linear-gradient(135deg,#667eea,#764ba2)"><span class="game-card__icon">⚡</span></div><div class="game-card__content"><h4 class="game-card__title">رد سريع</h4><p class="game-card__desc">اكتب أطرف إجابة وخل أصدقاءك يصوتون!</p><div class="game-card__tags"><span class="game-tag">👥 ٣-٨</span><span class="game-tag">😂 كوميدي</span></div></div></div>
-          <div class="game-card" onclick="App.selectGame('guesspionage')"><div class="game-card__banner" style="background:linear-gradient(135deg,#11998e,#38ef7d)"><span class="game-card__icon">📊</span></div><div class="game-card__content"><h4 class="game-card__title">خمّن النسبة</h4><p class="game-card__desc">كم نسبة الناس اللي يسوون كذا؟</p><div class="game-card__tags"><span class="game-tag">👥 ٢-٨</span><span class="game-tag">🧠 ذكاء</span></div></div></div>
-          <div class="game-card" onclick="App.selectGame('fakinit')"><div class="game-card__banner" style="background:linear-gradient(135deg,#fa709a,#fee140)"><span class="game-card__icon">🕵️</span></div><div class="game-card__content"><h4 class="game-card__title">المزيّف</h4><p class="game-card__desc">واحد ما يعرف المهمة - اكتشفوه!</p><div class="game-card__tags"><span class="game-tag">👥 ٣-٦</span><span class="game-tag">🎭 تمثيل</span></div></div></div>
-          <div class="game-card" onclick="App.selectGame('triviamurder')"><div class="game-card__banner" style="background:linear-gradient(135deg,#434343,#000)"><span class="game-card__icon">💀</span></div><div class="game-card__content"><h4 class="game-card__title">حفلة القاتل</h4><p class="game-card__desc">أجب صح أو مت!</p><div class="game-card__tags"><span class="game-tag">👥 ١-٨</span><span class="game-tag">☠️ رعب</span></div></div></div>
-          <div class="game-card" onclick="App.selectGame('fibbage')"><div class="game-card__banner" style="background:linear-gradient(135deg,#f093fb,#f5576c)"><span class="game-card__icon">🎭</span></div><div class="game-card__content"><h4 class="game-card__title">كشف الكذاب</h4><p class="game-card__desc">اكتب كذبة مقنعة!</p><div class="game-card__tags"><span class="game-tag">👥 ٢-٨</span><span class="game-tag">🤥 خداع</span></div></div></div>
-          <div class="game-card" onclick="App.selectGame('drawful')"><div class="game-card__banner" style="background:linear-gradient(135deg,#4facfe,#00f2fe)"><span class="game-card__icon">🎨</span></div><div class="game-card__content"><h4 class="game-card__title">ارسم لي</h4><p class="game-card__desc">ارسم وخل الباقين يخمنون!</p><div class="game-card__tags"><span class="game-tag">👥 ٣-٨</span><span class="game-tag">🖌️ رسم</span></div></div></div>
+          <!-- Quiplash -->
+          <div class="game-card" onclick="App.selectGame('quiplash')">
+            <div class="game-card__banner" style="background:linear-gradient(135deg,#667eea,#764ba2)">
+              <span class="game-card__icon">⚡</span>
+            </div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">رد سريع</h4>
+              <p class="game-card__desc">اكتب أطرف إجابة وخل أصدقاءك يصوتون! الإجابة الأقوى تفوز</p>
+              <div class="game-card__tags">
+                <span class="game-tag">👥 ٣-١٠</span>
+                <span class="game-tag">😂 كوميدي</span>
+                <span class="game-tag">✏️ كتابة</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Guesspionage -->
+          <div class="game-card" onclick="App.selectGame('guesspionage')">
+            <div class="game-card__banner" style="background:linear-gradient(135deg,#11998e,#38ef7d)">
+              <span class="game-card__icon">📊</span>
+            </div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">خمّن النسبة</h4>
+              <p class="game-card__desc">كم نسبة الناس اللي يسوون كذا؟ خمّن وشوف من الأقرب!</p>
+              <div class="game-card__tags">
+                <span class="game-tag">👥 ٢-١٠</span>
+                <span class="game-tag">🧠 ذكاء</span>
+                <span class="game-tag">📊 إحصائيات</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fakin' It -->
+          <div class="game-card" onclick="App.selectGame('fakinit')">
+            <div class="game-card__banner" style="background:linear-gradient(135deg,#fa709a,#fee140)">
+              <span class="game-card__icon">🕵️</span>
+            </div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">المزيّف</h4>
+              <p class="game-card__desc">واحد ما يعرف المهمة - اكتشفوه قبل ما يفلت!</p>
+              <div class="game-card__tags">
+                <span class="game-tag">👥 ٣-٨</span>
+                <span class="game-tag">🎭 تمثيل</span>
+                <span class="game-tag">🕵️ تحقيق</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Trivia Murder Party -->
+          <div class="game-card" onclick="App.selectGame('triviamurder')">
+            <div class="game-card__banner" style="background:linear-gradient(135deg,#434343,#000)">
+              <span class="game-card__icon">💀</span>
+            </div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">حفلة القاتل</h4>
+              <p class="game-card__desc">أجب صح أو مت! تحديات الموت تنتظر الخاسرين</p>
+              <div class="game-card__tags">
+                <span class="game-tag">👥 ٢-١٠</span>
+                <span class="game-tag">☠️ رعب</span>
+                <span class="game-tag">🧠 معلومات</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fibbage -->
+          <div class="game-card" onclick="App.selectGame('fibbage')">
+            <div class="game-card__banner" style="background:linear-gradient(135deg,#f093fb,#f5576c)">
+              <span class="game-card__icon">🎭</span>
+            </div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">كشف الكذاب</h4>
+              <p class="game-card__desc">اكتب كذبة مقنعة واخدع أصحابك! اللي يكذب أحسن يفوز</p>
+              <div class="game-card__tags">
+                <span class="game-tag">👥 ٢-١٠</span>
+                <span class="game-tag">🤥 خداع</span>
+                <span class="game-tag">🧐 كشف</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Drawful -->
+          <div class="game-card" onclick="App.selectGame('drawful')">
+            <div class="game-card__banner" style="background:linear-gradient(135deg,#4facfe,#00f2fe)">
+              <span class="game-card__icon">🎨</span>
+            </div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">ارسم لي</h4>
+              <p class="game-card__desc">ارسم الكلمة السرية وخل الباقين يخمنون! فن سعودي أصيل</p>
+              <div class="game-card__tags">
+                <span class="game-tag">👥 ٣-١٠</span>
+                <span class="game-tag">🖌️ رسم</span>
+                <span class="game-tag">😂 مضحك</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div id="waitingMessage" style="display:none"><p class="text-muted">⏳ انتظر المضيف...</p></div>
+
+      <!-- Waiting message (non-host) -->
+      <div id="waitingMessage" style="display:none">
+        <p class="text-muted">⏳ انتظر المضيف يختار لعبة...</p>
+      </div>
+
+      <!-- Lobby Actions -->
       <div class="flex gap-3 mt-2">
         <button class="btn btn--secondary" id="readyBtn" onclick="App.toggleReady()">✋ جاهز!</button>
-        <button class="btn btn--danger" onclick="if(confirm('متأكد؟'))location.reload()">🚪 خروج</button>
+        <button class="btn btn--danger" onclick="if(confirm('متأكد تبي تطلع؟'))location.reload()">🚪 خروج</button>
       </div>
     </div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════════
+   * GAME SCREEN - شاشة اللعبة
+   * Dynamic content rendered by app.js
+   * ═══════════════════════════════════════════════════════════ -->
   <div id="gameScreen" class="screen">
+    <!-- Game HUD -->
     <div class="game-hud">
-      <div class="game-hud__start"><button class="btn btn--danger btn--sm btn--icon" onclick="if(confirm('متأكد؟'))location.reload()">🚪</button><div><div class="game-hud__title" id="gameTitle">⚡ اللعبة</div><div class="game-hud__round" id="gameRound">الجولة ١ من ٣</div></div></div>
-      <div class="game-hud__center"></div>
-      <div class="game-hud__end"><div class="game-timer" id="gameTimer">30</div></div>
+      <div class="game-hud__start">
+        <button class="btn btn--danger btn--sm btn--icon" onclick="if(confirm('متأكد تبي تطلع؟'))location.reload()">🚪</button>
+        <div>
+          <div class="game-hud__title" id="gameTitle">⚡ اللعبة</div>
+          <div class="game-hud__round" id="gameRound">الجولة ١ من ٥</div>
+        </div>
+      </div>
+      <div class="game-hud__center">
+        <div id="answeredCount" class="text-sm text-muted" style="display:none"></div>
+      </div>
+      <div class="game-hud__end">
+        <div class="game-timer" id="gameTimer">30</div>
+      </div>
     </div>
+
+    <!-- Game Content (dynamically rendered) -->
     <div class="game-content" id="gameContent"></div>
-    <div class="game-footer"><p class="game-footer__hint" id="gameHint">💡 اكتب أطرف إجابة!</p></div>
+
+    <!-- Game Footer -->
+    <div class="game-footer">
+      <p class="game-footer__hint" id="gameHint">💡 اكتب أطرف إجابة!</p>
+    </div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════════
+   * RESULTS SCREEN - شاشة النتائج النهائية
+   * ═══════════════════════════════════════════════════════════ -->
   <div id="resultsScreen" class="screen screen--centered">
-    <div id="winnerDisplay" class="text-center mb-6"></div>
+    <div id="winnerDisplay" class="winner-showcase mb-6"></div>
     <div class="scoreboard" id="finalScoreboard"></div>
     <div class="flex justify-center gap-4 mt-6" id="resultsActions"></div>
   </div>
 
+  <!-- Toast Container -->
   <div id="toastContainer"></div>
+
+  <!-- App Script -->
   <script src="/js/app.js"></script>
 </body>
 </html>
