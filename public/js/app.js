@@ -534,11 +534,40 @@ const App = {
   // إجراءات الغرفة
   // ═══════════════════════════════════════════════════════════════
 
+  // ═══════════════════════════════════════════════════════════════
+  // Avatar Selection Integration
+  // ═══════════════════════════════════════════════════════════════
+
+  _hostAvatarData: null,
+  _joinAvatarData: null,
+
+  openAvatarPicker(context) {
+    if (typeof AudioEngine !== 'undefined') AudioEngine.click();
+    AvatarSystem.openPicker((avatarData) => {
+      if (context === 'host') {
+        this._hostAvatarData = avatarData;
+        this._updateAvatarButton('host', avatarData);
+      } else {
+        this._joinAvatarData = avatarData;
+        this._updateAvatarButton('join', avatarData);
+      }
+    });
+  },
+
+  _updateAvatarButton(context, avatarData) {
+    const previewEl = document.getElementById(context + 'AvatarPreview');
+    const nameEl = document.getElementById(context + 'AvatarName');
+    if (!previewEl || !nameEl || !avatarData) return;
+    previewEl.innerHTML = AvatarSystem.getAvatarHtml(avatarData, 48);
+    nameEl.textContent = (avatarData.icon || '') + ' ' + (avatarData.nameAr || 'شخصية');
+  },
+
   createRoom() {
     const name = document.getElementById('hostNameInput').value.trim();
     if (!name) return this.showToast('أدخل اسمك!', 'error');
     AudioEngine.click();
-    this.socket.emit('createRoom', name);
+    const avatarData = this._hostAvatarData || AvatarSystem.getRandomAvatarData();
+    this.socket.emit('createRoom', { playerName: name, avatarData: AvatarSystem.getAvatarData() || avatarData });
   },
 
   joinRoom() {
@@ -550,7 +579,8 @@ const App = {
     this._savedName = name;
     this._savedRoom = code;
     this._persistSession();
-    this.socket.emit('joinRoom', { code, playerName: name });
+    const avatarData = this._joinAvatarData || AvatarSystem.getRandomAvatarData();
+    this.socket.emit('joinRoom', { code, playerName: name, avatarData: AvatarSystem.getAvatarData() || avatarData });
   },
 
   joinAsAudience() {
@@ -562,7 +592,7 @@ const App = {
     this._savedName = name;
     this._savedRoom = code;
     this._persistSession();
-    this.socket.emit('joinAsAudience', { code, playerName: name });
+    this.socket.emit('joinAsAudience', { code, playerName: name, avatarData: AvatarSystem.getAvatarData() });
   },
 
   toggleReady() {
@@ -629,9 +659,14 @@ const App = {
         el.className = 'player-avatar';
 
         const face = document.createElement('div');
-        face.className = 'player-avatar__face';
+        face.className = 'player-avatar__face' + (p.avatarData ? ' player-avatar__face--rich' : '');
         face.style.background = p.color;
-        face.appendChild(document.createTextNode(p.avatar));
+        // Render rich avatar if available, otherwise fallback to emoji
+        if (p.avatarData && typeof AvatarSystem !== 'undefined') {
+          face.innerHTML = AvatarSystem.getAvatarHtml(p.avatarData, 56);
+        } else {
+          face.appendChild(document.createTextNode(p.avatar));
+        }
         el._face = face;
 
         const crown = document.createElement('span');
@@ -753,12 +788,15 @@ const App = {
     // عرض أفاتارات اللاعبين المجيبين
     const avatarsEl = document.getElementById('waitingAvatars');
     if (avatarsEl && answered && answered.length > 0) {
-      avatarsEl.innerHTML = answered.map(a =>
-        '<div class="waiting-avatar" style="background:' + escapeHtml(a.color) + '" title="' + escapeHtml(a.name) + '">' +
-          escapeHtml(a.avatar) +
+      avatarsEl.innerHTML = answered.map(a => {
+        const avatarContent = (a.avatarData && typeof AvatarSystem !== 'undefined')
+          ? AvatarSystem.getAvatarHtml(a.avatarData, 32)
+          : escapeHtml(a.avatar);
+        return '<div class="waiting-avatar' + (a.avatarData ? ' waiting-avatar--rich' : '') + '" style="background:' + escapeHtml(a.color) + '" title="' + escapeHtml(a.name) + '">' +
+          avatarContent +
           '<div class="waiting-avatar__check">✓</div>' +
-        '</div>'
-      ).join('');
+        '</div>';
+      }).join('');
     }
   },
 
@@ -950,18 +988,24 @@ const App = {
 
       // Build vote bars for each side
       const voterBreakdown = d.voterBreakdown || {};
-      const aBars = (voterBreakdown[sideA.playerId] || []).map((v, i) =>
-        '<div class="ql-vote-bar" style="background:' + escapeHtml(v.color || '#444') + ';animation-delay:' + (i * 0.2) + 's">' +
-          '<span class="ql-vote-bar__avatar">' + escapeHtml(v.avatar || '👤') + '</span>' +
+      const aBars = (voterBreakdown[sideA.playerId] || []).map((v, i) => {
+        const vAvatar = (v.avatarData && typeof AvatarSystem !== 'undefined')
+          ? AvatarSystem.getAvatarHtml(v.avatarData, 24)
+          : escapeHtml(v.avatar || '👤');
+        return '<div class="ql-vote-bar" style="background:' + escapeHtml(v.color || '#444') + ';animation-delay:' + (i * 0.2) + 's">' +
+          '<span class="ql-vote-bar__avatar">' + vAvatar + '</span>' +
           '<span class="ql-vote-bar__name">' + escapeHtml(v.name || '') + '</span>' +
-        '</div>'
-      ).join('');
-      const bBars = (voterBreakdown[sideB.playerId] || []).map((v, i) =>
-        '<div class="ql-vote-bar" style="background:' + escapeHtml(v.color || '#444') + ';animation-delay:' + (i * 0.2) + 's">' +
-          '<span class="ql-vote-bar__avatar">' + escapeHtml(v.avatar || '👤') + '</span>' +
+        '</div>';
+      }).join('');
+      const bBars = (voterBreakdown[sideB.playerId] || []).map((v, i) => {
+        const vAvatar = (v.avatarData && typeof AvatarSystem !== 'undefined')
+          ? AvatarSystem.getAvatarHtml(v.avatarData, 24)
+          : escapeHtml(v.avatar || '👤');
+        return '<div class="ql-vote-bar" style="background:' + escapeHtml(v.color || '#444') + ';animation-delay:' + (i * 0.2) + 's">' +
+          '<span class="ql-vote-bar__avatar">' + vAvatar + '</span>' +
           '<span class="ql-vote-bar__name">' + escapeHtml(v.name || '') + '</span>' +
-        '</div>'
-      ).join('');
+        '</div>';
+      }).join('');
 
       // Build the results HTML
       const gc = document.getElementById('gameContent');
@@ -979,7 +1023,7 @@ const App = {
               '<div class="ql-vote-stack" id="qlStackA">' + aBars + '</div>' +
               '<div class="ql-percentage ql-percentage--a' + (aWins ? ' ql-percentage--winner' : '') + (sideAPct === 0 ? ' ql-percentage--zero' : '') + '" id="qlPctA">0%</div>' +
               '<div class="ql-results__player">' +
-                '<div class="ql-results__player-avatar' + (aWins ? ' ql-results__player-avatar--happy' : bWins ? ' ql-results__player-avatar--sad' : '') + '">' + escapeHtml(sideA.avatar || '👤') + '</div>' +
+                '<div class="ql-results__player-avatar' + (aWins ? ' ql-results__player-avatar--happy' : bWins ? ' ql-results__player-avatar--sad' : '') + '">' + ((sideA.avatarData && typeof AvatarSystem !== 'undefined') ? AvatarSystem.getAvatarHtml(sideA.avatarData, 40) : escapeHtml(sideA.avatar || '👤')) + '</div>' +
                 '<div class="ql-results__player-name">' + escapeHtml(sideA.playerName || '') + '</div>' +
               '</div>' +
               '<div class="ql-points' + (sideA.quiplash ? ' ql-points--quiplash' : '') + '">+' + (sideA.points || 0) + '</div>' +
@@ -994,7 +1038,7 @@ const App = {
               '<div class="ql-vote-stack" id="qlStackB">' + bBars + '</div>' +
               '<div class="ql-percentage ql-percentage--b' + (bWins ? ' ql-percentage--winner' : '') + (sideBPct === 0 ? ' ql-percentage--zero' : '') + '" id="qlPctB">0%</div>' +
               '<div class="ql-results__player">' +
-                '<div class="ql-results__player-avatar' + (bWins ? ' ql-results__player-avatar--happy' : aWins ? ' ql-results__player-avatar--sad' : '') + '">' + escapeHtml(sideB.avatar || '👤') + '</div>' +
+                '<div class="ql-results__player-avatar' + (bWins ? ' ql-results__player-avatar--happy' : aWins ? ' ql-results__player-avatar--sad' : '') + '">' + ((sideB.avatarData && typeof AvatarSystem !== 'undefined') ? AvatarSystem.getAvatarHtml(sideB.avatarData, 40) : escapeHtml(sideB.avatar || '👤')) + '</div>' +
                 '<div class="ql-results__player-name">' + escapeHtml(sideB.playerName || '') + '</div>' +
               '</div>' +
               '<div class="ql-points' + (sideB.quiplash ? ' ql-points--quiplash' : '') + '">+' + (sideB.points || 0) + '</div>' +
@@ -1073,7 +1117,7 @@ const App = {
       const rank = i === 0 ? '👑' : (i + 1).toString();
       return '<div class="ql-mini-lb__row">' +
         '<div class="ql-mini-lb__rank">' + rank + '</div>' +
-        '<div class="ql-mini-lb__avatar">' + escapeHtml(p.avatar || '👤') + '</div>' +
+        '<div class="ql-mini-lb__avatar">' + ((p.avatarData && typeof AvatarSystem !== 'undefined') ? AvatarSystem.getAvatarHtml(p.avatarData, 28) : escapeHtml(p.avatar || '👤')) + '</div>' +
         '<div class="ql-mini-lb__name">' + escapeHtml(p.name || '') + '</div>' +
         '<div class="ql-mini-lb__score">' + (p.score || 0) + '</div>' +
       '</div>';
@@ -1107,9 +1151,9 @@ const App = {
           '<div class="ql-jinx__subtitle">نفس الإجابة! صفر نقاط للاثنين!</div>' +
           '<div class="ql-jinx__answer">"' + escapeHtml(r0.answer || r1.answer || '') + '"</div>' +
           '<div class="ql-jinx__players">' +
-            '<span>' + escapeHtml(r0.avatar || '👤') + ' ' + escapeHtml(r0.playerName || '') + '</span>' +
+            '<span>' + ((r0.avatarData && typeof AvatarSystem !== 'undefined') ? AvatarSystem.getAvatarHtml(r0.avatarData, 28) : escapeHtml(r0.avatar || '👤')) + ' ' + escapeHtml(r0.playerName || '') + '</span>' +
             '<span style="margin:0 12px;color:#ff3f7f;font-weight:900">=</span>' +
-            '<span>' + escapeHtml(r1.avatar || '👤') + ' ' + escapeHtml(r1.playerName || '') + '</span>' +
+            '<span>' + ((r1.avatarData && typeof AvatarSystem !== 'undefined') ? AvatarSystem.getAvatarHtml(r1.avatarData, 28) : escapeHtml(r1.avatar || '👤')) + ' ' + escapeHtml(r1.playerName || '') + '</span>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -1399,12 +1443,15 @@ const App = {
 
   handleFakinItVoting(d) {
     this.startTimer(d.timeLimit);
-    const players = d.players.map(p =>
-      '<div class="player-avatar" style="cursor:pointer" data-action="votePlayer" data-id="' + escapeHtml(p.id) + '">' +
-        '<div class="player-avatar__face" style="background:' + escapeHtml(p.color) + '">' + escapeHtml(p.avatar) + '</div>' +
+    const players = d.players.map(p => {
+      const faceContent = (p.avatarData && typeof AvatarSystem !== 'undefined')
+        ? AvatarSystem.getAvatarHtml(p.avatarData, 56)
+        : escapeHtml(p.avatar);
+      return '<div class="player-avatar" style="cursor:pointer" data-action="votePlayer" data-id="' + escapeHtml(p.id) + '">' +
+        '<div class="player-avatar__face' + (p.avatarData ? ' player-avatar__face--rich' : '') + '" style="background:' + escapeHtml(p.color) + '">' + faceContent + '</div>' +
         '<span class="player-avatar__name">' + escapeHtml(p.name) + '</span>' +
-      '</div>'
-    ).join('');
+      '</div>';
+    }).join('');
 
     document.getElementById('gameContent').innerHTML =
       '<div class="text-center" style="max-width:800px">' +
@@ -2227,22 +2274,29 @@ const App = {
     const w = d.finalResults[0];
     const winnerEl = document.getElementById('winnerDisplay');
     if (winnerEl) {
+      const winnerAvatar = (w.avatarData && typeof AvatarSystem !== 'undefined')
+        ? '<div class="winner-showcase__avatar">' + AvatarSystem.getAvatarHtml(w.avatarData, 80) + '</div>'
+        : '';
       winnerEl.innerHTML =
         '<div class="winner-showcase__trophy">🏆</div>' +
+        winnerAvatar +
         '<h1 class="winner-showcase__name">' + escapeHtml(w.name) + '</h1>' +
         '<div class="winner-showcase__score">' + w.score + ' نقطة</div>';
     }
 
-    const scores = d.finalResults.map((p, i) =>
-      '<div class="scoreboard__row">' +
+    const scores = d.finalResults.map((p, i) => {
+      const scoreAvatar = (p.avatarData && typeof AvatarSystem !== 'undefined')
+        ? AvatarSystem.getAvatarHtml(p.avatarData, 40)
+        : escapeHtml(p.avatar);
+      return '<div class="scoreboard__row">' +
         '<div class="flex items-center gap-3">' +
           '<span class="text-2xl">' + (i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1)) + '</span>' +
-          '<span class="avatar" style="background:' + escapeHtml(p.color) + ';width:40px;height:40px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center">' + escapeHtml(p.avatar) + '</span>' +
+          '<span class="avatar" style="background:' + escapeHtml(p.color) + ';width:40px;height:40px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center">' + scoreAvatar + '</span>' +
           '<span class="text-xl font-bold">' + escapeHtml(p.name) + '</span>' +
         '</div>' +
         '<span class="text-xl font-bold" style="color:#FFD93D">' + p.score + '</span>' +
-      '</div>'
-    ).join('');
+      '</div>';
+    }).join('');
 
     document.getElementById('finalScoreboard').innerHTML = scores;
 
