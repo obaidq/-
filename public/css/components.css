@@ -807,22 +807,22 @@
  * GAME CARD BANNERS - ألوان ممتعة
  * ───────────────────────────────────────────────────────────── */
 
-.game-card__banner--quiplash { background: linear-gradient(135deg, #667eea, #764ba2); }
-.game-card__banner--guesspionage { background: linear-gradient(135deg, #004d40, #00897b, #00D4AA); }
-.game-card__banner--fakinit { background: linear-gradient(135deg, #fa709a, #fee140); }
-.game-card__banner--triviamurder { background: linear-gradient(135deg, #434343, #000); }
-.game-card__banner--fibbage { background: linear-gradient(135deg, #f093fb, #f5576c); }
-.game-card__banner--drawful { background: linear-gradient(135deg, #4facfe, #00f2fe); }
-.game-card__banner--tshirtwars { background: linear-gradient(135deg, #6C3483, #FF6B35); }
-.game-card__banner--lovemonster { background: linear-gradient(135deg, #C2185B, #FF4081); }
-.game-card__banner--inventions { background: linear-gradient(135deg, #0277BD, #00E5FF); }
-.game-card__banner--wouldyourather { background: linear-gradient(135deg, #FF6F00, #FFC107); }
-.game-card__banner--whosaidit { background: linear-gradient(135deg, #1565C0, #42A5F5); }
-.game-card__banner--speedround { background: linear-gradient(135deg, #E65100, #FF3D00); }
-.game-card__banner--twotruths { background: linear-gradient(135deg, #2E7D32, #66BB6A); }
-.game-card__banner--splittheroom { background: linear-gradient(135deg, #4527A0, #7C4DFF); }
-.game-card__banner--emojidecode { background: linear-gradient(135deg, #AD1457, #F06292); }
-.game-card__banner--debateme { background: linear-gradient(135deg, #37474F, #78909C); }
-.game-card__banner--acrophobia { background: linear-gradient(135deg, #00695C, #26A69A); }
+.game-card__banner--quiplash { background: linear-gradient(135deg, #4a3f9f 0%, #667eea 40%, #764ba2 100%); }
+.game-card__banner--guesspionage { background: linear-gradient(135deg, #001a12 0%, #004d40 30%, #00897b 70%, #00D4AA 100%); }
+.game-card__banner--fakinit { background: linear-gradient(135deg, #c0392b 0%, #fa709a 40%, #fee140 100%); }
+.game-card__banner--triviamurder { background: linear-gradient(135deg, #1a0008 0%, #2D0A15 40%, #434343 80%, #1a1a1a 100%); }
+.game-card__banner--fibbage { background: linear-gradient(135deg, #8B4513 0%, #DAA520 40%, #f093fb 70%, #f5576c 100%); }
+.game-card__banner--drawful { background: linear-gradient(135deg, #0D1B3E 0%, #4facfe 40%, #00f2fe 80%, #00BFA5 100%); }
+.game-card__banner--tshirtwars { background: linear-gradient(135deg, #4A148C 0%, #6C3483 40%, #FF6B35 100%); }
+.game-card__banner--lovemonster { background: linear-gradient(135deg, #880E4F 0%, #C2185B 40%, #FF4081 80%, #FF80AB 100%); }
+.game-card__banner--inventions { background: linear-gradient(135deg, #01579B 0%, #0277BD 40%, #00E5FF 100%); }
+.game-card__banner--wouldyourather { background: linear-gradient(135deg, #BF360C 0%, #FF6F00 40%, #FFC107 80%, #FFF176 100%); }
+.game-card__banner--whosaidit { background: linear-gradient(135deg, #0D47A1 0%, #1565C0 40%, #42A5F5 80%, #90CAF9 100%); }
+.game-card__banner--speedround { background: linear-gradient(135deg, #BF360C 0%, #E65100 30%, #FF3D00 60%, #FF6E40 100%); }
+.game-card__banner--twotruths { background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 40%, #66BB6A 80%, #A5D6A7 100%); }
+.game-card__banner--splittheroom { background: linear-gradient(135deg, #1A237E 0%, #4527A0 40%, #7C4DFF 80%, #B388FF 100%); }
+.game-card__banner--emojidecode { background: linear-gradient(135deg, #880E4F 0%, #AD1457 40%, #F06292 80%, #F8BBD0 100%); }
+.game-card__banner--debateme { background: linear-gradient(135deg, #1C2833 0%, #37474F 40%, #78909C 80%, #B0BEC5 100%); }
+.game-card__banner--acrophobia { background: linear-gradient(135deg, #004D40 0%, #00695C 40%, #26A69A 80%, #80CBC4 100%); }
 
 .btn--icon-lg { font-size: 20px; }

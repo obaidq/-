@@ -850,6 +850,11 @@ const App = {
         el.appendChild(name);
         el._name = name;
 
+        const title = document.createElement('span');
+        title.className = 'player-avatar__title';
+        el.appendChild(title);
+        el._title = title;
+
         const score = document.createElement('span');
         score.className = 'player-avatar__score';
         el.appendChild(score);
@@ -864,6 +869,11 @@ const App = {
       el._crown.style.display = p.isHost ? '' : 'none';
       el._skull.style.display = !p.isAlive ? '' : 'none';
       el._name.textContent = p.name + (p.isReady ? ' ✓' : '');
+      if (el._title) {
+        const titleText = p.avatarData && p.avatarData.nameAr ? p.avatarData.nameAr : '';
+        el._title.textContent = titleText;
+        el._title.style.display = titleText ? '' : 'none';
+      }
       el._score.textContent = p.score + ' نقطة';
     });
 
@@ -3247,10 +3257,14 @@ const App = {
       const winnerAvatar = (w.avatarData && typeof AvatarSystem !== 'undefined')
         ? '<div class="winner-showcase__avatar">' + this._gAvatar(w.avatarData, 80, w.avatar) + '</div>'
         : '';
+      const trophyHTML = (typeof GameIllustrations !== 'undefined')
+        ? '<div class="trophy-svg">' + GameIllustrations.trophySVG + '</div>'
+        : '<div class="winner-showcase__trophy">🏆</div>';
       winnerEl.innerHTML =
-        '<div class="winner-showcase__trophy">🏆</div>' +
+        trophyHTML +
         winnerAvatar +
         '<h1 class="winner-showcase__name">' + escapeHtml(w.name) + '</h1>' +
+        '<div class="winner-showcase__subtitle">البطل</div>' +
         '<div class="winner-showcase__score">' + w.score + ' نقطة</div>';
 
       // Score popup for winner
