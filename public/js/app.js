@@ -2841,6 +2841,26 @@ const App = {
     }
   },
 
+  _renderResultsList(results) {
+    if (!results || !results.length) return '';
+    let html = '<div class="flex flex-col gap-3 mb-4" style="max-width:450px;width:100%">';
+    results.sort((a, b) => (b.points || 0) - (a.points || 0)).forEach((r, i) => {
+      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
+      html +=
+        '<div class="result-row' + (i === 0 ? ' result-row--top' : '') + '">' +
+          '<div>' +
+            '<span class="font-bold">' + medal + ' ' + escapeHtml(r.playerName || r.name || '') + '</span>' +
+            (r.text ? '<p class="text-sm text-muted mt-1">"' + escapeHtml(r.text) + '"</p>' : '') +
+            (r.detail ? '<p class="text-sm text-muted mt-1">' + escapeHtml(r.detail) + '</p>' : '') +
+          '</div>' +
+          '<div class="text-left">' +
+            '<div style="color:#D4AF37;font-weight:bold">+' + (r.points || 0) + '</div>' +
+          '</div>' +
+        '</div>';
+    });
+    return html + '</div>';
+  },
+
   _handleRoundResultsInner(d) {
     clearInterval(this.gameTimer);
     this._submitting = false;
@@ -3143,41 +3163,200 @@ const App = {
         }
         break;
 
-      case 'wouldyourather':
-      case 'whosaidit':
-      case 'speedround':
-      case 'twotruths':
-      case 'splittheroom':
-      case 'emojidecode':
-      case 'debateme':
-      case 'acrophobia':
-        // Generic results for new games
-        if (d.message) {
-          resultHtml = '<p class="text-xl mb-4">' + escapeHtml(d.message) + '</p>';
+      case 'wouldyourather': {
+        // تبي ولا ما تبي — عرض الاختيارين مع أشرطة النسب
+        const pctA = d.percentA || 0;
+        const pctB = d.percentB || 0;
+        resultHtml =
+          '<div class="wyr-results-card">' +
+            '<div class="wyr-vs-label">⚡ النتيجة ⚡</div>' +
+            '<div class="wyr-bar-container">' +
+              '<div class="wyr-bar wyr-bar--a" style="width:' + Math.max(pctA, 8) + '%">' +
+                '<span class="wyr-bar__label">' + escapeHtml(d.optionA || '') + '</span>' +
+                '<span class="wyr-bar__pct">' + pctA + '% (' + (d.countA || 0) + ')</span>' +
+              '</div>' +
+              '<div class="wyr-bar wyr-bar--b" style="width:' + Math.max(pctB, 8) + '%">' +
+                '<span class="wyr-bar__label">' + escapeHtml(d.optionB || '') + '</span>' +
+                '<span class="wyr-bar__pct">' + pctB + '% (' + (d.countB || 0) + ')</span>' +
+              '</div>' +
+            '</div>' +
+            (d.isSplit ? '<div class="wyr-split-badge">🎯 انقسام متساوي! +1000 للجميع</div>' : '') +
+          '</div>';
+        if (d.playerResults) {
+          resultHtml += this._renderResultsList(d.playerResults);
         }
+        break;
+      }
+
+      case 'whosaidit': {
+        // مين قال كذا — كشف المؤلفين
+        resultHtml = '<div class="game-prompt mb-4"><div class="game-prompt__icon">🗣️</div><p class="game-prompt__text">' + escapeHtml(d.prompt || '') + '</p></div>';
+        if (d.answers) {
+          resultHtml += '<div class="wsi-reveal-grid mb-4">';
+          d.answers.forEach(a => {
+            resultHtml +=
+              '<div class="wsi-reveal-card">' +
+                '<div class="wsi-reveal-card__quote">"' + escapeHtml(a.text) + '"</div>' +
+                '<div class="wsi-reveal-card__author">— ' + escapeHtml(a.authorName) + '</div>' +
+              '</div>';
+          });
+          resultHtml += '</div>';
+        }
+        if (d.playerResults) {
+          resultHtml += this._renderResultsList(d.playerResults);
+        }
+        break;
+      }
+
+      case 'speedround': {
+        // أسرع واحد — عرض السؤال والإجابة الصحيحة مع ترتيب السرعة
+        resultHtml =
+          '<div class="speed-results">' +
+            '<div class="speed-results__question">' + escapeHtml(d.question || '') + '</div>' +
+            '<div class="speed-results__answer">✅ ' + escapeHtml(d.correctAnswer || '') + '</div>' +
+          '</div>';
+        if (d.playerResults) {
+          resultHtml += '<div class="speed-results__ranking">';
+          d.playerResults.sort((a, b) => (b.points || 0) - (a.points || 0)).forEach((r, i) => {
+            const placeIcon = r.isCorrect ? (r.place === 1 ? '⚡' : r.place === 2 ? '🥈' : r.place === 3 ? '🥉' : '✅') : '❌';
+            resultHtml +=
+              '<div class="speed-results__row' + (r.isCorrect ? ' speed-results__row--correct' : ' speed-results__row--wrong') + '">' +
+                '<span class="speed-results__place">' + placeIcon + '</span>' +
+                '<span class="speed-results__name">' + escapeHtml(r.playerName) + '</span>' +
+                (r.answer ? '<span class="speed-results__ans text-sm text-muted">' + escapeHtml(r.answer) + '</span>' : '') +
+                '<span class="speed-results__pts">+' + (r.points || 0) + '</span>' +
+              '</div>';
+          });
+          resultHtml += '</div>';
+        }
+        break;
+      }
+
+      case 'twotruths': {
+        // حقيقتين وكذبة — كشف الكذبة مع تمييزها
+        resultHtml = '<div class="tt-results"><div class="tt-featured-name">' + escapeHtml(d.featuredPlayerName || '') + '</div>';
+        if (d.statements) {
+          resultHtml += '<div class="tt-statements">';
+          d.statements.forEach((s, i) => {
+            const isLie = (i === d.lieIndex);
+            resultHtml +=
+              '<div class="tt-statement' + (isLie ? ' tt-statement--lie' : ' tt-statement--truth') + '">' +
+                '<span class="tt-statement__icon">' + (isLie ? '🤥 كذبة!' : '✅ صح') + '</span>' +
+                '<span class="tt-statement__text">' + escapeHtml(s) + '</span>' +
+              '</div>';
+          });
+          resultHtml += '</div></div>';
+        }
+        if (d.playerResults) {
+          resultHtml += this._renderResultsList(d.playerResults);
+        }
+        break;
+      }
+
+      case 'splittheroom': {
+        // سبليت ذا روم — عرض الإجابة مع شريط الانقسام
+        const yPct = d.percentYes || 0;
+        const nPct = d.percentNo || 0;
+        resultHtml =
+          '<div class="split-results">' +
+            '<div class="split-results__scenario">' + escapeHtml(d.completedScenario || '') + '</div>' +
+            '<div class="split-results__filler">' + escapeHtml(d.fillerName || '') + ' كتب: <strong>' + escapeHtml(d.filledText || '') + '</strong></div>' +
+            '<div class="split-results__bar-container">' +
+              '<div class="split-results__bar split-results__bar--yes" style="width:' + Math.max(yPct, 5) + '%">' +
+                'نعم ' + yPct + '% (' + (d.yesCount || 0) + ')' +
+              '</div>' +
+              '<div class="split-results__bar split-results__bar--no" style="width:' + Math.max(nPct, 5) + '%">' +
+                'لا ' + nPct + '% (' + (d.noCount || 0) + ')' +
+              '</div>' +
+            '</div>' +
+            '<div class="split-results__diff">الفارق: ' + (d.splitDiff || 0) + '%</div>' +
+          '</div>';
+        if (d.playerResults) {
+          resultHtml += this._renderResultsList(d.playerResults);
+        }
+        break;
+      }
+
+      case 'emojidecode': {
+        // فك الرموز — عرض الإيموجي مع الإجابة الصحيحة
+        resultHtml =
+          '<div class="emoji-results">' +
+            '<div class="emoji-results__emojis">' + (d.emojis || '') + '</div>' +
+            '<div class="emoji-results__answer">✅ ' + escapeHtml(d.correctAnswer || '') + '</div>' +
+            (d.category ? '<div class="emoji-results__category">' + escapeHtml(d.category) + '</div>' : '') +
+          '</div>';
+        if (d.playerResults) {
+          resultHtml += '<div class="speed-results__ranking">';
+          d.playerResults.sort((a, b) => (b.points || 0) - (a.points || 0)).forEach((r, i) => {
+            const icon = r.isCorrect ? (r.points >= 1000 ? '⚡' : '✅') : '❌';
+            resultHtml +=
+              '<div class="speed-results__row' + (r.isCorrect ? ' speed-results__row--correct' : ' speed-results__row--wrong') + '">' +
+                '<span class="speed-results__place">' + icon + '</span>' +
+                '<span class="speed-results__name">' + escapeHtml(r.playerName) + '</span>' +
+                (r.answer ? '<span class="speed-results__ans text-sm text-muted">' + escapeHtml(r.answer) + '</span>' : '') +
+                '<span class="speed-results__pts">+' + (r.points || 0) + '</span>' +
+              '</div>';
+          });
+          resultHtml += '</div>';
+        }
+        break;
+      }
+
+      case 'debateme': {
+        // المحكمة — عرض الفريقين مع تصويت القاضي
+        const w = d.winningSide;
+        resultHtml =
+          '<div class="debate-results">' +
+            '<div class="debate-results__topic">' + escapeHtml(d.topic || '') + '</div>' +
+            '<div class="debate-results__sides">' +
+              '<div class="debate-results__side' + (w === 1 ? ' debate-results__side--winner' : '') + '">' +
+                '<div class="debate-results__side-label">' + escapeHtml(d.side1Label || 'فريق 1') + '</div>' +
+                '<div class="debate-results__side-votes">' + (d.side1Votes || 0) + ' صوت</div>' +
+                (w === 1 ? '<div class="debate-results__crown">🏆</div>' : '') +
+              '</div>' +
+              '<div class="debate-results__vs">⚔️</div>' +
+              '<div class="debate-results__side' + (w === 2 ? ' debate-results__side--winner' : '') + '">' +
+                '<div class="debate-results__side-label">' + escapeHtml(d.side2Label || 'فريق 2') + '</div>' +
+                '<div class="debate-results__side-votes">' + (d.side2Votes || 0) + ' صوت</div>' +
+                (w === 2 ? '<div class="debate-results__crown">🏆</div>' : '') +
+              '</div>' +
+            '</div>' +
+            (d.bestArgPlayerName ? '<div class="debate-results__best">🌟 أقوى حجة: ' + escapeHtml(d.bestArgPlayerName) + ' (' + (d.bestArgVotes || 0) + ' صوت)</div>' : '') +
+            (w === 0 ? '<div class="debate-results__tie">⚖️ تعادل!</div>' : '') +
+          '</div>';
+        if (d.playerResults) {
+          resultHtml += this._renderResultsList(d.playerResults);
+        }
+        break;
+      }
+
+      case 'acrophobia': {
+        // الأسماء — عرض الأحرف والفائزين
+        resultHtml =
+          '<div class="acro-results">' +
+            '<div class="acro-results__letters">' + escapeHtml(d.letters || '') + '</div>' +
+            (d.category ? '<div class="acro-results__category">' + escapeHtml(d.category) + '</div>' : '') +
+          '</div>';
         if (d.results) {
-          resultHtml += '<div class="flex flex-col gap-3 mb-4" style="max-width:450px;width:100%">';
+          resultHtml += '<div class="flex flex-col gap-3 mb-4" style="max-width:500px;width:100%">';
           d.results.forEach((r, i) => {
             const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
             resultHtml +=
-              '<div class="flex justify-between items-center p-3" style="background:rgba(255,255,255,0.05);border-radius:12px;border-right:4px solid ' + (i === 0 ? '#D4AF37' : 'transparent') + '">' +
-                '<div>' +
-                  '<span class="font-bold">' + medal + ' ' + escapeHtml(r.playerName || r.name || '') + '</span>' +
-                  (r.text ? '<p class="text-sm text-muted mt-1">"' + escapeHtml(r.text) + '"</p>' : '') +
-                  (r.detail ? '<p class="text-sm text-muted mt-1">' + escapeHtml(r.detail) + '</p>' : '') +
+              '<div class="acro-result-row' + (i === 0 ? ' acro-result-row--winner' : '') + '">' +
+                '<div class="acro-result-row__main">' +
+                  '<span class="font-bold">' + medal + ' ' + escapeHtml(r.playerName) + '</span>' +
+                  '<p class="acro-result-row__text">"' + escapeHtml(r.text) + '"</p>' +
                 '</div>' +
-                '<div class="text-left">' +
-                  '<div style="color:#D4AF37;font-weight:bold">+' + (r.points || 0) + '</div>' +
-                  (r.votes !== undefined ? '<div class="text-sm text-muted">' + r.votes + ' صوت</div>' : '') +
+                '<div class="acro-result-row__score">' +
+                  '<div class="acro-result-row__pts">+' + (r.points || 0) + '</div>' +
+                  '<div class="text-sm text-muted">' + (r.votes || 0) + ' صوت</div>' +
                 '</div>' +
               '</div>';
           });
           resultHtml += '</div>';
         }
-        if (d.correctAnswer) {
-          resultHtml = '<div class="text-2xl text-accent mb-4">✅ ' + escapeHtml(d.correctAnswer) + '</div>' + resultHtml;
-        }
         break;
+      }
 
       default:
         if (d.message) {

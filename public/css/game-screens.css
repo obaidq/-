@@ -1440,6 +1440,96 @@
 
 
 /* ═══════════════════════════════════════════════════════════════
+ * PER-GAME RESULTS UI — شاشات نتائج مخصصة لكل لعبة
+ * ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Shared Result Row ─── */
+.result-row { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:rgba(255,255,255,0.05); border-radius:12px; border-right:4px solid transparent; }
+.result-row--top { border-right-color:#D4AF37; background:rgba(212,175,55,0.08); }
+
+/* ─── Would You Rather ─── */
+.wyr-results-card { max-width:500px; width:100%; margin:0 auto 16px; }
+.wyr-vs-label { text-align:center; font-size:20px; font-weight:900; margin-bottom:12px; color:#D4AF37; }
+.wyr-bar-container { display:flex; flex-direction:column; gap:8px; }
+.wyr-bar { padding:14px 18px; border-radius:12px; font-weight:700; font-size:15px; display:flex; justify-content:space-between; transition:width 0.8s ease; min-width:60px; }
+.wyr-bar--a { background:linear-gradient(135deg, #00B0FF, #0091EA); color:#fff; }
+.wyr-bar--b { background:linear-gradient(135deg, #FF6D00, #E65100); color:#fff; }
+.wyr-bar__label { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+.wyr-bar__pct { flex-shrink:0; margin-right:8px; }
+
+/* ─── Who Said It ─── */
+.wsi-reveal-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; max-width:600px; margin:0 auto; }
+.wsi-reveal-card { background:rgba(156,39,176,0.1); border:2px solid rgba(156,39,176,0.3); border-radius:14px; padding:16px; text-align:center; animation:wsi-reveal 0.5s ease-out; }
+.wsi-reveal-card__quote { font-size:16px; font-weight:700; color:#fff; margin-bottom:8px; font-style:italic; }
+.wsi-reveal-card__author { font-size:13px; color:rgba(156,39,176,0.8); font-weight:600; }
+@keyframes wsi-reveal { from{opacity:0;transform:scale(0.8)} to{opacity:1;transform:scale(1)} }
+
+/* ─── Speed Round / Emoji Decode Results ─── */
+.speed-results { text-align:center; margin-bottom:16px; }
+.speed-results__question { font-size:18px; font-weight:700; color:#fff; margin-bottom:8px; }
+.speed-results__answer { font-size:24px; font-weight:900; color:#00E676; margin-bottom:16px; }
+.speed-results__ranking { display:flex; flex-direction:column; gap:8px; max-width:450px; width:100%; margin:0 auto; }
+.speed-results__row { display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:10px; background:rgba(255,255,255,0.05); }
+.speed-results__row--correct { border-right:3px solid #00E676; }
+.speed-results__row--wrong { opacity:0.5; }
+.speed-results__place { font-size:20px; min-width:28px; text-align:center; }
+.speed-results__name { font-weight:700; flex:1; }
+.speed-results__ans { flex-shrink:0; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.speed-results__pts { color:#D4AF37; font-weight:900; min-width:50px; text-align:left; }
+
+/* ─── Emoji Decode ─── */
+.emoji-results { text-align:center; margin-bottom:16px; }
+.emoji-results__emojis { font-size:48px; margin-bottom:8px; letter-spacing:8px; }
+.emoji-results__answer { font-size:28px; font-weight:900; color:#FFC107; margin-bottom:4px; }
+.emoji-results__category { font-size:14px; color:rgba(255,193,7,0.6); margin-bottom:16px; }
+
+/* ─── Two Truths ─── */
+.tt-results { max-width:450px; width:100%; margin:0 auto 16px; text-align:center; }
+.tt-featured-name { font-size:20px; font-weight:900; color:#D4AF37; margin-bottom:12px; }
+.tt-statements { display:flex; flex-direction:column; gap:8px; }
+.tt-statement { padding:14px 18px; border-radius:12px; display:flex; align-items:center; gap:12px; text-align:right; }
+.tt-statement--truth { background:rgba(76,175,80,0.12); border:2px solid rgba(76,175,80,0.3); }
+.tt-statement--lie { background:rgba(244,67,54,0.12); border:2px solid rgba(244,67,54,0.5); animation:tt-lie-reveal 0.6s ease-out; }
+.tt-statement__icon { font-size:14px; font-weight:900; flex-shrink:0; min-width:70px; }
+.tt-statement__text { font-size:15px; font-weight:600; }
+@keyframes tt-lie-reveal { from{transform:translateX(10px);opacity:0} to{transform:translateX(0);opacity:1} }
+
+/* ─── Split the Room ─── */
+.split-results { max-width:500px; width:100%; margin:0 auto 16px; text-align:center; }
+.split-results__scenario { font-size:16px; font-weight:600; color:#fff; margin-bottom:8px; line-height:1.5; }
+.split-results__filler { font-size:14px; color:rgba(233,30,99,0.8); margin-bottom:16px; }
+.split-results__bar-container { display:flex; gap:4px; border-radius:12px; overflow:hidden; margin-bottom:8px; }
+.split-results__bar { padding:12px; font-size:14px; font-weight:700; color:#fff; text-align:center; transition:width 0.8s ease; min-width:40px; }
+.split-results__bar--yes { background:linear-gradient(135deg, #4CAF50, #2E7D32); }
+.split-results__bar--no { background:linear-gradient(135deg, #f44336, #C62828); }
+.split-results__diff { font-size:14px; color:rgba(255,255,255,0.5); }
+
+/* ─── Debate Me ─── */
+.debate-results { max-width:500px; width:100%; margin:0 auto 16px; text-align:center; }
+.debate-results__topic { font-size:18px; font-weight:700; color:#fff; margin-bottom:16px; }
+.debate-results__sides { display:flex; align-items:center; gap:12px; justify-content:center; margin-bottom:12px; }
+.debate-results__side { flex:1; padding:16px; border-radius:14px; background:rgba(255,255,255,0.05); border:2px solid rgba(255,255,255,0.1); transition:all 0.3s; }
+.debate-results__side--winner { border-color:#D4AF37; background:rgba(212,175,55,0.1); box-shadow:0 0 20px rgba(212,175,55,0.2); }
+.debate-results__side-label { font-size:15px; font-weight:700; margin-bottom:4px; }
+.debate-results__side-votes { font-size:13px; color:rgba(255,255,255,0.5); }
+.debate-results__vs { font-size:24px; flex-shrink:0; }
+.debate-results__crown { font-size:24px; margin-top:8px; }
+.debate-results__best { font-size:15px; color:#D4AF37; font-weight:700; margin-bottom:8px; }
+.debate-results__tie { font-size:18px; font-weight:900; color:#FFC107; }
+
+/* ─── Acrophobia ─── */
+.acro-results { text-align:center; margin-bottom:16px; }
+.acro-results__letters { font-size:48px; font-weight:900; letter-spacing:16px; color:#607D8B; font-family:'Bangers',sans-serif; margin-bottom:4px; text-shadow:2px 2px 0 rgba(0,0,0,0.3); }
+.acro-results__category { font-size:14px; color:rgba(96,125,139,0.7); margin-bottom:16px; }
+.acro-result-row { display:flex; justify-content:space-between; align-items:flex-start; padding:12px 16px; background:rgba(255,255,255,0.05); border-radius:12px; border-right:4px solid transparent; }
+.acro-result-row--winner { border-right-color:#D4AF37; background:rgba(212,175,55,0.08); }
+.acro-result-row__main { flex:1; }
+.acro-result-row__text { font-size:14px; color:rgba(255,255,255,0.6); margin-top:4px; font-style:italic; }
+.acro-result-row__score { text-align:left; flex-shrink:0; margin-right:12px; }
+.acro-result-row__pts { color:#D4AF37; font-weight:900; }
+
+
+/* ═══════════════════════════════════════════════════════════════
  * REDUCED MOTION - تقليل الحركة
  * Respects user preferences for reduced animation
  * ═══════════════════════════════════════════════════════════════ */
