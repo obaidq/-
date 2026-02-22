@@ -635,8 +635,8 @@ const App = {
   // ═══════════════════════════════════════════════════════════════
 
   showScreen(id) {
-    // تنظيف confetti عند تبديل الشاشات
-    document.querySelectorAll('.confetti-particle').forEach(el => el.remove());
+    // تنظيف التأثيرات عند تبديل الشاشات
+    if (typeof window.FX !== 'undefined') window.FX.clear();
     // إعادة تعيين حالة الإرسال
     this._submitting = false;
     // مسح مؤقت اللعبة عند مغادرة شاشة اللعبة
@@ -1249,8 +1249,11 @@ const App = {
     overlay.innerHTML = '<div class="ql-quiplash-moment__text">⚡ QUIPLASH! ⚡</div>';
     document.body.appendChild(overlay);
     AudioEngine.quiplash();
-    // Trigger confetti
-    this.confetti();
+    // Trigger celebration effects
+    if (typeof window.FX !== 'undefined') {
+      window.FX.flash({ color: 'rgba(255,217,61,0.4)' });
+      window.FX.fireworks({ count: 3 });
+    }
     setTimeout(() => {
       overlay.style.opacity = '0';
       overlay.style.transition = 'opacity 0.5s';
@@ -3216,7 +3219,11 @@ const App = {
       if (drawContainer) this.renderDrawing(d.drawing, drawContainer);
     }
 
+    // تأثيرات بصرية لنتائج الجولة
     this.confetti();
+    if (typeof window.FX !== 'undefined') {
+      window.FX.sparkles({ count: 25, radius: 150 });
+    }
   },
 
   // ── نتائج اللعبة النهائية ──
@@ -3232,7 +3239,7 @@ const App = {
     clearInterval(this.gameTimer);
     this.setTheme('victory');
     document.getElementById('emojiBar')?.classList.add('hidden');
-    this.confetti();
+    this.celebration();
 
     const w = d.finalResults[0];
     const winnerEl = document.getElementById('winnerDisplay');
@@ -3245,6 +3252,12 @@ const App = {
         winnerAvatar +
         '<h1 class="winner-showcase__name">' + escapeHtml(w.name) + '</h1>' +
         '<div class="winner-showcase__score">' + w.score + ' نقطة</div>';
+
+      // Score popup for winner
+      if (typeof window.FX !== 'undefined') {
+        setTimeout(() => window.FX.scorePopup({ text: w.score + ' نقطة', color: '#D4AF37', fontSize: 56 }), 500);
+        setTimeout(() => window.FX.emojiBurst({ emoji: '🏆', count: 8 }), 1000);
+      }
     }
 
     const scores = d.finalResults.map((p, i) => {
@@ -3544,25 +3557,16 @@ const App = {
 
   confetti() {
     if (this.reducedMotion) return;
-    // تنظيف confetti الموجود
-    document.querySelectorAll('.confetti-particle').forEach(el => el.remove());
-    const colors = ['#D4AF37', '#006C35', '#C8A951', '#00843D', '#B8860B', '#DEB887', '#00BFA5'];
-    const count = 30; // تقليل العدد للأداء
-    for (let i = 0; i < count; i++) {
-      const c = document.createElement('div');
-      c.className = 'confetti-particle';
-      const size = 6 + Math.random() * 10;
-      const isCircle = Math.random() > 0.5;
-      c.style.cssText =
-        'position:fixed;width:' + size + 'px;height:' + size + 'px;' +
-        'background:' + colors[Math.floor(Math.random() * colors.length)] + ';' +
-        'left:' + (Math.random() * 100) + 'vw;top:-20px;z-index:9999;' +
-        'border-radius:' + (isCircle ? '50%' : '2px') + ';' +
-        'animation:confettiFall ' + (2.5 + Math.random() * 2) + 's linear forwards;' +
-        'animation-delay:' + (Math.random() * 0.8) + 's;' +
-        'pointer-events:none';
-      document.body.appendChild(c);
-      setTimeout(() => c.remove(), 6000);
+    if (typeof window.FX !== 'undefined') {
+      window.FX.confetti();
+    }
+  },
+
+  celebration() {
+    if (this.reducedMotion) return;
+    if (typeof window.FX !== 'undefined') {
+      window.FX.celebration({ duration: 3000 });
+      window.FX.fireworks({ count: 4 });
     }
   },
 
