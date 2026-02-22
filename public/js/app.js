@@ -47,6 +47,105 @@ const DRAW_COLORS = ['#000000', '#ff0000', '#0066ff', '#00aa00', '#ff8800', '#99
 const DRAW_SIZES = [4, 8, 16];
 
 // ═══════════════════════════════════════════════════════════════════
+// TV SHOW FRAMEWORK - Screen State Machine
+// Unified Jackbox-style scene management with pacing
+// ═══════════════════════════════════════════════════════════════════
+
+const ScreenMachine = {
+  // Current state
+  current: 'BOOT',
+  previousState: null,
+  _roundIntroTimer: null,
+
+  // Valid states
+  STATES: ['BOOT', 'MENU', 'LOBBY', 'HOW_TO_PLAY', 'COUNTDOWN', 'ROUND_INTRO',
+           'QUESTION', 'ANSWER_INPUT', 'LOCKED_IN', 'REVEAL', 'SCOREBOARD',
+           'ROUND_OUTRO', 'WINNER', 'RESULTS'],
+
+  // Minimum display times (ms)
+  PACE: {
+    ROUND_INTRO: 1800,
+    LOCKED_IN: 400,
+    REVEAL: 600,
+    SCOREBOARD: 1200,
+    ROUND_OUTRO: 1000,
+  },
+
+  transition(newState) {
+    this.previousState = this.current;
+    this.current = newState;
+  },
+
+  // Show round intro card ("الجولة X")
+  showRoundIntro(round, maxRounds, gameName, callback) {
+    const overlay = document.getElementById('roundIntroOverlay');
+    const labelEl = document.getElementById('roundIntroLabel');
+    const numEl = document.getElementById('roundIntroNumber');
+    const subEl = document.getElementById('roundIntroSub');
+    if (!overlay || !labelEl || !numEl) { if (callback) callback(); return; }
+
+    // Skip if reduced motion
+    if (App.reducedMotion) { if (callback) callback(); return; }
+
+    this.transition('ROUND_INTRO');
+    labelEl.textContent = 'الجولة';
+    numEl.textContent = round;
+    subEl.textContent = gameName ? (gameName + (maxRounds ? ' • ' + round + ' من ' + maxRounds : '')) : '';
+    overlay.classList.remove('hidden', 'round-intro--exit');
+
+    if (typeof AudioEngine !== 'undefined') AudioEngine.whoosh();
+
+    this._roundIntroTimer = setTimeout(() => {
+      overlay.classList.add('round-intro--exit');
+      setTimeout(() => {
+        overlay.classList.add('hidden');
+        overlay.classList.remove('round-intro--exit');
+        if (callback) callback();
+      }, 300);
+    }, this.PACE.ROUND_INTRO);
+  },
+
+  // Show lock-in state (after answer submission)
+  showLockIn(gameContent) {
+    if (!gameContent) return;
+    this.transition('LOCKED_IN');
+    gameContent.innerHTML =
+      '<div class="locked-in">' +
+        '<div class="locked-in__icon">🔒</div>' +
+        '<div class="locked-in__text">تم الإرسال!</div>' +
+        '<div class="locked-in__sub">ننتظر باقي اللاعبين...</div>' +
+      '</div>';
+  },
+
+  // Update answer progress in HUD
+  updateAnswerProgress(count, total) {
+    let el = document.getElementById('answerProgressHud');
+    if (!el) {
+      const center = document.querySelector('.game-hud__center');
+      if (!center) return;
+      center.innerHTML = '<div class="answer-progress" id="answerProgressHud">' +
+        '<span id="apCount">' + count + '/' + total + '</span>' +
+        '<div class="answer-progress__bar"><div class="answer-progress__fill" id="apFill"></div></div>' +
+      '</div>';
+      el = document.getElementById('answerProgressHud');
+    }
+    const countEl = document.getElementById('apCount');
+    const fillEl = document.getElementById('apFill');
+    if (countEl) countEl.textContent = count + '/' + total;
+    if (fillEl) fillEl.style.width = Math.round((count / total) * 100) + '%';
+  },
+
+  cleanup() {
+    if (this._roundIntroTimer) {
+      clearTimeout(this._roundIntroTimer);
+      this._roundIntroTimer = null;
+    }
+    const overlay = document.getElementById('roundIntroOverlay');
+    if (overlay) overlay.classList.add('hidden');
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════════
 // الأداة المساعدة: حماية XSS
 // ═══════════════════════════════════════════════════════════════════
 
@@ -435,27 +534,38 @@ const App = {
       AudioEngine.startMusic(data.game);
       if (data.commentary) this.showCommentary(data.commentary);
 
+      const gameInfo = GAMES[data.game];
+      const enterGame = () => {
+        this.showScreen('gameScreen');
+        document.getElementById('emojiBar')?.classList.remove('hidden');
+        document.getElementById('chatToggle')?.classList.remove('hidden');
+        // Show room code in HUD
+        const hudCode = document.getElementById('hudRoomCode');
+        if (hudCode && this.currentRoom) hudCode.textContent = this.currentRoom;
+      };
+
       // Quiplash gets a special game splash before countdown
       if (data.game === 'quiplash') {
         this._showQuiplashGameSplash(() => {
-          this.showCountdown(() => {
-            this.showScreen('gameScreen');
-            document.getElementById('emojiBar')?.classList.remove('hidden');
-          });
+          this.showCountdown(enterGame);
         });
       } else {
-        // عد تنازلي ثم عرض شاشة اللعبة
-        this.showCountdown(() => {
-          this.showScreen('gameScreen');
-          document.getElementById('emojiBar')?.classList.remove('hidden');
-          document.getElementById('chatToggle')?.classList.remove('hidden');
+        // Show game intro card → countdown → game screen
+        ScreenMachine.showRoundIntro('١', null, gameInfo ? gameInfo.icon + ' ' + gameInfo.name : '', () => {
+          this.showCountdown(enterGame);
         });
       }
     });
 
     // ── إجابات وتصويتات ──
-    s.on('playerAnswered', data => this.updateWaitingCount(data.count, data.total, null, data.answered));
-    s.on('playerVoted', data => this.updateWaitingCount(data.count, data.total, 'صوّتوا'));
+    s.on('playerAnswered', data => {
+      this.updateWaitingCount(data.count, data.total, null, data.answered);
+      ScreenMachine.updateAnswerProgress(data.count, data.total);
+    });
+    s.on('playerVoted', data => {
+      this.updateWaitingCount(data.count, data.total, 'صوّتوا');
+      ScreenMachine.updateAnswerProgress(data.count, data.total);
+    });
 
     // ── رد سريع (Quiplash) ──
     s.on('quiplashQuestion', data => this.handleQuiplashQuestion(data));
@@ -562,11 +672,16 @@ const App = {
 
     // ── النتائج ──
     s.on('roundResults', data => {
+      ScreenMachine.transition('REVEAL');
+      // Remove tension effect
+      document.getElementById('gameScreen')?.classList.remove('screen--tension');
+      document.getElementById('gameTimer')?.classList.remove('game-timer--tension');
       AudioEngine.reveal();
       if (data.commentary) this.showCommentary(data.commentary);
       this.handleRoundResults(data);
     });
     s.on('gameEnded', data => {
+      ScreenMachine.transition('WINNER');
       AudioEngine.stopMusic();
       AudioEngine.drumRoll(2);
       setTimeout(() => { AudioEngine.victory(); AudioEngine.applause(); }, 2000);
@@ -608,6 +723,7 @@ const App = {
       this.showScreen('lobbyScreen');
       this.showToast('رجعنا للوبي!', 'success');
       document.getElementById('emojiBar')?.classList.add('hidden');
+      document.getElementById('winnerDisplay')?.classList.remove('winner-spotlight');
     });
 
     s.on('gameCancelled', data => {
@@ -644,6 +760,15 @@ const App = {
       clearInterval(this.gameTimer);
       this.gameTimer = null;
     }
+    // Remove tension effect from previous screen
+    document.querySelectorAll('.screen--tension').forEach(s => s.classList.remove('screen--tension'));
+    // Cleanup round intro if switching away
+    ScreenMachine.cleanup();
+
+    // Track state in ScreenMachine
+    const stateMap = { bootScreen: 'BOOT', menuScreen: 'MENU', lobbyScreen: 'LOBBY',
+      howToPlayScreen: 'HOW_TO_PLAY', gameScreen: 'QUESTION', resultsScreen: 'RESULTS' };
+    if (stateMap[id]) ScreenMachine.transition(stateMap[id]);
 
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('is-active'));
     const screen = document.getElementById(id);
@@ -664,6 +789,9 @@ const App = {
       const game = GAMES[theme];
       bg.classList.add(game ? game.pattern : (theme === 'victory' ? 'pattern-confetti' : 'pattern-arabesque'));
     }
+    // Reset answer progress HUD
+    const center = document.querySelector('.game-hud__center');
+    if (center) center.innerHTML = '<div id="answeredCount" class="text-sm text-muted" style="display:none"></div>';
   },
 
   setIntensity(level) {
@@ -918,8 +1046,19 @@ const App = {
       t--;
       el.textContent = Math.max(0, t);
       if (t <= 10) { el.classList.add('game-timer--warning'); AudioEngine.tick(); }
-      if (t <= 5) { el.classList.remove('game-timer--warning'); el.classList.add('game-timer--danger'); AudioEngine.tickUrgent(); }
-      if (t <= 0) { clearInterval(this.gameTimer); AudioEngine.timesUp(); }
+      if (t <= 5) {
+        el.classList.remove('game-timer--warning');
+        el.classList.add('game-timer--danger', 'game-timer--tension');
+        // Add tension effect to screen
+        document.getElementById('gameScreen')?.classList.add('screen--tension');
+        AudioEngine.tickUrgent();
+      }
+      if (t <= 0) {
+        clearInterval(this.gameTimer);
+        el.classList.remove('game-timer--tension');
+        document.getElementById('gameScreen')?.classList.remove('screen--tension');
+        AudioEngine.timesUp();
+      }
     }, 1000);
   },
 
@@ -1606,7 +1745,7 @@ const App = {
 
   submitFakinAction() {
     this.socket.emit('submitAnswer', { code: this.currentRoom, answer: 'done' });
-    this.showWaiting('ننتظر الجميع...');
+    ScreenMachine.showLockIn(document.getElementById('gameContent'));
   },
 
   handleFakinItVoting(d) {
@@ -1712,7 +1851,7 @@ const App = {
     if (!answer) return this.showToast('اكتب شي!', 'error');
     this._submitting = true;
     this.socket.emit('submitAnswer', { code: this.currentRoom, answer });
-    this.showWaiting('هل بتنجو؟ 💀');
+    ScreenMachine.showLockIn(document.getElementById('gameContent'));
   },
 
   handleDeathChallengeStarted(d) {
@@ -1779,7 +1918,7 @@ const App = {
     this._submitting = true;
     AudioEngine.submit();
     this.socket.emit('submitAnswer', { code: this.currentRoom, answer: lie });
-    this.showWaiting('ننتظر الكذابين...');
+    ScreenMachine.showLockIn(document.getElementById('gameContent'));
   },
 
   handleFibbageVoting(d) {
@@ -1888,7 +2027,7 @@ const App = {
     const guess = document.getElementById('guessInput')?.value?.trim();
     if (!guess) return this.showToast('اكتب تخمين!', 'error');
     this.socket.emit('submitAnswer', { code: this.currentRoom, answer: guess });
-    this.showWaiting('ننتظر التخمينات...');
+    ScreenMachine.showLockIn(document.getElementById('gameContent'));
   },
 
   handleDrawfulVoting(d) {
@@ -2034,7 +2173,7 @@ const App = {
       code: this.currentRoom,
       drawing: JSON.stringify(this.strokes)
     });
-    this.showWaiting('تم إرسال الرسمة! ننتظر...');
+    ScreenMachine.showLockIn(document.getElementById('gameContent'));
   },
 
   renderDrawing(drawingData, container) {
@@ -2210,7 +2349,7 @@ const App = {
     if (Object.keys(this._wsiGuesses).length >= stmtCount && !this._submitting) {
       this._submitting = true;
       this.socket.emit('submitAnswer', { code: this.currentRoom, answer: JSON.stringify(this._wsiGuesses) });
-      this.showWaiting('ننتظر الباقين...');
+      ScreenMachine.showLockIn(document.getElementById('gameContent'));
     }
   },
 
@@ -2318,7 +2457,7 @@ const App = {
     this._submitting = true;
     AudioEngine.submit();
     this.socket.emit('submitAnswer', { code: this.currentRoom, answer: JSON.stringify({ t1, t2, lie }) });
-    this.showWaiting('ننتظر الباقين يخمنون...');
+    ScreenMachine.showLockIn(document.getElementById('gameContent'));
   },
 
   handleTwoTruthsGuess(d) {
@@ -2635,20 +2774,17 @@ const App = {
   showRoundInfo(round, max, title) {
     document.getElementById('gameRound').textContent = 'الجولة ' + round + ' من ' + max;
     document.getElementById('gameTitle').textContent = title;
+    // Show brief round intro card for rounds 2+
+    if (round > 1 && !this.reducedMotion) {
+      ScreenMachine.showRoundIntro(round, max, title, null);
+    }
   },
 
   setHint(text) {
     document.getElementById('gameHint').textContent = '💡 ' + text;
   },
 
-  setTheme(game) {
-    const info = GAMES[game];
-    if (info) {
-      document.body.setAttribute('data-theme', game);
-      const patternEl = document.querySelector('.bg__pattern');
-      if (patternEl) patternEl.className = 'bg__pattern ' + info.pattern;
-    }
-  },
+  // setTheme is defined once at L659 with full fallback support
 
   // ═══════════════════════════════════════════════════════════════
   // النتائج والإرسال
@@ -2665,7 +2801,7 @@ const App = {
     if (this.currentGame === 'quiplash') {
       this._showQuiplashSubmitted(ans);
     } else {
-      this.showWaiting('ننتظر الإجابات...');
+      ScreenMachine.showLockIn(document.getElementById('gameContent'));
     }
   },
 
@@ -2786,7 +2922,7 @@ const App = {
     if (this._submitting) return;
     this._submitting = true;
     target.classList.add('vote-option--selected');
-    this.socket.emit('submitAnswer', { code: this.roomCode, answer: id });
+    this.socket.emit('submitAnswer', { code: this.currentRoom, answer: id });
   },
 
   // ═══════════════════════════════════════════════════════
@@ -2846,6 +2982,26 @@ const App = {
       const gc = document.getElementById('gameContent');
       if (gc) gc.innerHTML = '<div class="text-center"><p class="text-xl">حصل خطأ في عرض النتائج</p></div>';
     }
+  },
+
+  _renderResultsList(results) {
+    if (!results || !results.length) return '';
+    let html = '<div class="flex flex-col gap-3 mb-4" style="max-width:450px;width:100%">';
+    results.sort((a, b) => (b.points || 0) - (a.points || 0)).forEach((r, i) => {
+      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
+      html +=
+        '<div class="result-row' + (i === 0 ? ' result-row--top' : '') + '">' +
+          '<div>' +
+            '<span class="font-bold">' + medal + ' ' + escapeHtml(r.playerName || r.name || '') + '</span>' +
+            (r.text ? '<p class="text-sm text-muted mt-1">"' + escapeHtml(r.text) + '"</p>' : '') +
+            (r.detail ? '<p class="text-sm text-muted mt-1">' + escapeHtml(r.detail) + '</p>' : '') +
+          '</div>' +
+          '<div class="text-left">' +
+            '<div style="color:#D4AF37;font-weight:bold">+' + (r.points || 0) + '</div>' +
+          '</div>' +
+        '</div>';
+    });
+    return html + '</div>';
   },
 
   _handleRoundResultsInner(d) {
@@ -3150,41 +3306,200 @@ const App = {
         }
         break;
 
-      case 'wouldyourather':
-      case 'whosaidit':
-      case 'speedround':
-      case 'twotruths':
-      case 'splittheroom':
-      case 'emojidecode':
-      case 'debateme':
-      case 'acrophobia':
-        // Generic results for new games
-        if (d.message) {
-          resultHtml = '<p class="text-xl mb-4">' + escapeHtml(d.message) + '</p>';
+      case 'wouldyourather': {
+        // تبي ولا ما تبي — عرض الاختيارين مع أشرطة النسب
+        const pctA = d.percentA || 0;
+        const pctB = d.percentB || 0;
+        resultHtml =
+          '<div class="wyr-results-card">' +
+            '<div class="wyr-vs-label">⚡ النتيجة ⚡</div>' +
+            '<div class="wyr-bar-container">' +
+              '<div class="wyr-bar wyr-bar--a" style="width:' + Math.max(pctA, 8) + '%">' +
+                '<span class="wyr-bar__label">' + escapeHtml(d.optionA || '') + '</span>' +
+                '<span class="wyr-bar__pct">' + pctA + '% (' + (d.countA || 0) + ')</span>' +
+              '</div>' +
+              '<div class="wyr-bar wyr-bar--b" style="width:' + Math.max(pctB, 8) + '%">' +
+                '<span class="wyr-bar__label">' + escapeHtml(d.optionB || '') + '</span>' +
+                '<span class="wyr-bar__pct">' + pctB + '% (' + (d.countB || 0) + ')</span>' +
+              '</div>' +
+            '</div>' +
+            (d.isSplit ? '<div class="wyr-split-badge">🎯 انقسام متساوي! +1000 للجميع</div>' : '') +
+          '</div>';
+        if (d.playerResults) {
+          resultHtml += this._renderResultsList(d.playerResults);
         }
+        break;
+      }
+
+      case 'whosaidit': {
+        // مين قال كذا — كشف المؤلفين
+        resultHtml = '<div class="game-prompt mb-4"><div class="game-prompt__icon">🗣️</div><p class="game-prompt__text">' + escapeHtml(d.prompt || '') + '</p></div>';
+        if (d.answers) {
+          resultHtml += '<div class="wsi-reveal-grid mb-4">';
+          d.answers.forEach(a => {
+            resultHtml +=
+              '<div class="wsi-reveal-card">' +
+                '<div class="wsi-reveal-card__quote">"' + escapeHtml(a.text) + '"</div>' +
+                '<div class="wsi-reveal-card__author">— ' + escapeHtml(a.authorName) + '</div>' +
+              '</div>';
+          });
+          resultHtml += '</div>';
+        }
+        if (d.playerResults) {
+          resultHtml += this._renderResultsList(d.playerResults);
+        }
+        break;
+      }
+
+      case 'speedround': {
+        // أسرع واحد — عرض السؤال والإجابة الصحيحة مع ترتيب السرعة
+        resultHtml =
+          '<div class="speed-results">' +
+            '<div class="speed-results__question">' + escapeHtml(d.question || '') + '</div>' +
+            '<div class="speed-results__answer">✅ ' + escapeHtml(d.correctAnswer || '') + '</div>' +
+          '</div>';
+        if (d.playerResults) {
+          resultHtml += '<div class="speed-results__ranking">';
+          d.playerResults.sort((a, b) => (b.points || 0) - (a.points || 0)).forEach((r, i) => {
+            const placeIcon = r.isCorrect ? (r.place === 1 ? '⚡' : r.place === 2 ? '🥈' : r.place === 3 ? '🥉' : '✅') : '❌';
+            resultHtml +=
+              '<div class="speed-results__row' + (r.isCorrect ? ' speed-results__row--correct' : ' speed-results__row--wrong') + '">' +
+                '<span class="speed-results__place">' + placeIcon + '</span>' +
+                '<span class="speed-results__name">' + escapeHtml(r.playerName) + '</span>' +
+                (r.answer ? '<span class="speed-results__ans text-sm text-muted">' + escapeHtml(r.answer) + '</span>' : '') +
+                '<span class="speed-results__pts">+' + (r.points || 0) + '</span>' +
+              '</div>';
+          });
+          resultHtml += '</div>';
+        }
+        break;
+      }
+
+      case 'twotruths': {
+        // حقيقتين وكذبة — كشف الكذبة مع تمييزها
+        resultHtml = '<div class="tt-results"><div class="tt-featured-name">' + escapeHtml(d.featuredPlayerName || '') + '</div>';
+        if (d.statements) {
+          resultHtml += '<div class="tt-statements">';
+          d.statements.forEach((s, i) => {
+            const isLie = (i === d.lieIndex);
+            resultHtml +=
+              '<div class="tt-statement' + (isLie ? ' tt-statement--lie' : ' tt-statement--truth') + '">' +
+                '<span class="tt-statement__icon">' + (isLie ? '🤥 كذبة!' : '✅ صح') + '</span>' +
+                '<span class="tt-statement__text">' + escapeHtml(s) + '</span>' +
+              '</div>';
+          });
+          resultHtml += '</div></div>';
+        }
+        if (d.playerResults) {
+          resultHtml += this._renderResultsList(d.playerResults);
+        }
+        break;
+      }
+
+      case 'splittheroom': {
+        // سبليت ذا روم — عرض الإجابة مع شريط الانقسام
+        const yPct = d.percentYes || 0;
+        const nPct = d.percentNo || 0;
+        resultHtml =
+          '<div class="split-results">' +
+            '<div class="split-results__scenario">' + escapeHtml(d.completedScenario || '') + '</div>' +
+            '<div class="split-results__filler">' + escapeHtml(d.fillerName || '') + ' كتب: <strong>' + escapeHtml(d.filledText || '') + '</strong></div>' +
+            '<div class="split-results__bar-container">' +
+              '<div class="split-results__bar split-results__bar--yes" style="width:' + Math.max(yPct, 5) + '%">' +
+                'نعم ' + yPct + '% (' + (d.yesCount || 0) + ')' +
+              '</div>' +
+              '<div class="split-results__bar split-results__bar--no" style="width:' + Math.max(nPct, 5) + '%">' +
+                'لا ' + nPct + '% (' + (d.noCount || 0) + ')' +
+              '</div>' +
+            '</div>' +
+            '<div class="split-results__diff">الفارق: ' + (d.splitDiff || 0) + '%</div>' +
+          '</div>';
+        if (d.playerResults) {
+          resultHtml += this._renderResultsList(d.playerResults);
+        }
+        break;
+      }
+
+      case 'emojidecode': {
+        // فك الرموز — عرض الإيموجي مع الإجابة الصحيحة
+        resultHtml =
+          '<div class="emoji-results">' +
+            '<div class="emoji-results__emojis">' + (d.emojis || '') + '</div>' +
+            '<div class="emoji-results__answer">✅ ' + escapeHtml(d.correctAnswer || '') + '</div>' +
+            (d.category ? '<div class="emoji-results__category">' + escapeHtml(d.category) + '</div>' : '') +
+          '</div>';
+        if (d.playerResults) {
+          resultHtml += '<div class="speed-results__ranking">';
+          d.playerResults.sort((a, b) => (b.points || 0) - (a.points || 0)).forEach((r, i) => {
+            const icon = r.isCorrect ? (r.points >= 1000 ? '⚡' : '✅') : '❌';
+            resultHtml +=
+              '<div class="speed-results__row' + (r.isCorrect ? ' speed-results__row--correct' : ' speed-results__row--wrong') + '">' +
+                '<span class="speed-results__place">' + icon + '</span>' +
+                '<span class="speed-results__name">' + escapeHtml(r.playerName) + '</span>' +
+                (r.answer ? '<span class="speed-results__ans text-sm text-muted">' + escapeHtml(r.answer) + '</span>' : '') +
+                '<span class="speed-results__pts">+' + (r.points || 0) + '</span>' +
+              '</div>';
+          });
+          resultHtml += '</div>';
+        }
+        break;
+      }
+
+      case 'debateme': {
+        // المحكمة — عرض الفريقين مع تصويت القاضي
+        const w = d.winningSide;
+        resultHtml =
+          '<div class="debate-results">' +
+            '<div class="debate-results__topic">' + escapeHtml(d.topic || '') + '</div>' +
+            '<div class="debate-results__sides">' +
+              '<div class="debate-results__side' + (w === 1 ? ' debate-results__side--winner' : '') + '">' +
+                '<div class="debate-results__side-label">' + escapeHtml(d.side1Label || 'فريق 1') + '</div>' +
+                '<div class="debate-results__side-votes">' + (d.side1Votes || 0) + ' صوت</div>' +
+                (w === 1 ? '<div class="debate-results__crown">🏆</div>' : '') +
+              '</div>' +
+              '<div class="debate-results__vs">⚔️</div>' +
+              '<div class="debate-results__side' + (w === 2 ? ' debate-results__side--winner' : '') + '">' +
+                '<div class="debate-results__side-label">' + escapeHtml(d.side2Label || 'فريق 2') + '</div>' +
+                '<div class="debate-results__side-votes">' + (d.side2Votes || 0) + ' صوت</div>' +
+                (w === 2 ? '<div class="debate-results__crown">🏆</div>' : '') +
+              '</div>' +
+            '</div>' +
+            (d.bestArgPlayerName ? '<div class="debate-results__best">🌟 أقوى حجة: ' + escapeHtml(d.bestArgPlayerName) + ' (' + (d.bestArgVotes || 0) + ' صوت)</div>' : '') +
+            (w === 0 ? '<div class="debate-results__tie">⚖️ تعادل!</div>' : '') +
+          '</div>';
+        if (d.playerResults) {
+          resultHtml += this._renderResultsList(d.playerResults);
+        }
+        break;
+      }
+
+      case 'acrophobia': {
+        // الأسماء — عرض الأحرف والفائزين
+        resultHtml =
+          '<div class="acro-results">' +
+            '<div class="acro-results__letters">' + escapeHtml(d.letters || '') + '</div>' +
+            (d.category ? '<div class="acro-results__category">' + escapeHtml(d.category) + '</div>' : '') +
+          '</div>';
         if (d.results) {
-          resultHtml += '<div class="flex flex-col gap-3 mb-4" style="max-width:450px;width:100%">';
+          resultHtml += '<div class="flex flex-col gap-3 mb-4" style="max-width:500px;width:100%">';
           d.results.forEach((r, i) => {
             const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
             resultHtml +=
-              '<div class="flex justify-between items-center p-3" style="background:rgba(255,255,255,0.05);border-radius:12px;border-right:4px solid ' + (i === 0 ? '#D4AF37' : 'transparent') + '">' +
-                '<div>' +
-                  '<span class="font-bold">' + medal + ' ' + escapeHtml(r.playerName || r.name || '') + '</span>' +
-                  (r.text ? '<p class="text-sm text-muted mt-1">"' + escapeHtml(r.text) + '"</p>' : '') +
-                  (r.detail ? '<p class="text-sm text-muted mt-1">' + escapeHtml(r.detail) + '</p>' : '') +
+              '<div class="acro-result-row' + (i === 0 ? ' acro-result-row--winner' : '') + '">' +
+                '<div class="acro-result-row__main">' +
+                  '<span class="font-bold">' + medal + ' ' + escapeHtml(r.playerName) + '</span>' +
+                  '<p class="acro-result-row__text">"' + escapeHtml(r.text) + '"</p>' +
                 '</div>' +
-                '<div class="text-left">' +
-                  '<div style="color:#D4AF37;font-weight:bold">+' + (r.points || 0) + '</div>' +
-                  (r.votes !== undefined ? '<div class="text-sm text-muted">' + r.votes + ' صوت</div>' : '') +
+                '<div class="acro-result-row__score">' +
+                  '<div class="acro-result-row__pts">+' + (r.points || 0) + '</div>' +
+                  '<div class="text-sm text-muted">' + (r.votes || 0) + ' صوت</div>' +
                 '</div>' +
               '</div>';
           });
           resultHtml += '</div>';
         }
-        if (d.correctAnswer) {
-          resultHtml = '<div class="text-2xl text-accent mb-4">✅ ' + escapeHtml(d.correctAnswer) + '</div>' + resultHtml;
-        }
         break;
+      }
 
       default:
         if (d.message) {
@@ -3195,7 +3510,7 @@ const App = {
     // لوحة النقاط
     const players = d.players ? d.players.sort((a, b) => b.score - a.score) : [];
     const scores = players.map((p, i) =>
-      '<div class="scoreboard__row">' +
+      '<div class="scoreboard__row score-snap" style="animation-delay:' + (i * 0.1) + 's">' +
         '<div class="flex items-center gap-3">' +
           '<span class="text-2xl">' + (i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1)) + '</span>' +
           '<span class="text-xl font-bold">' + escapeHtml(p.name) + '</span>' +
@@ -3216,12 +3531,18 @@ const App = {
       : '';
 
     document.getElementById('gameContent').innerHTML =
-      '<div class="text-center" style="max-width:500px;width:100%">' +
+      '<div class="text-center reveal-stage" style="max-width:500px;width:100%">' +
         resultHtml +
         '<div class="scoreboard mt-6">' + scores + '</div>' +
         quipHtml +
         nextBtn +
       '</div>';
+
+    // Trigger reveal animation
+    requestAnimationFrame(() => {
+      const stage = document.querySelector('#gameContent .reveal-stage');
+      if (stage) stage.classList.add('reveal-stage--visible');
+    });
 
     // عرض رسمة Drawful في النتائج
     if (d.game === 'drawful' && d.drawing) {
@@ -3254,6 +3575,7 @@ const App = {
     const w = d.finalResults[0];
     const winnerEl = document.getElementById('winnerDisplay');
     if (winnerEl) {
+      winnerEl.classList.add('winner-spotlight');
       const winnerAvatar = (w.avatarData && typeof AvatarSystem !== 'undefined')
         ? '<div class="winner-showcase__avatar">' + this._gAvatar(w.avatarData, 80, w.avatar) + '</div>'
         : '';
@@ -3276,7 +3598,7 @@ const App = {
 
     const scores = d.finalResults.map((p, i) => {
       const scoreAvatar = this._gAvatar(p.avatarData, 40, p.avatar);
-      return '<div class="scoreboard__row">' +
+      return '<div class="scoreboard__row score-snap" style="animation-delay:' + (0.5 + i * 0.15) + 's">' +
         '<div class="flex items-center gap-3">' +
           '<span class="text-2xl">' + (i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1)) + '</span>' +
           '<span class="avatar" style="background:' + escapeHtml(p.color) + ';width:40px;height:40px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center">' + scoreAvatar + '</span>' +
@@ -3482,7 +3804,7 @@ const App = {
       code: this.currentRoom,
       answer: JSON.stringify(Array.from(this._finalPicks))
     });
-    this.showWaiting('تم إرسال اختياراتك...');
+    ScreenMachine.showLockIn(document.getElementById('gameContent'));
   },
 
   // ═══════════════════════════════════════════════════════════════

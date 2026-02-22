@@ -503,6 +503,15 @@ body {
  * SELECTION
  * ───────────────────────────────────────────────────────────── */
 
+/* ─────────────────────────────────────────────────────────────
+ * FOCUS STATES - الوصولية
+ * ───────────────────────────────────────────────────────────── */
+
+:focus-visible {
+  outline: 3px solid var(--theme-accent, #00E676);
+  outline-offset: 2px;
+}
+
 ::selection {
   background: var(--theme-accent);
   color: var(--color-neutral-black);

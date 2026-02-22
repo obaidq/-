@@ -66,7 +66,7 @@ const io = new Server(server, {
 // ── Rate Limiter لأحداث Socket ──
 function createRateLimiter(maxPerSecond) {
   const clients = new Map();
-  return function(socketId) {
+  const limiter = function(socketId) {
     const now = Date.now();
     const record = clients.get(socketId);
     if (!record) {
@@ -81,6 +81,8 @@ function createRateLimiter(maxPerSecond) {
     record.count++;
     return record.count <= maxPerSecond;
   };
+  limiter.cleanup = (socketId) => clients.delete(socketId);
+  return limiter;
 }
 
 const rateLimiters = {
@@ -875,6 +877,8 @@ io.on('connection', (socket) => {
     if (typeof code !== 'string' || !/^[A-Z2-9]{4}$/.test(code)) return;
     const room = rooms.get(code);
     if (!room) return;
+    // المضيف فقط يقدر يرجع للوبي
+    if (socket.id !== room.hostId) return;
 
     clearRoundTimer(room);
 
@@ -1049,7 +1053,28 @@ io.on('connection', (socket) => {
     const room = rooms.get(code);
     if (!room || socket.id !== room.hostId) return;
     room._paused = !room._paused;
-    if (room._paused) clearRoundTimer(room);
+    if (room._paused) {
+      // حفظ الوقت المتبقي قبل الإيقاف
+      if (room.roundTimer && room._timerStartedAt && room._timerDuration) {
+        room._pausedRemaining = Math.max(0, room._timerDuration - (Date.now() - room._timerStartedAt));
+        room._pausedCallback = room._timerCallback;
+      }
+      clearRoundTimer(room);
+    } else {
+      // استئناف المؤقت بالوقت المتبقي
+      if (room._pausedRemaining > 0 && room._pausedCallback) {
+        const remaining = room._pausedRemaining;
+        const cb = room._pausedCallback;
+        room._timerStartedAt = Date.now();
+        room._timerDuration = remaining;
+        room._timerCallback = cb;
+        room.roundTimer = setTimeout(() => cb(), remaining);
+        // إرسال الوقت المتبقي للعميل
+        io.to(code).emit('timerSync', { remaining: Math.ceil(remaining / 1000) });
+      }
+      delete room._pausedRemaining;
+      delete room._pausedCallback;
+    }
     io.to(code).emit('gamePaused', { paused: room._paused });
     console.log('⏸️ اللعبة', room._paused ? 'متوقفة' : 'مستأنفة', '- غرفة:', code);
   });
@@ -1096,6 +1121,8 @@ io.on('connection', (socket) => {
   // ─────────────────────────────────────────────
   socket.on('disconnect', () => {
     console.log('🔴 لاعب انقطع:', socket.id);
+    // تنظيف rate limiter entries
+    Object.values(rateLimiters).forEach(rl => rl.cleanup && rl.cleanup(socket.id));
 
     rooms.forEach((room, code) => {
       if (!room.players.has(socket.id)) return;
@@ -1230,6 +1257,9 @@ function startGameRound(room) {
  * معالجة وصول كل الإجابات
  */
 function handleAllAnswered(room) {
+  // حماية ضد المعالجة المزدوجة
+  if (room._roundProcessing) return;
+  room._roundProcessing = true;
   clearRoundTimer(room);
 
   switch (room.currentGame) {
@@ -1318,6 +1348,9 @@ function handleAllAnswered(room) {
  * حساب نتائج التصويت
  */
 function calculateVoteResults(room) {
+  // حماية ضد المعالجة المزدوجة
+  if (room._roundProcessing) return;
+  room._roundProcessing = true;
   clearRoundTimer(room);
 
   switch (room.currentGame) {
@@ -1408,6 +1441,16 @@ function checkIfRoundCanProceed(room) {
     clearRoundTimer(room);
     room.state = 'lobby';
     room.currentGame = null;
+    room.currentRound = 0;
+    room.gameData = {};
+    // إعادة تعيين النقاط عند إلغاء اللعبة
+    room.players.forEach(p => {
+      p.score = 0;
+      p.isAlive = true;
+      p.isReady = false;
+      p.currentAnswer = null;
+      p.currentVote = null;
+    });
     io.to(room.code).emit('gameCancelled', {
       message: 'ما فيه لاعبين كفاية! اللعبة انلغت.',
       players: getPlayerList(room)
@@ -1431,6 +1474,11 @@ function checkIfRoundCanProceed(room) {
  */
 function setRoundTimer(room, timeLimit, onTimeout) {
   clearRoundTimer(room);
+  // حفظ بيانات المؤقت للإيقاف المؤقت
+  room._timerStartedAt = Date.now();
+  room._timerDuration = (timeLimit * 1000) + 2000;
+  room._timerCallback = onTimeout;
+  room._roundProcessing = false;
 
   // Half-time commentary (only for rounds >= 15s)
   if (CONFIG.commentaryEnabled && timeLimit >= 15) {
@@ -2587,12 +2635,18 @@ function resolveDeathChallenge(room) {
   const deadIds = room.gameData.newlyDead.map(p => p.id);
   const revived = [];
 
-  // كل اللي جاوبوا بإجابة صالحة (مو فاضية ومو timeout) يعودون
+  // كل اللي جاوبوا بإجابة صالحة يعودون - الإجابة لازم تكون 3 أحرف على الأقل وتحتوي حروف عربية أو إنجليزية أو أرقام منطقية
+  const challenge = room.gameData.deathChallenge || '';
   deadIds.forEach(id => {
     const p = room.players.get(id);
-    if (p && p.currentAnswer && p.currentAnswer !== '__timeout__' && p.currentAnswer.trim().length > 0) {
-      p.isAlive = true;
-      revived.push({ id: p.id, name: p.name });
+    if (p && p.currentAnswer && p.currentAnswer !== '__timeout__') {
+      const ans = p.currentAnswer.trim();
+      // الإجابة لازم تكون 2 حرف على الأقل وتحتوي محتوى حقيقي
+      const hasContent = ans.length >= 2 && /[\u0600-\u06FFa-zA-Z0-9]/.test(ans);
+      if (hasContent) {
+        p.isAlive = true;
+        revived.push({ id: p.id, name: p.name });
+      }
     }
   });
 
@@ -3074,8 +3128,9 @@ function calculateTshirtWarsResults(room) {
   const voteCounts = {};
   answers.forEach(a => { voteCounts[a.id] = 0; });
 
-  room.players.forEach((p) => {
-    if (p.currentVote && voteCounts[p.currentVote] !== undefined) {
+  room.players.forEach((p, id) => {
+    // منع التصويت لنفسك
+    if (p.currentVote && p.currentVote !== id && voteCounts[p.currentVote] !== undefined) {
       voteCounts[p.currentVote]++;
     }
   });
@@ -3266,8 +3321,9 @@ function calculateInventionsResults(room) {
   const voteCounts = {};
   inventions.forEach(inv => { voteCounts[inv.id] = 0; });
 
-  room.players.forEach((p) => {
-    if (p.currentVote && voteCounts[p.currentVote] !== undefined) {
+  room.players.forEach((p, id) => {
+    // منع التصويت لنفسك
+    if (p.currentVote && p.currentVote !== id && voteCounts[p.currentVote] !== undefined) {
       voteCounts[p.currentVote]++;
     }
   });
@@ -3619,12 +3675,12 @@ function calculateSpeedRoundResults(room) {
 
     if (p.currentAnswer && p.currentAnswer !== '__timeout__') {
       const playerAnswer = p.currentAnswer.trim().toLowerCase();
-      // مقارنة مرنة - هل الإجابة تحتوي على الكلمات المفتاحية
-      isCorrect = acceptableAnswers.some(correct => {
+      // مقارنة مشددة - الإجابة لازم تكون 2 حرف على الأقل
+      isCorrect = playerAnswer.length >= 2 && acceptableAnswers.some(correct => {
         const correctLower = correct.trim().toLowerCase();
         return playerAnswer === correctLower ||
                playerAnswer.includes(correctLower) ||
-               correctLower.includes(playerAnswer);
+               (playerAnswer.length >= 3 && correctLower.includes(playerAnswer));
       });
 
       if (isCorrect) {
@@ -4077,8 +4133,6 @@ function calculateEmojiDecodeResults(room) {
   const answerOrder = room.gameData.answerOrder || [];
   const playerResults = [];
 
-  let firstCorrectFound = false;
-
   room.players.forEach((p, id) => {
     let points = 0;
     let isCorrect = false;
@@ -4086,18 +4140,19 @@ function calculateEmojiDecodeResults(room) {
     if (p.currentAnswer && p.currentAnswer !== '__timeout__') {
       const playerAnswer = p.currentAnswer.trim().toLowerCase();
 
-      // مقارنة مرنة - هل الإجابة تحتوي على الكلمات المفتاحية
-      isCorrect = keywords.some(kw => {
+      // مقارنة مشددة - الإجابة لازم تكون 2 حرف على الأقل
+      isCorrect = playerAnswer.length >= 2 && keywords.some(kw => {
         const kwLower = kw.trim().toLowerCase();
         return playerAnswer === kwLower ||
                playerAnswer.includes(kwLower) ||
-               kwLower.includes(playerAnswer);
+               (playerAnswer.length >= 3 && kwLower.includes(playerAnswer));
       });
 
       if (isCorrect) {
-        if (!firstCorrectFound) {
-          points = 1000;
-          firstCorrectFound = true;
+        // استخدام answerOrder لتحديد الأول (بدل ترتيب Map)
+        const orderIdx = answerOrder.indexOf(id);
+        if (orderIdx === 0) {
+          points = 1000; // أول إجابة صحيحة
         } else {
           points = 500;
         }
@@ -4253,15 +4308,20 @@ function calculateDebateMeResults(room) {
     argVotes[a.id] = 0;
   });
 
-  // اللاعبين ما يصوتون لفريقهم
+  // اللاعبين ما يصوتون لفريقهم - تطبيق القاعدة
   room.players.forEach((p, id) => {
     if (p.currentVote && p.currentVote !== '__timeout__') {
       // التصويت هو ID اللاعب صاحب الحجة
       if (argVotes.hasOwnProperty(p.currentVote)) {
+        // منع التصويت لنفس الفريق
+        const voterOnSide1 = side1.includes(id);
+        const voteForSide1 = side1.includes(p.currentVote);
+        if (voterOnSide1 === voteForSide1) return; // تصويت لنفس الفريق - مرفوض
+
         argVotes[p.currentVote]++;
 
         // حساب أصوات الفريق
-        if (side1.includes(p.currentVote)) {
+        if (voteForSide1) {
           side1Votes++;
         } else {
           side2Votes++;

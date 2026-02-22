@@ -72,6 +72,7 @@
 .game-card { background:#fff; border-radius:22px; overflow:hidden; cursor:pointer; box-shadow:0 10px 30px rgba(0,0,0,0.4), 0 2px 0 rgba(0,0,0,0.08); transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s ease, border-color 0.25s ease; border:4px solid transparent; position:relative; }
 .game-card:hover { transform:translateY(-10px) scale(1.03) rotate(-0.5deg); border-color:#00C853; box-shadow:0 24px 48px rgba(0,0,0,0.5), 0 0 24px rgba(0,200,83,0.25); }
 .game-card:active { transform:translateY(-4px) scale(1.01); }
+.game-card:focus-visible { outline:3px solid #00C853; outline-offset:4px; transform:translateY(-8px) scale(1.02); box-shadow:0 20px 40px rgba(0,0,0,0.5), 0 0 20px rgba(0,200,83,0.3); }
 .game-card__banner { height:150px; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
 .game-card__banner::after { content:''; position:absolute; inset:0; background:linear-gradient(180deg,rgba(255,255,255,0.08) 0%,transparent 30%,rgba(0,0,0,0.15) 100%); pointer-events:none; z-index:1; }
 /* SVG illustration layer */
@@ -103,9 +104,9 @@
 
 /* ─── Game Timer ─── */
 .game-timer { width:80px; height:80px; background:var(--theme-accent,#00e676); border:5px solid #000; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:36px; font-weight:900; font-family:'Bangers',sans-serif; color:#000; box-shadow:4px 4px 0 #000; transition:background 0.3s; }
-.game-timer--warning { background:#FF8C42; animation:shake 0.5s ease infinite; }
-.game-timer--danger { background:#ff4444; color:#fff; animation:shake 0.2s ease infinite; }
-@keyframes shake { 0%,100%{transform:rotate(-3deg)} 50%{transform:rotate(3deg)} }
+.game-timer--warning { background:#FF8C42; animation:timer-shake 0.5s ease infinite; }
+.game-timer--danger { background:#ff4444; color:#fff; animation:timer-shake 0.2s ease infinite; }
+@keyframes timer-shake { 0%,100%{transform:rotate(-3deg)} 50%{transform:rotate(3deg)} }
 
 /* ─── Percentage Display ─── */
 .percent-display { font-size:72px; font-weight:900; font-family:'Bangers',sans-serif; color:var(--theme-accent,#00d4ff); text-shadow:4px 4px 0 #000; }
@@ -118,6 +119,7 @@
 /* ─── Vote Options ─── */
 .vote-option { background:#fff; border:4px solid #000; border-radius:14px; padding:20px 28px; cursor:pointer; transition:all 0.2s; min-width:260px; box-shadow:5px 5px 0 #000; }
 .vote-option:hover { transform:translate(-3px,-3px); box-shadow:8px 8px 0 #000; }
+.vote-option:focus-visible { outline:3px solid #00e676; outline-offset:3px; transform:translate(-3px,-3px); box-shadow:8px 8px 0 #000; }
 .vote-option--selected { border-color:#00e676; background:#e8f5e9; box-shadow:5px 5px 0 #00e676; }
 .vote-option__text { font-size:18px; font-weight:700; color:#1a1a1a; text-align:center; }
 .vote-option__author { font-size:12px; color:#888; text-align:center; margin-top:4px; }
@@ -1352,7 +1354,7 @@
 .wyr-split-badge {
   background: linear-gradient(135deg, #D4AF37, #B8860B); color: #000;
   padding: 12px 24px; border-radius: 50px; font-weight: 900;
-  font-size: 18px; animation: pulse 0.5s ease-in-out;
+  font-size: 18px; animation: scale-pulse 0.5s ease-in-out;
 }
 
 /* ─── Speed Round ─── */
@@ -1428,10 +1430,103 @@
 }
 
 /* ─── Pause Overlay ─── */
-#pauseOverlay { display:flex; align-items:center; justify-content:center; }
+#pauseOverlay { display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.8); }
+.pause-content { text-align:center; }
+.pause-icon { font-size:4rem; margin-bottom:1rem; }
+.pause-title { font-size:2rem; font-weight:900; color:#fff; }
 
 /* ─── Animations ─── */
-@keyframes pulse { 0%{transform:scale(1)} 50%{transform:scale(1.05)} 100%{transform:scale(1)} }
+@keyframes scale-pulse { 0%{transform:scale(1)} 50%{transform:scale(1.05)} 100%{transform:scale(1)} }
+
+
+/* ═══════════════════════════════════════════════════════════════
+ * PER-GAME RESULTS UI — شاشات نتائج مخصصة لكل لعبة
+ * ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Shared Result Row ─── */
+.result-row { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:rgba(255,255,255,0.05); border-radius:12px; border-right:4px solid transparent; }
+.result-row--top { border-right-color:#D4AF37; background:rgba(212,175,55,0.08); }
+
+/* ─── Would You Rather ─── */
+.wyr-results-card { max-width:500px; width:100%; margin:0 auto 16px; }
+.wyr-vs-label { text-align:center; font-size:20px; font-weight:900; margin-bottom:12px; color:#D4AF37; }
+.wyr-bar-container { display:flex; flex-direction:column; gap:8px; }
+.wyr-bar { padding:14px 18px; border-radius:12px; font-weight:700; font-size:15px; display:flex; justify-content:space-between; transition:width 0.8s ease; min-width:60px; }
+.wyr-bar--a { background:linear-gradient(135deg, #00B0FF, #0091EA); color:#fff; }
+.wyr-bar--b { background:linear-gradient(135deg, #FF6D00, #E65100); color:#fff; }
+.wyr-bar__label { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+.wyr-bar__pct { flex-shrink:0; margin-right:8px; }
+
+/* ─── Who Said It ─── */
+.wsi-reveal-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; max-width:600px; margin:0 auto; }
+.wsi-reveal-card { background:rgba(156,39,176,0.1); border:2px solid rgba(156,39,176,0.3); border-radius:14px; padding:16px; text-align:center; animation:wsi-reveal 0.5s ease-out; }
+.wsi-reveal-card__quote { font-size:16px; font-weight:700; color:#fff; margin-bottom:8px; font-style:italic; }
+.wsi-reveal-card__author { font-size:13px; color:rgba(156,39,176,0.8); font-weight:600; }
+@keyframes wsi-reveal { from{opacity:0;transform:scale(0.8)} to{opacity:1;transform:scale(1)} }
+
+/* ─── Speed Round / Emoji Decode Results ─── */
+.speed-results { text-align:center; margin-bottom:16px; }
+.speed-results__question { font-size:18px; font-weight:700; color:#fff; margin-bottom:8px; }
+.speed-results__answer { font-size:24px; font-weight:900; color:#00E676; margin-bottom:16px; }
+.speed-results__ranking { display:flex; flex-direction:column; gap:8px; max-width:450px; width:100%; margin:0 auto; }
+.speed-results__row { display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:10px; background:rgba(255,255,255,0.05); }
+.speed-results__row--correct { border-right:3px solid #00E676; }
+.speed-results__row--wrong { opacity:0.5; }
+.speed-results__place { font-size:20px; min-width:28px; text-align:center; }
+.speed-results__name { font-weight:700; flex:1; }
+.speed-results__ans { flex-shrink:0; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.speed-results__pts { color:#D4AF37; font-weight:900; min-width:50px; text-align:left; }
+
+/* ─── Emoji Decode ─── */
+.emoji-results { text-align:center; margin-bottom:16px; }
+.emoji-results__emojis { font-size:48px; margin-bottom:8px; letter-spacing:8px; }
+.emoji-results__answer { font-size:28px; font-weight:900; color:#FFC107; margin-bottom:4px; }
+.emoji-results__category { font-size:14px; color:rgba(255,193,7,0.6); margin-bottom:16px; }
+
+/* ─── Two Truths ─── */
+.tt-results { max-width:450px; width:100%; margin:0 auto 16px; text-align:center; }
+.tt-featured-name { font-size:20px; font-weight:900; color:#D4AF37; margin-bottom:12px; }
+.tt-statements { display:flex; flex-direction:column; gap:8px; }
+.tt-statement { padding:14px 18px; border-radius:12px; display:flex; align-items:center; gap:12px; text-align:right; }
+.tt-statement--truth { background:rgba(76,175,80,0.12); border:2px solid rgba(76,175,80,0.3); }
+.tt-statement--lie { background:rgba(244,67,54,0.12); border:2px solid rgba(244,67,54,0.5); animation:tt-lie-reveal 0.6s ease-out; }
+.tt-statement__icon { font-size:14px; font-weight:900; flex-shrink:0; min-width:70px; }
+.tt-statement__text { font-size:15px; font-weight:600; }
+@keyframes tt-lie-reveal { from{transform:translateX(10px);opacity:0} to{transform:translateX(0);opacity:1} }
+
+/* ─── Split the Room ─── */
+.split-results { max-width:500px; width:100%; margin:0 auto 16px; text-align:center; }
+.split-results__scenario { font-size:16px; font-weight:600; color:#fff; margin-bottom:8px; line-height:1.5; }
+.split-results__filler { font-size:14px; color:rgba(233,30,99,0.8); margin-bottom:16px; }
+.split-results__bar-container { display:flex; gap:4px; border-radius:12px; overflow:hidden; margin-bottom:8px; }
+.split-results__bar { padding:12px; font-size:14px; font-weight:700; color:#fff; text-align:center; transition:width 0.8s ease; min-width:40px; }
+.split-results__bar--yes { background:linear-gradient(135deg, #4CAF50, #2E7D32); }
+.split-results__bar--no { background:linear-gradient(135deg, #f44336, #C62828); }
+.split-results__diff { font-size:14px; color:rgba(255,255,255,0.5); }
+
+/* ─── Debate Me ─── */
+.debate-results { max-width:500px; width:100%; margin:0 auto 16px; text-align:center; }
+.debate-results__topic { font-size:18px; font-weight:700; color:#fff; margin-bottom:16px; }
+.debate-results__sides { display:flex; align-items:center; gap:12px; justify-content:center; margin-bottom:12px; }
+.debate-results__side { flex:1; padding:16px; border-radius:14px; background:rgba(255,255,255,0.05); border:2px solid rgba(255,255,255,0.1); transition:all 0.3s; }
+.debate-results__side--winner { border-color:#D4AF37; background:rgba(212,175,55,0.1); box-shadow:0 0 20px rgba(212,175,55,0.2); }
+.debate-results__side-label { font-size:15px; font-weight:700; margin-bottom:4px; }
+.debate-results__side-votes { font-size:13px; color:rgba(255,255,255,0.5); }
+.debate-results__vs { font-size:24px; flex-shrink:0; }
+.debate-results__crown { font-size:24px; margin-top:8px; }
+.debate-results__best { font-size:15px; color:#D4AF37; font-weight:700; margin-bottom:8px; }
+.debate-results__tie { font-size:18px; font-weight:900; color:#FFC107; }
+
+/* ─── Acrophobia ─── */
+.acro-results { text-align:center; margin-bottom:16px; }
+.acro-results__letters { font-size:48px; font-weight:900; letter-spacing:16px; color:#607D8B; font-family:'Bangers',sans-serif; margin-bottom:4px; text-shadow:2px 2px 0 rgba(0,0,0,0.3); }
+.acro-results__category { font-size:14px; color:rgba(96,125,139,0.7); margin-bottom:16px; }
+.acro-result-row { display:flex; justify-content:space-between; align-items:flex-start; padding:12px 16px; background:rgba(255,255,255,0.05); border-radius:12px; border-right:4px solid transparent; }
+.acro-result-row--winner { border-right-color:#D4AF37; background:rgba(212,175,55,0.08); }
+.acro-result-row__main { flex:1; }
+.acro-result-row__text { font-size:14px; color:rgba(255,255,255,0.6); margin-top:4px; font-style:italic; }
+.acro-result-row__score { text-align:left; flex-shrink:0; margin-right:12px; }
+.acro-result-row__pts { color:#D4AF37; font-weight:900; }
 
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1482,4 +1577,323 @@
 [data-reduced-motion="true"] .game-tag {
   animation: none !important;
   transition: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ * TV SHOW FRAMEWORK - Unified Jackbox-Style Experience
+ * ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Enhanced Background System (5-layer composition) ─── */
+.bg__gradient {
+  position: fixed; inset: 0; z-index: -5;
+  background: linear-gradient(135deg, var(--theme-hue1, #001a0e) 0%, var(--theme-hue2, #002815) 50%, var(--theme-hue1, #001a0e) 100%);
+  background-size: 400% 400%;
+  animation: bg-gradient-drift 12s ease-in-out infinite;
+}
+@keyframes bg-gradient-drift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.bg__noise {
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+  mix-blend-mode: overlay;
+}
+
+/* Enhance existing overlay with stronger vignette */
+.bg__overlay {
+  background: radial-gradient(ellipse at center,
+    transparent 0%,
+    transparent 40%,
+    rgba(0,0,0,0.15) 60%,
+    rgba(0,0,0,0.4) 80%,
+    rgba(0,0,0,0.7) 100%
+  ) !important;
+}
+
+/* Per-game accent glow */
+.bg__glow {
+  background: radial-gradient(circle at 50% 50%, var(--theme-glow, rgba(0,230,118,0.15)) 0%, transparent 70%) !important;
+}
+
+/* ─── Scene Transitions (fast fade/snap) ─── */
+.screen {
+  transition: opacity var(--scene-fade, 250ms) ease-out;
+}
+.screen:not(.is-active) {
+  opacity: 0;
+  pointer-events: none;
+}
+.screen.is-active {
+  opacity: 1;
+}
+
+/* ─── TV-Safe Game Screen Layout ─── */
+#gameScreen {
+  padding: var(--tv-safe-y) var(--tv-safe-x);
+}
+#gameScreen .game-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  width: 100%;
+  max-width: var(--card-max-width, 720px);
+  margin: 0 auto;
+}
+
+/* ─── Main Card (centered content panel for TV) ─── */
+.main-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding);
+  box-shadow: var(--card-shadow);
+  width: 100%;
+  max-width: var(--card-max-width);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  position: relative;
+  overflow: hidden;
+}
+.main-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--theme-accent, #00e676), transparent);
+  opacity: 0.6;
+}
+
+/* ─── Round Intro Overlay (TV Show "Round X" card) ─── */
+.round-intro {
+  position: fixed; inset: 0;
+  z-index: var(--z-overlay, 300);
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.round-intro.hidden { display: none; }
+.round-intro__card {
+  text-align: center;
+  animation: round-intro-pop 0.4s var(--ease-bounce, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+}
+.round-intro__label {
+  font-size: var(--text-xl, 1.25rem);
+  font-weight: 700;
+  color: var(--theme-accent, #00e676);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  opacity: 0.8;
+  margin-bottom: 8px;
+}
+.round-intro__number {
+  font-size: clamp(4rem, 12vw, 8rem);
+  font-weight: 900;
+  font-family: var(--font-display, 'Bangers', sans-serif);
+  color: #fff;
+  text-shadow: 0 0 40px var(--theme-glow, rgba(0,230,118,0.3)),
+               4px 4px 0 rgba(0,0,0,0.5);
+  line-height: 1;
+}
+.round-intro__subtitle {
+  font-size: var(--text-lg, 1.125rem);
+  color: rgba(255,255,255,0.6);
+  margin-top: 12px;
+  font-weight: 500;
+}
+@keyframes round-intro-pop {
+  0% { opacity: 0; transform: scale(0.5); }
+  70% { opacity: 1; transform: scale(1.05); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.round-intro--exit .round-intro__card {
+  animation: round-intro-exit 0.3s ease-in forwards;
+}
+@keyframes round-intro-exit {
+  to { opacity: 0; transform: scale(0.8); }
+}
+
+/* ─── Lock-In State (after answer submission) ─── */
+.locked-in {
+  position: relative;
+  text-align: center;
+  padding: var(--space-8);
+}
+.locked-in__icon {
+  font-size: 4rem;
+  animation: lock-in-bounce 0.5s var(--ease-bounce) both;
+  margin-bottom: var(--space-4);
+}
+.locked-in__text {
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  color: var(--theme-accent, #00e676);
+}
+.locked-in__sub {
+  font-size: var(--text-sm);
+  color: rgba(255,255,255,0.5);
+  margin-top: var(--space-2);
+}
+@keyframes lock-in-bounce {
+  0% { transform: scale(0); }
+  60% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+/* ─── Answer Progress Bar ─── */
+.answer-progress {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 14px;
+  background: rgba(255,255,255,0.06);
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(255,255,255,0.08);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: rgba(255,255,255,0.7);
+}
+.answer-progress__bar {
+  width: 60px; height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.answer-progress__fill {
+  height: 100%;
+  background: var(--theme-accent, #00e676);
+  border-radius: 3px;
+  transition: width 0.3s ease-out;
+}
+
+/* ─── Timer Tension Effect (last 5 seconds) ─── */
+.game-timer--tension {
+  animation: timer-tension 0.5s ease-in-out infinite alternate !important;
+  color: #FF4757 !important;
+  text-shadow: 0 0 20px rgba(255,71,87,0.6) !important;
+  font-size: 2.2rem !important;
+}
+@keyframes timer-tension {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.15); }
+}
+
+/* Red pulse on the whole screen during tension */
+.screen--tension::after {
+  content: '';
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse at center, rgba(255,71,87,0.08) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 1;
+  animation: tension-pulse 1s ease-in-out infinite;
+}
+@keyframes tension-pulse {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+/* ─── Winner Spotlight (enlarged card moment) ─── */
+.winner-spotlight {
+  animation: winner-spotlight-zoom 0.6s var(--ease-bounce) both;
+}
+@keyframes winner-spotlight-zoom {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ─── Score Snap Animation ─── */
+.score-snap {
+  animation: score-snap-in 0.3s var(--ease-pop) both;
+}
+@keyframes score-snap-in {
+  0% { transform: scale(0.5) translateY(20px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* ─── Enhanced HUD (compact, TV-friendly) ─── */
+.game-hud {
+  background: rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+  padding: 8px 16px !important;
+}
+.game-hud__title {
+  font-size: var(--text-base) !important;
+  font-weight: 700 !important;
+  white-space: nowrap;
+}
+.game-hud__round {
+  font-size: var(--text-xs) !important;
+  opacity: 0.6;
+}
+
+/* ─── Room Code Badge (small, in HUD) ─── */
+.hud-room-code {
+  font-family: monospace;
+  font-size: var(--text-xs);
+  background: rgba(255,255,255,0.08);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  color: var(--theme-accent, #00e676);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+/* ─── Reveal Cadence (staged appearance) ─── */
+.reveal-stage {
+  opacity: 0;
+  transform: translateY(12px);
+}
+.reveal-stage--visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+
+/* Staggered reveal for multiple items */
+.reveal-stage--visible:nth-child(1) { transition-delay: 0s; }
+.reveal-stage--visible:nth-child(2) { transition-delay: 0.1s; }
+.reveal-stage--visible:nth-child(3) { transition-delay: 0.2s; }
+.reveal-stage--visible:nth-child(4) { transition-delay: 0.3s; }
+.reveal-stage--visible:nth-child(5) { transition-delay: 0.4s; }
+
+/* ─── Round Title Card (brief flash before question) ─── */
+.round-title-card {
+  text-align: center;
+  padding: var(--space-12) var(--space-8);
+}
+.round-title-card__round {
+  font-size: var(--text-sm);
+  color: var(--theme-accent, #00e676);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+}
+.round-title-card__title {
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.4);
+  line-height: 1.1;
+}
+
+/* ─── Responsive TV-safe adjustments ─── */
+@media (max-width: 768px) {
+  :root {
+    --tv-safe-x: 12px;
+    --tv-safe-y: 8px;
+    --card-max-width: 100%;
+    --card-padding: var(--space-5);
+  }
+  .round-intro__number {
+    font-size: 4rem;
+  }
 }

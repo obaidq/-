@@ -84,11 +84,22 @@
     </defs>
   </svg>
 
-  <!-- Background System: base → pattern → glow → overlay -->
+  <!-- Background System: base → pattern → glow → noise → overlay (5-layer composition) -->
   <div class="bg">
+    <div class="bg__gradient"></div>
     <div class="bg__pattern pattern-rays"></div>
     <div class="bg__glow"></div>
+    <div class="bg__noise"></div>
     <div class="bg__overlay"></div>
+  </div>
+
+  <!-- Round Intro Overlay (TV show "Round X" card) -->
+  <div id="roundIntroOverlay" class="round-intro hidden" aria-live="assertive">
+    <div class="round-intro__card">
+      <div class="round-intro__label" id="roundIntroLabel">الجولة</div>
+      <div class="round-intro__number" id="roundIntroNumber">١</div>
+      <div class="round-intro__subtitle" id="roundIntroSub"></div>
+    </div>
   </div>
 
   <!-- ═══════════════════════════════════════════════════════════
@@ -557,6 +568,7 @@
           <div class="game-hud__title" id="gameTitle">⚡ اللعبة</div>
           <div class="game-hud__round" id="gameRound">الجولة ١ من ٥</div>
         </div>
+        <div class="hud-room-code" id="hudRoomCode"></div>
       </div>
       <div class="game-hud__center">
         <div id="answeredCount" class="text-sm text-muted" style="display:none"></div>
@@ -686,10 +698,10 @@
   </div>
 
   <!-- Pause Overlay -->
-  <div id="pauseOverlay" class="countdown-overlay hidden" style="background:rgba(0,0,0,0.8)">
-    <div style="text-align:center">
-      <div style="font-size:4rem;margin-bottom:1rem">⏸️</div>
-      <div style="font-size:2rem;font-weight:900;color:#fff">اللعبة متوقفة</div>
+  <div id="pauseOverlay" class="countdown-overlay hidden">
+    <div class="pause-content">
+      <div class="pause-icon">⏸️</div>
+      <div class="pause-title">اللعبة متوقفة</div>
       <div class="text-muted mt-2">المضيف أوقف اللعبة مؤقتاً</div>
     </div>
   </div>

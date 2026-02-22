@@ -34,6 +34,7 @@ class EffectsEngine {
     const h = window.innerHeight;
     this.canvas.width = w * this.dpr;
     this.canvas.height = h * this.dpr;
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
     this.ctx.scale(this.dpr, this.dpr);
     this.w = w;
     this.h = h;

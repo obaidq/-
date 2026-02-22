@@ -218,6 +218,36 @@
 
   --safe-area-x: 48px;
   --safe-area-y: 32px;
+
+  /* ─────────────────────────────────────────────────────────────
+   * TV-SAFE AREA (10% padding for TV displays)
+   * ───────────────────────────────────────────────────────────── */
+  --tv-safe-x: 5vw;
+  --tv-safe-y: 4vh;
+
+  /* ─────────────────────────────────────────────────────────────
+   * MAIN CARD (Centered content card for TV show framework)
+   * ───────────────────────────────────────────────────────────── */
+  --card-max-width: 720px;
+  --card-bg: rgba(0, 15, 8, 0.82);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --card-radius: var(--radius-2xl);
+  --card-padding: var(--space-8);
+  --card-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06);
+
+  /* ─────────────────────────────────────────────────────────────
+   * SCENE TRANSITIONS
+   * ───────────────────────────────────────────────────────────── */
+  --scene-fade: 250ms;
+  --scene-snap: 200ms;
+
+  /* ─────────────────────────────────────────────────────────────
+   * PACING (minimum screen display times)
+   * ───────────────────────────────────────────────────────────── */
+  --pace-round-intro: 1800ms;
+  --pace-lock-in: 400ms;
+  --pace-reveal-pause: 600ms;
+  --pace-score-hold: 1200ms;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -265,6 +295,31 @@
   --intensity-pattern-speed: 15s;
   --intensity-overlay-vignette: 90%;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+ * PER-GAME THEME COLORS (12 unique palettes)
+ * Each game gets a primary gradient + accent for the background
+ * ═══════════════════════════════════════════════════════════════ */
+
+[data-theme="hub"]          { --theme-hue1: #001a0e; --theme-hue2: #002815; --theme-accent: #00e676; --theme-glow: rgba(0, 230, 118, 0.15); }
+[data-theme="quiplash"]     { --theme-hue1: #0a0a2e; --theme-hue2: #1a0a3e; --theme-accent: #FFD93D; --theme-glow: rgba(255, 217, 61, 0.12); }
+[data-theme="guesspionage"] { --theme-hue1: #0a1a0a; --theme-hue2: #001f0f; --theme-accent: #00ff41; --theme-glow: rgba(0, 255, 65, 0.10); }
+[data-theme="fakinit"]      { --theme-hue1: #1a0a0a; --theme-hue2: #2a0a1a; --theme-accent: #FF6B9D; --theme-glow: rgba(255, 107, 157, 0.12); }
+[data-theme="triviamurder"] { --theme-hue1: #1a0011; --theme-hue2: #0d000a; --theme-accent: #FF4757; --theme-glow: rgba(255, 71, 87, 0.15); }
+[data-theme="fibbage"]      { --theme-hue1: #1a1508; --theme-hue2: #0d0b04; --theme-accent: #FFB300; --theme-glow: rgba(255, 179, 0, 0.12); }
+[data-theme="drawful"]      { --theme-hue1: #0a0a1e; --theme-hue2: #15082a; --theme-accent: #A55EEA; --theme-glow: rgba(165, 94, 234, 0.12); }
+[data-theme="tshirtwars"]   { --theme-hue1: #001a1a; --theme-hue2: #002020; --theme-accent: #00D2D3; --theme-glow: rgba(0, 210, 211, 0.12); }
+[data-theme="lovemonster"]  { --theme-hue1: #1a050f; --theme-hue2: #200815; --theme-accent: #FF69B4; --theme-glow: rgba(255, 105, 180, 0.15); }
+[data-theme="inventions"]   { --theme-hue1: #0d1a00; --theme-hue2: #152200; --theme-accent: #76FF03; --theme-glow: rgba(118, 255, 3, 0.10); }
+[data-theme="wouldyourather"]{ --theme-hue1: #0a0f1a; --theme-hue2: #0a1520; --theme-accent: #448AFF; --theme-glow: rgba(68, 138, 255, 0.12); }
+[data-theme="whosaidit"]    { --theme-hue1: #120a1a; --theme-hue2: #1a0a20; --theme-accent: #E040FB; --theme-glow: rgba(224, 64, 251, 0.12); }
+[data-theme="speedround"]   { --theme-hue1: #1a1200; --theme-hue2: #201800; --theme-accent: #FFAB00; --theme-glow: rgba(255, 171, 0, 0.15); }
+[data-theme="twotruths"]    { --theme-hue1: #001a12; --theme-hue2: #00200a; --theme-accent: #1DE9B6; --theme-glow: rgba(29, 233, 182, 0.12); }
+[data-theme="splittheroom"] { --theme-hue1: #0a001a; --theme-hue2: #10002a; --theme-accent: #7C4DFF; --theme-glow: rgba(124, 77, 255, 0.12); }
+[data-theme="emojidecode"]  { --theme-hue1: #1a0a00; --theme-hue2: #201000; --theme-accent: #FF6D00; --theme-glow: rgba(255, 109, 0, 0.12); }
+[data-theme="debateme"]     { --theme-hue1: #0a0a1a; --theme-hue2: #0a101a; --theme-accent: #40C4FF; --theme-glow: rgba(64, 196, 255, 0.12); }
+[data-theme="acrophobia"]   { --theme-hue1: #0f1a0a; --theme-hue2: #15200a; --theme-accent: #B2FF59; --theme-glow: rgba(178, 255, 89, 0.10); }
+[data-theme="victory"]      { --theme-hue1: #1a1000; --theme-hue2: #201500; --theme-accent: #FFD700; --theme-glow: rgba(255, 215, 0, 0.20); }
 
 html {
   color-scheme: dark;
