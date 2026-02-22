@@ -2641,14 +2641,7 @@ const App = {
     document.getElementById('gameHint').textContent = '💡 ' + text;
   },
 
-  setTheme(game) {
-    const info = GAMES[game];
-    if (info) {
-      document.body.setAttribute('data-theme', game);
-      const patternEl = document.querySelector('.bg__pattern');
-      if (patternEl) patternEl.className = 'bg__pattern ' + info.pattern;
-    }
-  },
+  // setTheme is defined once at L659 with full fallback support
 
   // ═══════════════════════════════════════════════════════════════
   // النتائج والإرسال
@@ -2786,7 +2779,7 @@ const App = {
     if (this._submitting) return;
     this._submitting = true;
     target.classList.add('vote-option--selected');
-    this.socket.emit('submitAnswer', { code: this.roomCode, answer: id });
+    this.socket.emit('submitAnswer', { code: this.currentRoom, answer: id });
   },
 
   // ═══════════════════════════════════════════════════════
