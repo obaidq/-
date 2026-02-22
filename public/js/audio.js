@@ -274,6 +274,77 @@ const AudioEngine = {
     this.playNote(1200, 0.06, 'sine', this.sfxGain, 0.1);
   },
 
+  // Achievement unlocked
+  achievement() {
+    this.playNote(784, 0.1, 'sine', this.sfxGain, 0.25);
+    this.playNote(988, 0.1, 'sine', this.sfxGain, 0.25, 0.1);
+    this.playNote(1175, 0.1, 'sine', this.sfxGain, 0.25, 0.2);
+    this.playNote(1568, 0.3, 'sine', this.sfxGain, 0.2, 0.3);
+    this.playNoise(0.08, this.sfxGain, 0.05, 0.35);
+  },
+
+  // Chat message
+  chatMsg() {
+    this.playNote(1100, 0.05, 'sine', this.sfxGain, 0.1);
+  },
+
+  // Speed round correct (fast ascending)
+  speedCorrect() {
+    for (let i = 0; i < 4; i++) {
+      this.playNote(600 + i * 300, 0.08, 'sine', this.sfxGain, 0.2, i * 0.04);
+    }
+  },
+
+  // Split perfect (50/50)
+  splitPerfect() {
+    const notes = [523, 659, 784, 1047, 1319, 1568];
+    notes.forEach((n, i) => {
+      this.playNote(n, 0.12, 'sine', this.sfxGain, 0.2, i * 0.06);
+    });
+    this.playNoise(0.1, this.sfxGain, 0.08, 0.4);
+  },
+
+  // Debate gavel
+  gavel() {
+    this.playNoise(0.08, this.sfxGain, 0.2);
+    this.playNote(150, 0.2, 'square', this.sfxGain, 0.15, 0.05);
+  },
+
+  // Sad trombone (for losers/zero points)
+  sadTrombone() {
+    const notes = [293, 277, 261, 196];
+    notes.forEach((n, i) => {
+      this.playNote(n, 0.4, 'sawtooth', this.sfxGain, 0.12, i * 0.35);
+    });
+  },
+
+  // Suspense build
+  suspense() {
+    for (let i = 0; i < 8; i++) {
+      this.playNote(200 + i * 30, 0.2, 'sine', this.sfxGain, 0.05 + i * 0.02, i * 0.2);
+    }
+  },
+
+  // Boing (comic)
+  boing() {
+    if (!this.enabled || !this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(300, t);
+      osc.frequency.exponentialRampToValueAtTime(1500, t + 0.05);
+      osc.frequency.exponentialRampToValueAtTime(300, t + 0.15);
+      g.gain.setValueAtTime(0.15, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+      osc.connect(g);
+      g.connect(this.sfxGain);
+      osc.start(t);
+      osc.stop(t + 0.2);
+    } catch (e) {}
+  },
+
   // Whoosh (transition)
   whoosh() {
     if (!this.enabled || !this.ctx) return;
@@ -331,7 +402,18 @@ const AudioEngine = {
         fakinit: [[293, 349, 440], [261, 329, 415], [311, 392, 466], [293, 349, 440]],
         triviamurder: [[220, 261, 329], [196, 246, 293], [207, 261, 311], [220, 261, 329]],
         fibbage: [[277, 349, 415], [261, 329, 392], [293, 369, 440], [277, 349, 415]],
-        drawful: [[329, 415, 493], [349, 440, 523], [293, 369, 440], [329, 415, 493]]
+        drawful: [[329, 415, 493], [349, 440, 523], [293, 369, 440], [329, 415, 493]],
+        tshirtwars: [[349, 440, 523], [329, 415, 493], [311, 392, 466], [349, 440, 523]],
+        lovemonster: [[277, 349, 440], [293, 369, 466], [261, 329, 415], [277, 349, 440]],
+        inventions: [[329, 415, 523], [349, 440, 554], [293, 369, 466], [329, 415, 523]],
+        wouldyourather: [[349, 440, 523], [311, 392, 466], [329, 415, 493], [349, 440, 523]],
+        whosaidit: [[261, 329, 415], [277, 349, 440], [293, 369, 466], [261, 329, 415]],
+        speedround: [[349, 440, 554], [392, 493, 622], [349, 440, 554], [329, 415, 523]],
+        twotruths: [[293, 369, 440], [277, 349, 415], [261, 329, 392], [293, 369, 440]],
+        splittheroom: [[311, 392, 493], [293, 369, 466], [329, 415, 523], [311, 392, 493]],
+        emojidecode: [[392, 493, 587], [349, 440, 523], [329, 415, 493], [392, 493, 587]],
+        debateme: [[261, 311, 392], [246, 293, 369], [261, 329, 415], [261, 311, 392]],
+        acrophobia: [[349, 440, 523], [392, 493, 587], [329, 415, 523], [349, 440, 523]]
       };
 
       const prog = chords[theme] || chords.hub;

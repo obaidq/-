@@ -24,12 +24,23 @@ const TIPS = [
 ];
 
 const GAMES = {
-  quiplash:     { icon: '⚡', name: 'رد سريع',      hint: 'اكتب أطرف إجابة!',      pattern: 'pattern-stage' },
-  guesspionage: { icon: '📊', name: 'خمّن النسبة',   hint: 'خمّن النسبة الصحيحة!',   pattern: 'pattern-matrix' },
-  fakinit:      { icon: '🕵️', name: 'المزيّف',       hint: 'اكتشف المزيّف!',         pattern: 'pattern-deception' },
-  triviamurder: { icon: '💀', name: 'حفلة القاتل',   hint: 'أجب صح أو مت!',          pattern: 'pattern-blood' },
-  fibbage:      { icon: '🎭', name: 'كشف الكذاب',    hint: 'اكتب كذبة مقنعة!',       pattern: 'pattern-newspaper' },
-  drawful:      { icon: '🎨', name: 'ارسم لي',       hint: 'ارسم الكلمة!',           pattern: 'pattern-paint' }
+  quiplash:       { icon: '⚡', name: 'رد سريع',        hint: 'اكتب أطرف إجابة!',                pattern: 'pattern-stage' },
+  guesspionage:   { icon: '📊', name: 'خمّن النسبة',     hint: 'خمّن النسبة الصحيحة!',             pattern: 'pattern-matrix' },
+  fakinit:        { icon: '🕵️', name: 'المزيّف',         hint: 'اكتشف المزيّف!',                   pattern: 'pattern-deception' },
+  triviamurder:   { icon: '💀', name: 'حفلة القاتل',     hint: 'أجب صح أو مت!',                    pattern: 'pattern-blood' },
+  fibbage:        { icon: '🎭', name: 'كشف الكذاب',      hint: 'اكتب كذبة مقنعة!',                 pattern: 'pattern-newspaper' },
+  drawful:        { icon: '🎨', name: 'ارسم لي',         hint: 'ارسم الكلمة!',                     pattern: 'pattern-paint' },
+  tshirtwars:     { icon: '👕', name: 'حرب التيشيرتات',  hint: 'اكتب أفضل شعار!',                  pattern: 'pattern-rays' },
+  lovemonster:    { icon: '💕', name: 'الوحش العاشق',    hint: 'اختر واحد ترسل له!',               pattern: 'pattern-dots' },
+  inventions:     { icon: '💡', name: 'اختراعات مجنونة',  hint: 'اخترع شي مجنون!',                  pattern: 'pattern-grid' },
+  wouldyourather: { icon: '🤔', name: 'تبي ولا ما تبي',  hint: 'اختر خيار!',                       pattern: 'pattern-zigzag' },
+  whosaidit:      { icon: '💬', name: 'من قال؟',         hint: 'خمّن مين كتب هالكلام!',            pattern: 'pattern-stripes' },
+  speedround:     { icon: '⚡', name: 'أسرع واحد',       hint: 'أجب أسرع من الكل!',                pattern: 'pattern-confetti' },
+  twotruths:      { icon: '✌️', name: 'حقيقتين وكذبة',   hint: 'اكتشف الكذبة!',                    pattern: 'pattern-waves' },
+  splittheroom:   { icon: '🔀', name: 'سبليت ذا روم',    hint: 'اقسم الغرفة!',                     pattern: 'pattern-halftone' },
+  emojidecode:    { icon: '🎭', name: 'فك الرموز',       hint: 'خمّن من الإيموجي!',                pattern: 'pattern-noise' },
+  debateme:       { icon: '⚖️', name: 'المحكمة',         hint: 'قنع الباقين برأيك!',               pattern: 'pattern-spotlight' },
+  acrophobia:     { icon: '🔤', name: 'الأسماء',         hint: 'اصنع أطرف اختصار!',                pattern: 'pattern-triangles' }
 };
 
 const DRAW_COLORS = ['#000000', '#ff0000', '#0066ff', '#00aa00', '#ff8800', '#9900cc', '#ff69b4', '#8B4513', '#FFD700', '#00CED1', '#808080', '#ffffff'];
@@ -176,6 +187,11 @@ const App = {
         case 'submitGuessDrawful': this.submitGuessDrawful(); break;
         case 'submitFinalPicks': this.submitFinalPicks(); break;
         case 'submitLoveChoice': this.submitLoveChoice(id, target); break;
+        case 'submitWyrChoice': this.submitWyrChoice(target.getAttribute('data-choice'), target); break;
+        case 'guessWhoSaidIt': this.guessWhoSaidIt(target.getAttribute('data-player'), target); break;
+        case 'submitTwoTruths': this.submitTwoTruths(); break;
+        case 'guessTwoTruths': this.guessTwoTruths(id, target); break;
+        case 'submitSplitVote': this.submitSplitVote(target.getAttribute('data-vote'), target); break;
         case 'requestNextRound': this.requestNextRound(); break;
         case 'backToLobby': this.backToLobby(); break;
         case 'undoStroke': this.undoStroke(); break;
@@ -235,6 +251,14 @@ const App = {
         case 'confirmExit': if (confirm('متأكد تبي تطلع؟')) location.reload(); break;
         case 'sendEmoji': this.sendEmoji(target.getAttribute('data-emoji')); break;
         case 'toggleReducedMotion': this.toggleReducedMotion(target.checked); break;
+        case 'toggleDarkMode': this.toggleDarkMode(target.checked); break;
+        case 'pauseGame': this.pauseGame(); break;
+        case 'skipQuestion': this.skipQuestion(); break;
+        case 'showKickMenu': this.showKickMenu(); break;
+        case 'closeKickMenu': this.closeKickMenu(); break;
+        case 'kickPlayer': this.kickPlayer(target.getAttribute('data-id')); break;
+        case 'toggleChat': this.toggleChat(); break;
+        case 'sendChat': this.sendChat(); break;
       }
     });
 
@@ -247,6 +271,18 @@ const App = {
     document.getElementById('intensitySelect')?.addEventListener('change', (e) => {
       this.setIntensity(e.target.value);
     });
+
+    // ── Chat enter key ──
+    document.getElementById('chatInput')?.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') this.sendChat();
+    });
+
+    // ── Dark mode init ──
+    if (localStorage.getItem('darkMode') === 'true') {
+      document.body.setAttribute('data-dark-mode', 'true');
+      const toggle = document.getElementById('darkModeToggle');
+      if (toggle) toggle.checked = true;
+    }
 
     // ── Room code auto-uppercase ──
     document.getElementById('roomCodeInput')?.addEventListener('input', (e) => {
@@ -412,6 +448,7 @@ const App = {
         this.showCountdown(() => {
           this.showScreen('gameScreen');
           document.getElementById('emojiBar')?.classList.remove('hidden');
+          document.getElementById('chatToggle')?.classList.remove('hidden');
         });
       }
     });
@@ -473,6 +510,55 @@ const App = {
     // ── اختراعات مجنونة (Inventions) ──
     s.on('inventionsProblem', data => this.handleInventionsProblem(data));
     s.on('inventionsVoting', data => this.handleInventionsVoting(data));
+
+    // ── تبي ولا ما تبي (Would You Rather) ──
+    s.on('wouldYouRatherQuestion', data => this.handleWouldYouRatherQuestion(data));
+    s.on('wouldYouRatherResults', data => this.handleWouldYouRatherResults(data));
+
+    // ── من قال؟ (Who Said It) ──
+    s.on('whoSaidItWrite', data => { this._wsiGuesses = {}; this.handleWhoSaidItWrite(data); });
+    s.on('whoSaidItGuess', data => { this._wsiGuesses = {}; this.handleWhoSaidItGuess(data); });
+
+    // ── أسرع واحد (Speed Round) ──
+    s.on('speedRoundQuestion', data => this.handleSpeedRoundQuestion(data));
+    s.on('speedRoundResult', data => this.handleSpeedRoundResult(data));
+
+    // ── حقيقتين وكذبة (Two Truths) ──
+    s.on('twoTruthsWrite', data => this.handleTwoTruthsWrite(data));
+    s.on('twoTruthsGuess', data => this.handleTwoTruthsGuess(data));
+
+    // ── سبليت ذا روم (Split the Room) ──
+    s.on('splitTheRoomWrite', data => this.handleSplitTheRoomWrite(data));
+    s.on('splitTheRoomVote', data => this.handleSplitTheRoomVote(data));
+
+    // ── فك الرموز (Emoji Decode) ──
+    s.on('emojiDecodeQuestion', data => this.handleEmojiDecodeQuestion(data));
+
+    // ── المحكمة (Debate Me) ──
+    s.on('debateMeWrite', data => this.handleDebateMeWrite(data));
+    s.on('debateMeVoting', data => this.handleDebateMeVoting(data));
+
+    // ── الأسماء (Acrophobia) ──
+    s.on('acrophobiaWrite', data => this.handleAcrophobiaWrite(data));
+    s.on('acrophobiaVoting', data => this.handleAcrophobiaVoting(data));
+
+    // ── Host Controls ──
+    s.on('gamePaused', data => {
+      const overlay = document.getElementById('pauseOverlay');
+      if (overlay) overlay.classList.toggle('hidden', !data.paused);
+      const btn = document.getElementById('pauseBtn');
+      if (btn) btn.textContent = data.paused ? '▶️ استئناف' : '⏸️ إيقاف مؤقت';
+    });
+    s.on('kicked', data => {
+      this.showToast(data.message, 'error');
+      setTimeout(() => location.reload(), 2000);
+    });
+
+    // ── Chat ──
+    s.on('chatMessage', data => this.addChatMessage(data));
+
+    // ── Achievements ──
+    s.on('achievement', data => this.showAchievement(data));
 
     // ── النتائج ──
     s.on('roundResults', data => {
@@ -1983,6 +2069,575 @@ const App = {
   },
 
   // ═══════════════════════════════════════════════════════════════
+  // 🤔 تبي ولا ما تبي (Would You Rather)
+  // ═══════════════════════════════════════════════════════════════
+
+  handleWouldYouRatherQuestion(d) {
+    this._submitting = false;
+    this.showScreen('gameScreen');
+    this.setTheme('wouldyourather');
+    this.showRoundInfo(d.round, d.maxRounds, '🤔 تبي ولا ما تبي');
+    this.startTimer(d.timeLimit);
+    this.setHint('اختر خيار واحد!');
+    if (d.commentary) this.showCommentary(d.commentary);
+
+    document.getElementById('gameContent').innerHTML =
+      '<div class="wyr-container">' +
+        '<div class="wyr-title">تبي ولا ما تبي؟ 🤔</div>' +
+        '<div class="wyr-options">' +
+          '<button class="wyr-option wyr-option--a" data-action="submitWyrChoice" data-choice="a">' +
+            '<div class="wyr-option__text">' + escapeHtml(d.optionA) + '</div>' +
+          '</button>' +
+          '<div class="wyr-vs">أو</div>' +
+          '<button class="wyr-option wyr-option--b" data-action="submitWyrChoice" data-choice="b">' +
+            '<div class="wyr-option__text">' + escapeHtml(d.optionB) + '</div>' +
+          '</button>' +
+        '</div>' +
+        '<p class="text-muted mt-4" id="waitingCount"></p>' +
+      '</div>';
+  },
+
+  submitWyrChoice(choice, el) {
+    if (this._submitting) return;
+    this._submitting = true;
+    AudioEngine.vote();
+    el.classList.add('wyr-option--selected');
+    document.querySelectorAll('.wyr-option:not(.wyr-option--selected)').forEach(b => b.style.opacity = '0.3');
+    this.socket.emit('submitAnswer', { code: this.currentRoom, answer: choice });
+  },
+
+  handleWouldYouRatherResults(d) {
+    clearInterval(this.gameTimer);
+    AudioEngine.reveal();
+    const totalVotes = (d.countA || 0) + (d.countB || 0);
+    const pctA = totalVotes > 0 ? Math.round((d.countA / totalVotes) * 100) : 50;
+    const pctB = 100 - pctA;
+
+    document.getElementById('gameContent').innerHTML =
+      '<div class="wyr-container">' +
+        '<div class="wyr-title">النتائج! 📊</div>' +
+        '<div class="wyr-results">' +
+          '<div class="wyr-result wyr-result--a">' +
+            '<div class="wyr-result__text">' + escapeHtml(d.optionA) + '</div>' +
+            '<div class="wyr-result__pct" id="wyrPctA">0%</div>' +
+            '<div class="wyr-result__count">' + d.countA + ' لاعبين</div>' +
+          '</div>' +
+          '<div class="wyr-result wyr-result--b">' +
+            '<div class="wyr-result__text">' + escapeHtml(d.optionB) + '</div>' +
+            '<div class="wyr-result__pct" id="wyrPctB">0%</div>' +
+            '<div class="wyr-result__count">' + d.countB + ' لاعبين</div>' +
+          '</div>' +
+        '</div>' +
+        (d.isSplit ? '<div class="wyr-split-badge">🎯 انقسام مثالي! الكل يكسب!</div>' : '') +
+      '</div>';
+
+    this._animatePercentage('wyrPctA', pctA, 1200);
+    this._animatePercentage('wyrPctB', pctB, 1200);
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 💬 من قال؟ (Who Said It)
+  // ═══════════════════════════════════════════════════════════════
+
+  handleWhoSaidItWrite(d) {
+    this._submitting = false;
+    this.showScreen('gameScreen');
+    this.setTheme('whosaidit');
+    this.showRoundInfo(d.round, d.maxRounds, '💬 من قال؟');
+    this.startTimer(d.timeLimit);
+    this.setHint('اكتب إجابة صادقة!');
+
+    document.getElementById('gameContent').innerHTML =
+      '<div class="panel" style="max-width:600px">' +
+        '<div class="badge badge--info mb-4">💬 اكتب شي عن نفسك</div>' +
+        '<p class="text-2xl font-bold mb-6">' + escapeHtml(d.prompt) + '</p>' +
+        '<textarea class="input input--game input--textarea" id="answerInput" placeholder="اكتب إجابتك..." maxlength="150" rows="3"></textarea>' +
+        '<button class="btn btn--primary btn--lg btn--full mt-3" data-action="submitAnswer">إرسال 💬</button>' +
+      '</div>';
+    document.getElementById('answerInput')?.focus();
+  },
+
+  handleWhoSaidItGuess(d) {
+    this._submitting = false;
+    this.startTimer(d.timeLimit);
+    this.setHint('خمّن مين كتب كل إجابة!');
+
+    let html = '<div class="panel" style="max-width:700px;width:100%">' +
+      '<div class="badge badge--info mb-4">🕵️ من قال هالكلام؟</div>';
+
+    d.statements.forEach((s, idx) => {
+      html += '<div class="wsi-statement" id="wsiStatement' + idx + '">' +
+        '<p class="wsi-statement__text">"' + escapeHtml(s.text) + '"</p>' +
+        '<div class="wsi-statement__options">';
+      d.players.forEach(p => {
+        html += '<button class="wsi-player-btn" data-action="guessWhoSaidIt" data-stmt="' + idx + '" data-player="' + escapeHtml(p.id) + '">' +
+          escapeHtml(p.name) + '</button>';
+      });
+      html += '</div></div>';
+    });
+
+    html += '<p class="text-muted text-center mt-4" id="waitingCount"></p></div>';
+    document.getElementById('gameContent').innerHTML = html;
+  },
+
+  _wsiGuesses: {},
+  guessWhoSaidIt(playerId, el) {
+    const stmtIdx = el.closest('.wsi-statement')?.id?.replace('wsiStatement', '');
+    if (stmtIdx === undefined) return;
+    const container = document.getElementById('wsiStatement' + stmtIdx);
+    if (container) {
+      container.querySelectorAll('.wsi-player-btn').forEach(b => b.classList.remove('wsi-player-btn--selected'));
+      el.classList.add('wsi-player-btn--selected');
+    }
+    this._wsiGuesses[stmtIdx] = playerId;
+    AudioEngine.vote();
+
+    // Auto-submit when all statements have a guess
+    const stmtCount = document.querySelectorAll('.wsi-statement').length;
+    if (Object.keys(this._wsiGuesses).length >= stmtCount && !this._submitting) {
+      this._submitting = true;
+      this.socket.emit('submitAnswer', { code: this.currentRoom, answer: JSON.stringify(this._wsiGuesses) });
+      this.showWaiting('ننتظر الباقين...');
+    }
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // ⚡ أسرع واحد (Speed Round)
+  // ═══════════════════════════════════════════════════════════════
+
+  handleSpeedRoundQuestion(d) {
+    this._submitting = false;
+    this.showScreen('gameScreen');
+    this.setTheme('speedround');
+    this.showRoundInfo(d.round, d.maxRounds, '⚡ أسرع واحد');
+    this.startTimer(d.timeLimit);
+    this.setHint('أجب بأسرع ما يمكن!');
+    AudioEngine.reveal();
+
+    document.getElementById('gameContent').innerHTML =
+      '<div class="speed-container">' +
+        '<div class="speed-badge">⚡ سؤال ' + d.round + '</div>' +
+        '<p class="speed-question">' + escapeHtml(d.question) + '</p>' +
+        (d.category ? '<span class="game-tag mb-4">' + escapeHtml(d.category) + '</span>' : '') +
+        '<div class="speed-input-wrap">' +
+          '<input type="text" class="input input--game" id="answerInput" placeholder="اكتب الجواب..." maxlength="50" autocomplete="off">' +
+          '<button class="btn btn--primary btn--lg" data-action="submitAnswer">⚡</button>' +
+        '</div>' +
+        '<p class="text-muted mt-2" id="waitingCount"></p>' +
+      '</div>';
+
+    const input = document.getElementById('answerInput');
+    if (input) {
+      input.focus();
+      input.addEventListener('keypress', e => {
+        if (e.key === 'Enter') this.submitAnswer();
+      });
+    }
+  },
+
+  handleSpeedRoundResult(d) {
+    clearInterval(this.gameTimer);
+    let html = '<div class="speed-container">' +
+      '<div class="speed-badge">⚡ الجواب</div>' +
+      '<p class="speed-answer">' + escapeHtml(d.correctAnswer) + '</p>';
+
+    if (d.rankings && d.rankings.length > 0) {
+      html += '<div class="speed-rankings">';
+      d.rankings.forEach((r, i) => {
+        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+        html += '<div class="speed-rank">' +
+          '<span class="speed-rank__pos">' + medal + '</span>' +
+          '<span class="speed-rank__name">' + escapeHtml(r.name) + '</span>' +
+          '<span class="speed-rank__time">' + (r.time ? (r.time / 1000).toFixed(1) + 'ث' : '⏱️') + '</span>' +
+          '<span class="speed-rank__points" style="color:#D4AF37">+' + r.points + '</span>' +
+        '</div>';
+      });
+      html += '</div>';
+    }
+
+    if (d.noCorrect) {
+      html += '<p class="text-muted mt-4">ما أحد جاوب صح! 😅</p>';
+    }
+
+    html += '</div>';
+    document.getElementById('gameContent').innerHTML = html;
+    if (d.rankings && d.rankings.length > 0) AudioEngine.applause();
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // ✌️ حقيقتين وكذبة (Two Truths One Lie)
+  // ═══════════════════════════════════════════════════════════════
+
+  handleTwoTruthsWrite(d) {
+    this._submitting = false;
+    this.showScreen('gameScreen');
+    this.setTheme('twotruths');
+    this.showRoundInfo(d.round, d.maxRounds, '✌️ حقيقتين وكذبة');
+    this.startTimer(d.timeLimit);
+
+    if (d.isFeatured) {
+      this.setHint('اكتب حقيقتين وكذبة وحدة!');
+      document.getElementById('gameContent').innerHTML =
+        '<div class="panel" style="max-width:600px">' +
+          '<div class="badge badge--warning mb-4">✌️ دورك!</div>' +
+          (d.promptHint ? '<p class="text-muted mb-4">💡 ' + escapeHtml(d.promptHint) + '</p>' : '') +
+          '<div class="mb-3"><label class="text-sm text-muted">✅ حقيقة 1</label>' +
+          '<input type="text" class="input" id="truth1" placeholder="حقيقة عنك..." maxlength="100"></div>' +
+          '<div class="mb-3"><label class="text-sm text-muted">✅ حقيقة 2</label>' +
+          '<input type="text" class="input" id="truth2" placeholder="حقيقة ثانية عنك..." maxlength="100"></div>' +
+          '<div class="mb-3"><label class="text-sm text-muted">❌ كذبة</label>' +
+          '<input type="text" class="input" id="lie1" placeholder="كذبة مقنعة..." maxlength="100"></div>' +
+          '<button class="btn btn--primary btn--full mt-4" data-action="submitTwoTruths">إرسال ✌️</button>' +
+        '</div>';
+      document.getElementById('truth1')?.focus();
+    } else {
+      this.setHint('انتظر ' + escapeHtml(d.featuredName) + '...');
+      this.showWaiting(escapeHtml(d.featuredName) + ' يكتب حقيقتين وكذبة...');
+    }
+  },
+
+  submitTwoTruths() {
+    if (this._submitting) return;
+    const t1 = document.getElementById('truth1')?.value?.trim();
+    const t2 = document.getElementById('truth2')?.value?.trim();
+    const lie = document.getElementById('lie1')?.value?.trim();
+    if (!t1 || !t2 || !lie) return this.showToast('اكتب كل الحقول!', 'error');
+    this._submitting = true;
+    AudioEngine.submit();
+    this.socket.emit('submitAnswer', { code: this.currentRoom, answer: JSON.stringify({ t1, t2, lie }) });
+    this.showWaiting('ننتظر الباقين يخمنون...');
+  },
+
+  handleTwoTruthsGuess(d) {
+    this._submitting = false;
+    this.startTimer(d.timeLimit);
+    this.setHint('أي واحدة الكذبة؟');
+
+    const stmts = d.statements.map((s, i) =>
+      '<button class="vote-option" data-action="guessTwoTruths" data-id="' + i + '">' +
+        '<div class="vote-option__text">' + escapeHtml(s) + '</div>' +
+      '</button>'
+    ).join('');
+
+    document.getElementById('gameContent').innerHTML =
+      '<div class="panel" style="max-width:600px">' +
+        '<div class="badge badge--warning mb-4">🤔 أي وحدة الكذبة؟</div>' +
+        '<p class="text-lg mb-4">' + escapeHtml(d.featuredName) + ' كتب:</p>' +
+        '<div class="flex flex-col gap-3">' + stmts + '</div>' +
+        '<p class="text-muted text-center mt-4" id="waitingCount"></p>' +
+      '</div>';
+  },
+
+  guessTwoTruths(id, el) {
+    if (this._submitting) return;
+    this._submitting = true;
+    document.querySelectorAll('.vote-option').forEach(c => c.classList.remove('vote-option--selected'));
+    el.classList.add('vote-option--selected');
+    AudioEngine.vote();
+    this.socket.emit('submitVote', { code: this.currentRoom, voteId: id });
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 🔀 سبليت ذا روم (Split the Room)
+  // ═══════════════════════════════════════════════════════════════
+
+  handleSplitTheRoomWrite(d) {
+    this._submitting = false;
+    this.showScreen('gameScreen');
+    this.setTheme('splittheroom');
+    this.showRoundInfo(d.round, d.maxRounds, '🔀 سبليت ذا روم');
+    this.startTimer(d.timeLimit);
+
+    if (d.isFeatured) {
+      this.setHint('اكمل السيناريو!');
+      document.getElementById('gameContent').innerHTML =
+        '<div class="panel" style="max-width:600px">' +
+          '<div class="badge badge--info mb-4">🔀 اكمل الفراغ!</div>' +
+          '<p class="text-xl mb-4">' + escapeHtml(d.scenario) + '</p>' +
+          '<input type="text" class="input" id="answerInput" placeholder="اكتب تكملة..." maxlength="80">' +
+          '<button class="btn btn--primary btn--full mt-4" data-action="submitAnswer">إرسال 🔀</button>' +
+        '</div>';
+      document.getElementById('answerInput')?.focus();
+    } else {
+      this.setHint('انتظر ' + escapeHtml(d.featuredName) + '...');
+      this.showWaiting(escapeHtml(d.featuredName) + ' يكمل السيناريو...');
+    }
+  },
+
+  handleSplitTheRoomVote(d) {
+    this._submitting = false;
+    this.startTimer(d.timeLimit);
+    this.setHint('نعم أو لا؟');
+
+    document.getElementById('gameContent').innerHTML =
+      '<div class="split-container">' +
+        '<div class="split-scenario">' + escapeHtml(d.completedScenario) + '</div>' +
+        '<p class="text-lg mb-4">— ' + escapeHtml(d.featuredName) + '</p>' +
+        '<div class="split-buttons">' +
+          '<button class="split-btn split-btn--yes" data-action="submitSplitVote" data-vote="yes">نعم ✅</button>' +
+          '<button class="split-btn split-btn--no" data-action="submitSplitVote" data-vote="no">لا ❌</button>' +
+        '</div>' +
+        '<p class="text-muted mt-4" id="waitingCount"></p>' +
+      '</div>';
+  },
+
+  submitSplitVote(vote, el) {
+    if (this._submitting) return;
+    this._submitting = true;
+    AudioEngine.vote();
+    el.classList.add('split-btn--selected');
+    document.querySelectorAll('.split-btn:not(.split-btn--selected)').forEach(b => b.style.opacity = '0.3');
+    this.socket.emit('submitAnswer', { code: this.currentRoom, answer: vote });
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 🎭 فك الرموز (Emoji Decode)
+  // ═══════════════════════════════════════════════════════════════
+
+  handleEmojiDecodeQuestion(d) {
+    this._submitting = false;
+    this.showScreen('gameScreen');
+    this.setTheme('emojidecode');
+    this.showRoundInfo(d.round, d.maxRounds, '🎭 فك الرموز');
+    this.startTimer(d.timeLimit);
+    this.setHint('خمّن من الإيموجي!');
+
+    document.getElementById('gameContent').innerHTML =
+      '<div class="emoji-decode-container">' +
+        '<div class="emoji-decode-category">' + escapeHtml(d.category) + '</div>' +
+        '<div class="emoji-decode-emojis">' + escapeHtml(d.emojis) + '</div>' +
+        '<div class="speed-input-wrap">' +
+          '<input type="text" class="input input--game" id="answerInput" placeholder="اكتب جوابك..." maxlength="50" autocomplete="off">' +
+          '<button class="btn btn--primary btn--lg" data-action="submitAnswer">🎭</button>' +
+        '</div>' +
+        '<p class="text-muted mt-2" id="waitingCount"></p>' +
+      '</div>';
+
+    const input = document.getElementById('answerInput');
+    if (input) {
+      input.focus();
+      input.addEventListener('keypress', e => {
+        if (e.key === 'Enter') this.submitAnswer();
+      });
+    }
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // ⚖️ المحكمة (Debate Me)
+  // ═══════════════════════════════════════════════════════════════
+
+  handleDebateMeWrite(d) {
+    this._submitting = false;
+    this.showScreen('gameScreen');
+    this.setTheme('debateme');
+    this.showRoundInfo(d.round, d.maxRounds, '⚖️ المحكمة');
+    this.startTimer(d.timeLimit);
+    this.setHint('اكتب أقوى حجة!');
+
+    document.getElementById('gameContent').innerHTML =
+      '<div class="panel" style="max-width:600px">' +
+        '<div class="badge badge--info mb-4">⚖️ الموضوع</div>' +
+        '<p class="text-2xl font-bold mb-4">' + escapeHtml(d.topic) + '</p>' +
+        '<div class="debate-side" style="background:' + (d.yourSide === 'side1' ? 'rgba(0,200,83,0.2)' : 'rgba(255,68,68,0.2)') + ';padding:12px;border-radius:12px;margin-bottom:16px">' +
+          '<p class="text-lg font-bold">أنت في فريق: ' + escapeHtml(d.yourSideLabel) + '</p>' +
+        '</div>' +
+        '<textarea class="input input--game input--textarea" id="answerInput" placeholder="اكتب حجتك هنا..." maxlength="200" rows="3"></textarea>' +
+        '<button class="btn btn--primary btn--full mt-3" data-action="submitAnswer">إرسال الحجة ⚖️</button>' +
+      '</div>';
+    document.getElementById('answerInput')?.focus();
+  },
+
+  handleDebateMeVoting(d) {
+    this._submitting = false;
+    this.startTimer(d.timeLimit);
+    this.setHint('صوّت لأقوى حجة!');
+
+    let html = '<div class="panel" style="max-width:700px;width:100%">' +
+      '<div class="badge badge--info mb-4">⚖️ ' + escapeHtml(d.topic) + '</div>' +
+      '<div class="debate-grid">';
+
+    d.arguments.forEach(arg => {
+      html += '<button class="vote-option" data-action="voteAnswer" data-id="' + escapeHtml(arg.id) + '">' +
+        '<div class="vote-option__side" style="color:' + (arg.side === 'side1' ? '#00C853' : '#ff4444') + '">' + escapeHtml(arg.sideLabel) + '</div>' +
+        '<div class="vote-option__text">' + escapeHtml(arg.text) + '</div>' +
+      '</button>';
+    });
+
+    html += '</div><p class="text-muted text-center mt-4" id="waitingCount"></p></div>';
+    document.getElementById('gameContent').innerHTML = html;
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 🔤 الأسماء (Acrophobia)
+  // ═══════════════════════════════════════════════════════════════
+
+  handleAcrophobiaWrite(d) {
+    this._submitting = false;
+    this.showScreen('gameScreen');
+    this.setTheme('acrophobia');
+    this.showRoundInfo(d.round, d.maxRounds, '🔤 الأسماء');
+    this.startTimer(d.timeLimit);
+    this.setHint('اصنع جملة من الأحرف!');
+
+    document.getElementById('gameContent').innerHTML =
+      '<div class="panel" style="max-width:600px">' +
+        '<div class="badge badge--info mb-4">🔤 اصنع اختصار!</div>' +
+        '<div class="acro-letters">' + escapeHtml(d.letters) + '</div>' +
+        '<p class="text-muted mb-4">اكتب جملة كل كلمة تبدأ بحرف من الأحرف أعلاه</p>' +
+        '<input type="text" class="input input--game" id="answerInput" placeholder="مثال: كبسة ممتازة عجيبة..." maxlength="100">' +
+        '<button class="btn btn--primary btn--full mt-3" data-action="submitAnswer">إرسال 🔤</button>' +
+      '</div>';
+    document.getElementById('answerInput')?.focus();
+  },
+
+  handleAcrophobiaVoting(d) {
+    this._submitting = false;
+    this.startTimer(d.timeLimit);
+    this.setHint('صوّت لأطرف اختصار!');
+
+    let html = '<div class="panel" style="max-width:600px">' +
+      '<div class="acro-letters mb-4">' + escapeHtml(d.letters) + '</div>';
+
+    d.answers.forEach(a => {
+      html += '<button class="vote-option" data-action="voteAnswer" data-id="' + escapeHtml(a.id) + '">' +
+        '<div class="vote-option__text">' + escapeHtml(a.text) + '</div>' +
+      '</button>';
+    });
+
+    html += '<p class="text-muted text-center mt-4" id="waitingCount"></p></div>';
+    document.getElementById('gameContent').innerHTML = html;
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 🎮 Host Controls (إيقاف، تخطي، طرد)
+  // ═══════════════════════════════════════════════════════════════
+
+  pauseGame() {
+    if (!this.isHost || !this.currentRoom) return;
+    this.socket.emit('pauseGame', this.currentRoom);
+  },
+
+  skipQuestion() {
+    if (!this.isHost || !this.currentRoom) return;
+    this.socket.emit('skipQuestion', this.currentRoom);
+    this.showToast('تم تخطي السؤال', 'success');
+  },
+
+  showKickMenu() {
+    if (!this.isHost) return;
+    const modal = document.getElementById('kickModal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    const list = document.getElementById('kickPlayersList');
+    if (!list) return;
+    const grid = document.getElementById('playersGrid');
+    if (!grid) return;
+
+    let html = '';
+    grid.querySelectorAll('[data-player-id]').forEach(el => {
+      const pid = el.dataset.playerId;
+      const name = el.querySelector('.player-avatar__name')?.textContent || '';
+      if (pid !== this.myId) {
+        html += '<button class="btn btn--danger btn--full" data-action="kickPlayer" data-id="' + escapeHtml(pid) + '">🚫 طرد ' + escapeHtml(name) + '</button>';
+      }
+    });
+    list.innerHTML = html || '<p class="text-muted">ما فيه لاعبين ثانيين</p>';
+  },
+
+  closeKickMenu() {
+    document.getElementById('kickModal')?.classList.add('hidden');
+  },
+
+  kickPlayer(id) {
+    if (!this.isHost || !this.currentRoom) return;
+    this.socket.emit('kickPlayer', { code: this.currentRoom, playerId: id });
+    this.closeKickMenu();
+    this.showToast('تم طرد اللاعب', 'success');
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 💬 Chat System
+  // ═══════════════════════════════════════════════════════════════
+
+  toggleChat() {
+    const container = document.getElementById('chatContainer');
+    if (container) container.classList.toggle('hidden');
+  },
+
+  sendChat() {
+    const input = document.getElementById('chatInput');
+    if (!input || !input.value.trim() || !this.currentRoom) return;
+    this.socket.emit('chatMessage', { code: this.currentRoom, message: input.value.trim() });
+    input.value = '';
+  },
+
+  addChatMessage(data) {
+    const container = document.getElementById('chatMessages');
+    if (!container) return;
+    const msg = document.createElement('div');
+    msg.className = 'chat-msg';
+    msg.innerHTML = '<span class="chat-msg__name" style="color:' + escapeHtml(data.color || '#00E676') + '">' +
+      escapeHtml(data.name) + ':</span> ' + escapeHtml(data.message);
+    container.appendChild(msg);
+    container.scrollTop = container.scrollHeight;
+    // Keep only last 50 messages
+    while (container.children.length > 50) container.removeChild(container.firstChild);
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 🌙 Dark Mode
+  // ═══════════════════════════════════════════════════════════════
+
+  toggleDarkMode(checked) {
+    document.body.setAttribute('data-dark-mode', checked ? 'true' : 'false');
+    localStorage.setItem('darkMode', checked);
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 🏆 Achievement Display
+  // ═══════════════════════════════════════════════════════════════
+
+  showAchievement(data) {
+    const container = document.getElementById('achievementContainer');
+    if (!container) return;
+    const el = document.createElement('div');
+    el.className = 'achievement-toast';
+    el.innerHTML = '<span class="achievement-toast__icon">' + (data.icon || '🏆') + '</span>' +
+      '<div class="achievement-toast__info">' +
+        '<div class="achievement-toast__title">' + escapeHtml(data.title) + '</div>' +
+        '<div class="achievement-toast__detail">' + escapeHtml(data.detail || '') + '</div>' +
+      '</div>';
+    container.appendChild(el);
+    AudioEngine.achievement();
+    setTimeout(() => {
+      el.style.animation = 'slideOut 0.3s ease-in forwards';
+      setTimeout(() => el.remove(), 300);
+    }, 4000);
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // Helper methods for new games
+  // ═══════════════════════════════════════════════════════════════
+
+  showRoundInfo(round, max, title) {
+    document.getElementById('gameRound').textContent = 'الجولة ' + round + ' من ' + max;
+    document.getElementById('gameTitle').textContent = title;
+  },
+
+  setHint(text) {
+    document.getElementById('gameHint').textContent = '💡 ' + text;
+  },
+
+  setTheme(game) {
+    const info = GAMES[game];
+    if (info) {
+      document.body.setAttribute('data-theme', game);
+      const patternEl = document.querySelector('.bg__pattern');
+      if (patternEl) patternEl.className = 'bg__pattern ' + info.pattern;
+    }
+  },
+
+  // ═══════════════════════════════════════════════════════════════
   // النتائج والإرسال
   // ═══════════════════════════════════════════════════════════════
 
@@ -2479,6 +3134,42 @@ const App = {
               '</div>';
           });
           resultHtml += '</div>';
+        }
+        break;
+
+      case 'wouldyourather':
+      case 'whosaidit':
+      case 'speedround':
+      case 'twotruths':
+      case 'splittheroom':
+      case 'emojidecode':
+      case 'debateme':
+      case 'acrophobia':
+        // Generic results for new games
+        if (d.message) {
+          resultHtml = '<p class="text-xl mb-4">' + escapeHtml(d.message) + '</p>';
+        }
+        if (d.results) {
+          resultHtml += '<div class="flex flex-col gap-3 mb-4" style="max-width:450px;width:100%">';
+          d.results.forEach((r, i) => {
+            const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
+            resultHtml +=
+              '<div class="flex justify-between items-center p-3" style="background:rgba(255,255,255,0.05);border-radius:12px;border-right:4px solid ' + (i === 0 ? '#D4AF37' : 'transparent') + '">' +
+                '<div>' +
+                  '<span class="font-bold">' + medal + ' ' + escapeHtml(r.playerName || r.name || '') + '</span>' +
+                  (r.text ? '<p class="text-sm text-muted mt-1">"' + escapeHtml(r.text) + '"</p>' : '') +
+                  (r.detail ? '<p class="text-sm text-muted mt-1">' + escapeHtml(r.detail) + '</p>' : '') +
+                '</div>' +
+                '<div class="text-left">' +
+                  '<div style="color:#D4AF37;font-weight:bold">+' + (r.points || 0) + '</div>' +
+                  (r.votes !== undefined ? '<div class="text-sm text-muted">' + r.votes + ' صوت</div>' : '') +
+                '</div>' +
+              '</div>';
+          });
+          resultHtml += '</div>';
+        }
+        if (d.correctAnswer) {
+          resultHtml = '<div class="text-2xl text-accent mb-4">✅ ' + escapeHtml(d.correctAnswer) + '</div>' + resultHtml;
         }
         break;
 

@@ -925,6 +925,74 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
+ * NEW GAMES THEMES V7
+ * ═══════════════════════════════════════════════════════════════ */
+
+[data-theme="wouldyourather"] {
+  --theme-bg-primary: #1a0e00; --theme-bg-secondary: #3d1f00;
+  --theme-accent: #FFC107; --theme-text-primary: #fff; --theme-text-secondary: #ffe082;
+  --theme-glow: rgba(255,193,7,0.4); --theme-card-bg: rgba(255,193,7,0.08);
+  --theme-card-border: rgba(255,193,7,0.3);
+}
+[data-theme="wouldyourather"] .bg { background: linear-gradient(135deg, #1a0e00 0%, #3d1f00 50%, #1a0e00 100%); }
+
+[data-theme="whosaidit"] {
+  --theme-bg-primary: #0a1628; --theme-bg-secondary: #152238;
+  --theme-accent: #42A5F5; --theme-text-primary: #fff; --theme-text-secondary: #90caf9;
+  --theme-glow: rgba(66,165,245,0.4); --theme-card-bg: rgba(66,165,245,0.08);
+  --theme-card-border: rgba(66,165,245,0.3);
+}
+[data-theme="whosaidit"] .bg { background: linear-gradient(135deg, #0a1628 0%, #152238 50%, #0a1628 100%); }
+
+[data-theme="speedround"] {
+  --theme-bg-primary: #1a0500; --theme-bg-secondary: #3d0c00;
+  --theme-accent: #FF3D00; --theme-text-primary: #fff; --theme-text-secondary: #ff8a65;
+  --theme-glow: rgba(255,61,0,0.4); --theme-card-bg: rgba(255,61,0,0.08);
+  --theme-card-border: rgba(255,61,0,0.3);
+}
+[data-theme="speedround"] .bg { background: linear-gradient(135deg, #1a0500 0%, #3d0c00 50%, #1a0500 100%); }
+
+[data-theme="twotruths"] {
+  --theme-bg-primary: #0a1a0e; --theme-bg-secondary: #1a3d1f;
+  --theme-accent: #66BB6A; --theme-text-primary: #fff; --theme-text-secondary: #a5d6a7;
+  --theme-glow: rgba(102,187,106,0.4); --theme-card-bg: rgba(102,187,106,0.08);
+  --theme-card-border: rgba(102,187,106,0.3);
+}
+[data-theme="twotruths"] .bg { background: linear-gradient(135deg, #0a1a0e 0%, #1a3d1f 50%, #0a1a0e 100%); }
+
+[data-theme="splittheroom"] {
+  --theme-bg-primary: #0e0a1a; --theme-bg-secondary: #1f153d;
+  --theme-accent: #7C4DFF; --theme-text-primary: #fff; --theme-text-secondary: #b388ff;
+  --theme-glow: rgba(124,77,255,0.4); --theme-card-bg: rgba(124,77,255,0.08);
+  --theme-card-border: rgba(124,77,255,0.3);
+}
+[data-theme="splittheroom"] .bg { background: linear-gradient(135deg, #0e0a1a 0%, #1f153d 50%, #0e0a1a 100%); }
+
+[data-theme="emojidecode"] {
+  --theme-bg-primary: #1a0a15; --theme-bg-secondary: #3d1530;
+  --theme-accent: #F06292; --theme-text-primary: #fff; --theme-text-secondary: #f48fb1;
+  --theme-glow: rgba(240,98,146,0.4); --theme-card-bg: rgba(240,98,146,0.08);
+  --theme-card-border: rgba(240,98,146,0.3);
+}
+[data-theme="emojidecode"] .bg { background: linear-gradient(135deg, #1a0a15 0%, #3d1530 50%, #1a0a15 100%); }
+
+[data-theme="debateme"] {
+  --theme-bg-primary: #0f1114; --theme-bg-secondary: #1c2024;
+  --theme-accent: #78909C; --theme-text-primary: #fff; --theme-text-secondary: #b0bec5;
+  --theme-glow: rgba(120,144,156,0.4); --theme-card-bg: rgba(120,144,156,0.08);
+  --theme-card-border: rgba(120,144,156,0.3);
+}
+[data-theme="debateme"] .bg { background: linear-gradient(135deg, #0f1114 0%, #1c2024 50%, #0f1114 100%); }
+
+[data-theme="acrophobia"] {
+  --theme-bg-primary: #0a1a17; --theme-bg-secondary: #153d33;
+  --theme-accent: #26A69A; --theme-text-primary: #fff; --theme-text-secondary: #80cbc4;
+  --theme-glow: rgba(38,166,154,0.4); --theme-card-bg: rgba(38,166,154,0.08);
+  --theme-card-border: rgba(38,166,154,0.3);
+}
+[data-theme="acrophobia"] .bg { background: linear-gradient(135deg, #0a1a17 0%, #153d33 50%, #0a1a17 100%); }
+
+/* ═══════════════════════════════════════════════════════════════
  * RESULTS / VICTORY THEME - شاشة الفوز 🏆
  * ═══════════════════════════════════════════════════════════════ */
 

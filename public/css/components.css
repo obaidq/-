@@ -719,6 +719,14 @@
 .game-card__banner--tshirtwars { background: linear-gradient(135deg, #6C3483, #FF6B35); }
 .game-card__banner--lovemonster { background: linear-gradient(135deg, #C2185B, #FF4081); }
 .game-card__banner--inventions { background: linear-gradient(135deg, #0277BD, #00E5FF); }
+.game-card__banner--wouldyourather { background: linear-gradient(135deg, #FF6F00, #FFC107); }
+.game-card__banner--whosaidit { background: linear-gradient(135deg, #1565C0, #42A5F5); }
+.game-card__banner--speedround { background: linear-gradient(135deg, #E65100, #FF3D00); }
+.game-card__banner--twotruths { background: linear-gradient(135deg, #2E7D32, #66BB6A); }
+.game-card__banner--splittheroom { background: linear-gradient(135deg, #4527A0, #7C4DFF); }
+.game-card__banner--emojidecode { background: linear-gradient(135deg, #AD1457, #F06292); }
+.game-card__banner--debateme { background: linear-gradient(135deg, #37474F, #78909C); }
+.game-card__banner--acrophobia { background: linear-gradient(135deg, #00695C, #26A69A); }
 
 /* ─────────────────────────────────────────────────────────────
  * SETTINGS BUTTON SIZE
