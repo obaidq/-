@@ -24,14 +24,14 @@
   --color-secondary-400: #00E676;
   --color-secondary-300: #69F0AE;
 
-  /* Accent Colors - ألوان التمييز */
-  --color-accent-yellow: #FFD93D;
-  --color-accent-orange: #FF8C42;
-  --color-accent-pink: #ff3f7f;
-  --color-accent-red: #ff2d55;
-  --color-accent-purple: #9d4edd;
-  --color-accent-green: #00e676;
-  --color-accent-cyan: #00d4ff;
+  /* Accent Colors - ألوان سعودية */
+  --color-accent-yellow: #D4AF37;
+  --color-accent-orange: #B8860B;
+  --color-accent-pink: #8B2252;
+  --color-accent-red: #8B0000;
+  --color-accent-purple: #5C4033;
+  --color-accent-green: #006C35;
+  --color-accent-cyan: #00BFA5;
   
   /* Neutral - الرمادي */
   --color-neutral-white: #ffffff;

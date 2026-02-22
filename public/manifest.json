@@ -1,0 +1,20 @@
+{
+  "name": "أبو عابد بوكس",
+  "short_name": "أبو عابد",
+  "description": "ألعاب جماعية سعودية مثل جاكبوكس! العب مع ربعك",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#001a0e",
+  "theme_color": "#001a0e",
+  "orientation": "any",
+  "lang": "ar",
+  "dir": "rtl",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧔🏻</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

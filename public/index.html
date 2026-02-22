@@ -7,6 +7,7 @@
   <meta name="description" content="أبو عابد بوكس - ألعاب جماعية سعودية مثل جاكبوكس! العب مع ربعك">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="/manifest.json">
   <title>أبو عابد بوكس 🎮</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧔🏻</text></svg>">
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&family=Bangers&family=Black+Ops+One&display=swap" rel="stylesheet">
@@ -104,7 +105,7 @@
       <div class="boot-bar"><div class="boot-bar__fill"></div></div>
     </div>
     <div class="boot-tip" id="bootTip">💡 الكذب في اللعب... فن! 🎭</div>
-    <div class="boot-version">V6.0 • 2026</div>
+    <div class="boot-version">V7.0 • 2026</div>
   </div>
 
   <!-- ═══════════════════════════════════════════════════════════
@@ -120,9 +121,9 @@
       <p class="tagline">🇸🇦 ألعاب جماعية سعودية • العب مع ربعك!</p>
     </div>
     <div class="menu-actions">
-      <button class="btn btn--primary btn--lg btn--full" onclick="App.showScreen('createScreen')">🏠 أنشئ غرفة</button>
-      <button class="btn btn--secondary btn--lg btn--full" onclick="App.showScreen('joinScreen')">🚪 انضم لغرفة</button>
-      <button class="btn btn--ghost btn--full" onclick="App.showScreen('howToPlayScreen')">❓ كيف ألعب؟</button>
+      <button class="btn btn--primary btn--lg btn--full" data-action="showScreen" data-screen="createScreen">🏠 أنشئ غرفة</button>
+      <button class="btn btn--secondary btn--lg btn--full" data-action="showScreen" data-screen="joinScreen">🚪 انضم لغرفة</button>
+      <button class="btn btn--ghost btn--full" data-action="showScreen" data-screen="howToPlayScreen">❓ كيف ألعب؟</button>
     </div>
     <div class="saudi-footer">
       <span>🇸🇦</span>
@@ -146,16 +147,16 @@
       </div>
       <div class="mb-4">
         <label class="text-sm text-muted mb-1 block">شخصيتك</label>
-        <button type="button" class="avatar-select-btn" id="hostAvatarBtn" onclick="App.openAvatarPicker('host')">
-          <div class="avatar-select-btn__preview" id="hostAvatarPreview"><span style="font-size:28px">🎭</span></div>
+        <button type="button" class="avatar-select-btn" id="hostAvatarBtn" data-action="openAvatarPicker" data-target="host">
+          <div class="avatar-select-btn__preview" id="hostAvatarPreview"><span class="avatar-emoji">🎭</span></div>
           <div class="avatar-select-btn__text">
             <span class="avatar-select-btn__label">اضغط لاختيار شخصية</span>
             <span class="avatar-select-btn__name" id="hostAvatarName">اختر شخصيتك!</span>
           </div>
         </button>
       </div>
-      <button class="btn btn--primary btn--lg btn--full mb-3" onclick="App.createRoom()">يلا نبدأ! 🎉</button>
-      <button class="btn btn--ghost btn--full" onclick="App.showScreen('menuScreen')">← رجوع</button>
+      <button class="btn btn--primary btn--lg btn--full mb-3" data-action="createRoom">يلا نبدأ! 🎉</button>
+      <button class="btn btn--ghost btn--full" data-action="showScreen" data-screen="menuScreen">← رجوع</button>
     </div>
   </div>
 
@@ -170,7 +171,7 @@
       </div>
       <div class="mb-4">
         <label class="text-sm text-muted mb-1 block">كود الغرفة</label>
-        <input type="text" id="roomCodeInput" class="input input--code" placeholder="ABCD" maxlength="4" dir="ltr" autocomplete="off" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
+        <input type="text" id="roomCodeInput" class="input input--code" placeholder="ABCD" maxlength="4" dir="ltr" autocomplete="off" data-auto-uppercase>
       </div>
       <div class="mb-4">
         <label class="text-sm text-muted mb-1 block">اسمك</label>
@@ -178,17 +179,17 @@
       </div>
       <div class="mb-4">
         <label class="text-sm text-muted mb-1 block">شخصيتك</label>
-        <button type="button" class="avatar-select-btn" id="joinAvatarBtn" onclick="App.openAvatarPicker('join')">
-          <div class="avatar-select-btn__preview" id="joinAvatarPreview"><span style="font-size:28px">🎭</span></div>
+        <button type="button" class="avatar-select-btn" id="joinAvatarBtn" data-action="openAvatarPicker" data-target="join">
+          <div class="avatar-select-btn__preview" id="joinAvatarPreview"><span class="avatar-emoji">🎭</span></div>
           <div class="avatar-select-btn__text">
             <span class="avatar-select-btn__label">اضغط لاختيار شخصية</span>
             <span class="avatar-select-btn__name" id="joinAvatarName">اختر شخصيتك!</span>
           </div>
         </button>
       </div>
-      <button class="btn btn--primary btn--lg btn--full mb-3" onclick="App.joinRoom()">انضم! 🎮</button>
-      <button class="btn btn--secondary btn--full mb-3" onclick="App.joinAsAudience()">👀 انضم كمتفرج</button>
-      <button class="btn btn--ghost btn--full" onclick="App.showScreen('menuScreen')">← رجوع</button>
+      <button class="btn btn--primary btn--lg btn--full mb-3" data-action="joinRoom">انضم! 🎮</button>
+      <button class="btn btn--secondary btn--full mb-3" data-action="joinAsAudience">👀 انضم كمتفرج</button>
+      <button class="btn btn--ghost btn--full" data-action="showScreen" data-screen="menuScreen">← رجوع</button>
     </div>
   </div>
 
@@ -204,13 +205,13 @@
       <div class="how-steps">
         <div class="how-step"><span class="how-step__num">1</span><span class="how-step__text">أنشئ غرفة أو انضم لغرفة صاحبك بالكود</span></div>
         <div class="how-step"><span class="how-step__num">2</span><span class="how-step__text">شارك كود الغرفة مع أصدقائك (٢-١٠ لاعبين)</span></div>
-        <div class="how-step"><span class="how-step__num">3</span><span class="how-step__text">المضيف يختار لعبة من ٦ ألعاب مختلفة</span></div>
+        <div class="how-step"><span class="how-step__num">3</span><span class="how-step__text">المضيف يختار لعبة من ١٧ لعبة مختلفة</span></div>
         <div class="how-step"><span class="how-step__num">4</span><span class="how-step__text">كل لعبة لها أسلوبها الخاص - استمتعوا! 🎉</span></div>
       </div>
       <div class="mt-4 tip-box">
         <p class="text-sm tip-box__text">💡 نصيحة: العب على شاشة كبيرة (تلفزيون أو لابتوب) وكل لاعب يستخدم جواله!</p>
       </div>
-      <button class="btn btn--secondary btn--lg btn--full mt-6" onclick="App.showScreen('menuScreen')">فهمت! 👍</button>
+      <button class="btn btn--secondary btn--lg btn--full mt-6" data-action="showScreen" data-screen="menuScreen">فهمت! 👍</button>
     </div>
   </div>
 
@@ -229,7 +230,7 @@
       <div class="room-display">
         <div class="room-display__label">كود الغرفة</div>
         <div class="room-display__code" id="displayRoomCode">XXXX</div>
-        <div class="room-display__share" onclick="App.shareRoom()">📤 انسخ الكود وشاركه!</div>
+        <div class="room-display__share" data-action="shareRoom">📤 انسخ الكود وشاركه!</div>
       </div>
 
       <!-- Players -->
@@ -240,10 +241,10 @@
 
       <!-- Game Selection (Host only) -->
       <div id="gamesSection" class="w-full" style="display:none">
-        <h3 class="text-xl font-black text-center mb-4">🎮 اختر لعبة</h3>
+        <h3 class="text-xl font-black text-center mb-4">🎮 اختر لعبة (١٧ لعبة!)</h3>
         <div class="games-grid">
           <!-- Quiplash -->
-          <div class="game-card" onclick="App.selectGame('quiplash')" role="button" tabindex="0" aria-label="لعبة رد سريع" onkeydown="if(event.key==='Enter')this.click()">
+          <div class="game-card" data-action="selectGame" data-game="quiplash" role="button" tabindex="0" aria-label="لعبة رد سريع">
             <div class="game-card__banner game-card__banner--quiplash">
               <span class="game-card__icon">⚡</span>
             </div>
@@ -259,7 +260,7 @@
           </div>
 
           <!-- Guesspionage -->
-          <div class="game-card" onclick="App.selectGame('guesspionage')" role="button" tabindex="0" aria-label="لعبة خمّن النسبة" onkeydown="if(event.key==='Enter')this.click()">
+          <div class="game-card" data-action="selectGame" data-game="guesspionage" role="button" tabindex="0" aria-label="لعبة خمّن النسبة">
             <div class="game-card__banner game-card__banner--guesspionage">
               <span class="game-card__icon">📊</span>
             </div>
@@ -275,7 +276,7 @@
           </div>
 
           <!-- Fakin' It -->
-          <div class="game-card" onclick="App.selectGame('fakinit')" role="button" tabindex="0" aria-label="لعبة المزيّف" onkeydown="if(event.key==='Enter')this.click()">
+          <div class="game-card" data-action="selectGame" data-game="fakinit" role="button" tabindex="0" aria-label="لعبة المزيّف">
             <div class="game-card__banner game-card__banner--fakinit">
               <span class="game-card__icon">🕵️</span>
             </div>
@@ -291,7 +292,7 @@
           </div>
 
           <!-- Trivia Murder Party -->
-          <div class="game-card" onclick="App.selectGame('triviamurder')" role="button" tabindex="0" aria-label="لعبة حفلة القاتل" onkeydown="if(event.key==='Enter')this.click()">
+          <div class="game-card" data-action="selectGame" data-game="triviamurder" role="button" tabindex="0" aria-label="لعبة حفلة القاتل">
             <div class="game-card__banner game-card__banner--triviamurder">
               <span class="game-card__icon">💀</span>
             </div>
@@ -307,7 +308,7 @@
           </div>
 
           <!-- Fibbage -->
-          <div class="game-card" onclick="App.selectGame('fibbage')" role="button" tabindex="0" aria-label="لعبة كشف الكذاب" onkeydown="if(event.key==='Enter')this.click()">
+          <div class="game-card" data-action="selectGame" data-game="fibbage" role="button" tabindex="0" aria-label="لعبة كشف الكذاب">
             <div class="game-card__banner game-card__banner--fibbage">
               <span class="game-card__icon">🎭</span>
             </div>
@@ -323,7 +324,7 @@
           </div>
 
           <!-- Drawful -->
-          <div class="game-card" onclick="App.selectGame('drawful')" role="button" tabindex="0" aria-label="لعبة ارسم لي" onkeydown="if(event.key==='Enter')this.click()">
+          <div class="game-card" data-action="selectGame" data-game="drawful" role="button" tabindex="0" aria-label="لعبة ارسم لي">
             <div class="game-card__banner game-card__banner--drawful">
               <span class="game-card__icon">🎨</span>
             </div>
@@ -334,6 +335,181 @@
                 <span class="game-tag">👥 ٣-١٠</span>
                 <span class="game-tag">🖌️ رسم</span>
                 <span class="game-tag">😂 مضحك</span>
+              </div>
+            </div>
+          </div>
+          <!-- T-Shirt Wars -->
+          <div class="game-card" data-action="selectGame" data-game="tshirtwars" role="button" tabindex="0" aria-label="لعبة حرب التيشيرتات">
+            <div class="game-card__banner game-card__banner--tshirtwars">
+              <span class="game-card__icon">👕</span>
+            </div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">حرب التيشيرتات</h4>
+              <p class="game-card__desc">اكتب أفضل شعار وصوّتوا لأقوى تيشيرت!</p>
+              <div class="game-card__tags">
+                <span class="game-tag">👥 ٣-١٠</span>
+                <span class="game-tag">✏️ كتابة</span>
+                <span class="game-tag">🎨 إبداع</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Love Monster -->
+          <div class="game-card" data-action="selectGame" data-game="lovemonster" role="button" tabindex="0" aria-label="لعبة الوحش العاشق">
+            <div class="game-card__banner game-card__banner--lovemonster">
+              <span class="game-card__icon">💕</span>
+            </div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">الوحش العاشق</h4>
+              <p class="game-card__desc">أرسل رسائل مواعدة سرية واكسب قلوب اللاعبين!</p>
+              <div class="game-card__tags">
+                <span class="game-tag">👥 ٣-٧</span>
+                <span class="game-tag">💌 اجتماعي</span>
+                <span class="game-tag">🎭 استراتيجي</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Inventions -->
+          <div class="game-card" data-action="selectGame" data-game="inventions" role="button" tabindex="0" aria-label="لعبة اختراعات مجنونة">
+            <div class="game-card__banner game-card__banner--inventions">
+              <span class="game-card__icon">💡</span>
+            </div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">اختراعات مجنونة</h4>
+              <p class="game-card__desc">اخترع حلول جنونية لمشاكل حقيقية!</p>
+              <div class="game-card__tags">
+                <span class="game-tag">👥 ٣-١٠</span>
+                <span class="game-tag">💡 إبداع</span>
+                <span class="game-tag">😂 مضحك</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Would You Rather -->
+          <div class="game-card" data-action="selectGame" data-game="wouldyourather" role="button" tabindex="0" aria-label="لعبة تبي ولا ما تبي">
+            <div class="game-card__banner game-card__banner--wouldyourather">
+              <span class="game-card__icon">🤔</span>
+            </div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">تبي ولا ما تبي</h4>
+              <p class="game-card__desc">اختر بين خيارين مستحيلين! الأغلبية تفوز</p>
+              <div class="game-card__tags">
+                <span class="game-tag">👥 ٢-١٠</span>
+                <span class="game-tag">🤔 قرارات</span>
+                <span class="game-tag">😂 مضحك</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Who Said It -->
+          <div class="game-card" data-action="selectGame" data-game="whosaidit" role="button" tabindex="0" aria-label="لعبة من قال">
+            <div class="game-card__banner game-card__banner--whosaidit">
+              <span class="game-card__icon">💬</span>
+            </div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">من قال؟</h4>
+              <p class="game-card__desc">اكتب شي عن نفسك وخل الباقين يخمنون مين قال!</p>
+              <div class="game-card__tags">
+                <span class="game-tag">👥 ٣-١٠</span>
+                <span class="game-tag">💬 اجتماعي</span>
+                <span class="game-tag">🕵️ تحقيق</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Speed Round -->
+          <div class="game-card" data-action="selectGame" data-game="speedround" role="button" tabindex="0" aria-label="لعبة أسرع واحد">
+            <div class="game-card__banner game-card__banner--speedround">
+              <span class="game-card__icon">⚡</span>
+            </div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">أسرع واحد</h4>
+              <p class="game-card__desc">أجب أسرع من الكل! أول واحد يكتب الجواب الصح يفوز</p>
+              <div class="game-card__tags">
+                <span class="game-tag">👥 ٢-١٠</span>
+                <span class="game-tag">⚡ سرعة</span>
+                <span class="game-tag">🧠 معلومات</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Two Truths One Lie -->
+          <div class="game-card" data-action="selectGame" data-game="twotruths" role="button" tabindex="0" aria-label="لعبة حقيقتين وكذبة">
+            <div class="game-card__banner game-card__banner--twotruths">
+              <span class="game-card__icon">✌️</span>
+            </div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">حقيقتين وكذبة</h4>
+              <p class="game-card__desc">اكتب حقيقتين وكذبة وخل الباقين يكتشفون الكذبة!</p>
+              <div class="game-card__tags">
+                <span class="game-tag">👥 ٣-١٠</span>
+                <span class="game-tag">🤥 خداع</span>
+                <span class="game-tag">💬 اجتماعي</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Split the Room -->
+          <div class="game-card" data-action="selectGame" data-game="splittheroom" role="button" tabindex="0" aria-label="لعبة سبليت ذا روم">
+            <div class="game-card__banner game-card__banner--splittheroom">
+              <span class="game-card__icon">🔀</span>
+            </div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">سبليت ذا روم</h4>
+              <p class="game-card__desc">اكتب سيناريو يقسم الغرفة! كل ما كان التصويت ٥٠/٥٠ تفوز أكثر</p>
+              <div class="game-card__tags">
+                <span class="game-tag">👥 ٣-١٠</span>
+                <span class="game-tag">🔀 استراتيجي</span>
+                <span class="game-tag">✏️ كتابة</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Emoji Decode -->
+          <div class="game-card" data-action="selectGame" data-game="emojidecode" role="button" tabindex="0" aria-label="لعبة فك الرموز">
+            <div class="game-card__banner game-card__banner--emojidecode">
+              <span class="game-card__icon">🎭</span>
+            </div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">فك الرموز</h4>
+              <p class="game-card__desc">خمّن الفلم أو الأغنية من الإيموجي! أسرع واحد يفوز</p>
+              <div class="game-card__tags">
+                <span class="game-tag">👥 ٢-١٠</span>
+                <span class="game-tag">🎭 ألغاز</span>
+                <span class="game-tag">⚡ سرعة</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Debate Me -->
+          <div class="game-card" data-action="selectGame" data-game="debateme" role="button" tabindex="0" aria-label="لعبة المحكمة">
+            <div class="game-card__banner game-card__banner--debateme">
+              <span class="game-card__icon">⚖️</span>
+            </div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">المحكمة</h4>
+              <p class="game-card__desc">ناقش موضوع جدلي وقنع الباقين برأيك!</p>
+              <div class="game-card__tags">
+                <span class="game-tag">👥 ٤-١٠</span>
+                <span class="game-tag">⚖️ نقاش</span>
+                <span class="game-tag">🧠 إقناع</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Acrophobia -->
+          <div class="game-card" data-action="selectGame" data-game="acrophobia" role="button" tabindex="0" aria-label="لعبة الأسماء">
+            <div class="game-card__banner game-card__banner--acrophobia">
+              <span class="game-card__icon">🔤</span>
+            </div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">الأسماء</h4>
+              <p class="game-card__desc">اصنع أطرف اختصار من الأحرف العشوائية!</p>
+              <div class="game-card__tags">
+                <span class="game-tag">👥 ٣-١٠</span>
+                <span class="game-tag">🔤 إبداع</span>
+                <span class="game-tag">😂 كوميدي</span>
               </div>
             </div>
           </div>
@@ -348,17 +524,22 @@
       <!-- Host Controls (Family Mode, Extended Timers, Hide Code) -->
       <div id="familyModeSection" class="w-full text-center mt-2" style="display:none">
         <div class="flex gap-2 justify-center flex-wrap">
-          <button class="btn btn--ghost btn--sm" id="familyModeBtn" onclick="App.toggleFamilyMode()">🏠 وضع العائلة: معطّل</button>
-          <button class="btn btn--ghost btn--sm" id="extendedTimersBtn" onclick="App.toggleExtendedTimers()">⏱️ مؤقتات ممتدة: معطّلة</button>
-          <button class="btn btn--ghost btn--sm" onclick="App.toggleHideRoomCode()">📺 إخفاء الكود</button>
+          <button class="btn btn--ghost btn--sm" id="familyModeBtn" data-action="toggleFamilyMode">🏠 وضع العائلة: معطّل</button>
+          <button class="btn btn--ghost btn--sm" id="extendedTimersBtn" data-action="toggleExtendedTimers">⏱️ مؤقتات ممتدة: معطّلة</button>
+          <button class="btn btn--ghost btn--sm" data-action="toggleHideRoomCode">📺 إخفاء الكود</button>
+        </div>
+        <div class="flex gap-2 justify-center flex-wrap mt-2" id="hostControlsAdvanced">
+          <button class="btn btn--ghost btn--sm" data-action="pauseGame" id="pauseBtn">⏸️ إيقاف مؤقت</button>
+          <button class="btn btn--ghost btn--sm" data-action="skipQuestion">⏭️ تخطي السؤال</button>
+          <button class="btn btn--ghost btn--sm" data-action="showKickMenu">🚫 طرد لاعب</button>
         </div>
       </div>
 
       <!-- Lobby Actions -->
       <div class="flex gap-3 mt-2">
-        <button class="btn btn--secondary" id="readyBtn" onclick="App.toggleReady()">✋ جاهز!</button>
-        <button class="btn btn--ghost btn--sm" onclick="App.toggleSettings()">⚙️</button>
-        <button class="btn btn--danger" onclick="if(confirm('متأكد تبي تطلع؟'))location.reload()">🚪 خروج</button>
+        <button class="btn btn--secondary" id="readyBtn" data-action="toggleReady">✋ جاهز!</button>
+        <button class="btn btn--ghost btn--sm" data-action="toggleSettings">⚙️</button>
+        <button class="btn btn--danger" data-action="confirmExit">🚪 خروج</button>
       </div>
     </div>
   </div>
@@ -371,7 +552,7 @@
     <!-- Game HUD -->
     <div class="game-hud">
       <div class="game-hud__start">
-        <button class="btn btn--danger btn--sm btn--icon" onclick="if(confirm('متأكد تبي تطلع؟'))location.reload()">🚪</button>
+        <button class="btn btn--danger btn--sm btn--icon" data-action="confirmExit">🚪</button>
         <div>
           <div class="game-hud__title" id="gameTitle">⚡ اللعبة</div>
           <div class="game-hud__round" id="gameRound">الجولة ١ من ٥</div>
@@ -381,7 +562,7 @@
         <div id="answeredCount" class="text-sm text-muted" style="display:none"></div>
       </div>
       <div class="game-hud__end">
-        <button class="btn btn--ghost btn--sm btn--icon btn--icon-lg" onclick="App.toggleSettings()">⚙️</button>
+        <button class="btn btn--ghost btn--sm btn--icon btn--icon-lg" data-action="toggleSettings">⚙️</button>
         <div class="game-timer" id="gameTimer" role="timer" aria-live="polite" aria-label="المؤقت">30</div>
       </div>
     </div>
@@ -416,14 +597,22 @@
    * EMOJI REACTION BAR - ردود فعل
    * ═══════════════════════════════════════════════════════════ -->
   <div id="emojiBar" class="emoji-bar hidden" role="toolbar" aria-label="ردود الفعل">
-    <button class="emoji-btn" onclick="App.sendEmoji('😂')" aria-label="ضحك">😂</button>
-    <button class="emoji-btn" onclick="App.sendEmoji('🔥')" aria-label="حماس">🔥</button>
-    <button class="emoji-btn" onclick="App.sendEmoji('👏')" aria-label="تصفيق">👏</button>
-    <button class="emoji-btn" onclick="App.sendEmoji('😱')" aria-label="صدمة">😱</button>
-    <button class="emoji-btn" onclick="App.sendEmoji('💀')" aria-label="موت">💀</button>
-    <button class="emoji-btn" onclick="App.sendEmoji('❤️')" aria-label="حب">❤️</button>
-    <button class="emoji-btn" onclick="App.sendEmoji('👎')" aria-label="رفض">👎</button>
-    <button class="emoji-btn" onclick="App.sendEmoji('🤣')" aria-label="ضحك شديد">🤣</button>
+    <button class="emoji-btn" data-action="sendEmoji" data-emoji="😂" aria-label="ضحك">😂</button>
+    <button class="emoji-btn" data-action="sendEmoji" data-emoji="🔥" aria-label="حماس">🔥</button>
+    <button class="emoji-btn" data-action="sendEmoji" data-emoji="👏" aria-label="تصفيق">👏</button>
+    <button class="emoji-btn" data-action="sendEmoji" data-emoji="😱" aria-label="صدمة">😱</button>
+    <button class="emoji-btn" data-action="sendEmoji" data-emoji="💀" aria-label="موت">💀</button>
+    <button class="emoji-btn" data-action="sendEmoji" data-emoji="❤️" aria-label="حب">❤️</button>
+    <button class="emoji-btn" data-action="sendEmoji" data-emoji="👎" aria-label="رفض">👎</button>
+    <button class="emoji-btn" data-action="sendEmoji" data-emoji="🤣" aria-label="ضحك شديد">🤣</button>
+    <button class="emoji-btn" data-action="sendEmoji" data-emoji="🤯" aria-label="مندهش">🤯</button>
+    <button class="emoji-btn" data-action="sendEmoji" data-emoji="😈" aria-label="شرير">😈</button>
+    <button class="emoji-btn" data-action="sendEmoji" data-emoji="🤡" aria-label="مهرج">🤡</button>
+    <button class="emoji-btn" data-action="sendEmoji" data-emoji="💪" aria-label="قوة">💪</button>
+    <button class="emoji-btn" data-action="sendEmoji" data-emoji="🧠" aria-label="ذكاء">🧠</button>
+    <button class="emoji-btn" data-action="sendEmoji" data-emoji="😴" aria-label="نوم">😴</button>
+    <button class="emoji-btn" data-action="sendEmoji" data-emoji="🏆" aria-label="فوز">🏆</button>
+    <button class="emoji-btn" data-action="sendEmoji" data-emoji="💩" aria-label="سيء">💩</button>
   </div>
   <div id="emojiFloatContainer" class="emoji-float-container"></div>
 
@@ -431,27 +620,27 @@
    * SETTINGS MODAL - الإعدادات
    * ═══════════════════════════════════════════════════════════ -->
   <div id="settingsModal" class="settings-modal hidden">
-    <div class="settings-modal__backdrop" onclick="App.toggleSettings()"></div>
+    <div class="settings-modal__backdrop" data-action="toggleSettings"></div>
     <div class="settings-modal__content">
       <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-black">⚙️ الإعدادات</h2>
-        <button class="btn btn--ghost btn--sm" onclick="App.toggleSettings()">✕</button>
+        <button class="btn btn--ghost btn--sm" data-action="toggleSettings">✕</button>
       </div>
       <div class="settings-group">
         <label class="settings-label" for="volMaster">🔊 الصوت الرئيسي</label>
-        <input type="range" class="settings-slider" id="volMaster" min="0" max="100" value="70" aria-label="الصوت الرئيسي" oninput="App.updateVolume('master',this.value)">
+        <input type="range" class="settings-slider" id="volMaster" min="0" max="100" value="70" aria-label="الصوت الرئيسي" data-volume="master">
       </div>
       <div class="settings-group">
         <label class="settings-label" for="volMusic">🎵 الموسيقى</label>
-        <input type="range" class="settings-slider" id="volMusic" min="0" max="100" value="40" aria-label="مستوى الموسيقى" oninput="App.updateVolume('music',this.value)">
+        <input type="range" class="settings-slider" id="volMusic" min="0" max="100" value="40" aria-label="مستوى الموسيقى" data-volume="music">
       </div>
       <div class="settings-group">
         <label class="settings-label" for="volSfx">🔔 المؤثرات</label>
-        <input type="range" class="settings-slider" id="volSfx" min="0" max="100" value="80" aria-label="مستوى المؤثرات" oninput="App.updateVolume('sfx',this.value)">
+        <input type="range" class="settings-slider" id="volSfx" min="0" max="100" value="80" aria-label="مستوى المؤثرات" data-volume="sfx">
       </div>
       <div class="settings-group">
         <label class="settings-label" for="intensitySelect">🎨 مستوى الحيوية</label>
-        <select class="settings-select" id="intensitySelect" onchange="App.setIntensity(this.value)" aria-label="مستوى الحيوية">
+        <select class="settings-select" id="intensitySelect" aria-label="مستوى الحيوية">
           <option value="calm">هادي 🌙</option>
           <option value="party" selected>حفلة 🎉</option>
           <option value="chaos">جنون 🔥</option>
@@ -459,14 +648,51 @@
       </div>
       <div class="settings-group">
         <label class="settings-label">
-          <input type="checkbox" id="reducedMotion" onchange="App.toggleReducedMotion(this.checked)"> تقليل الحركة
+          <input type="checkbox" id="reducedMotion" data-action="toggleReducedMotion"> تقليل الحركة
+        </label>
+      </div>
+      <div class="settings-group">
+        <label class="settings-label">
+          <input type="checkbox" id="darkModeToggle" data-action="toggleDarkMode"> 🌙 الوضع الداكن
         </label>
       </div>
     </div>
   </div>
 
+  <!-- In-Game Chat -->
+  <div id="chatContainer" class="chat-container hidden">
+    <div id="chatMessages" class="chat-messages"></div>
+    <div class="chat-input-wrap">
+      <input type="text" id="chatInput" class="chat-input" placeholder="اكتب رسالة..." maxlength="100" autocomplete="off">
+      <button class="chat-send-btn" data-action="sendChat">📤</button>
+    </div>
+  </div>
+  <button id="chatToggle" class="chat-toggle hidden" data-action="toggleChat">💬</button>
+
   <!-- Abu Abed Commentary Bar -->
   <div id="commentaryBar" class="commentary-bar hidden" aria-live="polite"></div>
+
+  <!-- Achievement Toast Container -->
+  <div id="achievementContainer" class="achievement-container"></div>
+
+  <!-- Kick Player Modal -->
+  <div id="kickModal" class="settings-modal hidden">
+    <div class="settings-modal__backdrop" data-action="closeKickMenu"></div>
+    <div class="settings-modal__content">
+      <h2 class="text-2xl font-black mb-4">🚫 طرد لاعب</h2>
+      <div id="kickPlayersList" class="flex flex-col gap-2"></div>
+      <button class="btn btn--ghost btn--full mt-4" data-action="closeKickMenu">إلغاء</button>
+    </div>
+  </div>
+
+  <!-- Pause Overlay -->
+  <div id="pauseOverlay" class="countdown-overlay hidden" style="background:rgba(0,0,0,0.8)">
+    <div style="text-align:center">
+      <div style="font-size:4rem;margin-bottom:1rem">⏸️</div>
+      <div style="font-size:2rem;font-weight:900;color:#fff">اللعبة متوقفة</div>
+      <div class="text-muted mt-2">المضيف أوقف اللعبة مؤقتاً</div>
+    </div>
+  </div>
 
   <!-- Toast Container -->
   <div id="toastContainer" aria-live="assertive" role="alert"></div>
