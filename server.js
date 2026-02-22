@@ -477,7 +477,7 @@ io.on('connection', (socket) => {
     if (room.state === 'playing') return socket.emit('error', { message: 'اللعبة شغالة بالفعل!' });
 
     // التحقق من صحة اسم اللعبة
-    const validGames = ['quiplash', 'guesspionage', 'fakinit', 'triviamurder', 'fibbage', 'drawful'];
+    const validGames = ['quiplash', 'guesspionage', 'fakinit', 'triviamurder', 'fibbage', 'drawful', 'tshirtwars', 'lovemonster', 'inventions'];
     if (!validGames.includes(game)) {
       return socket.emit('error', { message: 'لعبة غير معروفة!' });
     }
@@ -494,7 +494,10 @@ io.on('connection', (socket) => {
       fakinit: 3,
       triviamurder: 5,
       fibbage: 3,
-      drawful: 3
+      drawful: 3,
+      tshirtwars: 3,
+      lovemonster: 4,
+      inventions: 3
     };
 
     // إعداد الغرفة للعبة
@@ -544,7 +547,10 @@ io.on('connection', (socket) => {
       fakinit: '🕵️ المزيّف',
       triviamurder: '💀 حفلة القاتل',
       fibbage: '🎭 كشف الكذاب',
-      drawful: '🎨 ارسم لي'
+      drawful: '🎨 ارسم لي',
+      tshirtwars: '👕 حرب التيشيرتات',
+      lovemonster: '💕 الوحش العاشق',
+      inventions: '💡 اختراعات مجنونة'
     };
 
     const startComment = CONFIG.commentaryEnabled
@@ -586,7 +592,7 @@ io.on('connection', (socket) => {
     if (typeof answer === 'string') {
       const trimmed = answer.trim().substring(0, 200);
       // Only filter free-text games (not trivia choices or guesspionage bets)
-      const freeTextGames = ['quiplash', 'fibbage', 'drawful'];
+      const freeTextGames = ['quiplash', 'fibbage', 'drawful', 'tshirtwars', 'inventions'];
       const isFreeText = freeTextGames.includes(room.currentGame) ||
         (room.currentGame === 'triviamurder' && room.gameData.phase === 'deathChallenge');
       if (isFreeText) {
@@ -1039,6 +1045,15 @@ function startGameRound(room) {
     case 'drawful':
       startDrawfulRound(room);
       break;
+    case 'tshirtwars':
+      startTshirtWarsRound(room);
+      break;
+    case 'lovemonster':
+      startLoveMonsterRound(room);
+      break;
+    case 'inventions':
+      startInventionsRound(room);
+      break;
     default:
       console.log('❌ لعبة غير معروفة:', room.currentGame);
   }
@@ -1074,6 +1089,15 @@ function handleAllAnswered(room) {
     case 'drawful':
       // لا يصل هنا عادة - الرسم يُعالج بشكل منفصل
       break;
+    case 'tshirtwars':
+      startTshirtWarsVoting(room);
+      break;
+    case 'lovemonster':
+      calculateLoveMonsterResults(room);
+      break;
+    case 'inventions':
+      startInventionsVoting(room);
+      break;
     default:
       sendRoundResults(room, {});
   }
@@ -1098,6 +1122,12 @@ function calculateVoteResults(room) {
     case 'drawful':
       calculateDrawfulResults(room);
       break;
+    case 'tshirtwars':
+      calculateTshirtWarsResults(room);
+      break;
+    case 'inventions':
+      calculateInventionsResults(room);
+      break;
     default:
       sendRoundResults(room, {});
   }
@@ -1108,7 +1138,7 @@ function calculateVoteResults(room) {
  */
 function getEligibleVoters(room) {
   // Include audience in vote-based games
-  const includeAudience = ['quiplash', 'fibbage', 'drawful'].includes(room.currentGame);
+  const includeAudience = ['quiplash', 'fibbage', 'drawful', 'tshirtwars', 'inventions'].includes(room.currentGame);
 
   switch (room.currentGame) {
     case 'quiplash': {
@@ -1121,6 +1151,9 @@ function getEligibleVoters(room) {
       return Array.from(room.players.values()).filter(p => !p.isAudience);
     case 'fibbage':
       return Array.from(room.players.values()); // audience can vote too
+    case 'guesspionage':
+      // Audience can bet in Guesspionage (without earning points)
+      return Array.from(room.players.values());
     case 'drawful':
       return Array.from(room.players.values()).filter(p => p.id !== room.gameData.drawerId);
     default:
@@ -2722,6 +2755,303 @@ function calculateDrawfulResults(room) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// 👕 حرب التيشيرتات (T-Shirt Wars / Tee K.O.)
+// ═══════════════════════════════════════════════════════════════════
+
+function startTshirtWarsRound(room) {
+  const slogans = content.tshirtwars.slogans;
+  const slogan = pickQuestion(room, slogans.map((s, i) => ({ q: s, a: '', _idx: i })));
+  room.gameData.phase = 'writing';
+  room.gameData.slogan = slogan.q;
+
+  const timeLimit = room._extendedTimers ? 90 : 60;
+
+  io.to(room.code).emit('tshirtWarsSlogan', {
+    slogan: slogan.q,
+    round: room.currentRound + 1,
+    maxRounds: room.maxRounds,
+    timeLimit
+  });
+
+  setRoundTimer(room, timeLimit, () => {
+    handleAllAnswered(room);
+  });
+}
+
+function startTshirtWarsVoting(room) {
+  const answers = [];
+  room.players.forEach((p, id) => {
+    if (p.currentAnswer && p.currentAnswer !== '__timeout__') {
+      answers.push({ id, text: p.currentAnswer, playerName: p.name });
+    }
+  });
+
+  if (answers.length < 2) {
+    sendRoundResults(room, { message: 'ما فيه إجابات كافية!' });
+    return;
+  }
+
+  // Shuffle for fair display
+  for (let i = answers.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [answers[i], answers[j]] = [answers[j], answers[i]];
+  }
+
+  room.gameData.phase = 'voting';
+  room.gameData.answers = answers;
+  resetAnswers(room);
+
+  const timeLimit = room._extendedTimers ? 30 : 20;
+
+  io.to(room.code).emit('tshirtWarsVoting', {
+    slogan: room.gameData.slogan,
+    answers: answers.map(a => ({ id: a.id, text: a.text })),
+    timeLimit
+  });
+
+  setRoundTimer(room, timeLimit, () => {
+    calculateVoteResults(room);
+  });
+}
+
+function calculateTshirtWarsResults(room) {
+  clearRoundTimer(room);
+  const answers = room.gameData.answers || [];
+  const voteCounts = {};
+  answers.forEach(a => { voteCounts[a.id] = 0; });
+
+  room.players.forEach((p) => {
+    if (p.currentVote && voteCounts[p.currentVote] !== undefined) {
+      voteCounts[p.currentVote]++;
+    }
+  });
+
+  const totalVoters = Array.from(room.players.values()).filter(p => p.currentVote).length;
+
+  const results = answers.map(a => {
+    const votes = voteCounts[a.id] || 0;
+    const percentage = totalVoters > 0 ? Math.round((votes / totalVoters) * 100) : 0;
+    const points = votes * 500;
+    const player = room.players.get(a.id);
+    if (player) player.score += points;
+
+    return {
+      playerId: a.id,
+      playerName: a.playerName,
+      text: a.text,
+      votes,
+      percentage,
+      points
+    };
+  });
+
+  results.sort((a, b) => b.votes - a.votes);
+
+  io.to(room.code).emit('roundResults', {
+    game: 'tshirtwars',
+    round: room.currentRound + 1,
+    maxRounds: room.maxRounds,
+    slogan: room.gameData.slogan,
+    results,
+    players: getPlayerList(room),
+    isLastRound: room.currentRound >= room.maxRounds - 1
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// 💕 الوحش العاشق (Love Monster)
+// ═══════════════════════════════════════════════════════════════════
+
+function startLoveMonsterRound(room) {
+  const playerIds = Array.from(room.players.keys());
+  room.gameData.phase = 'messaging';
+  room.gameData.messages = new Map();
+
+  const timeLimit = room._extendedTimers ? 60 : 45;
+
+  // Each player picks who to "date"
+  playerIds.forEach(id => {
+    const others = playerIds.filter(pid => pid !== id);
+    const player = room.players.get(id);
+
+    io.to(id).emit('loveMonsterPick', {
+      round: room.currentRound + 1,
+      maxRounds: room.maxRounds,
+      players: others.map(pid => {
+        const p = room.players.get(pid);
+        return { id: pid, name: p.name, avatar: p.avatar, avatarData: p.avatarData };
+      }),
+      timeLimit,
+      messages: content.lovemonster.messages
+    });
+  });
+
+  setRoundTimer(room, timeLimit, () => {
+    handleAllAnswered(room);
+  });
+}
+
+function calculateLoveMonsterResults(room) {
+  clearRoundTimer(room);
+  const playerIds = Array.from(room.players.keys());
+  const choices = new Map(); // who each player picked
+  const receivedFrom = new Map(); // who picked each player
+
+  playerIds.forEach(id => { receivedFrom.set(id, []); });
+
+  room.players.forEach((p, id) => {
+    if (p.currentAnswer && p.currentAnswer !== '__timeout__') {
+      choices.set(id, p.currentAnswer);
+      const recv = receivedFrom.get(p.currentAnswer);
+      if (recv) recv.push(id);
+    }
+  });
+
+  const results = [];
+  room.players.forEach((p, id) => {
+    const pickedId = choices.get(id);
+    const pickedPlayer = pickedId ? room.players.get(pickedId) : null;
+    const receivedCount = (receivedFrom.get(id) || []).length;
+
+    // Mutual match = 1000 points each
+    let points = 0;
+    let mutual = false;
+    if (pickedId && choices.get(pickedId) === id) {
+      points = 1000;
+      mutual = true;
+    }
+    // Each received message = 200 bonus points
+    points += receivedCount * 200;
+    p.score += points;
+
+    results.push({
+      playerId: id,
+      playerName: p.name,
+      picked: pickedPlayer ? pickedPlayer.name : null,
+      receivedCount,
+      mutual,
+      points
+    });
+  });
+
+  results.sort((a, b) => b.points - a.points);
+
+  io.to(room.code).emit('roundResults', {
+    game: 'lovemonster',
+    round: room.currentRound + 1,
+    maxRounds: room.maxRounds,
+    results,
+    players: getPlayerList(room),
+    isLastRound: room.currentRound >= room.maxRounds - 1
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// 💡 اختراعات مجنونة (Mad Inventions)
+// ═══════════════════════════════════════════════════════════════════
+
+function startInventionsRound(room) {
+  const problem = pickQuestion(room, content.inventions.problems);
+  room.gameData.phase = 'inventing';
+  room.gameData.problem = problem;
+
+  const timeLimit = room._extendedTimers ? 90 : 60;
+
+  io.to(room.code).emit('inventionsProblem', {
+    problem: problem.q,
+    category: problem.category,
+    round: room.currentRound + 1,
+    maxRounds: room.maxRounds,
+    timeLimit
+  });
+
+  setRoundTimer(room, timeLimit, () => {
+    handleAllAnswered(room);
+  });
+}
+
+function startInventionsVoting(room) {
+  const inventions = [];
+  room.players.forEach((p, id) => {
+    if (p.currentAnswer && p.currentAnswer !== '__timeout__') {
+      inventions.push({ id, text: p.currentAnswer, playerName: p.name });
+    }
+  });
+
+  if (inventions.length < 2) {
+    sendRoundResults(room, { message: 'ما فيه اختراعات كافية!' });
+    return;
+  }
+
+  // Shuffle
+  for (let i = inventions.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [inventions[i], inventions[j]] = [inventions[j], inventions[i]];
+  }
+
+  room.gameData.phase = 'voting';
+  room.gameData.inventions = inventions;
+  resetAnswers(room);
+
+  const timeLimit = room._extendedTimers ? 30 : 20;
+
+  io.to(room.code).emit('inventionsVoting', {
+    problem: room.gameData.problem.q,
+    inventions: inventions.map(inv => ({ id: inv.id, text: inv.text })),
+    timeLimit
+  });
+
+  setRoundTimer(room, timeLimit, () => {
+    calculateVoteResults(room);
+  });
+}
+
+function calculateInventionsResults(room) {
+  clearRoundTimer(room);
+  const inventions = room.gameData.inventions || [];
+  const voteCounts = {};
+  inventions.forEach(inv => { voteCounts[inv.id] = 0; });
+
+  room.players.forEach((p) => {
+    if (p.currentVote && voteCounts[p.currentVote] !== undefined) {
+      voteCounts[p.currentVote]++;
+    }
+  });
+
+  const totalVoters = Array.from(room.players.values()).filter(p => p.currentVote).length;
+
+  const results = inventions.map(inv => {
+    const votes = voteCounts[inv.id] || 0;
+    const percentage = totalVoters > 0 ? Math.round((votes / totalVoters) * 100) : 0;
+    const points = votes * 500;
+    const player = room.players.get(inv.id);
+    if (player) player.score += points;
+
+    return {
+      playerId: inv.id,
+      playerName: inv.playerName,
+      text: inv.text,
+      votes,
+      percentage,
+      points
+    };
+  });
+
+  results.sort((a, b) => b.votes - a.votes);
+
+  io.to(room.code).emit('roundResults', {
+    game: 'inventions',
+    round: room.currentRound + 1,
+    maxRounds: room.maxRounds,
+    problem: room.gameData.problem.q,
+    category: room.gameData.problem.category,
+    results,
+    players: getPlayerList(room),
+    isLastRound: room.currentRound >= room.maxRounds - 1
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // الدوال المشتركة
 // ═══════════════════════════════════════════════════════════════════
 
@@ -2987,6 +3317,7 @@ server.listen(PORT, () => {
   ║                                                              ║
   ║     ⚡ رد سريع    📊 خمّن النسبة    🕵️ المزيّف             ║
   ║     💀 حفلة القاتل  🎭 كشف الكذاب    🎨 ارسم لي           ║
+  ║     👕 حرب التيشيرتات  💕 الوحش العاشق  💡 اختراعات مجنونة  ║
   ║                                                              ║
   ║     ✅ السيرفر شغال على البورت ${PORT}                       ║
   ║     🌐 http://localhost:${PORT}                               ║

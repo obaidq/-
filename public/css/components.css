@@ -704,6 +704,8 @@
 
 .lobby-container { width: 100%; max-width: 1200px; margin: 0 auto; }
 
+.avatar-emoji { font-size: 28px; }
+
 /* ─────────────────────────────────────────────────────────────
  * GAME CARD BANNERS - ألوان كروت الألعاب
  * ───────────────────────────────────────────────────────────── */
@@ -714,6 +716,9 @@
 .game-card__banner--triviamurder { background: linear-gradient(135deg, #434343, #000); }
 .game-card__banner--fibbage { background: linear-gradient(135deg, #f093fb, #f5576c); }
 .game-card__banner--drawful { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+.game-card__banner--tshirtwars { background: linear-gradient(135deg, #6C3483, #FF6B35); }
+.game-card__banner--lovemonster { background: linear-gradient(135deg, #C2185B, #FF4081); }
+.game-card__banner--inventions { background: linear-gradient(135deg, #0277BD, #00E5FF); }
 
 /* ─────────────────────────────────────────────────────────────
  * SETTINGS BUTTON SIZE

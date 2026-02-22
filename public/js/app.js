@@ -175,6 +175,7 @@ const App = {
         case 'submitDrawing': this.submitDrawing(); break;
         case 'submitGuessDrawful': this.submitGuessDrawful(); break;
         case 'submitFinalPicks': this.submitFinalPicks(); break;
+        case 'submitLoveChoice': this.submitLoveChoice(id, target); break;
         case 'requestNextRound': this.requestNextRound(); break;
         case 'backToLobby': this.backToLobby(); break;
         case 'undoStroke': this.undoStroke(); break;
@@ -209,6 +210,55 @@ const App = {
       if (!target) return;
       const action = target.getAttribute('data-action');
       if (action === 'backToLobby') this.backToLobby();
+    });
+
+    // ── Document-level Event Delegation (menu, lobby, settings, emoji) ──
+    document.addEventListener('click', (e) => {
+      const target = e.target.closest('[data-action]');
+      if (!target) return;
+      // Skip if already handled by gameContent or resultsActions
+      if (e.target.closest('#gameContent') || e.target.closest('#resultsActions')) return;
+      const action = target.getAttribute('data-action');
+      switch (action) {
+        case 'showScreen': this.showScreen(target.getAttribute('data-screen')); break;
+        case 'createRoom': this.createRoom(); break;
+        case 'joinRoom': this.joinRoom(); break;
+        case 'joinAsAudience': this.joinAsAudience(); break;
+        case 'openAvatarPicker': this.openAvatarPicker(target.getAttribute('data-target')); break;
+        case 'shareRoom': this.shareRoom(); break;
+        case 'selectGame': this.selectGame(target.getAttribute('data-game')); break;
+        case 'toggleFamilyMode': this.toggleFamilyMode(); break;
+        case 'toggleExtendedTimers': this.toggleExtendedTimers(); break;
+        case 'toggleHideRoomCode': this.toggleHideRoomCode(); break;
+        case 'toggleReady': this.toggleReady(); break;
+        case 'toggleSettings': this.toggleSettings(); break;
+        case 'confirmExit': if (confirm('متأكد تبي تطلع؟')) location.reload(); break;
+        case 'sendEmoji': this.sendEmoji(target.getAttribute('data-emoji')); break;
+        case 'toggleReducedMotion': this.toggleReducedMotion(target.checked); break;
+      }
+    });
+
+    // ── Settings input delegation (volume sliders, intensity select) ──
+    document.getElementById('settingsModal')?.addEventListener('input', (e) => {
+      if (e.target.dataset.volume) {
+        this.updateVolume(e.target.dataset.volume, e.target.value);
+      }
+    });
+    document.getElementById('intensitySelect')?.addEventListener('change', (e) => {
+      this.setIntensity(e.target.value);
+    });
+
+    // ── Room code auto-uppercase ──
+    document.getElementById('roomCodeInput')?.addEventListener('input', (e) => {
+      e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    });
+
+    // ── Game card Enter key support ──
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const card = e.target.closest('[data-action="selectGame"]');
+        if (card) card.click();
+      }
     });
 
     // ── Escape لإغلاق الإعدادات ──
@@ -412,6 +462,17 @@ const App = {
     s.on('drawfulWaiting', data => this.handleDrawfulWaiting(data));
     s.on('drawfulGuessing', data => this.handleDrawfulGuessing(data));
     s.on('drawfulVoting', data => this.handleDrawfulVoting(data));
+
+    // ── حرب التيشيرتات (T-Shirt Wars) ──
+    s.on('tshirtWarsSlogan', data => this.handleTshirtWarsSlogan(data));
+    s.on('tshirtWarsVoting', data => this.handleTshirtWarsVoting(data));
+
+    // ── الوحش العاشق (Love Monster) ──
+    s.on('loveMonsterPick', data => this.handleLoveMonsterPick(data));
+
+    // ── اختراعات مجنونة (Inventions) ──
+    s.on('inventionsProblem', data => this.handleInventionsProblem(data));
+    s.on('inventionsVoting', data => this.handleInventionsVoting(data));
 
     // ── النتائج ──
     s.on('roundResults', data => {
@@ -1974,6 +2035,141 @@ const App = {
     this.socket.emit('requestNextRound', this.currentRoom);
   },
 
+  // ═══════════════════════════════════════════════════════
+  // 👕 حرب التيشيرتات (T-Shirt Wars)
+  // ═══════════════════════════════════════════════════════
+
+  handleTshirtWarsSlogan(d) {
+    this._submitting = false;
+    this.showScreen('gameScreen');
+    this.setTheme('tshirtwars');
+    this.showRoundInfo(d.round, d.maxRounds, '👕 حرب التيشيرتات');
+    this.startTimer(d.timeLimit);
+    this.setHint('اكتب أفضل شعار للتيشيرت!');
+
+    const gc = document.getElementById('gameContent');
+    gc.innerHTML =
+      '<div class="game-prompt">' +
+        '<div class="game-prompt__icon">👕</div>' +
+        '<p class="game-prompt__text">' + escapeHtml(d.slogan) + '</p>' +
+      '</div>' +
+      '<div class="answer-section">' +
+        '<input type="text" class="input input--game" id="answerInput" placeholder="اكتب شعارك هنا..." maxlength="100" autocomplete="off">' +
+        '<button class="btn btn--primary btn--lg btn--full mt-3" data-action="submitAnswer">إرسال الشعار 👕</button>' +
+      '</div>';
+    document.getElementById('answerInput')?.focus();
+  },
+
+  handleTshirtWarsVoting(d) {
+    this._submitting = false;
+    this.startTimer(d.timeLimit);
+    this.setHint('صوّت لأفضل شعار!');
+
+    const gc = document.getElementById('gameContent');
+    let html =
+      '<div class="game-prompt">' +
+        '<div class="game-prompt__icon">👕</div>' +
+        '<p class="game-prompt__text">' + escapeHtml(d.slogan) + '</p>' +
+      '</div>' +
+      '<div class="vote-grid">';
+
+    d.answers.forEach(a => {
+      html +=
+        '<button class="vote-option" data-action="voteAnswer" data-id="' + a.id + '">' +
+          '<span class="vote-option__text">' + escapeHtml(a.text) + '</span>' +
+        '</button>';
+    });
+    html += '</div>';
+    gc.innerHTML = html;
+  },
+
+  // ═══════════════════════════════════════════════════════
+  // 💕 الوحش العاشق (Love Monster)
+  // ═══════════════════════════════════════════════════════
+
+  handleLoveMonsterPick(d) {
+    this._submitting = false;
+    this.showScreen('gameScreen');
+    this.setTheme('lovemonster');
+    this.showRoundInfo(d.round, d.maxRounds, '💕 الوحش العاشق');
+    this.startTimer(d.timeLimit);
+    this.setHint('اختر مين تبي ترسل له رسالة!');
+
+    const gc = document.getElementById('gameContent');
+    let html =
+      '<div class="game-prompt">' +
+        '<div class="game-prompt__icon">💕</div>' +
+        '<p class="game-prompt__text">اختر لاعب ترسل له رسالة مواعدة!</p>' +
+      '</div>' +
+      '<div class="vote-grid">';
+
+    d.players.forEach(p => {
+      html +=
+        '<button class="vote-option vote-option--player" data-action="submitLoveChoice" data-id="' + p.id + '">' +
+          '<span class="vote-option__avatar">' + (p.avatar || '🎮') + '</span>' +
+          '<span class="vote-option__text">' + escapeHtml(p.name) + '</span>' +
+        '</button>';
+    });
+    html += '</div>';
+    gc.innerHTML = html;
+  },
+
+  submitLoveChoice(id, target) {
+    if (this._submitting) return;
+    this._submitting = true;
+    target.classList.add('vote-option--selected');
+    this.socket.emit('submitAnswer', { code: this.roomCode, answer: id });
+  },
+
+  // ═══════════════════════════════════════════════════════
+  // 💡 اختراعات مجنونة (Inventions)
+  // ═══════════════════════════════════════════════════════
+
+  handleInventionsProblem(d) {
+    this._submitting = false;
+    this.showScreen('gameScreen');
+    this.setTheme('inventions');
+    this.showRoundInfo(d.round, d.maxRounds, '💡 اختراعات مجنونة');
+    this.startTimer(d.timeLimit);
+    this.setHint('اكتب اختراعك المجنون!');
+
+    const gc = document.getElementById('gameContent');
+    gc.innerHTML =
+      '<div class="game-prompt">' +
+        '<div class="game-prompt__icon">💡</div>' +
+        '<p class="game-prompt__text">' + escapeHtml(d.problem) + '</p>' +
+        '<span class="game-tag">' + escapeHtml(d.category) + '</span>' +
+      '</div>' +
+      '<div class="answer-section">' +
+        '<textarea class="input input--game input--textarea" id="answerInput" placeholder="اكتب اختراعك هنا..." maxlength="200" rows="3"></textarea>' +
+        '<button class="btn btn--primary btn--lg btn--full mt-3" data-action="submitAnswer">إرسال الاختراع 💡</button>' +
+      '</div>';
+    document.getElementById('answerInput')?.focus();
+  },
+
+  handleInventionsVoting(d) {
+    this._submitting = false;
+    this.startTimer(d.timeLimit);
+    this.setHint('صوّت لأجنن اختراع!');
+
+    const gc = document.getElementById('gameContent');
+    let html =
+      '<div class="game-prompt">' +
+        '<div class="game-prompt__icon">💡</div>' +
+        '<p class="game-prompt__text">' + escapeHtml(d.problem) + '</p>' +
+      '</div>' +
+      '<div class="vote-grid">';
+
+    d.inventions.forEach(inv => {
+      html +=
+        '<button class="vote-option" data-action="voteAnswer" data-id="' + inv.id + '">' +
+          '<span class="vote-option__text">' + escapeHtml(inv.text) + '</span>' +
+        '</button>';
+    });
+    html += '</div>';
+    gc.innerHTML = html;
+  },
+
   // ── نتائج الجولة ──
 
   handleRoundResults(d) {
@@ -2048,8 +2244,8 @@ const App = {
                   '<path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="12" stroke-linecap="round"/>' +
                   '<path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="url(#revealGaugeGrad)" stroke-width="12" stroke-linecap="round"/>' +
                   '<circle cx="100" cy="100" r="6" fill="#fff"/>' +
-                  '<line x1="100" y1="100" x2="100" y2="35" stroke="#fff" stroke-width="3" stroke-linecap="round" id="revealNeedle" class="gspy-needle-line" style="transition:all 1.5s ease-out"/>' +
-                  (d.featuredGuess !== undefined ? '<line x1="100" y1="100" x2="100" y2="40" stroke="#D4AF37" stroke-width="2" stroke-linecap="round" id="revealGuessMarker" style="opacity:0.5;transition:all 0.5s ease-out"/>' : '') +
+                  '<line x1="100" y1="100" x2="100" y2="35" stroke="#fff" stroke-width="3" stroke-linecap="round" id="revealNeedle" class="gspy-needle-line" style="transform-origin:100px 100px;transform:rotate(-90deg);transition:transform 1.5s ease-out"/>' +
+                  (d.featuredGuess !== undefined ? '<line x1="100" y1="100" x2="100" y2="40" stroke="#D4AF37" stroke-width="2" stroke-linecap="round" id="revealGuessMarker" style="transform-origin:100px 100px;opacity:0.5;transition:transform 0.5s ease-out"/>' : '') +
                 '</svg>' +
               '</div>' +
               '<div class="gspy-results-number gspy-reveal-number" id="revealNumber" style="opacity:0;transform:scale(0)">?</div>' +
@@ -2105,24 +2301,19 @@ const App = {
 
         // Schedule staged reveal animations after DOM render
         setTimeout(() => {
-          // Beat 2 (1600ms): Animate gauge needle to truth
+          // Beat 2 (1600ms): Animate gauge needle to truth via CSS rotation
           const needle = document.getElementById('revealNeedle');
           if (needle) {
-            const truthAngle = -90 + (d.correctAnswer / 100) * 180;
-            const truthRad = (truthAngle * Math.PI) / 180;
-            const nx = 100 + 65 * Math.cos(truthRad);
-            const ny = 100 + 65 * Math.sin(truthRad);
-            needle.setAttribute('x2', nx);
-            needle.setAttribute('y2', ny);
+            // Needle points up (50%). Rotate: -90=0%, 0=50%, +90=100%
+            const truthRotation = -90 + (d.correctAnswer / 100) * 180;
+            needle.style.transform = 'rotate(' + truthRotation + 'deg)';
           }
           // Position guess marker
           if (d.featuredGuess !== undefined) {
             const marker = document.getElementById('revealGuessMarker');
             if (marker) {
-              const guessAngle = -90 + (d.featuredGuess / 100) * 180;
-              const guessRad = (guessAngle * Math.PI) / 180;
-              marker.setAttribute('x2', 100 + 55 * Math.cos(guessRad));
-              marker.setAttribute('y2', 100 + 55 * Math.sin(guessRad));
+              const guessRotation = -90 + (d.featuredGuess / 100) * 180;
+              marker.style.transform = 'rotate(' + guessRotation + 'deg)';
             }
           }
           // Number reveal
@@ -2210,6 +2401,81 @@ const App = {
               '<div class="flex justify-between items-center p-2" style="background:rgba(255,255,255,0.05);border-radius:8px">' +
                 '<span>' + escapeHtml(pr.playerName) + ' ' + info + '</span>' +
                 '<span style="color:#D4AF37">+' + pr.points + '</span>' +
+              '</div>';
+          });
+          resultHtml += '</div>';
+        }
+        break;
+
+      case 'tshirtwars':
+        resultHtml =
+          '<div class="game-prompt mb-4">' +
+            '<div class="game-prompt__icon">👕</div>' +
+            '<p class="game-prompt__text">' + escapeHtml(d.slogan) + '</p>' +
+          '</div>';
+        if (d.results) {
+          resultHtml += '<div class="flex flex-col gap-3 mb-4" style="max-width:450px;width:100%">';
+          d.results.forEach((r, i) => {
+            const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
+            resultHtml +=
+              '<div class="flex justify-between items-center p-3" style="background:rgba(255,255,255,0.05);border-radius:12px;border-right:4px solid ' + (i === 0 ? '#D4AF37' : 'transparent') + '">' +
+                '<div>' +
+                  '<span class="font-bold">' + medal + ' ' + escapeHtml(r.playerName) + '</span>' +
+                  '<p class="text-sm text-muted mt-1">"' + escapeHtml(r.text) + '"</p>' +
+                '</div>' +
+                '<div class="text-left">' +
+                  '<div style="color:#D4AF37;font-weight:bold">+' + r.points + '</div>' +
+                  '<div class="text-sm text-muted">' + r.percentage + '% (' + r.votes + ' صوت)</div>' +
+                '</div>' +
+              '</div>';
+          });
+          resultHtml += '</div>';
+        }
+        break;
+
+      case 'lovemonster':
+        resultHtml = '<div class="game-prompt mb-4"><div class="game-prompt__icon">💕</div></div>';
+        if (d.results) {
+          resultHtml += '<div class="flex flex-col gap-3 mb-4" style="max-width:450px;width:100%">';
+          d.results.forEach(r => {
+            let info = '';
+            if (r.mutual) info = '💕 توافق متبادل!';
+            else if (r.picked) info = '💌 أرسل لـ ' + escapeHtml(r.picked);
+            else info = '😴 ما أرسل';
+            if (r.receivedCount > 0) info += ' • 💌×' + r.receivedCount + ' وصلته';
+            resultHtml +=
+              '<div class="flex justify-between items-center p-3" style="background:rgba(255,255,255,0.05);border-radius:12px;border-right:4px solid ' + (r.mutual ? '#D4AF37' : 'transparent') + '">' +
+                '<div>' +
+                  '<span class="font-bold">' + escapeHtml(r.playerName) + '</span>' +
+                  '<p class="text-sm text-muted mt-1">' + info + '</p>' +
+                '</div>' +
+                '<span style="color:#D4AF37;font-weight:bold">+' + r.points + '</span>' +
+              '</div>';
+          });
+          resultHtml += '</div>';
+        }
+        break;
+
+      case 'inventions':
+        resultHtml =
+          '<div class="game-prompt mb-4">' +
+            '<div class="game-prompt__icon">💡</div>' +
+            '<p class="game-prompt__text">' + escapeHtml(d.problem) + '</p>' +
+          '</div>';
+        if (d.results) {
+          resultHtml += '<div class="flex flex-col gap-3 mb-4" style="max-width:450px;width:100%">';
+          d.results.forEach((r, i) => {
+            const medal = i === 0 ? '🏆' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
+            resultHtml +=
+              '<div class="flex justify-between items-center p-3" style="background:rgba(255,255,255,0.05);border-radius:12px;border-right:4px solid ' + (i === 0 ? '#D4AF37' : 'transparent') + '">' +
+                '<div>' +
+                  '<span class="font-bold">' + medal + ' ' + escapeHtml(r.playerName) + '</span>' +
+                  '<p class="text-sm text-muted mt-1">"' + escapeHtml(r.text) + '"</p>' +
+                '</div>' +
+                '<div class="text-left">' +
+                  '<div style="color:#D4AF37;font-weight:bold">+' + r.points + '</div>' +
+                  '<div class="text-sm text-muted">' + r.percentage + '% (' + r.votes + ' صوت)</div>' +
+                '</div>' +
               '</div>';
           });
           resultHtml += '</div>';
