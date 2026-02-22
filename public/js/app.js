@@ -72,6 +72,18 @@ const App = {
   reducedMotion: false,
 
   // ─────────────────────────────────────────────
+  // Game-Aware Avatar Helper
+  // Uses per-game DiceBear style + CSS wrapper when in a game
+  // ─────────────────────────────────────────────
+  _gAvatar(avatarData, size, fallback) {
+    if (!avatarData || typeof AvatarSystem === 'undefined') return escapeHtml(fallback || '👤');
+    if (this.currentGame) {
+      return AvatarSystem.getGameAvatarHtml(avatarData, this.currentGame, size);
+    }
+    return AvatarSystem.getAvatarHtml(avatarData, size);
+  },
+
+  // ─────────────────────────────────────────────
   // التهيئة
   // ─────────────────────────────────────────────
   // حالة الإرسال (منع الإرسال المزدوج)
@@ -442,6 +454,7 @@ const App = {
 
     // ── الرجوع والإلغاء ──
     s.on('returnedToLobby', data => {
+      this.currentGame = null;
       this.setTheme('hub');
       AudioEngine.stopMusic();
       this.updatePlayers(data.players);
@@ -451,6 +464,7 @@ const App = {
     });
 
     s.on('gameCancelled', data => {
+      this.currentGame = null;
       this.setTheme('hub');
       AudioEngine.stopMusic();
       this.updatePlayers(data.players);
@@ -661,9 +675,9 @@ const App = {
         const face = document.createElement('div');
         face.className = 'player-avatar__face' + (p.avatarData ? ' player-avatar__face--rich' : '');
         face.style.background = p.color;
-        // Render rich avatar if available, otherwise fallback to emoji
+        // Render rich avatar — game-aware when in a game, standard in lobby
         if (p.avatarData && typeof AvatarSystem !== 'undefined') {
-          face.innerHTML = AvatarSystem.getAvatarHtml(p.avatarData, 56);
+          face.innerHTML = this._gAvatar(p.avatarData, 56, p.avatar);
         } else {
           face.appendChild(document.createTextNode(p.avatar));
         }
@@ -789,9 +803,7 @@ const App = {
     const avatarsEl = document.getElementById('waitingAvatars');
     if (avatarsEl && answered && answered.length > 0) {
       avatarsEl.innerHTML = answered.map(a => {
-        const avatarContent = (a.avatarData && typeof AvatarSystem !== 'undefined')
-          ? AvatarSystem.getAvatarHtml(a.avatarData, 32)
-          : escapeHtml(a.avatar);
+        const avatarContent = this._gAvatar(a.avatarData, 32, a.avatar);
         return '<div class="waiting-avatar' + (a.avatarData ? ' waiting-avatar--rich' : '') + '" style="background:' + escapeHtml(a.color) + '" title="' + escapeHtml(a.name) + '">' +
           avatarContent +
           '<div class="waiting-avatar__check">✓</div>' +
@@ -989,18 +1001,14 @@ const App = {
       // Build vote bars for each side
       const voterBreakdown = d.voterBreakdown || {};
       const aBars = (voterBreakdown[sideA.playerId] || []).map((v, i) => {
-        const vAvatar = (v.avatarData && typeof AvatarSystem !== 'undefined')
-          ? AvatarSystem.getAvatarHtml(v.avatarData, 24)
-          : escapeHtml(v.avatar || '👤');
+        const vAvatar = this._gAvatar(v.avatarData, 24, v.avatar);
         return '<div class="ql-vote-bar" style="background:' + escapeHtml(v.color || '#444') + ';animation-delay:' + (i * 0.2) + 's">' +
           '<span class="ql-vote-bar__avatar">' + vAvatar + '</span>' +
           '<span class="ql-vote-bar__name">' + escapeHtml(v.name || '') + '</span>' +
         '</div>';
       }).join('');
       const bBars = (voterBreakdown[sideB.playerId] || []).map((v, i) => {
-        const vAvatar = (v.avatarData && typeof AvatarSystem !== 'undefined')
-          ? AvatarSystem.getAvatarHtml(v.avatarData, 24)
-          : escapeHtml(v.avatar || '👤');
+        const vAvatar = this._gAvatar(v.avatarData, 24, v.avatar);
         return '<div class="ql-vote-bar" style="background:' + escapeHtml(v.color || '#444') + ';animation-delay:' + (i * 0.2) + 's">' +
           '<span class="ql-vote-bar__avatar">' + vAvatar + '</span>' +
           '<span class="ql-vote-bar__name">' + escapeHtml(v.name || '') + '</span>' +
@@ -1023,7 +1031,7 @@ const App = {
               '<div class="ql-vote-stack" id="qlStackA">' + aBars + '</div>' +
               '<div class="ql-percentage ql-percentage--a' + (aWins ? ' ql-percentage--winner' : '') + (sideAPct === 0 ? ' ql-percentage--zero' : '') + '" id="qlPctA">0%</div>' +
               '<div class="ql-results__player">' +
-                '<div class="ql-results__player-avatar' + (aWins ? ' ql-results__player-avatar--happy' : bWins ? ' ql-results__player-avatar--sad' : '') + '">' + ((sideA.avatarData && typeof AvatarSystem !== 'undefined') ? AvatarSystem.getAvatarHtml(sideA.avatarData, 40) : escapeHtml(sideA.avatar || '👤')) + '</div>' +
+                '<div class="ql-results__player-avatar' + (aWins ? ' ql-results__player-avatar--happy' : bWins ? ' ql-results__player-avatar--sad' : '') + '">' + this._gAvatar(sideA.avatarData, 40, sideA.avatar) + '</div>' +
                 '<div class="ql-results__player-name">' + escapeHtml(sideA.playerName || '') + '</div>' +
               '</div>' +
               '<div class="ql-points' + (sideA.quiplash ? ' ql-points--quiplash' : '') + '">+' + (sideA.points || 0) + '</div>' +
@@ -1038,7 +1046,7 @@ const App = {
               '<div class="ql-vote-stack" id="qlStackB">' + bBars + '</div>' +
               '<div class="ql-percentage ql-percentage--b' + (bWins ? ' ql-percentage--winner' : '') + (sideBPct === 0 ? ' ql-percentage--zero' : '') + '" id="qlPctB">0%</div>' +
               '<div class="ql-results__player">' +
-                '<div class="ql-results__player-avatar' + (bWins ? ' ql-results__player-avatar--happy' : aWins ? ' ql-results__player-avatar--sad' : '') + '">' + ((sideB.avatarData && typeof AvatarSystem !== 'undefined') ? AvatarSystem.getAvatarHtml(sideB.avatarData, 40) : escapeHtml(sideB.avatar || '👤')) + '</div>' +
+                '<div class="ql-results__player-avatar' + (bWins ? ' ql-results__player-avatar--happy' : aWins ? ' ql-results__player-avatar--sad' : '') + '">' + this._gAvatar(sideB.avatarData, 40, sideB.avatar) + '</div>' +
                 '<div class="ql-results__player-name">' + escapeHtml(sideB.playerName || '') + '</div>' +
               '</div>' +
               '<div class="ql-points' + (sideB.quiplash ? ' ql-points--quiplash' : '') + '">+' + (sideB.points || 0) + '</div>' +
@@ -1117,7 +1125,7 @@ const App = {
       const rank = i === 0 ? '👑' : (i + 1).toString();
       return '<div class="ql-mini-lb__row">' +
         '<div class="ql-mini-lb__rank">' + rank + '</div>' +
-        '<div class="ql-mini-lb__avatar">' + ((p.avatarData && typeof AvatarSystem !== 'undefined') ? AvatarSystem.getAvatarHtml(p.avatarData, 28) : escapeHtml(p.avatar || '👤')) + '</div>' +
+        '<div class="ql-mini-lb__avatar">' + this._gAvatar(p.avatarData, 28, p.avatar) + '</div>' +
         '<div class="ql-mini-lb__name">' + escapeHtml(p.name || '') + '</div>' +
         '<div class="ql-mini-lb__score">' + (p.score || 0) + '</div>' +
       '</div>';
@@ -1151,9 +1159,9 @@ const App = {
           '<div class="ql-jinx__subtitle">نفس الإجابة! صفر نقاط للاثنين!</div>' +
           '<div class="ql-jinx__answer">"' + escapeHtml(r0.answer || r1.answer || '') + '"</div>' +
           '<div class="ql-jinx__players">' +
-            '<span>' + ((r0.avatarData && typeof AvatarSystem !== 'undefined') ? AvatarSystem.getAvatarHtml(r0.avatarData, 28) : escapeHtml(r0.avatar || '👤')) + ' ' + escapeHtml(r0.playerName || '') + '</span>' +
+            '<span>' + this._gAvatar(r0.avatarData, 28, r0.avatar) + ' ' + escapeHtml(r0.playerName || '') + '</span>' +
             '<span style="margin:0 12px;color:#ff3f7f;font-weight:900">=</span>' +
-            '<span>' + ((r1.avatarData && typeof AvatarSystem !== 'undefined') ? AvatarSystem.getAvatarHtml(r1.avatarData, 28) : escapeHtml(r1.avatar || '👤')) + ' ' + escapeHtml(r1.playerName || '') + '</span>' +
+            '<span>' + this._gAvatar(r1.avatarData, 28, r1.avatar) + ' ' + escapeHtml(r1.playerName || '') + '</span>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -1444,9 +1452,7 @@ const App = {
   handleFakinItVoting(d) {
     this.startTimer(d.timeLimit);
     const players = d.players.map(p => {
-      const faceContent = (p.avatarData && typeof AvatarSystem !== 'undefined')
-        ? AvatarSystem.getAvatarHtml(p.avatarData, 56)
-        : escapeHtml(p.avatar);
+      const faceContent = this._gAvatar(p.avatarData, 56, p.avatar);
       return '<div class="player-avatar" style="cursor:pointer" data-action="votePlayer" data-id="' + escapeHtml(p.id) + '">' +
         '<div class="player-avatar__face' + (p.avatarData ? ' player-avatar__face--rich' : '') + '" style="background:' + escapeHtml(p.color) + '">' + faceContent + '</div>' +
         '<span class="player-avatar__name">' + escapeHtml(p.name) + '</span>' +
@@ -2275,7 +2281,7 @@ const App = {
     const winnerEl = document.getElementById('winnerDisplay');
     if (winnerEl) {
       const winnerAvatar = (w.avatarData && typeof AvatarSystem !== 'undefined')
-        ? '<div class="winner-showcase__avatar">' + AvatarSystem.getAvatarHtml(w.avatarData, 80) + '</div>'
+        ? '<div class="winner-showcase__avatar">' + this._gAvatar(w.avatarData, 80, w.avatar) + '</div>'
         : '';
       winnerEl.innerHTML =
         '<div class="winner-showcase__trophy">🏆</div>' +
@@ -2285,9 +2291,7 @@ const App = {
     }
 
     const scores = d.finalResults.map((p, i) => {
-      const scoreAvatar = (p.avatarData && typeof AvatarSystem !== 'undefined')
-        ? AvatarSystem.getAvatarHtml(p.avatarData, 40)
-        : escapeHtml(p.avatar);
+      const scoreAvatar = this._gAvatar(p.avatarData, 40, p.avatar);
       return '<div class="scoreboard__row">' +
         '<div class="flex items-center gap-3">' +
           '<span class="text-2xl">' + (i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1)) + '</span>' +

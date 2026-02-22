@@ -628,3 +628,344 @@
  * MT-4 utility (for notion section)
  * ───────────────────────────────────────────────────────────── */
 .mt-4 { margin-top: 16px; }
+
+
+/* ═══════════════════════════════════════════════════════════════
+ * PER-GAME AVATAR VISUAL EFFECTS
+ * Each game transforms avatars with unique animations,
+ * filters, borders, and glows for 400% differentiation
+ * ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Base game-avatar wrapper ─── */
+.game-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.game-avatar img,
+.game-avatar svg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+
+/* ═════════════════════════════════════════════════════════════
+ * QUIPLASH — Wobbly Hand-Drawn Doodles
+ * Comedy stage vibe: shaky, sketchy, warm yellows
+ * ═════════════════════════════════════════════════════════════ */
+
+.game-avatar--quiplash {
+  filter: url(#filter-sketch);
+  border: 3px dashed rgba(255, 217, 61, 0.6);
+  animation: avatar-wobble 2.5s ease-in-out infinite;
+  box-shadow: 0 0 12px rgba(255, 217, 61, 0.3);
+  background: linear-gradient(135deg, #FFD93D 0%, #FF6B35 100%);
+}
+
+[data-theme="quiplash"] .player-avatar__face {
+  animation: avatar-wobble 3s ease-in-out infinite;
+  border: 3px dashed rgba(255, 217, 61, 0.4) !important;
+}
+
+[data-theme="quiplash"] .player-avatar__face--rich {
+  filter: url(#filter-sketch);
+}
+
+@keyframes avatar-wobble {
+  0%, 100% { transform: rotate(-2deg) scale(1); }
+  25% { transform: rotate(1.5deg) scale(1.03); }
+  50% { transform: rotate(-1deg) scale(0.98); }
+  75% { transform: rotate(2deg) scale(1.02); }
+}
+
+/* Waiting avatar dots in quiplash */
+[data-theme="quiplash"] .waiting-avatar {
+  border: 2px dashed rgba(255, 217, 61, 0.4);
+  animation: avatar-wobble 2s ease-in-out infinite;
+}
+
+
+/* ═════════════════════════════════════════════════════════════
+ * GUESSPIONAGE — Noir Spy Silhouettes
+ * Dark, green-tinted, scan lines, spy briefing room
+ * ═════════════════════════════════════════════════════════════ */
+
+.game-avatar--guesspionage {
+  filter: url(#filter-noir);
+  border: 2px solid rgba(0, 255, 65, 0.4);
+  box-shadow:
+    0 0 15px rgba(0, 255, 65, 0.3),
+    inset 0 0 10px rgba(0, 0, 0, 0.5);
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a3a2a 100%);
+  animation: avatar-scan 4s linear infinite;
+}
+
+[data-theme="guesspionage"] .player-avatar__face {
+  filter: url(#filter-noir);
+  border: 2px solid rgba(0, 255, 65, 0.3) !important;
+  box-shadow: 0 0 12px rgba(0, 255, 65, 0.2);
+}
+
+[data-theme="guesspionage"] .player-avatar__face--rich {
+  filter: url(#filter-noir);
+}
+
+[data-theme="guesspionage"] .player-avatar__face::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 255, 65, 0.03) 2px,
+    rgba(0, 255, 65, 0.03) 4px
+  );
+  pointer-events: none;
+  border-radius: 50%;
+}
+
+@keyframes avatar-scan {
+  0% { box-shadow: 0 0 10px rgba(0, 255, 65, 0.2), inset 0 -100% 30px -15px rgba(0, 255, 65, 0.1); }
+  50% { box-shadow: 0 0 20px rgba(0, 255, 65, 0.4), inset 0 100% 30px -15px rgba(0, 255, 65, 0.15); }
+  100% { box-shadow: 0 0 10px rgba(0, 255, 65, 0.2), inset 0 -100% 30px -15px rgba(0, 255, 65, 0.1); }
+}
+
+[data-theme="guesspionage"] .waiting-avatar {
+  filter: brightness(0.3) saturate(0);
+  border: 1px solid rgba(0, 255, 65, 0.3);
+}
+
+
+/* ═════════════════════════════════════════════════════════════
+ * FAKIN' IT — Colorful Suspicious Round Blobs
+ * Shifty eyes, neon borders, suspicion glow
+ * ═════════════════════════════════════════════════════════════ */
+
+.game-avatar--fakinit {
+  border: 3px solid rgba(233, 30, 140, 0.5);
+  box-shadow: 0 0 16px rgba(233, 30, 140, 0.3);
+  animation: avatar-shifty 3s ease-in-out infinite;
+  background: linear-gradient(135deg, #E91E8C 0%, #FF6B35 100%);
+}
+
+[data-theme="fakinit"] .player-avatar__face {
+  animation: avatar-shifty 4s ease-in-out infinite;
+  border: 2px solid rgba(233, 30, 140, 0.4) !important;
+  box-shadow: 0 0 10px rgba(233, 30, 140, 0.2);
+}
+
+[data-theme="fakinit"] .player-avatar__face--rich img,
+[data-theme="fakinit"] .player-avatar__face--rich svg {
+  animation: avatar-shifty-inner 5s ease-in-out infinite;
+}
+
+@keyframes avatar-shifty {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-3px); }
+  30% { transform: translateX(3px); }
+  40% { transform: translateX(0); }
+  70% { transform: translateX(-2px) rotate(-1deg); }
+  85% { transform: translateX(2px) rotate(1deg); }
+}
+
+@keyframes avatar-shifty-inner {
+  0%, 40%, 100% { transform: scaleX(1); }
+  45% { transform: scaleX(-1); }
+  50% { transform: scaleX(-1); }
+  55% { transform: scaleX(1); }
+}
+
+[data-theme="fakinit"] .waiting-avatar {
+  border: 2px solid rgba(233, 30, 140, 0.3);
+  animation: avatar-shifty 3s ease-in-out infinite;
+}
+
+/* Suspicion indicator pulse on vote targets */
+[data-theme="fakinit"] .player-avatar[data-action="votePlayer"] {
+  cursor: pointer;
+}
+
+[data-theme="fakinit"] .player-avatar[data-action="votePlayer"]:hover .player-avatar__face {
+  box-shadow: 0 0 25px rgba(255, 0, 0, 0.5) !important;
+  border-color: rgba(255, 0, 0, 0.7) !important;
+}
+
+
+/* ═════════════════════════════════════════════════════════════
+ * TRIVIA MURDER PARTY — Cute-Creepy Chibi Horror
+ * Floating ghosts, purple glow, eerie vibes
+ * ═════════════════════════════════════════════════════════════ */
+
+.game-avatar--triviamurder {
+  filter: url(#filter-creepy);
+  border: 2px solid rgba(155, 89, 182, 0.5);
+  box-shadow: 0 0 20px rgba(155, 89, 182, 0.4);
+  animation: avatar-float 4s ease-in-out infinite;
+  background: linear-gradient(135deg, #1a0a2e 0%, #4a0e2e 100%);
+}
+
+[data-theme="triviamurder"] .player-avatar__face {
+  animation: avatar-float 5s ease-in-out infinite;
+  border: 2px solid rgba(155, 89, 182, 0.3) !important;
+  box-shadow: 0 0 15px rgba(155, 89, 182, 0.3);
+}
+
+[data-theme="triviamurder"] .player-avatar__face--rich {
+  filter: url(#filter-creepy);
+}
+
+[data-theme="triviamurder"] .player-avatar--dead .player-avatar__face {
+  filter: url(#filter-creepy) grayscale(0.8) brightness(0.5) !important;
+  animation: avatar-ghost-fade 2s ease-in-out infinite !important;
+}
+
+@keyframes avatar-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes avatar-ghost-fade {
+  0%, 100% { opacity: 0.4; transform: translateY(0) scale(0.95); }
+  50% { opacity: 0.7; transform: translateY(-4px) scale(1); }
+}
+
+[data-theme="triviamurder"] .waiting-avatar {
+  border: 1px solid rgba(155, 89, 182, 0.3);
+  animation: avatar-float 3s ease-in-out infinite;
+  box-shadow: 0 0 8px rgba(155, 89, 182, 0.2);
+}
+
+
+/* ═════════════════════════════════════════════════════════════
+ * FIBBAGE — Vintage Theater Masks / Carnival
+ * Sepia tones, gold spotlight, classic theater
+ * ═════════════════════════════════════════════════════════════ */
+
+.game-avatar--fibbage {
+  filter: url(#filter-vintage);
+  border: 3px double rgba(255, 215, 0, 0.6);
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.3);
+  animation: avatar-spotlight 5s ease-in-out infinite;
+  background: linear-gradient(135deg, #2c1810 0%, #4a2c20 100%);
+}
+
+[data-theme="fibbage"] .player-avatar__face {
+  filter: url(#filter-vintage);
+  border: 3px double rgba(255, 215, 0, 0.4) !important;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+  animation: avatar-spotlight 6s ease-in-out infinite;
+}
+
+[data-theme="fibbage"] .player-avatar__face--rich {
+  filter: url(#filter-vintage);
+}
+
+@keyframes avatar-spotlight {
+  0%, 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
+  50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.15); }
+}
+
+[data-theme="fibbage"] .waiting-avatar {
+  filter: sepia(0.5);
+  border: 2px double rgba(255, 215, 0, 0.3);
+}
+
+
+/* ═════════════════════════════════════════════════════════════
+ * DRAWFUL — Crayon/Paint-Splattered Childlike Art
+ * Colorful splashes, high saturation, playful movement
+ * ═════════════════════════════════════════════════════════════ */
+
+.game-avatar--drawful {
+  filter: url(#filter-crayon);
+  border: 3px solid rgba(240, 147, 251, 0.5);
+  box-shadow: 0 0 16px rgba(240, 147, 251, 0.3);
+  animation: avatar-paint 3s ease-in-out infinite;
+  background: linear-gradient(135deg, #f093fb 0%, #43e97b 100%);
+}
+
+[data-theme="drawful"] .player-avatar__face {
+  animation: avatar-paint 4s ease-in-out infinite;
+  border: 3px solid rgba(240, 147, 251, 0.3) !important;
+  box-shadow: 0 0 10px rgba(240, 147, 251, 0.2);
+}
+
+[data-theme="drawful"] .player-avatar__face--rich {
+  filter: url(#filter-crayon) saturate(1.5);
+}
+
+@keyframes avatar-paint {
+  0%, 100% { transform: rotate(0deg) scale(1); border-color: rgba(240, 147, 251, 0.5); }
+  25% { transform: rotate(-3deg) scale(1.05); border-color: rgba(67, 233, 123, 0.5); }
+  50% { transform: rotate(2deg) scale(0.97); border-color: rgba(250, 112, 154, 0.5); }
+  75% { transform: rotate(-1deg) scale(1.03); border-color: rgba(161, 140, 209, 0.5); }
+}
+
+[data-theme="drawful"] .waiting-avatar {
+  border: 2px solid rgba(240, 147, 251, 0.3);
+  animation: avatar-paint 3s ease-in-out infinite;
+}
+
+
+/* ═════════════════════════════════════════════════════════════
+ * VICTORY SCREEN — Winner gets extra glow
+ * ═════════════════════════════════════════════════════════════ */
+
+[data-theme="victory"] .winner-showcase__avatar .game-avatar,
+[data-theme="victory"] .winner-showcase__avatar img,
+[data-theme="victory"] .winner-showcase__avatar svg {
+  filter: none !important;
+  animation: winner-glow 2s ease-in-out infinite;
+}
+
+@keyframes winner-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.6), 0 0 80px rgba(255, 215, 0, 0.2); }
+}
+
+
+/* ═════════════════════════════════════════════════════════════
+ * SCOREBOARD — Per-game row styles carry through
+ * ═════════════════════════════════════════════════════════════ */
+
+.scoreboard__row .game-avatar {
+  flex-shrink: 0;
+}
+
+/* ═════════════════════════════════════════════════════════════
+ * VOTE OPTION AVATARS — Inherit game filter
+ * ═════════════════════════════════════════════════════════════ */
+
+.vote-option .game-avatar {
+  border: none;
+  box-shadow: none;
+  animation: none;
+}
+
+/* ═════════════════════════════════════════════════════════════
+ * REDUCED MOTION — Disable all game avatar animations
+ * ═════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  .game-avatar,
+  [data-theme] .player-avatar__face,
+  [data-theme] .player-avatar__face--rich,
+  [data-theme] .waiting-avatar {
+    animation: none !important;
+  }
+}
+
+[data-reduced-motion="true"] .game-avatar,
+[data-reduced-motion="true"] [data-theme] .player-avatar__face,
+[data-reduced-motion="true"] [data-theme] .player-avatar__face--rich,
+[data-reduced-motion="true"] [data-theme] .waiting-avatar {
+  animation: none !important;
+}

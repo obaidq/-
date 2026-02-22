@@ -216,6 +216,75 @@ const AvatarSystem = {
   EMOJI_AVATARS: ['😎', '🤠', '🥳', '😈', '🤖', '👻', '🦊', '🐸', '🦁', '🐼', '🐯', '🦄', '🧔🏻', '👨‍🚀', '🧛', '🧟', '🤴', '👸', '🧙‍♂️', '🦸', '🥷', '🤺', '🧜‍♂️', '👽'],
 
   // ═══════════════════════════════════════════════════════════════
+  // Per-Game Avatar Visual Identity
+  // Each game transforms avatars with unique styles, filters,
+  // and DiceBear preferences so they look 400% different
+  // ═══════════════════════════════════════════════════════════════
+
+  GAME_AVATAR_CONFIG: {
+    quiplash: {
+      label: 'رد سريع',
+      dicebearStyle: 'croodles',         // Wobbly hand-drawn doodles
+      cssClass: 'game-avatar--quiplash',
+      svgFilter: 'url(#filter-sketch)',
+      bgGradient: 'linear-gradient(135deg, #FFD93D 0%, #FF6B35 100%)',
+      animation: 'avatar-wobble',
+      borderStyle: '3px dashed rgba(255,217,61,0.6)',
+      glowColor: 'rgba(255,217,61,0.4)'
+    },
+    guesspionage: {
+      label: 'خمّن النسبة',
+      dicebearStyle: 'shapes',           // Noir spy silhouettes
+      cssClass: 'game-avatar--guesspionage',
+      svgFilter: 'url(#filter-noir)',
+      bgGradient: 'linear-gradient(135deg, #0a0a0a 0%, #1a3a2a 100%)',
+      animation: 'avatar-scan',
+      borderStyle: '2px solid rgba(0,255,65,0.4)',
+      glowColor: 'rgba(0,255,65,0.5)'
+    },
+    fakinit: {
+      label: 'المزيّف',
+      dicebearStyle: 'fun-emoji',        // Colorful suspicious blobs
+      cssClass: 'game-avatar--fakinit',
+      svgFilter: 'none',
+      bgGradient: 'linear-gradient(135deg, #E91E8C 0%, #FF6B35 100%)',
+      animation: 'avatar-shifty',
+      borderStyle: '3px solid rgba(233,30,140,0.5)',
+      glowColor: 'rgba(233,30,140,0.4)'
+    },
+    triviamurder: {
+      label: 'حفلة القاتل',
+      dicebearStyle: 'bottts-neutral',   // Cute-creepy chibi
+      cssClass: 'game-avatar--triviamurder',
+      svgFilter: 'url(#filter-creepy)',
+      bgGradient: 'linear-gradient(135deg, #1a0a2e 0%, #4a0e2e 100%)',
+      animation: 'avatar-float',
+      borderStyle: '2px solid rgba(155,89,182,0.5)',
+      glowColor: 'rgba(155,89,182,0.6)'
+    },
+    fibbage: {
+      label: 'كشف الكذاب',
+      dicebearStyle: 'avataaars',        // Vintage theater masks
+      cssClass: 'game-avatar--fibbage',
+      svgFilter: 'url(#filter-vintage)',
+      bgGradient: 'linear-gradient(135deg, #2c1810 0%, #4a2c20 100%)',
+      animation: 'avatar-spotlight',
+      borderStyle: '3px double rgba(255,215,0,0.6)',
+      glowColor: 'rgba(255,215,0,0.4)'
+    },
+    drawful: {
+      label: 'ارسم لي',
+      dicebearStyle: 'lorelei',          // Crayon/paint-splattered
+      cssClass: 'game-avatar--drawful',
+      svgFilter: 'url(#filter-crayon)',
+      bgGradient: 'linear-gradient(135deg, #f093fb 0%, #43e97b 100%)',
+      animation: 'avatar-paint',
+      borderStyle: '3px solid rgba(240,147,251,0.5)',
+      glowColor: 'rgba(240,147,251,0.4)'
+    }
+  },
+
+  // ═══════════════════════════════════════════════════════════════
   // State
   // ═══════════════════════════════════════════════════════════════
 
@@ -892,5 +961,47 @@ const AvatarSystem = {
   getRandomAvatarData() {
     this.randomAvatar();
     return this.getAvatarData();
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // Game-Aware Avatar Rendering
+  // Wraps avatar in game-specific visual treatment
+  // ═══════════════════════════════════════════════════════════════
+
+  /**
+   * Get avatar HTML with per-game visual treatment applied.
+   * @param {object} avatarData - Player's avatar data
+   * @param {string} game - Current game key (quiplash, guesspionage, etc.)
+   * @param {number} size - Avatar size in pixels
+   * @returns {string} HTML string with game-themed avatar wrapper
+   */
+  getGameAvatarHtml(avatarData, game, size) {
+    const s = size || 64;
+    const config = this.GAME_AVATAR_CONFIG[game];
+
+    // No game config? Fall back to standard rendering
+    if (!config) return this.getAvatarHtml(avatarData, s);
+
+    // For DiceBear avatars, optionally use the game's preferred style
+    let innerHtml;
+    if (avatarData && avatarData.type === 'dicebear' && config.dicebearStyle) {
+      // Use player's own seed but apply game-specific DiceBear style
+      const gameUrl = this.getDiceBearUrl(config.dicebearStyle, avatarData.seed, s);
+      innerHtml = `<img src="${gameUrl}" alt="${avatarData.nameAr || ''}" width="${s}" height="${s}" style="border-radius:50%" loading="lazy" onerror="this.outerHTML='<span style=font-size:${s * 0.5}px>${avatarData.icon || '🎲'}</span>'"/>`;
+    } else {
+      innerHtml = this.getAvatarHtml(avatarData, s);
+    }
+
+    // Wrap in game-themed container
+    return `<div class="game-avatar ${config.cssClass}" style="width:${s}px;height:${s}px">${innerHtml}</div>`;
+  },
+
+  /**
+   * Get the current game's avatar config
+   * @param {string} game - Game key
+   * @returns {object|null} Config object or null
+   */
+  getGameConfig(game) {
+    return this.GAME_AVATAR_CONFIG[game] || null;
   }
 };
