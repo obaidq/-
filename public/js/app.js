@@ -1160,7 +1160,7 @@ const App = {
           '<div class="ql-jinx__answer">"' + escapeHtml(r0.answer || r1.answer || '') + '"</div>' +
           '<div class="ql-jinx__players">' +
             '<span>' + this._gAvatar(r0.avatarData, 28, r0.avatar) + ' ' + escapeHtml(r0.playerName || '') + '</span>' +
-            '<span style="margin:0 12px;color:#ff3f7f;font-weight:900">=</span>' +
+            '<span style="margin:0 12px;color:#B8860B;font-weight:900">=</span>' +
             '<span>' + this._gAvatar(r1.avatarData, 28, r1.avatar) + ' ' + escapeHtml(r1.playerName || '') + '</span>' +
           '</div>' +
         '</div>' +
@@ -1192,9 +1192,9 @@ const App = {
             '<svg viewBox="0 0 200 120" class="gspy-gauge-svg" aria-hidden="true">' +
               '<defs>' +
                 '<linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">' +
-                  '<stop offset="0%" style="stop-color:#ff4444"/>' +
-                  '<stop offset="50%" style="stop-color:#FFD93D"/>' +
-                  '<stop offset="100%" style="stop-color:#00e676"/>' +
+                  '<stop offset="0%" style="stop-color:#8B4513"/>' +
+                  '<stop offset="50%" style="stop-color:#C8A951"/>' +
+                  '<stop offset="100%" style="stop-color:#006C35"/>' +
                 '</linearGradient>' +
               '</defs>' +
               '<path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="12" stroke-linecap="round"/>' +
@@ -1471,7 +1471,7 @@ const App = {
 
   votePlayer(id, el) {
     document.querySelectorAll('.player-avatar').forEach(c => c.style.borderColor = 'transparent');
-    el.style.borderColor = '#00e676';
+    el.style.borderColor = '#006C35';
     AudioEngine.vote();
     this.socket.emit('submitVote', { code: this.currentRoom, voteId: id });
   },
@@ -1517,7 +1517,7 @@ const App = {
         }
         html += '</div>';
       } else {
-        html += '<p class="text-lg" style="color:#00e676">✅ الكل نجا!</p>';
+        html += '<p class="text-lg" style="color:#006C35">✅ الكل نجا!</p>';
       }
 
       if (d.survivors.length > 0) {
@@ -1540,8 +1540,8 @@ const App = {
         '<div class="text-4xl mb-4">💀</div>' +
         '<h3 class="text-2xl font-bold mb-2">تحدي الموت!</h3>' +
         '<p class="text-xl mb-6">' + escapeHtml(d.challenge) + '</p>' +
-        '<input type="text" class="input mb-4" id="deathInput" placeholder="إجابتك السريعة..." maxlength="50" style="background:rgba(255,255,255,0.1);color:#fff;border-color:#DC143C">' +
-        '<button class="btn btn--primary btn--full" data-action="submitDeathAnswer" style="background:#DC143C">أنقذ نفسك! 🏃</button>' +
+        '<input type="text" class="input mb-4" id="deathInput" placeholder="إجابتك السريعة..." maxlength="50" style="background:rgba(255,255,255,0.1);color:#fff;border-color:#8B2252">' +
+        '<button class="btn btn--primary btn--full" data-action="submitDeathAnswer" style="background:#8B2252">أنقذ نفسك! 🏃</button>' +
       '</div>';
     document.getElementById('deathInput')?.focus();
   },
@@ -1577,13 +1577,13 @@ const App = {
 
       if (d.revived.length > 0) {
         html += '<div class="text-3xl mb-4">🎉</div>';
-        html += '<p class="text-xl font-bold" style="color:#00e676">نجوا من الموت!</p>';
+        html += '<p class="text-xl font-bold" style="color:#006C35">نجوا من الموت!</p>';
         html += '<p class="text-lg mt-2">' + d.revived.map(p => escapeHtml(p.name)).join('، ') + '</p>';
       }
 
       if (d.stillDead.length > 0) {
         html += '<div class="text-3xl mt-4 mb-2">💀</div>';
-        html += '<p class="text-xl font-bold" style="color:#ff4444">ما نجوا...</p>';
+        html += '<p class="text-xl font-bold" style="color:#8B2252">ما نجوا...</p>';
         html += '<p class="text-lg mt-2">' + d.stillDead.map(p => escapeHtml(p.name)).join('، ') + '</p>';
       }
 
@@ -2040,16 +2040,16 @@ const App = {
                 '<svg viewBox="0 0 200 120" class="gspy-gauge-svg" aria-hidden="true">' +
                   '<defs>' +
                     '<linearGradient id="revealGaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">' +
-                      '<stop offset="0%" style="stop-color:#ff4444"/>' +
-                      '<stop offset="50%" style="stop-color:#FFD93D"/>' +
-                      '<stop offset="100%" style="stop-color:#00e676"/>' +
+                      '<stop offset="0%" style="stop-color:#8B4513"/>' +
+                      '<stop offset="50%" style="stop-color:#C8A951"/>' +
+                      '<stop offset="100%" style="stop-color:#006C35"/>' +
                     '</linearGradient>' +
                   '</defs>' +
                   '<path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="12" stroke-linecap="round"/>' +
                   '<path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="url(#revealGaugeGrad)" stroke-width="12" stroke-linecap="round"/>' +
                   '<circle cx="100" cy="100" r="6" fill="#fff"/>' +
                   '<line x1="100" y1="100" x2="100" y2="35" stroke="#fff" stroke-width="3" stroke-linecap="round" id="revealNeedle" class="gspy-needle-line" style="transition:all 1.5s ease-out"/>' +
-                  (d.featuredGuess !== undefined ? '<line x1="100" y1="100" x2="100" y2="40" stroke="#FFD93D" stroke-width="2" stroke-linecap="round" id="revealGuessMarker" style="opacity:0.5;transition:all 0.5s ease-out"/>' : '') +
+                  (d.featuredGuess !== undefined ? '<line x1="100" y1="100" x2="100" y2="40" stroke="#D4AF37" stroke-width="2" stroke-linecap="round" id="revealGuessMarker" style="opacity:0.5;transition:all 0.5s ease-out"/>' : '') +
                 '</svg>' +
               '</div>' +
               '<div class="gspy-results-number gspy-reveal-number" id="revealNumber" style="opacity:0;transform:scale(0)">?</div>' +
@@ -2166,10 +2166,10 @@ const App = {
       case 'triviamurder':
         resultHtml = '<div class="text-2xl text-accent mb-4">✅ ' + escapeHtml(d.correctAnswer) + '</div>';
         if (d.newlyDead && d.newlyDead.length > 0) {
-          resultHtml += '<p style="color:#ff4444">💀 ' + d.newlyDead.map(p => escapeHtml(p.name)).join('، ') + '</p>';
+          resultHtml += '<p style="color:#8B2252">💀 ' + d.newlyDead.map(p => escapeHtml(p.name)).join('، ') + '</p>';
         }
         if (d.revived && d.revived.length > 0) {
-          resultHtml += '<p style="color:#00e676" class="mt-2">🎉 نجوا: ' + d.revived.map(p => escapeHtml(p.name)).join('، ') + '</p>';
+          resultHtml += '<p style="color:#006C35" class="mt-2">🎉 نجوا: ' + d.revived.map(p => escapeHtml(p.name)).join('، ') + '</p>';
         }
         break;
 
@@ -2186,7 +2186,7 @@ const App = {
             resultHtml +=
               '<div class="flex justify-between items-center p-2" style="background:rgba(255,255,255,0.05);border-radius:8px">' +
                 '<span>' + escapeHtml(pr.playerName) + ' ' + info + '</span>' +
-                '<span style="color:#FFD93D">+' + pr.points + '</span>' +
+                '<span style="color:#D4AF37">+' + pr.points + '</span>' +
               '</div>';
           });
           resultHtml += '</div>';
@@ -2209,7 +2209,7 @@ const App = {
             resultHtml +=
               '<div class="flex justify-between items-center p-2" style="background:rgba(255,255,255,0.05);border-radius:8px">' +
                 '<span>' + escapeHtml(pr.playerName) + ' ' + info + '</span>' +
-                '<span style="color:#FFD93D">+' + pr.points + '</span>' +
+                '<span style="color:#D4AF37">+' + pr.points + '</span>' +
               '</div>';
           });
           resultHtml += '</div>';
@@ -2230,7 +2230,7 @@ const App = {
           '<span class="text-2xl">' + (i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1)) + '</span>' +
           '<span class="text-xl font-bold">' + escapeHtml(p.name) + '</span>' +
         '</div>' +
-        '<span class="text-xl font-bold" style="color:#FFD93D">' + p.score + '</span>' +
+        '<span class="text-xl font-bold" style="color:#D4AF37">' + p.score + '</span>' +
       '</div>'
     ).join('');
 
@@ -2298,7 +2298,7 @@ const App = {
           '<span class="avatar" style="background:' + escapeHtml(p.color) + ';width:40px;height:40px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center">' + scoreAvatar + '</span>' +
           '<span class="text-xl font-bold">' + escapeHtml(p.name) + '</span>' +
         '</div>' +
-        '<span class="text-xl font-bold" style="color:#FFD93D">' + p.score + '</span>' +
+        '<span class="text-xl font-bold" style="color:#D4AF37">' + p.score + '</span>' +
       '</div>';
     }).join('');
 
@@ -2344,7 +2344,7 @@ const App = {
     if (!c) return;
     const t = document.createElement('div');
     t.className = 'toast toast--' + (type || 'error');
-    t.style.cssText = 'background:' + (type === 'success' ? 'linear-gradient(135deg,#00e676,#00c853)' : 'linear-gradient(135deg,#ff4444,#cc0000)') +
+    t.style.cssText = 'background:' + (type === 'success' ? 'linear-gradient(135deg,#006C35,#00843D)' : 'linear-gradient(135deg,#8B2252,#5C0A30)') +
       ';color:#fff;padding:14px 28px;border-radius:50px;margin:8px;font-weight:700;font-size:16px;' +
       'box-shadow:0 4px 15px rgba(0,0,0,0.3);animation:slideIn 0.3s ease-out;border:2px solid rgba(255,255,255,0.2)';
     t.textContent = (type === 'success' ? '✅' : '⚠️') + ' ' + msg;
@@ -2589,7 +2589,7 @@ const App = {
     if (this.reducedMotion) return;
     // تنظيف confetti الموجود
     document.querySelectorAll('.confetti-particle').forEach(el => el.remove());
-    const colors = ['#FFD93D', '#E91E8C', '#00d4ff', '#00e676', '#7c4dff', '#FF8C42', '#f093fb'];
+    const colors = ['#D4AF37', '#006C35', '#C8A951', '#00843D', '#B8860B', '#DEB887', '#00BFA5'];
     const count = 30; // تقليل العدد للأداء
     for (let i = 0; i < count; i++) {
       const c = document.createElement('div');

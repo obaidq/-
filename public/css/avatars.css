@@ -663,15 +663,15 @@
 
 .game-avatar--quiplash {
   filter: url(#filter-sketch);
-  border: 3px dashed rgba(255, 217, 61, 0.6);
+  border: 3px dashed rgba(212, 175, 55, 0.6);
   animation: avatar-wobble 2.5s ease-in-out infinite;
-  box-shadow: 0 0 12px rgba(255, 217, 61, 0.3);
-  background: linear-gradient(135deg, #FFD93D 0%, #FF6B35 100%);
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
+  background: linear-gradient(135deg, #D4AF37 0%, #006C35 100%);
 }
 
 [data-theme="quiplash"] .player-avatar__face {
   animation: avatar-wobble 3s ease-in-out infinite;
-  border: 3px dashed rgba(255, 217, 61, 0.4) !important;
+  border: 3px dashed rgba(212, 175, 55, 0.4) !important;
 }
 
 [data-theme="quiplash"] .player-avatar__face--rich {
@@ -687,7 +687,7 @@
 
 /* Waiting avatar dots in quiplash */
 [data-theme="quiplash"] .waiting-avatar {
-  border: 2px dashed rgba(255, 217, 61, 0.4);
+  border: 2px dashed rgba(212, 175, 55, 0.4);
   animation: avatar-wobble 2s ease-in-out infinite;
 }
 
@@ -699,18 +699,18 @@
 
 .game-avatar--guesspionage {
   filter: url(#filter-noir);
-  border: 2px solid rgba(0, 255, 65, 0.4);
+  border: 2px solid rgba(200, 169, 81, 0.4);
   box-shadow:
-    0 0 15px rgba(0, 255, 65, 0.3),
+    0 0 15px rgba(200, 169, 81, 0.3),
     inset 0 0 10px rgba(0, 0, 0, 0.5);
-  background: linear-gradient(135deg, #0a0a0a 0%, #1a3a2a 100%);
+  background: linear-gradient(135deg, #0A1931 0%, #1B3A5C 100%);
   animation: avatar-scan 4s linear infinite;
 }
 
 [data-theme="guesspionage"] .player-avatar__face {
   filter: url(#filter-noir);
-  border: 2px solid rgba(0, 255, 65, 0.3) !important;
-  box-shadow: 0 0 12px rgba(0, 255, 65, 0.2);
+  border: 2px solid rgba(200, 169, 81, 0.3) !important;
+  box-shadow: 0 0 12px rgba(200, 169, 81, 0.2);
 }
 
 [data-theme="guesspionage"] .player-avatar__face--rich {
@@ -725,22 +725,22 @@
     0deg,
     transparent,
     transparent 2px,
-    rgba(0, 255, 65, 0.03) 2px,
-    rgba(0, 255, 65, 0.03) 4px
+    rgba(200, 169, 81, 0.03) 2px,
+    rgba(200, 169, 81, 0.03) 4px
   );
   pointer-events: none;
   border-radius: 50%;
 }
 
 @keyframes avatar-scan {
-  0% { box-shadow: 0 0 10px rgba(0, 255, 65, 0.2), inset 0 -100% 30px -15px rgba(0, 255, 65, 0.1); }
-  50% { box-shadow: 0 0 20px rgba(0, 255, 65, 0.4), inset 0 100% 30px -15px rgba(0, 255, 65, 0.15); }
-  100% { box-shadow: 0 0 10px rgba(0, 255, 65, 0.2), inset 0 -100% 30px -15px rgba(0, 255, 65, 0.1); }
+  0% { box-shadow: 0 0 10px rgba(200, 169, 81, 0.2), inset 0 -100% 30px -15px rgba(200, 169, 81, 0.1); }
+  50% { box-shadow: 0 0 20px rgba(200, 169, 81, 0.4), inset 0 100% 30px -15px rgba(200, 169, 81, 0.15); }
+  100% { box-shadow: 0 0 10px rgba(200, 169, 81, 0.2), inset 0 -100% 30px -15px rgba(200, 169, 81, 0.1); }
 }
 
 [data-theme="guesspionage"] .waiting-avatar {
   filter: brightness(0.3) saturate(0);
-  border: 1px solid rgba(0, 255, 65, 0.3);
+  border: 1px solid rgba(200, 169, 81, 0.3);
 }
 
 
@@ -750,16 +750,16 @@
  * ═════════════════════════════════════════════════════════════ */
 
 .game-avatar--fakinit {
-  border: 3px solid rgba(233, 30, 140, 0.5);
-  box-shadow: 0 0 16px rgba(233, 30, 140, 0.3);
+  border: 3px solid rgba(232, 163, 23, 0.5);
+  box-shadow: 0 0 16px rgba(232, 163, 23, 0.3);
   animation: avatar-shifty 3s ease-in-out infinite;
-  background: linear-gradient(135deg, #E91E8C 0%, #FF6B35 100%);
+  background: linear-gradient(135deg, #E8A317 0%, #8B4513 100%);
 }
 
 [data-theme="fakinit"] .player-avatar__face {
   animation: avatar-shifty 4s ease-in-out infinite;
-  border: 2px solid rgba(233, 30, 140, 0.4) !important;
-  box-shadow: 0 0 10px rgba(233, 30, 140, 0.2);
+  border: 2px solid rgba(232, 163, 23, 0.4) !important;
+  box-shadow: 0 0 10px rgba(232, 163, 23, 0.2);
 }
 
 [data-theme="fakinit"] .player-avatar__face--rich img,
@@ -784,7 +784,7 @@
 }
 
 [data-theme="fakinit"] .waiting-avatar {
-  border: 2px solid rgba(233, 30, 140, 0.3);
+  border: 2px solid rgba(232, 163, 23, 0.3);
   animation: avatar-shifty 3s ease-in-out infinite;
 }
 
@@ -794,8 +794,8 @@
 }
 
 [data-theme="fakinit"] .player-avatar[data-action="votePlayer"]:hover .player-avatar__face {
-  box-shadow: 0 0 25px rgba(255, 0, 0, 0.5) !important;
-  border-color: rgba(255, 0, 0, 0.7) !important;
+  box-shadow: 0 0 25px rgba(184, 134, 11, 0.5) !important;
+  border-color: rgba(184, 134, 11, 0.7) !important;
 }
 
 
@@ -806,16 +806,16 @@
 
 .game-avatar--triviamurder {
   filter: url(#filter-creepy);
-  border: 2px solid rgba(155, 89, 182, 0.5);
-  box-shadow: 0 0 20px rgba(155, 89, 182, 0.4);
+  border: 2px solid rgba(139, 34, 82, 0.5);
+  box-shadow: 0 0 20px rgba(139, 34, 82, 0.4);
   animation: avatar-float 4s ease-in-out infinite;
-  background: linear-gradient(135deg, #1a0a2e 0%, #4a0e2e 100%);
+  background: linear-gradient(135deg, #1A0008 0%, #2D0A15 100%);
 }
 
 [data-theme="triviamurder"] .player-avatar__face {
   animation: avatar-float 5s ease-in-out infinite;
-  border: 2px solid rgba(155, 89, 182, 0.3) !important;
-  box-shadow: 0 0 15px rgba(155, 89, 182, 0.3);
+  border: 2px solid rgba(184, 134, 11, 0.3) !important;
+  box-shadow: 0 0 15px rgba(139, 34, 82, 0.3);
 }
 
 [data-theme="triviamurder"] .player-avatar__face--rich {
@@ -838,9 +838,9 @@
 }
 
 [data-theme="triviamurder"] .waiting-avatar {
-  border: 1px solid rgba(155, 89, 182, 0.3);
+  border: 1px solid rgba(139, 34, 82, 0.3);
   animation: avatar-float 3s ease-in-out infinite;
-  box-shadow: 0 0 8px rgba(155, 89, 182, 0.2);
+  box-shadow: 0 0 8px rgba(139, 34, 82, 0.2);
 }
 
 
@@ -851,16 +851,16 @@
 
 .game-avatar--fibbage {
   filter: url(#filter-vintage);
-  border: 3px double rgba(255, 215, 0, 0.6);
-  box-shadow: 0 0 25px rgba(255, 215, 0, 0.3);
+  border: 3px double rgba(218, 165, 32, 0.6);
+  box-shadow: 0 0 25px rgba(218, 165, 32, 0.3);
   animation: avatar-spotlight 5s ease-in-out infinite;
-  background: linear-gradient(135deg, #2c1810 0%, #4a2c20 100%);
+  background: linear-gradient(135deg, #1A0F08 0%, #2E1A0E 100%);
 }
 
 [data-theme="fibbage"] .player-avatar__face {
   filter: url(#filter-vintage);
-  border: 3px double rgba(255, 215, 0, 0.4) !important;
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+  border: 3px double rgba(218, 165, 32, 0.4) !important;
+  box-shadow: 0 0 15px rgba(218, 165, 32, 0.2);
   animation: avatar-spotlight 6s ease-in-out infinite;
 }
 
@@ -869,13 +869,13 @@
 }
 
 @keyframes avatar-spotlight {
-  0%, 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
-  50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.15); }
+  0%, 100% { box-shadow: 0 0 10px rgba(218, 165, 32, 0.2); }
+  50% { box-shadow: 0 0 30px rgba(218, 165, 32, 0.5), 0 0 60px rgba(218, 165, 32, 0.15); }
 }
 
 [data-theme="fibbage"] .waiting-avatar {
   filter: sepia(0.5);
-  border: 2px double rgba(255, 215, 0, 0.3);
+  border: 2px double rgba(218, 165, 32, 0.3);
 }
 
 
@@ -886,16 +886,16 @@
 
 .game-avatar--drawful {
   filter: url(#filter-crayon);
-  border: 3px solid rgba(240, 147, 251, 0.5);
-  box-shadow: 0 0 16px rgba(240, 147, 251, 0.3);
+  border: 3px solid rgba(0, 191, 165, 0.5);
+  box-shadow: 0 0 16px rgba(0, 191, 165, 0.3);
   animation: avatar-paint 3s ease-in-out infinite;
-  background: linear-gradient(135deg, #f093fb 0%, #43e97b 100%);
+  background: linear-gradient(135deg, #00BFA5 0%, #0D1B3E 100%);
 }
 
 [data-theme="drawful"] .player-avatar__face {
   animation: avatar-paint 4s ease-in-out infinite;
-  border: 3px solid rgba(240, 147, 251, 0.3) !important;
-  box-shadow: 0 0 10px rgba(240, 147, 251, 0.2);
+  border: 3px solid rgba(0, 191, 165, 0.3) !important;
+  box-shadow: 0 0 10px rgba(0, 191, 165, 0.2);
 }
 
 [data-theme="drawful"] .player-avatar__face--rich {
@@ -903,14 +903,14 @@
 }
 
 @keyframes avatar-paint {
-  0%, 100% { transform: rotate(0deg) scale(1); border-color: rgba(240, 147, 251, 0.5); }
-  25% { transform: rotate(-3deg) scale(1.05); border-color: rgba(67, 233, 123, 0.5); }
-  50% { transform: rotate(2deg) scale(0.97); border-color: rgba(250, 112, 154, 0.5); }
-  75% { transform: rotate(-1deg) scale(1.03); border-color: rgba(161, 140, 209, 0.5); }
+  0%, 100% { transform: rotate(0deg) scale(1); border-color: rgba(0, 191, 165, 0.5); }
+  25% { transform: rotate(-3deg) scale(1.05); border-color: rgba(212, 175, 55, 0.5); }
+  50% { transform: rotate(2deg) scale(0.97); border-color: rgba(0, 108, 53, 0.5); }
+  75% { transform: rotate(-1deg) scale(1.03); border-color: rgba(0, 150, 136, 0.5); }
 }
 
 [data-theme="drawful"] .waiting-avatar {
-  border: 2px solid rgba(240, 147, 251, 0.3);
+  border: 2px solid rgba(0, 191, 165, 0.3);
   animation: avatar-paint 3s ease-in-out infinite;
 }
 
@@ -927,8 +927,8 @@
 }
 
 @keyframes winner-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
-  50% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.6), 0 0 80px rgba(255, 215, 0, 0.2); }
+  0%, 100% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(212, 175, 55, 0.6), 0 0 80px rgba(212, 175, 55, 0.2); }
 }
 
 
