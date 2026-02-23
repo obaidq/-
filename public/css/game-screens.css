@@ -1233,6 +1233,82 @@
   font-size:18px; font-weight:700; color:rgba(255,255,255,0.8);
 }
 
+/* ─── Thriplash (Final Round) Styles ─── */
+.ql-prompt-card--thriplash {
+  border-color:#FF6B35;
+  box-shadow:0 8px 40px rgba(0,0,0,0.4), 0 0 40px rgba(255,107,53,0.2);
+}
+.ql-prompt-card--thriplash::before {
+  background:linear-gradient(90deg,#FF6B35,#FFD700,#FF6B35);
+}
+.ql-thriplash-vote {
+  display:flex; flex-direction:column; align-items:center; gap:16px;
+  max-width:600px; width:100%; animation:ql-fade-up 0.4s ease-out;
+}
+.ql-thriplash-vote__badge {
+  display:inline-flex; padding:8px 24px; border-radius:50px;
+  font-size:16px; font-weight:900; color:#000;
+  background:linear-gradient(135deg,#FFD700,#FF6B35);
+  border:3px solid #000; box-shadow:4px 4px 0 #000;
+  text-transform:uppercase; letter-spacing:2px;
+}
+.ql-thriplash-vote__question {
+  font-size:24px; font-weight:700; color:#fff; text-align:center;
+  font-family:'Tajawal',sans-serif; margin-bottom:8px;
+}
+.ql-thriplash-vote__options {
+  display:flex; flex-direction:column; gap:12px; width:100%;
+}
+.ql-thriplash-option {
+  background:rgba(255,255,255,0.06); border:3px solid rgba(255,255,255,0.15);
+  border-radius:16px; padding:20px; text-align:center; cursor:pointer;
+  transition:all 0.2s; font-family:'Tajawal',sans-serif;
+}
+.ql-thriplash-option:hover {
+  border-color:#FFD700; background:rgba(255,215,0,0.1);
+  transform:translateY(-2px); box-shadow:0 4px 20px rgba(255,215,0,0.2);
+}
+.ql-thriplash-option:active { transform:scale(0.98); }
+.ql-thriplash-option__text { font-size:20px; font-weight:700; color:#fff; }
+
+/* Thriplash Results */
+.ql-thriplash-results {
+  display:flex; flex-direction:column; align-items:center; gap:20px;
+  max-width:600px; width:100%; animation:ql-fade-up 0.4s ease-out;
+}
+.ql-thriplash-results__header { text-align:center; }
+.ql-thriplash-results__badge {
+  font-size:28px; font-weight:900; color:#FFD700;
+  text-shadow:2px 2px 0 #000; margin-bottom:8px;
+}
+.ql-thriplash-results__question {
+  font-size:18px; color:rgba(255,255,255,0.6); font-weight:600;
+}
+.ql-thriplash-results__list {
+  display:flex; flex-direction:column; gap:10px; width:100%;
+}
+.ql-thriplash-result {
+  display:flex; align-items:center; gap:12px;
+  background:rgba(255,255,255,0.05); border:2px solid rgba(255,255,255,0.1);
+  border-radius:14px; padding:14px 16px;
+  animation:ql-fade-up 0.3s ease-out;
+}
+.ql-thriplash-result--winner {
+  border-color:#FFD700; background:rgba(255,215,0,0.1);
+  box-shadow:0 0 20px rgba(255,215,0,0.15);
+}
+.ql-thriplash-result__place { font-size:24px; min-width:36px; text-align:center; }
+.ql-thriplash-result__avatar { flex-shrink:0; }
+.ql-thriplash-result__info { flex:1; min-width:0; }
+.ql-thriplash-result__name { font-weight:700; font-size:16px; color:#fff; }
+.ql-thriplash-result__answer {
+  font-size:14px; color:rgba(255,255,255,0.6); margin-top:2px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.ql-thriplash-result__stats { text-align:left; flex-shrink:0; }
+.ql-thriplash-result__votes { font-size:14px; color:rgba(255,255,255,0.5); }
+.ql-thriplash-result__points { font-size:18px; font-weight:900; color:#D4AF37; }
+
 /* ═══ QUIPLASH RESPONSIVE ═══ */
 @media(max-width:768px) {
   .ql-interstitial__round-num { font-size:80px; }
@@ -1259,6 +1335,16 @@
   .ql-bubble__text { font-size:16px; }
   .ql-percentage { font-size:28px; }
   .ql-quiplash-moment__text { font-size:44px; }
+  .ql-thriplash-vote__badge { font-size:14px; }
+  .ql-thriplash-option__text { font-size:17px; }
+  .ql-thriplash-results__badge { font-size:22px; }
+}
+
+/* ═══ FAKIN' IT ═══ */
+.fakin-discussion-box {
+  background: rgba(0,108,53,0.15); border: 2px solid rgba(0,108,53,0.4);
+  border-radius: 16px; padding: 24px; margin: 16px 0;
+  animation: fadeIn 0.5s ease-out;
 }
 
 /* ═══════════════════════════════════════════════════════════════
