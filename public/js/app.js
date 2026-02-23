@@ -1616,12 +1616,12 @@ const App = {
           '<div class="gspy-question-icon">📊</div>' +
           '<p class="gspy-question-text">' + escapeHtml(d.question) + '</p>' +
         '</div>' +
-        '<div class="gspy-featured-spotlight">' +
-          '<div class="gspy-spotlight-icon">🎯</div>' +
-          '<p class="gspy-spotlight-name">' + escapeHtml(d.featuredPlayerName) + '</p>' +
-          '<p class="gspy-spotlight-label">يخمّن النسبة...</p>' +
-          '<div class="spinner mt-4"></div>' +
+        '<div class="featured-player mt-4">' +
+          '<div class="featured-player__avatar">🎯</div>' +
+          '<div class="featured-player__name">' + escapeHtml(d.featuredPlayerName) + '</div>' +
+          '<div class="featured-player__label">يخمّن النسبة...</div>' +
         '</div>' +
+        '<div class="spinner mt-4"></div>' +
       '</div>';
   },
 
@@ -1632,13 +1632,14 @@ const App = {
     this.startTimer(d.timeLimit);
     document.getElementById('gameContent').innerHTML =
       '<div class="gspy-result-container">' +
-        '<div class="gspy-badge gspy-badge--featured">🎯 تخمينك</div>' +
         '<div class="gspy-question-card gspy-question-card--sm">' +
           '<p class="gspy-question-text">' + escapeHtml(d.question) + '</p>' +
         '</div>' +
-        '<div class="gspy-your-guess">' +
-          '<div class="gspy-guess-number">' + d.yourGuess + '%</div>' +
-          '<p class="gspy-guess-label">تخمينك</p>' +
+        '<div class="donut-chart mt-4 mb-4" style="--pct:' + d.yourGuess + ';margin:0 auto">' +
+          '<div class="donut-chart__inner">' +
+            '<div class="donut-chart__value">' + d.yourGuess + '%</div>' +
+            '<div class="donut-chart__symbol">تخمينك</div>' +
+          '</div>' +
         '</div>' +
         '<div class="gspy-waiting-others">' +
           '<div class="spinner"></div>' +
@@ -1656,13 +1657,11 @@ const App = {
     if (d.commentary) this.showCommentary(d.commentary);
 
     let buttonsHtml =
-      '<button class="gspy-bet-btn gspy-bet-btn--higher" data-action="submitGuess" data-bet="higher" aria-label="الجواب أعلى من التخمين">' +
-        '<span class="gspy-bet-arrow">▲</span>' +
-        '<span class="gspy-bet-text">أعلى</span>' +
+      '<button class="hl-btn hl-btn--higher" data-action="submitGuess" data-bet="higher" aria-label="الجواب أعلى من التخمين">' +
+        '▲ أعلى' +
       '</button>' +
-      '<button class="gspy-bet-btn gspy-bet-btn--lower" data-action="submitGuess" data-bet="lower" aria-label="الجواب أقل من التخمين">' +
-        '<span class="gspy-bet-arrow">▼</span>' +
-        '<span class="gspy-bet-text">أقل</span>' +
+      '<button class="hl-btn hl-btn--lower" data-action="submitGuess" data-bet="lower" aria-label="الجواب أقل من التخمين">' +
+        '▼ أقل' +
       '</button>';
 
     let muchHtml = '';
@@ -1670,15 +1669,11 @@ const App = {
       muchHtml =
         '<div class="gspy-much-label mt-4">🎲 أو راهن أكبر!</div>' +
         '<div class="gspy-bet-buttons gspy-bet-buttons--much">' +
-          '<button class="gspy-bet-btn gspy-bet-btn--much-higher" data-action="submitGuess" data-bet="much_higher" aria-label="الجواب أعلى بكثير">' +
-            '<span class="gspy-bet-arrow">▲▲</span>' +
-            '<span class="gspy-bet-text">أعلى بكثير</span>' +
-            '<span class="gspy-bet-sub">+2000 أو 0!</span>' +
+          '<button class="hl-btn hl-btn--much-higher" data-action="submitGuess" data-bet="much_higher" aria-label="الجواب أعلى بكثير">' +
+            '▲▲ أعلى بكثير<br><span style="font-size:12px;opacity:0.7">+2000 أو 0!</span>' +
           '</button>' +
-          '<button class="gspy-bet-btn gspy-bet-btn--much-lower" data-action="submitGuess" data-bet="much_lower" aria-label="الجواب أقل بكثير">' +
-            '<span class="gspy-bet-arrow">▼▼</span>' +
-            '<span class="gspy-bet-text">أقل بكثير</span>' +
-            '<span class="gspy-bet-sub">+2000 أو 0!</span>' +
+          '<button class="hl-btn hl-btn--much-lower" data-action="submitGuess" data-bet="much_lower" aria-label="الجواب أقل بكثير">' +
+            '▼▼ أقل بكثير<br><span style="font-size:12px;opacity:0.7">+2000 أو 0!</span>' +
           '</button>' +
         '</div>';
     }
@@ -1689,11 +1684,13 @@ const App = {
           '<p class="gspy-question-text">' + escapeHtml(d.question) + '</p>' +
         '</div>' +
         '<div class="gspy-featured-guess-display">' +
-          '<p class="gspy-featured-label">' + escapeHtml(d.featuredPlayerName) + ' خمّن:</p>' +
-          '<div class="gspy-featured-number">' + d.featuredGuess + '%</div>' +
+          '<div class="featured-player mb-2"><div class="featured-player__label">خمّن</div><div class="featured-player__name">' + escapeHtml(d.featuredPlayerName) + '</div></div>' +
+          '<div class="donut-chart mb-3" style="--pct:' + d.featuredGuess + ';margin:0 auto">' +
+            '<div class="donut-chart__inner"><div class="donut-chart__value">' + d.featuredGuess + '%</div></div>' +
+          '</div>' +
         '</div>' +
         '<div class="gspy-challenge-prompt">الجواب الصحيح أعلى أو أقل؟</div>' +
-        '<div class="gspy-bet-buttons">' + buttonsHtml + '</div>' +
+        '<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">' + buttonsHtml + '</div>' +
         muchHtml +
         '<p class="text-muted mt-4" id="waitingCount"></p>' +
       '</div>';
@@ -1810,22 +1807,23 @@ const App = {
     let html;
     if (d.isFaker) {
       html =
-        '<div class="panel" style="max-width:600px;background:linear-gradient(135deg,#8B0000,#4a0000)">' +
-          '<div class="badge badge--error mb-4">🕵️ أنت المزيّف!</div>' +
-          '<div class="text-4xl mb-4">' + catIcon + '</div>' +
-          '<p class="text-2xl font-bold mb-4">ما تعرف المهمة!</p>' +
-          '<p class="text-muted mb-2">النوع: ' + escapeHtml(d.category) + '</p>' +
-          '<p class="text-muted">حاول تتصرف طبيعي وما ينكشف أمرك!</p>' +
-          '<button class="btn btn--secondary btn--full mt-6" data-action="submitFakinAction">جاهز! 🎭</button>' +
+        '<div class="faker-reveal" style="max-width:600px">' +
+          '<div class="faker-silhouette faker-silhouette--revealed mb-4">' +
+            '<div class="faker-silhouette__emoji">🕵️</div>' +
+          '</div>' +
+          '<p class="text-2xl font-bold mb-2" style="color:#FF4466">أنت المزيّف!</p>' +
+          '<p class="text-lg mb-2" style="color:rgba(255,255,255,0.6)">النوع: ' + escapeHtml(d.category) + ' ' + catIcon + '</p>' +
+          '<p class="text-muted mb-4">ما تعرف المهمة! حاول تتصرف طبيعي</p>' +
+          '<button class="btn btn--secondary btn--full mt-4" data-action="submitFakinAction" style="background:rgba(139,34,82,0.5);border-color:#8B2252">جاهز! 🎭</button>' +
         '</div>';
     } else {
       html =
-        '<div class="panel" style="max-width:600px">' +
-          '<div class="badge badge--warning mb-4">' + escapeHtml(d.category) + '</div>' +
-          '<div class="text-4xl mb-4">' + catIcon + '</div>' +
+        '<div class="faker-reveal" style="max-width:600px">' +
+          '<div style="font-size:64px;margin-bottom:16px">' + catIcon + '</div>' +
+          '<div class="faker-status faker-status--safe mb-4">' + escapeHtml(d.category) + '</div>' +
           (catHint ? '<p class="text-sm text-muted mb-2">' + catHint + '</p>' : '') +
           '<p class="text-sm text-muted mb-2">' + escapeHtml(d.instruction) + '</p>' +
-          '<p class="text-2xl font-bold mb-6">' + escapeHtml(d.task) + '</p>' +
+          '<p class="text-2xl font-bold mb-6" style="color:#fff">' + escapeHtml(d.task) + '</p>' +
           '<button class="btn btn--primary btn--full" data-action="submitFakinAction">جاهز! ✅</button>' +
         '</div>';
     }
@@ -1843,24 +1841,23 @@ const App = {
 
     const players = d.players.map(p => {
       const faceContent = this._gAvatar(p.avatarData, 48, p.avatar);
-      return '<div class="player-avatar">' +
-        '<div class="player-avatar__face' + (p.avatarData ? ' player-avatar__face--rich' : '') + '" style="background:' + escapeHtml(p.color) + '">' + faceContent + '</div>' +
-        '<span class="player-avatar__name">' + escapeHtml(p.name) + '</span>' +
+      return '<div class="faker-silhouette" style="border:none;background:rgba(255,255,255,0.05)">' +
+        '<div class="player-avatar__face' + (p.avatarData ? ' player-avatar__face--rich' : '') + '" style="background:' + escapeHtml(p.color) + ';width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;border:3px solid #000;box-shadow:3px 3px 0 #000">' + faceContent + '</div>' +
+        '<span style="margin-top:6px;display:block;font-weight:600;color:#fff;font-size:13px">' + escapeHtml(p.name) + '</span>' +
       '</div>';
     }).join('');
 
     document.getElementById('gameContent').innerHTML =
-      '<div class="text-center" style="max-width:700px">' +
-        '<div class="badge badge--info mb-4">💬 مرحلة النقاش</div>' +
-        '<p class="text-lg mb-2">المهمة كانت:</p>' +
-        '<p class="text-2xl font-bold text-accent mb-4">"' + escapeHtml(d.task) + '"</p>' +
-        '<p class="text-muted mb-2">(' + escapeHtml(d.category) + ': ' + escapeHtml(d.instruction) + ')</p>' +
-        '<div class="fakin-discussion-box">' +
-          '<p class="text-xl font-bold mb-2">🗣️ ناقشوا مع بعض!</p>' +
-          '<p class="text-muted mb-4">مين تحسون إنه المزيّف؟ شاركوا شكوككم!</p>' +
-          '<div class="players-area">' + players + '</div>' +
+      '<div class="faker-reveal" style="max-width:700px">' +
+        '<p class="text-lg mb-2" style="color:rgba(255,255,255,0.6)">المهمة كانت:</p>' +
+        '<p class="text-xl font-bold mb-3" style="color:#FF4466">"' + escapeHtml(d.task) + '"</p>' +
+        '<p class="text-sm mb-4" style="color:rgba(255,255,255,0.4)">(' + escapeHtml(d.category) + ': ' + escapeHtml(d.instruction) + ')</p>' +
+        '<div class="faker-frame mb-4" style="padding:20px">' +
+          '<p class="text-xl font-bold mb-2" style="color:#fff">🗣️ ناقشوا مع بعض!</p>' +
+          '<p class="text-sm mb-4" style="color:rgba(255,255,255,0.5)">مين تحسون إنه المزيّف؟</p>' +
+          '<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">' + players + '</div>' +
         '</div>' +
-        '<p class="text-sm text-muted mt-4">التصويت يبدأ بعد انتهاء النقاش...</p>' +
+        '<p class="text-sm text-muted">التصويت يبدأ بعد انتهاء النقاش...</p>' +
       '</div>';
   },
 
@@ -1868,18 +1865,21 @@ const App = {
     this.startTimer(d.timeLimit);
     const players = d.players.map(p => {
       const faceContent = this._gAvatar(p.avatarData, 56, p.avatar);
-      return '<div class="player-avatar" style="cursor:pointer" data-action="votePlayer" data-id="' + escapeHtml(p.id) + '">' +
-        '<div class="player-avatar__face' + (p.avatarData ? ' player-avatar__face--rich' : '') + '" style="background:' + escapeHtml(p.color) + '">' + faceContent + '</div>' +
-        '<span class="player-avatar__name">' + escapeHtml(p.name) + '</span>' +
+      return '<div class="faker-silhouette" style="cursor:pointer" data-action="votePlayer" data-id="' + escapeHtml(p.id) + '">' +
+        '<div class="player-avatar__face' + (p.avatarData ? ' player-avatar__face--rich' : '') + '" style="background:' + escapeHtml(p.color) + ';width:68px;height:68px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:34px;border:4px solid #000;box-shadow:4px 4px 0 #000">' + faceContent + '</div>' +
+        '<span style="margin-top:8px;display:block;font-weight:700;color:#fff">' + escapeHtml(p.name) + '</span>' +
       '</div>';
     }).join('');
 
     document.getElementById('gameContent').innerHTML =
-      '<div class="text-center" style="max-width:800px">' +
-        '<p class="text-xl mb-2">المهمة كانت:</p>' +
-        '<p class="text-2xl font-bold text-accent mb-6">"' + escapeHtml(d.task) + '"</p>' +
-        '<h3 class="text-2xl font-bold mb-4">🕵️ من المزيّف؟</h3>' +
-        '<div class="players-area">' + players + '</div>' +
+      '<div class="faker-reveal" style="max-width:800px">' +
+        '<p class="text-lg mb-2" style="color:rgba(255,255,255,0.6)">المهمة كانت:</p>' +
+        '<p class="text-xl font-bold mb-4" style="color:#FF4466">"' + escapeHtml(d.task) + '"</p>' +
+        '<div class="faker-silhouette mb-4" style="border:none;background:none">' +
+          '<div class="faker-silhouette__question">🕵️</div>' +
+        '</div>' +
+        '<h3 class="text-2xl font-bold mb-4" style="color:#fff">من المزيّف؟</h3>' +
+        '<div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center">' + players + '</div>' +
         '<p class="text-muted mt-4" id="waitingCount"></p>' +
       '</div>';
   },
@@ -1899,44 +1899,62 @@ const App = {
     document.getElementById('gameRound').textContent = 'الجولة ' + d.round + ' من ' + d.maxRounds;
     this.startTimer(d.timeLimit);
     const opts = d.options.map((o, i) =>
-      '<button class="btn btn--secondary btn--full" data-action="submitTriviaAnswer" data-id="' + i + '">' + escapeHtml(o) + '</button>'
+      '<div class="murder-option" data-action="submitTriviaAnswer" data-id="' + i + '">' +
+        '<span class="murder-option__num">' + (i + 1) + '</span>' +
+        '<span class="murder-option__text">' + escapeHtml(o) + '</span>' +
+      '</div>'
     ).join('');
 
     document.getElementById('gameContent').innerHTML =
-      '<div class="panel" style="max-width:600px">' +
-        '<div class="badge badge--error mb-4">💀 أجب أو مت!</div>' +
-        '<p class="text-2xl font-bold mb-6">' + escapeHtml(d.question) + '</p>' +
-        '<div class="flex flex-col gap-3">' + opts + '</div>' +
+      '<div class="death-zone">' +
+        '<div class="death-zone__title">💀 أجب أو مت!</div>' +
+        '<p class="text-2xl font-bold mb-6" style="color:#fff">' + escapeHtml(d.question) + '</p>' +
+        '<div class="murder-options">' + opts + '</div>' +
       '</div>';
   },
 
-  submitTriviaAnswer(i, btn) {
-    document.querySelectorAll('#gameContent .btn--secondary').forEach(b => { b.disabled = true; b.style.opacity = '0.5'; });
-    btn.style.opacity = '1';
-    btn.style.borderColor = '#FFD93D';
+  submitTriviaAnswer(i, el) {
+    const opt = el.closest('.murder-option') || el;
+    document.querySelectorAll('.murder-option').forEach(b => { b.style.pointerEvents = 'none'; b.style.opacity = '0.5'; });
+    opt.style.opacity = '1';
+    opt.classList.add('murder-option--selected');
     this.socket.emit('submitAnswer', { code: this.currentRoom, answer: i });
   },
 
   handleTriviaMurderResults(d) {
     try {
       clearInterval(this.gameTimer);
-      let html = '<div class="text-center" style="max-width:600px">';
-      html += '<div class="text-2xl text-accent mb-4">✅ ' + escapeHtml(d.correctAnswer) + '</div>';
+      let html = '<div class="death-zone" style="max-width:600px">';
+      html += '<div class="text-2xl mb-4" style="color:#00e676">✅ ' + escapeHtml(d.correctAnswer) + '</div>';
 
       if (d.newlyDead.length > 0) {
-        html += '<div class="death-panel mt-4 mb-4">';
-        html += '<p class="text-xl font-bold mb-2">💀 ماتوا!</p>';
-        html += '<p class="text-lg">' + d.newlyDead.map(p => escapeHtml(p.name)).join('، ') + '</p>';
+        html += '<div class="dolls-row mb-4">';
+        d.newlyDead.forEach((p, i) => {
+          const colors = ['crimson', 'purple', 'midnight', 'teal', 'rust', 'olive', 'navy', 'coral'];
+          html += '<div class="doll doll--' + colors[i % colors.length] + '">' +
+            '<div class="doll__body"><div class="doll__face">💀</div></div>' +
+            '<div class="doll__name">' + escapeHtml(p.name) + '</div>' +
+          '</div>';
+        });
+        html += '</div>';
+        html += '<p class="text-xl font-bold" style="color:#FF4466">ماتوا!</p>';
         if (d.hasDeathChallenge) {
           html += '<p class="text-muted mt-2">⏳ تحدي الموت قادم...</p>';
         }
-        html += '</div>';
       } else {
-        html += '<p class="text-lg" style="color:#006C35">✅ الكل نجا!</p>';
+        html += '<p class="text-lg" style="color:#00e676">✅ الكل نجا!</p>';
       }
 
-      if (d.survivors.length > 0) {
-        html += '<p class="text-muted mt-2">الأحياء: ' + d.survivors.map(p => escapeHtml(p.name)).join('، ') + '</p>';
+      if (d.survivors && d.survivors.length > 0) {
+        html += '<div class="dolls-row mt-4" style="opacity:0.6">';
+        d.survivors.forEach((p, i) => {
+          const colors = ['teal', 'navy', 'olive', 'coral'];
+          html += '<div class="doll doll--' + colors[i % colors.length] + '" style="transform:scale(0.8)">' +
+            '<div class="doll__body"><div class="doll__face">😌</div></div>' +
+            '<div class="doll__name">' + escapeHtml(p.name) + '</div>' +
+          '</div>';
+        });
+        html += '</div>';
       }
 
       html += '</div>';
@@ -1955,19 +1973,17 @@ const App = {
     let inputHtml = '';
 
     if (type === 'chalice') {
-      // Show numbered buttons instead of text input
       const optCount = d.options || 5;
       const chaliceEmojis = ['🏆', '🥂', '🍷', '🫗', '🥃'];
-      let btns = '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:16px">';
+      let btns = '<div class="murder-options" style="flex-direction:row;flex-wrap:wrap;justify-content:center">';
       for (let i = 1; i <= optCount; i++) {
-        btns += '<button class="btn" data-action="submitDeathAnswer" data-chalice="' + i + '" ' +
-          'style="background:rgba(139,34,82,0.6);border:3px solid #8B2252;width:60px;height:60px;font-size:28px;border-radius:14px;cursor:pointer">' +
-          (chaliceEmojis[i-1] || i) + '</button>';
+        btns += '<div class="murder-option" data-action="submitDeathAnswer" data-chalice="' + i + '" style="min-width:60px;justify-content:center">' +
+          '<span style="font-size:28px">' + (chaliceEmojis[i-1] || i) + '</span>' +
+        '</div>';
       }
       btns += '</div>';
       inputHtml = btns;
     } else {
-      // Text input for all other types
       const placeholder = type === 'math' ? 'اكتب الجواب (رقم)...' :
                           type === 'mindmeld' ? 'اكتب كلمة واحدة فقط...' :
                           'إجابتك السريعة...';
@@ -1978,10 +1994,10 @@ const App = {
     }
 
     document.getElementById('gameContent').innerHTML =
-      '<div class="death-panel" style="max-width:500px">' +
-        '<div class="text-4xl mb-4">' + icon + '</div>' +
-        '<h3 class="text-2xl font-bold mb-2" style="color:#FF4466">⚔️ أرضية القتل!</h3>' +
-        '<p class="text-xl mb-6">' + escapeHtml(d.challenge) + '</p>' +
+      '<div class="death-zone">' +
+        '<div class="death-zone__title">⚔️ أرضية القتل!</div>' +
+        '<div style="font-size:64px;margin-bottom:16px">' + icon + '</div>' +
+        '<p class="text-xl mb-6" style="color:#fff">' + escapeHtml(d.challenge) + '</p>' +
         inputHtml +
       '</div>';
     document.getElementById('deathInput')?.focus();
@@ -2002,26 +2018,31 @@ const App = {
   },
 
   handleDeathChallengeStarted(d) {
-    // يُرسل لكل اللاعبين - الأحياء يشوفون إن فيه تحدي
     const gc = document.getElementById('gameContent');
     if (!gc) return;
-    // لا نحدّث إلا إذا اللاعب حي (الميتين عندهم شاشة التحدي)
     const currentContent = gc.innerHTML;
-    if (currentContent.includes('تحدي الموت')) return; // اللاعب الميت عنده شاشة التحدي
+    if (currentContent.includes('أرضية القتل')) return;
     gc.innerHTML =
-      '<div class="text-center">' +
-        '<div class="text-5xl mb-4">⚔️</div>' +
-        '<h3 class="text-2xl font-bold mb-4">تحدي الموت جاري!</h3>' +
-        '<p class="text-muted">' + d.deadPlayers.map(p => escapeHtml(p.name)).join('، ') + ' يحاولون النجاة...</p>' +
+      '<div class="death-zone">' +
+        '<div class="death-zone__title">⚔️ تحدي الموت جاري!</div>' +
+        '<div class="dolls-row mb-4">' +
+          d.deadPlayers.map((p, i) => {
+            const colors = ['crimson', 'purple', 'midnight', 'teal'];
+            return '<div class="doll doll--' + colors[i % colors.length] + '">' +
+              '<div class="doll__body"><div class="doll__face">💀</div></div>' +
+              '<div class="doll__name">' + escapeHtml(p.name) + '</div>' +
+            '</div>';
+          }).join('') +
+        '</div>' +
+        '<p class="text-muted">يحاولون النجاة...</p>' +
       '</div>';
   },
 
   handleDeathChallengeResult(d) {
     try {
       clearInterval(this.gameTimer);
-      let html = '<div class="text-center" style="max-width:500px">';
+      let html = '<div class="death-zone">';
 
-      // Show type-specific info
       if (d.challengeType === 'chalice' && d.poisonChoice) {
         const chaliceEmojis = ['🏆', '🥂', '🍷', '🫗', '🥃'];
         html += '<div class="text-2xl mb-3" style="color:#FF4466">الكأس المسموم كان: ' + (chaliceEmojis[d.poisonChoice - 1] || d.poisonChoice) + ' رقم ' + d.poisonChoice + '</div>';
@@ -2030,15 +2051,29 @@ const App = {
       }
 
       if (d.revived && d.revived.length > 0) {
-        html += '<div class="text-3xl mb-4">🎉</div>';
-        html += '<p class="text-xl font-bold" style="color:#006C35">نجوا من الموت!</p>';
-        html += '<p class="text-lg mt-2">' + d.revived.map(p => escapeHtml(p.name)).join('، ') + '</p>';
+        html += '<div class="dolls-row mb-4">';
+        d.revived.forEach((p, i) => {
+          const colors = ['teal', 'olive', 'navy', 'coral'];
+          html += '<div class="doll doll--' + colors[i % colors.length] + '">' +
+            '<div class="doll__body"><div class="doll__face">😇</div></div>' +
+            '<div class="doll__name">' + escapeHtml(p.name) + '</div>' +
+          '</div>';
+        });
+        html += '</div>';
+        html += '<p class="text-xl font-bold" style="color:#00e676">نجوا من الموت! 🎉</p>';
       }
 
       if (d.stillDead && d.stillDead.length > 0) {
-        html += '<div class="text-3xl mt-4 mb-2">💀</div>';
-        html += '<p class="text-xl font-bold" style="color:#8B2252">ما نجوا...</p>';
-        html += '<p class="text-lg mt-2">' + d.stillDead.map(p => escapeHtml(p.name)).join('، ') + '</p>';
+        html += '<div class="dolls-row mt-4 mb-4">';
+        d.stillDead.forEach((p, i) => {
+          const colors = ['crimson', 'purple', 'midnight', 'rust'];
+          html += '<div class="doll doll--' + colors[i % colors.length] + '">' +
+            '<div class="doll__body"><div class="doll__face">💀</div></div>' +
+            '<div class="doll__name">' + escapeHtml(p.name) + '</div>' +
+          '</div>';
+        });
+        html += '</div>';
+        html += '<p class="text-xl font-bold" style="color:#FF4466">ما نجوا...</p>';
       }
 
       if (d.challengeType === 'mindmeld') {
@@ -2060,15 +2095,14 @@ const App = {
   handleFibbageQuestion(d) {
     document.getElementById('gameRound').textContent = 'الجولة ' + d.round + ' من ' + d.maxRounds;
     this.startTimer(d.timeLimit);
-    const categoryBadge = d.category ? '<p class="text-sm text-muted mb-2">' + escapeHtml(d.category) + '</p>' : '';
+    const categoryBadge = d.category ? '<div class="info-box mb-3"><div class="info-box__label">الفئة</div><div class="info-box__value">' + escapeHtml(d.category) + '</div></div>' : '';
     document.getElementById('gameContent').innerHTML =
-      '<div class="panel" style="max-width:600px">' +
-        '<div class="badge badge--warning mb-4">🎭 اكتب كذبة مقنعة</div>' +
+      '<div class="lie-card">' +
         categoryBadge +
-        '<p class="text-2xl font-bold mb-4">' + escapeHtml(d.question) + '</p>' +
-        '<p class="text-sm text-muted mb-4">اكتب إجابة كاذبة تبدو مقنعة عشان تخدع الباقين!</p>' +
-        '<input type="text" class="input mb-4" id="lieInput" placeholder="كذبتك المقنعة..." maxlength="50">' +
-        '<button class="btn btn--primary btn--full" data-action="submitLie">إرسال 🎭</button>' +
+        '<div class="lie-card__question">' + escapeHtml(d.question) + '</div>' +
+        '<p class="text-sm mb-4" style="color:rgba(255,255,255,0.6)">اكتب إجابة كاذبة تبدو مقنعة عشان تخدع الباقين!</p>' +
+        '<input type="text" class="input mb-4" id="lieInput" placeholder="كذبتك المقنعة..." maxlength="50" style="background:rgba(255,255,255,0.1);color:#fff;border-color:rgba(218,165,32,0.4)">' +
+        '<button class="btn btn--primary btn--full" data-action="submitLie" style="background:linear-gradient(135deg,#DAA520,#B8860B);border-color:#000">إرسال 🎭</button>' +
       '</div>';
     document.getElementById('lieInput')?.focus();
   },
@@ -2085,17 +2119,18 @@ const App = {
 
   handleFibbageVoting(d) {
     this.startTimer(d.timeLimit);
-    const opts = d.options.map(o =>
-      '<div class="vote-option" data-action="guessFibbage" data-id="' + escapeHtml(o.id) + '">' +
-        '<div class="vote-option__text">' + escapeHtml(o.text) + '</div>' +
+    const opts = d.options.map((o, i) =>
+      '<div class="murder-option" style="border-color:rgba(218,165,32,0.3)" data-action="guessFibbage" data-id="' + escapeHtml(o.id) + '">' +
+        '<span class="murder-option__num" style="background:rgba(218,165,32,0.3);color:#DAA520">' + String.fromCharCode(65 + i) + '</span>' +
+        '<span class="murder-option__text">' + escapeHtml(o.text) + '</span>' +
       '</div>'
     ).join('');
 
     document.getElementById('gameContent').innerHTML =
-      '<div class="panel" style="max-width:600px">' +
-        '<p class="text-xl mb-2">اختر الإجابة الصحيحة:</p>' +
-        '<p class="text-2xl font-bold text-accent mb-6">' + escapeHtml(d.question) + '</p>' +
-        '<div class="flex flex-col gap-3">' + opts + '</div>' +
+      '<div class="lie-card">' +
+        '<div class="lie-card__question" style="font-size:20px;margin-bottom:16px">' + escapeHtml(d.question) + '</div>' +
+        '<p class="text-sm mb-4" style="color:rgba(255,255,255,0.5)">🔍 اختر الإجابة الصحيحة من بين الكذب!</p>' +
+        '<div class="murder-options">' + opts + '</div>' +
         '<p class="text-muted text-center mt-4" id="waitingCount"></p>' +
       '</div>';
   },
@@ -2171,18 +2206,21 @@ const App = {
     if (isDrawer) {
       document.getElementById('gameContent').innerHTML =
         '<div class="text-center">' +
-          '<div class="text-3xl mb-4">🎨</div>' +
-          '<h3 class="text-xl font-bold mb-2">هذي رسمتك - انتظر التخمينات!</h3>' +
-          '<div id="drawingDisplay" style="max-width:400px;margin:0 auto"></div>' +
+          '<div class="speech-bubble mb-4" style="margin:0 auto">' +
+            '<div class="speech-bubble__text">🎨 هذي رسمتك - انتظر التخمينات!</div>' +
+          '</div>' +
+          '<div id="drawingDisplay" style="max-width:400px;margin:0 auto;border-radius:16px;overflow:hidden"></div>' +
           '<p class="text-muted mt-4" id="waitingCount">ننتظر التخمينات...</p>' +
         '</div>';
     } else {
-      const drawerLabel = d.drawerName ? '<p class="text-sm text-muted mb-2">رسمة: ' + escapeHtml(d.drawerName) + '</p>' : '';
+      const drawerLabel = d.drawerName ? '<div class="speech-bubble__author">🎨 ' + escapeHtml(d.drawerName) + '</div>' : '';
       document.getElementById('gameContent').innerHTML =
-        '<div class="panel" style="max-width:600px;width:100%">' +
-          '<div class="badge badge--info mb-4">🤔 اكتب عنوان مزيّف!</div>' +
-          drawerLabel +
-          '<div id="drawingDisplay" style="max-width:400px;margin:0 auto;margin-bottom:20px"></div>' +
+        '<div style="max-width:600px;width:100%">' +
+          '<div class="speech-bubble mb-4" style="margin:0 auto">' +
+            '<div class="speech-bubble__text">🤔 اكتب عنوان مزيّف!</div>' +
+            drawerLabel +
+          '</div>' +
+          '<div id="drawingDisplay" style="max-width:400px;margin:0 auto;margin-bottom:20px;border-radius:16px;overflow:hidden"></div>' +
           '<input type="text" class="input mb-4" id="guessInput" placeholder="اكتب عنوان مزيّف..." maxlength="50">' +
           '<button class="btn btn--primary btn--full" data-action="submitGuessDrawful">إرسال 🤔</button>' +
         '</div>';
@@ -2203,17 +2241,20 @@ const App = {
     this.startTimer(d.timeLimit);
     const isDrawer = d.drawerId === this.myId;
 
-    const opts = d.options.map(o =>
-      '<div class="vote-option" ' + (isDrawer ? 'style="cursor:default"' : 'data-action="guessFibbage" data-id="' + escapeHtml(o.id) + '"') + '>' +
-        '<div class="vote-option__text">' + escapeHtml(o.text) + '</div>' +
+    const opts = d.options.map((o, i) =>
+      '<div class="murder-option" style="border-color:rgba(0,200,83,0.3)" ' + (isDrawer ? '' : 'data-action="guessFibbage" data-id="' + escapeHtml(o.id) + '"') + '>' +
+        '<span class="murder-option__num" style="background:rgba(0,200,83,0.2);color:#00C853">' + String.fromCharCode(65 + i) + '</span>' +
+        '<span class="murder-option__text">' + escapeHtml(o.text) + '</span>' +
       '</div>'
     ).join('');
 
     document.getElementById('gameContent').innerHTML =
-      '<div class="panel" style="max-width:600px;width:100%">' +
-        '<div class="badge badge--primary mb-4">🗳️ ' + (isDrawer ? 'انتظر التصويت' : 'أي تخمين صحيح؟') + '</div>' +
-        '<div id="drawingDisplay" style="max-width:300px;margin:0 auto;margin-bottom:16px"></div>' +
-        '<div class="flex flex-col gap-3">' + opts + '</div>' +
+      '<div style="max-width:600px;width:100%">' +
+        '<div class="speech-bubble mb-4" style="margin:0 auto">' +
+          '<div class="speech-bubble__text">' + (isDrawer ? '🎨 انتظر التصويت' : '🤔 أي تخمين صحيح؟') + '</div>' +
+        '</div>' +
+        '<div id="drawingDisplay" style="max-width:300px;margin:0 auto;margin-bottom:16px;border-radius:16px;overflow:hidden"></div>' +
+        '<div class="murder-options">' + opts + '</div>' +
         '<p class="text-muted text-center mt-4" id="waitingCount"></p>' +
       '</div>';
 
@@ -2225,19 +2266,22 @@ const App = {
     const correctText = d.options.find(o => o.isCorrect);
 
     let html = '<div class="text-center" style="max-width:600px">';
-    html += '<div id="drawingDisplay" style="max-width:300px;margin:0 auto;margin-bottom:16px"></div>';
-    html += '<p class="text-lg mb-2">الجواب الصحيح:</p>';
-    html += '<p class="text-2xl font-bold text-accent mb-4">' + escapeHtml(d.prompt) + '</p>';
-    html += '<p class="text-muted mb-4">رسمة: ' + escapeHtml(d.drawerName) + '</p>';
+    html += '<div id="drawingDisplay" style="max-width:300px;margin:0 auto;margin-bottom:16px;border-radius:16px;overflow:hidden"></div>';
+    html += '<div class="speech-bubble mb-4" style="margin:0 auto">';
+    html += '<div class="speech-bubble__text" style="font-size:14px;color:#888">الجواب الصحيح:</div>';
+    html += '<div class="speech-bubble__text" style="font-size:22px;color:#000">' + escapeHtml(d.prompt) + '</div>';
+    html += '<div class="speech-bubble__author">🎨 ' + escapeHtml(d.drawerName) + '</div>';
+    html += '</div>';
 
-    // Show who was fooled by each option
     if (d.options) {
-      html += '<div class="flex flex-col gap-2 mb-4">';
+      html += '<div class="murder-options mb-4">';
       d.options.forEach(o => {
         const icon = o.isCorrect ? '✅' : '🎭';
         const author = o.authorName ? ' (كتبها: ' + escapeHtml(o.authorName) + ')' : '';
-        html += '<div class="text-sm" style="padding:8px;background:rgba(255,255,255,0.05);border-radius:8px">' +
-          icon + ' ' + escapeHtml(o.text) + author + '</div>';
+        html += '<div class="murder-option" style="pointer-events:none;border-color:' + (o.isCorrect ? 'rgba(0,200,83,0.5)' : 'rgba(255,255,255,0.1)') + '">' +
+          '<span class="murder-option__num" style="background:' + (o.isCorrect ? 'rgba(0,200,83,0.2)' : 'rgba(255,255,255,0.05)') + '">' + icon + '</span>' +
+          '<span class="murder-option__text">' + escapeHtml(o.text) + author + '</span>' +
+        '</div>';
       });
       html += '</div>';
     }
@@ -3065,13 +3109,15 @@ const App = {
     }
 
     document.getElementById('gameContent').innerHTML =
-      '<div class="panel" style="max-width:600px">' +
-        '<div class="badge badge--primary mb-4">👕 الخطوة 1: الشعارات</div>' +
-        '<p class="text-lg mb-2">الموضوع:</p>' +
-        '<p class="text-xl font-bold text-accent mb-6">' + escapeHtml(d.prompt || '') + '</p>' +
+      '<div style="max-width:600px">' +
+        '<div class="tshirt-shape tshirt-shape--dark" style="margin:0 auto 20px;transform:scale(0.7);pointer-events:none">' +
+          '<div class="tshirt-shape__design">👕</div>' +
+          '<div class="tshirt-shape__slogan">الخطوة 1: الشعارات</div>' +
+        '</div>' +
+        (d.prompt ? '<p class="text-lg mb-2" style="color:rgba(255,255,255,0.6)">الموضوع:</p><p class="text-xl font-bold mb-4" style="color:#FFD93D">' + escapeHtml(d.prompt) + '</p>' : '') +
         '<p class="text-muted mb-4">اكتب ' + count + ' شعارات مضحكة للتيشيرت:</p>' +
         inputs +
-        '<button class="btn btn--primary btn--full mt-3" data-action="submitTkoSlogans">إرسال الشعارات 👕</button>' +
+        '<button class="btn btn--primary btn--full mt-3" data-action="submitTkoSlogans" style="background:linear-gradient(135deg,#e74c3c,#c0392b);border-color:#000">إرسال الشعارات 👕</button>' +
       '</div>';
     document.getElementById('sloganInput0')?.focus();
   },
@@ -3130,11 +3176,12 @@ const App = {
     });
 
     document.getElementById('gameContent').innerHTML =
-      '<div class="panel" style="max-width:600px">' +
-        '<div class="badge badge--accent mb-4">👕 الخطوة 3: ركّب التيشيرت</div>' +
-        '<p class="text-lg mb-2">تصميمك:</p>' +
-        '<div id="drawingDisplay" style="max-width:250px;margin:0 auto;margin-bottom:20px"></div>' +
-        '<p class="text-lg mb-4">اختر شعار يناسب تصميمك:</p>' +
+      '<div style="max-width:600px">' +
+        '<div class="tshirt-shape tshirt-shape--white" style="margin:0 auto 20px">' +
+          '<div class="tshirt-shape__design" id="drawingDisplay"></div>' +
+          '<div class="tshirt-shape__slogan" style="color:#000">اختر شعار ⬇️</div>' +
+        '</div>' +
+        '<p class="text-lg mb-4" style="color:#fff">اختر شعار يناسب تصميمك:</p>' +
         sloganBtns +
       '</div>';
     this.renderDrawing(d.drawing, document.getElementById('drawingDisplay'));
@@ -3153,25 +3200,25 @@ const App = {
     this.setHint('صوّت لأفضل تيشيرت!');
 
     if (d.phase === 'tournament' && d.matchup) {
-      // Head-to-head tournament voting
+      const tkoColors = ['dark', 'white', 'red', 'blue'];
       let html = '<div class="text-center mb-4"><p class="text-muted">مباراة ' + d.matchNum + '/' + d.totalMatches + '</p></div>';
-      html += '<div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">';
-      d.matchup.forEach(shirt => {
-        html += '<div class="vote-option" style="flex:1;min-width:200px;max-width:300px;cursor:pointer;padding:16px" data-action="voteAnswer" data-id="' + escapeHtml(shirt.id) + '">' +
-          '<div id="tkoShirt' + escapeHtml(shirt.id) + '" style="max-width:200px;margin:0 auto;margin-bottom:10px"></div>' +
-          '<p class="text-lg font-bold text-center">' + escapeHtml(shirt.slogan) + '</p>' +
+      html += '<div class="vs-arena">';
+      d.matchup.forEach((shirt, idx) => {
+        const color = tkoColors[idx % tkoColors.length];
+        if (idx > 0) html += '<div class="lightning-vs">⚡</div>';
+        html += '<div class="tshirt-shape tshirt-shape--' + color + '" data-action="voteAnswer" data-id="' + escapeHtml(shirt.id) + '" style="cursor:pointer">' +
+          '<div class="tshirt-shape__design" id="tkoShirt' + escapeHtml(shirt.id) + '"></div>' +
+          '<div class="tshirt-shape__slogan">' + escapeHtml(shirt.slogan) + '</div>' +
         '</div>';
       });
       html += '</div>';
       document.getElementById('gameContent').innerHTML = html;
 
-      // Render drawings
       d.matchup.forEach(shirt => {
         const container = document.getElementById('tkoShirt' + shirt.id);
         if (container) this.renderDrawing(shirt.drawing, container);
       });
     } else {
-      // Fallback simple voting
       const gc = document.getElementById('gameContent');
       gc.innerHTML = '<div class="text-center"><p>التصويت جاري...</p></div>';
     }
@@ -3180,10 +3227,12 @@ const App = {
   handleTshirtWarsMatchResult(d) {
     clearInterval(this.gameTimer);
     let html = '<div class="text-center" style="max-width:600px">';
-    html += '<div class="text-3xl mb-4">🏆</div>';
-    html += '<p class="text-2xl font-bold text-accent mb-4">' + escapeHtml(d.winner.name) + ' فاز!</p>';
-    html += '<div id="winnerShirt" style="max-width:200px;margin:0 auto;margin-bottom:10px"></div>';
-    html += '<p class="text-xl font-bold mb-2">' + escapeHtml(d.winner.slogan) + '</p>';
+    html += '<div class="winner-stamp mb-4"><div class="winner-stamp__label">🏆 فائز!</div></div>';
+    html += '<p class="text-2xl font-bold mb-4" style="color:#FFD93D">' + escapeHtml(d.winner.name) + '</p>';
+    html += '<div class="tshirt-shape tshirt-shape--dark" style="margin:0 auto 16px;transform:scale(1.1)">';
+    html += '<div class="tshirt-shape__design" id="winnerShirt"></div>';
+    html += '<div class="tshirt-shape__slogan">' + escapeHtml(d.winner.slogan) + '</div>';
+    html += '</div>';
     html += '<p class="text-muted">' + d.winner.votes + ' vs ' + d.loser.votes + ' أصوات</p>';
     html += '<p class="text-sm text-muted mt-4">المباراة التالية قريباً...</p>';
     html += '</div>';
@@ -3206,7 +3255,7 @@ const App = {
     const myMonster = d.myMonster;
     let monsterBadge = '';
     if (myMonster) {
-      monsterBadge = '<div class="text-sm text-muted mb-4">هويتك السرية: ' + escapeHtml(myMonster.icon) + ' ' + escapeHtml(myMonster.name) + '</div>';
+      monsterBadge = '<div class="monster-card mb-4" style="margin:0 auto"><div class="monster-card__icon">' + escapeHtml(myMonster.icon) + '</div><div class="monster-card__name">' + escapeHtml(myMonster.name) + '</div></div>';
     }
 
     const gc = document.getElementById('gameContent');
@@ -3214,18 +3263,18 @@ const App = {
       '<div class="game-prompt">' +
         '<div class="game-prompt__icon">💕</div>' +
         '<p class="game-prompt__text">اختر لاعب تبي تواعده!</p>' +
-        monsterBadge +
       '</div>' +
-      '<div class="vote-grid">';
+      monsterBadge +
+      '<div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center">';
 
     d.players.forEach(p => {
-      const revealTag = p.monsterRevealed ? '<span class="text-xs" style="display:block;color:rgba(255,255,255,0.5)">' + escapeHtml(p.monsterRevealed.icon) + ' ' + escapeHtml(p.monsterRevealed.name) + '</span>' : '';
+      const revealTag = p.monsterRevealed ? '<div class="monster-card__name" style="font-size:11px;margin-top:4px">' + escapeHtml(p.monsterRevealed.icon) + ' ' + escapeHtml(p.monsterRevealed.name) + '</div>' : '';
       html +=
-        '<button class="vote-option vote-option--player" data-action="submitLoveChoice" data-id="' + p.id + '">' +
-          '<span class="vote-option__avatar">' + (p.avatar || '🎮') + '</span>' +
-          '<span class="vote-option__text">' + escapeHtml(p.name) + '</span>' +
+        '<div class="monster-card" data-action="submitLoveChoice" data-id="' + p.id + '" style="cursor:pointer">' +
+          '<div class="monster-card__icon">' + (p.avatar || '🎮') + '</div>' +
+          '<div class="monster-card__name">' + escapeHtml(p.name) + '</div>' +
           revealTag +
-        '</button>';
+        '</div>';
     });
     html += '</div>';
     gc.innerHTML = html;
@@ -3250,13 +3299,13 @@ const App = {
     this.startTimer(d.timeLimit);
     this.setHint('اكتب اسم اختراعك!');
 
-    const stepLabel = d.hasDrawing ? '<p class="text-sm text-muted mb-2">الخطوة 1: اسم الاختراع (بعدها ترسمه)</p>' : '';
+    const stepLabel = d.hasDrawing ? '<p class="text-sm mb-2" style="color:rgba(255,255,255,0.5)">الخطوة 1: اسم الاختراع (بعدها ترسمه)</p>' : '';
 
     const gc = document.getElementById('gameContent');
     gc.innerHTML =
-      '<div class="game-prompt">' +
-        '<div class="game-prompt__icon">💡</div>' +
-        '<p class="game-prompt__text">' + escapeHtml(d.problem) + '</p>' +
+      '<div class="blueprint mb-4">' +
+        '<div class="blueprint__label">💡 المشكلة</div>' +
+        '<p style="font-size:20px;font-weight:700;color:#fff;margin-bottom:8px">' + escapeHtml(d.problem) + '</p>' +
         '<span class="game-tag">' + escapeHtml(d.category) + '</span>' +
       '</div>' +
       stepLabel +
@@ -3282,8 +3331,7 @@ const App = {
 
     document.getElementById('gameContent').innerHTML =
       '<div class="drawing-area">' +
-        '<div class="badge badge--warning mb-2">🎨 الخطوة 2: ارسم اختراعك</div>' +
-        '<p class="text-lg mb-2">المشكلة: ' + escapeHtml(d.problem) + '</p>' +
+        '<div class="blueprint mb-3" style="padding:12px 16px"><div class="blueprint__label">🎨 الخطوة 2: ارسم اختراعك</div><p style="color:#fff;margin:0">' + escapeHtml(d.problem) + '</p></div>' +
         '<canvas class="drawing-canvas" id="drawCanvas" width="400" height="300"></canvas>' +
         '<div class="drawing-tools mt-3">' +
           colors +
@@ -3306,24 +3354,23 @@ const App = {
 
     const gc = document.getElementById('gameContent');
     let html =
-      '<div class="game-prompt">' +
-        '<div class="game-prompt__icon">💡</div>' +
-        '<p class="game-prompt__text">' + escapeHtml(d.problem) + '</p>' +
+      '<div class="blueprint mb-4" style="padding:12px 16px">' +
+        '<div class="blueprint__label">💡 المشكلة</div>' +
+        '<p style="color:#fff;margin:0;font-size:18px">' + escapeHtml(d.problem) + '</p>' +
       '</div>' +
-      '<div class="vote-grid">';
+      '<div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center">';
 
     d.inventions.forEach(inv => {
       const hasDrawing = inv.drawing && inv.drawing !== '[]';
       html +=
-        '<button class="vote-option" data-action="voteAnswer" data-id="' + inv.id + '" style="padding:12px">' +
-          (hasDrawing ? '<div id="invDraw' + escapeHtml(inv.id) + '" style="max-width:150px;margin:0 auto 8px"></div>' : '') +
-          '<span class="vote-option__text">' + escapeHtml(inv.text) + '</span>' +
-        '</button>';
+        '<div class="blueprint" data-action="voteAnswer" data-id="' + inv.id + '" style="cursor:pointer;flex:1;min-width:200px;max-width:280px;transition:transform 0.2s,box-shadow 0.2s">' +
+          (hasDrawing ? '<div id="invDraw' + escapeHtml(inv.id) + '" style="max-width:180px;margin:0 auto 8px"></div>' : '') +
+          '<p style="color:#fff;font-weight:700;text-align:center;margin:0">' + escapeHtml(inv.text) + '</p>' +
+        '</div>';
     });
     html += '</div>';
     gc.innerHTML = html;
 
-    // Render drawings
     d.inventions.forEach(inv => {
       if (inv.drawing && inv.drawing !== '[]') {
         const container = document.getElementById('invDraw' + inv.id);
@@ -3530,16 +3577,27 @@ const App = {
       case 'fakinit':
         resultHtml =
           '<div class="faker-reveal">' +
-            '<div class="faker-reveal__icon">' + (d.caught ? '🎉' : '🕵️') + '</div>' +
-            '<p class="text-2xl font-bold mt-4">' + (d.caught ? 'انكشف المزيّف!' : 'المزيّف نجا!') + '</p>' +
-            '<p class="text-xl mt-2">المزيّف: <strong>' + escapeHtml(d.fakerName) + '</strong></p>' +
+            '<div class="faker-silhouette' + (d.caught ? ' faker-silhouette--revealed' : '') + ' mb-4">' +
+              '<div class="faker-silhouette__emoji">' + (d.caught ? '🕵️' : '❓') + '</div>' +
+            '</div>' +
+            '<div class="faker-status ' + (d.caught ? 'faker-status--caught' : 'faker-status--safe') + ' mb-4">' +
+              (d.caught ? '🎉 انكشف المزيّف!' : '🕵️ المزيّف نجا!') +
+            '</div>' +
+            '<p class="text-xl mt-2" style="color:#fff">المزيّف: <strong style="color:#FF4466">' + escapeHtml(d.fakerName) + '</strong></p>' +
           '</div>';
         break;
 
       case 'triviamurder':
-        resultHtml = '<div class="text-2xl text-accent mb-4">✅ ' + escapeHtml(d.correctAnswer) + '</div>';
+        resultHtml = '<div class="death-zone mb-4" style="padding:20px"><div class="text-2xl" style="color:#00e676">✅ ' + escapeHtml(d.correctAnswer) + '</div></div>';
         if (d.newlyDead && d.newlyDead.length > 0) {
-          resultHtml += '<p style="color:#8B2252">💀 ' + d.newlyDead.map(p => escapeHtml(p.name)).join('، ') + '</p>';
+          resultHtml += '<div class="dolls-row mb-3">';
+          d.newlyDead.forEach((p, i) => {
+            const colors = ['crimson', 'purple', 'midnight'];
+            resultHtml += '<div class="doll doll--' + colors[i % colors.length] + '" style="transform:scale(0.7)">' +
+              '<div class="doll__body"><div class="doll__face">💀</div></div>' +
+              '<div class="doll__name">' + escapeHtml(p.name) + '</div></div>';
+          });
+          resultHtml += '</div>';
         }
         if (d.revived && d.revived.length > 0) {
           resultHtml += '<p style="color:#006C35" class="mt-2">🎉 نجوا: ' + d.revived.map(p => escapeHtml(p.name)).join('، ') + '</p>';
@@ -3548,8 +3606,10 @@ const App = {
 
       case 'fibbage':
         resultHtml =
-          '<p class="text-xl mb-2">الإجابة الصحيحة:</p>' +
-          '<p class="text-2xl font-bold text-accent mb-4">' + escapeHtml(d.correctAnswer) + '</p>';
+          '<div class="lie-card mb-4" style="padding:20px">' +
+            '<p class="text-sm" style="color:rgba(255,255,255,0.5)">الإجابة الصحيحة:</p>' +
+            '<div class="lie-card__question" style="color:#DAA520">' + escapeHtml(d.correctAnswer) + '</div>' +
+          '</div>';
         if (d.playerResults) {
           resultHtml += '<div class="flex flex-col gap-2 mb-4" style="max-width:400px;width:100%">';
           d.playerResults.forEach(pr => {
@@ -3557,9 +3617,9 @@ const App = {
             if (pr.guessedCorrect) info += '✅ خمّن صح ';
             if (pr.fooledCount > 0) info += '🤥 خدع ' + pr.fooledCount;
             resultHtml +=
-              '<div class="flex justify-between items-center p-2" style="background:rgba(255,255,255,0.05);border-radius:8px">' +
-                '<span>' + escapeHtml(pr.playerName) + ' ' + info + '</span>' +
-                '<span style="color:#D4AF37">+' + pr.points + '</span>' +
+              '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(255,255,255,0.05);border-radius:10px;border-right:3px solid ' + (pr.guessedCorrect ? '#DAA520' : 'transparent') + '">' +
+                '<span style="color:#fff">' + escapeHtml(pr.playerName) + ' ' + info + '</span>' +
+                '<span style="color:#DAA520;font-weight:bold">+' + pr.points + '</span>' +
               '</div>';
           });
           resultHtml += '</div>';
@@ -3568,10 +3628,12 @@ const App = {
 
       case 'drawful':
         resultHtml =
-          '<p class="text-xl mb-2">الكلمة كانت:</p>' +
-          '<p class="text-2xl font-bold text-accent mb-4">' + escapeHtml(d.prompt) + '</p>';
+          '<div class="speech-bubble mb-4" style="margin:0 auto">' +
+            '<div class="speech-bubble__text" style="font-size:14px;color:rgba(0,0,0,0.5)">الكلمة كانت:</div>' +
+            '<div class="speech-bubble__text" style="font-size:22px">' + escapeHtml(d.prompt) + '</div>' +
+          '</div>';
         if (d.drawing) {
-          resultHtml += '<div id="resultDrawing" style="max-width:300px;margin:0 auto;margin-bottom:16px"></div>';
+          resultHtml += '<div id="resultDrawing" style="max-width:300px;margin:0 auto;margin-bottom:16px;border-radius:16px;overflow:hidden"></div>';
         }
         if (d.playerResults) {
           resultHtml += '<div class="flex flex-col gap-2 mb-4" style="max-width:400px;width:100%">';
@@ -3580,9 +3642,9 @@ const App = {
             if (pr.guessedCorrect) info += '✅ ';
             if (pr.fooledCount > 0) info += '🤥×' + pr.fooledCount;
             resultHtml +=
-              '<div class="flex justify-between items-center p-2" style="background:rgba(255,255,255,0.05);border-radius:8px">' +
-                '<span>' + escapeHtml(pr.playerName) + ' ' + info + '</span>' +
-                '<span style="color:#D4AF37">+' + pr.points + '</span>' +
+              '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(255,255,255,0.05);border-radius:10px;border-right:3px solid ' + (pr.guessedCorrect ? '#00C853' : 'transparent') + '">' +
+                '<span style="color:#fff">' + escapeHtml(pr.playerName) + ' ' + info + '</span>' +
+                '<span style="color:#D4AF37;font-weight:bold">+' + pr.points + '</span>' +
               '</div>';
           });
           resultHtml += '</div>';
@@ -3590,25 +3652,25 @@ const App = {
         break;
 
       case 'tshirtwars':
-        resultHtml =
-          '<div class="game-prompt mb-4">' +
-            '<div class="game-prompt__icon">👕</div>' +
-            '<p class="game-prompt__text">' + escapeHtml(d.slogan) + '</p>' +
-          '</div>';
+        if (d.slogan) {
+          resultHtml =
+            '<div class="tshirt-shape tshirt-shape--dark mb-4" style="margin:0 auto;transform:scale(0.8)">' +
+              '<div class="tshirt-shape__design">👕</div>' +
+              '<div class="tshirt-shape__slogan">' + escapeHtml(d.slogan) + '</div>' +
+            '</div>';
+        }
         if (d.results) {
-          resultHtml += '<div class="flex flex-col gap-3 mb-4" style="max-width:450px;width:100%">';
+          const tkoColors = ['dark', 'red', 'blue', 'white'];
+          resultHtml += '<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:16px">';
           d.results.forEach((r, i) => {
             const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
+            const color = tkoColors[i % tkoColors.length];
             resultHtml +=
-              '<div class="flex justify-between items-center p-3" style="background:rgba(255,255,255,0.05);border-radius:12px;border-right:4px solid ' + (i === 0 ? '#D4AF37' : 'transparent') + '">' +
-                '<div>' +
-                  '<span class="font-bold">' + medal + ' ' + escapeHtml(r.playerName) + '</span>' +
-                  '<p class="text-sm text-muted mt-1">"' + escapeHtml(r.text) + '"</p>' +
-                '</div>' +
-                '<div class="text-left">' +
-                  '<div style="color:#D4AF37;font-weight:bold">+' + r.points + '</div>' +
-                  '<div class="text-sm text-muted">' + r.percentage + '% (' + r.votes + ' صوت)</div>' +
-                '</div>' +
+              '<div class="tshirt-shape tshirt-shape--' + color + '" style="transform:scale(' + (i === 0 ? '1' : '0.8') + ');' + (i === 0 ? 'box-shadow:0 0 20px rgba(212,175,55,0.5)' : '') + '">' +
+                '<div class="tshirt-shape__design" style="font-size:24px">' + medal + '</div>' +
+                '<div class="tshirt-shape__slogan">' + escapeHtml(r.text || r.playerName) + '</div>' +
+                '<div class="tshirt-shape__owner" style="visibility:visible;opacity:1">' + escapeHtml(r.playerName) + '</div>' +
+                '<div style="color:#D4AF37;font-weight:bold;font-size:14px;margin-top:4px">+' + r.points + '</div>' +
               '</div>';
           });
           resultHtml += '</div>';
@@ -3616,47 +3678,45 @@ const App = {
         break;
 
       case 'lovemonster':
-        resultHtml = '<div class="game-prompt mb-4"><div class="game-prompt__icon">💕</div></div>';
+        resultHtml = '<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:16px">';
         if (d.results) {
-          resultHtml += '<div class="flex flex-col gap-3 mb-4" style="max-width:450px;width:100%">';
           d.results.forEach(r => {
             let info = '';
             if (r.mutual) info = '💕 توافق متبادل!';
             else if (r.picked) info = '💌 أرسل لـ ' + escapeHtml(r.picked);
             else info = '😴 ما أرسل';
-            if (r.receivedCount > 0) info += ' • 💌×' + r.receivedCount + ' وصلته';
+            if (r.receivedCount > 0) info += ' • 💌×' + r.receivedCount;
             resultHtml +=
-              '<div class="flex justify-between items-center p-3" style="background:rgba(255,255,255,0.05);border-radius:12px;border-right:4px solid ' + (r.mutual ? '#D4AF37' : 'transparent') + '">' +
-                '<div>' +
-                  '<span class="font-bold">' + escapeHtml(r.playerName) + '</span>' +
-                  '<p class="text-sm text-muted mt-1">' + info + '</p>' +
-                '</div>' +
-                '<span style="color:#D4AF37;font-weight:bold">+' + r.points + '</span>' +
+              '<div class="monster-card" style="' + (r.mutual ? 'border-color:#FF4081;box-shadow:0 0 20px rgba(255,64,129,0.4)' : '') + '">' +
+                '<div class="monster-card__icon">' + (r.avatar || '💕') + '</div>' +
+                '<div class="monster-card__name">' + escapeHtml(r.playerName) + '</div>' +
+                '<div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:4px">' + info + '</div>' +
+                '<div style="color:#FF4081;font-weight:bold;margin-top:4px">+' + r.points + '</div>' +
               '</div>';
           });
-          resultHtml += '</div>';
         }
+        resultHtml += '</div>';
         break;
 
       case 'inventions':
         resultHtml =
-          '<div class="game-prompt mb-4">' +
-            '<div class="game-prompt__icon">💡</div>' +
-            '<p class="game-prompt__text">' + escapeHtml(d.problem) + '</p>' +
+          '<div class="blueprint mb-4" style="padding:12px 16px">' +
+            '<div class="blueprint__label">💡 المشكلة</div>' +
+            '<p style="color:#fff;margin:0">' + escapeHtml(d.problem) + '</p>' +
           '</div>';
         if (d.results) {
           resultHtml += '<div class="flex flex-col gap-3 mb-4" style="max-width:450px;width:100%">';
           d.results.forEach((r, i) => {
             const medal = i === 0 ? '🏆' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
             resultHtml +=
-              '<div class="flex justify-between items-center p-3" style="background:rgba(255,255,255,0.05);border-radius:12px;border-right:4px solid ' + (i === 0 ? '#D4AF37' : 'transparent') + '">' +
+              '<div class="blueprint" style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;' + (i === 0 ? 'border-color:#D4AF37;box-shadow:0 0 15px rgba(212,175,55,0.3)' : '') + '">' +
                 '<div>' +
-                  '<span class="font-bold">' + medal + ' ' + escapeHtml(r.playerName) + '</span>' +
-                  '<p class="text-sm text-muted mt-1">"' + escapeHtml(r.text) + '"</p>' +
+                  '<span style="font-weight:bold;color:#fff">' + medal + ' ' + escapeHtml(r.playerName) + '</span>' +
+                  '<p style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:4px">"' + escapeHtml(r.text) + '"</p>' +
                 '</div>' +
-                '<div class="text-left">' +
+                '<div style="text-align:left">' +
                   '<div style="color:#D4AF37;font-weight:bold">+' + r.points + '</div>' +
-                  '<div class="text-sm text-muted">' + r.percentage + '% (' + r.votes + ' صوت)</div>' +
+                  '<div style="font-size:12px;color:rgba(255,255,255,0.4)">' + r.percentage + '% (' + r.votes + ' صوت)</div>' +
                 '</div>' +
               '</div>';
           });
@@ -4173,13 +4233,17 @@ const App = {
 
     document.getElementById('gameContent').innerHTML =
       '<div class="text-center" style="max-width:600px">' +
-        '<div class="badge badge--accent mb-4">⚡ سؤال ' + d.questionNum + ' من ' + d.totalQuestions + '</div>' +
-        '<p class="text-xl font-bold mb-4">' + escapeHtml(d.question) + '</p>' +
-        '<div class="gspy-percent-display mb-4">' + d.shownPercent + '%</div>' +
+        '<div class="info-box mb-4"><div class="info-box__label">سؤال</div><div class="info-box__value">' + d.questionNum + ' / ' + d.totalQuestions + '</div></div>' +
+        '<p class="text-xl font-bold mb-4" style="color:#fff">' + escapeHtml(d.question) + '</p>' +
+        '<div class="donut-chart mb-4" style="--pct:' + d.shownPercent + ';margin:0 auto">' +
+          '<div class="donut-chart__inner">' +
+            '<div class="donut-chart__value">' + d.shownPercent + '%</div>' +
+          '</div>' +
+        '</div>' +
         '<p class="text-muted mb-4">الجواب الحقيقي أعلى أو أقل؟</p>' +
         '<div style="display:flex;gap:16px;justify-content:center">' +
-          '<button class="btn btn--primary" style="flex:1;max-width:200px;font-size:20px;padding:16px" data-action="submitFinalHL" data-hl="higher">⬆️ أعلى</button>' +
-          '<button class="btn btn--secondary" style="flex:1;max-width:200px;font-size:20px;padding:16px" data-action="submitFinalHL" data-hl="lower">⬇️ أقل</button>' +
+          '<button class="hl-btn hl-btn--higher" data-action="submitFinalHL" data-hl="higher">⬆️ أعلى</button>' +
+          '<button class="hl-btn hl-btn--lower" data-action="submitFinalHL" data-hl="lower">⬇️ أقل</button>' +
         '</div>' +
       '</div>';
   },
@@ -4196,14 +4260,18 @@ const App = {
   handleGuesspionageFinalAnswer(d) {
     clearInterval(this.gameTimer);
     const isHigher = d.realPercent > d.shownPercent;
-    const arrow = isHigher ? '⬆️' : '⬇️';
 
     document.getElementById('gameContent').innerHTML =
       '<div class="text-center" style="max-width:600px">' +
-        '<p class="text-lg mb-2">' + escapeHtml(d.question) + '</p>' +
-        '<div class="gspy-percent-display mb-2">' +
-          '<span style="text-decoration:line-through;opacity:0.5;font-size:0.6em">' + d.shownPercent + '%</span> ' +
-          arrow + ' <span style="color:#D4AF37">' + d.realPercent + '%</span>' +
+        '<p class="text-lg mb-4" style="color:rgba(255,255,255,0.7)">' + escapeHtml(d.question) + '</p>' +
+        '<div style="display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:16px">' +
+          '<div class="donut-chart" style="--pct:' + d.shownPercent + ';width:80px;height:80px;opacity:0.4">' +
+            '<div class="donut-chart__inner" style="width:50px;height:50px"><div class="donut-chart__value" style="font-size:16px;text-decoration:line-through">' + d.shownPercent + '%</div></div>' +
+          '</div>' +
+          '<div style="font-size:32px">' + (isHigher ? '⬆️' : '⬇️') + '</div>' +
+          '<div class="donut-chart" style="--pct:' + d.realPercent + ';width:100px;height:100px;margin:0 auto">' +
+            '<div class="donut-chart__inner" style="width:64px;height:64px"><div class="donut-chart__value" style="color:#DAA520">' + d.realPercent + '%</div></div>' +
+          '</div>' +
         '</div>' +
         '<p class="text-xl font-bold" style="color:' + (d.correctAnswer === 'higher' ? '#00C853' : '#FF5252') + '">' +
           (d.correctAnswer === 'higher' ? 'أعلى!' : 'أقل!') +
