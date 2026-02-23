@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abu Abed Box - Game Visuals Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&family=Bangers&display=swap" rel="stylesheet">
+<style>
+/* ═══ BASE ═══ */
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Tajawal',sans-serif;color:#fff;line-height:1.6;overflow-x:hidden}
+.preview-page{max-width:1100px;margin:0 auto;padding:30px 20px}
+h1{text-align:center;font-size:36px;margin-bottom:10px;font-family:'Bangers',sans-serif;letter-spacing:3px}
+.subtitle{text-align:center;color:#aaa;margin-bottom:50px;font-size:16px}
+
+/* Section styling */
+.game-section{
+  margin-bottom:60px;border-radius:24px;
+  padding:40px 30px;position:relative;overflow:hidden;
+}
+.game-section::before{
+  content:'';position:absolute;inset:0;opacity:0.03;
+  background-image:repeating-linear-gradient(45deg,#fff 0,#fff 1px,transparent 1px,transparent 10px);
+}
+.game-section h2{
+  font-size:28px;margin-bottom:8px;font-weight:900;position:relative;z-index:1;
+}
+.game-section .game-label{
+  font-size:13px;color:rgba(255,255,255,0.4);letter-spacing:2px;
+  text-transform:uppercase;margin-bottom:24px;position:relative;z-index:1;
+}
+.game-section .demo-box{
+  position:relative;z-index:1;
+}
+.demo-row{display:flex;gap:24px;flex-wrap:wrap;justify-content:center;margin-bottom:20px}
+
+/* GAME THEME COLORS */
+.sec-quiplash{background:linear-gradient(135deg,#1a0a2e,#16213e)}
+.sec-trivia{background:linear-gradient(135deg,#1a0000,#2d0a1e)}
+.sec-fakinit{background:linear-gradient(135deg,#1a1a2e,#0a1628)}
+.sec-fibbage{background:linear-gradient(135deg,#1a1400,#2d1f0a)}
+.sec-drawful{background:linear-gradient(135deg,#0a1e2e,#162e1e)}
+.sec-tko{background:linear-gradient(135deg,#2d0a0a,#1a0a28)}
+.sec-lovemonster{background:linear-gradient(135deg,#2d0a1e,#1a0028)}
+.sec-inventions{background:linear-gradient(135deg,#0a1e28,#001a2d)}
+.sec-guesspionage{background:linear-gradient(135deg,#0a2028,#002020)}
+
+/* ═══ COMPONENT CSS (from game-screens.css) ═══ */
+
+/* Speech Bubble */
+.speech-bubble{background:#fff;border:4px solid #000;border-radius:20px;padding:24px 36px;position:relative;max-width:600px;margin:0 auto;box-shadow:6px 6px 0 rgba(0,0,0,0.3);animation:bubble-pop 0.4s cubic-bezier(0.34,1.56,0.64,1)}
+.speech-bubble::after{content:'';position:absolute;bottom:-22px;left:40px;width:0;height:0;border-left:16px solid transparent;border-right:16px solid transparent;border-top:22px solid #fff}
+.speech-bubble::before{content:'';position:absolute;bottom:-28px;left:36px;width:0;height:0;border-left:20px solid transparent;border-right:20px solid transparent;border-top:28px solid #000}
+.speech-bubble__text{font-size:28px;font-weight:900;color:#000;text-align:center;font-family:'Tajawal',sans-serif;line-height:1.3}
+.speech-bubble__author{font-size:16px;color:#666;text-align:center;margin-top:8px;font-weight:700}
+@keyframes bubble-pop{from{transform:scale(0.7);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* Voter Tags */
+.voter-tags{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
+.voter-tag{padding:4px 14px;border-radius:6px;font-size:13px;font-weight:700;color:#fff;border:2px solid rgba(0,0,0,0.2);animation:tag-pop 0.3s ease-out backwards}
+.voter-tag:nth-child(1){animation-delay:0.1s}.voter-tag:nth-child(2){animation-delay:0.2s}.voter-tag:nth-child(3){animation-delay:0.3s}
+@keyframes tag-pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* VS Arena */
+.vs-arena{display:flex;align-items:stretch;justify-content:center;gap:20px;padding:20px}
+.vs-card{flex:1;max-width:350px;background:#fff;border:4px solid #000;border-radius:20px;padding:24px;position:relative;box-shadow:6px 6px 0 rgba(0,0,0,0.3);cursor:pointer;transition:transform 0.2s ease,box-shadow 0.2s ease}
+.vs-card:hover{transform:translateY(-8px);box-shadow:8px 12px 0 rgba(0,0,0,0.4)}
+.vs-card--winner{border-color:#2ecc71;box-shadow:0 0 20px rgba(46,204,113,0.5),6px 6px 0 rgba(0,0,0,0.3)}
+.vs-card__text{font-size:24px;font-weight:900;color:#000;text-align:center}
+.vs-card__author{font-size:14px;color:#888;text-align:center;margin-top:8px}
+.vs-badge{font-size:42px;font-weight:900;color:#e74c3c;text-shadow:3px 3px 0 #000;align-self:center;animation:vs-pulse 1s ease-in-out infinite alternate;min-width:60px;text-align:center}
+@keyframes vs-pulse{from{transform:scale(1)}to{transform:scale(1.15)}}
+
+/* Winner Stamp */
+.winner-stamp{position:absolute;top:-15px;right:-15px;width:80px;height:80px;background:linear-gradient(135deg,#2ecc71,#27ae60);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(-15deg);border:4px solid #000;box-shadow:3px 3px 0 rgba(0,0,0,0.3);animation:stamp-slam 0.4s cubic-bezier(0.34,1.56,0.64,1) 0.5s backwards}
+.winner-stamp__label{font-size:14px;font-weight:900;color:#fff}
+@keyframes stamp-slam{from{transform:rotate(-15deg) scale(2);opacity:0}to{transform:rotate(-15deg) scale(1);opacity:1}}
+
+/* Donut Chart */
+.donut-chart{width:180px;height:180px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;margin:0 auto;background:conic-gradient(#22d3d1 0% calc(var(--pct,50)*1%),rgba(255,255,255,0.1) calc(var(--pct,50)*1%) 100%);box-shadow:0 0 30px rgba(34,211,209,0.3)}
+.donut-chart__inner{width:120px;height:120px;border-radius:50%;background:#1e3a5f;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1}
+.donut-chart__value{font-size:42px;font-weight:900;color:#fff;font-family:'Bangers',sans-serif}
+.donut-chart__symbol{font-size:14px;color:rgba(255,255,255,0.5)}
+
+/* Featured Player */
+.featured-player{text-align:center;margin-bottom:20px;animation:featured-entrance 0.6s cubic-bezier(0.34,1.56,0.64,1)}
+@keyframes featured-entrance{from{transform:scale(0.5);opacity:0}to{transform:scale(1);opacity:1}}
+.featured-player__avatar{font-size:56px;filter:drop-shadow(3px 3px 0 rgba(0,0,0,0.5))}
+.featured-player__name{font-size:20px;font-weight:900;color:#22d3d1;margin-top:4px}
+.featured-player__label{font-size:12px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:3px}
+
+/* HL Buttons */
+.hl-btn{padding:16px 36px;font-size:20px;font-weight:900;border:3px solid #000;border-radius:14px;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;font-family:'Tajawal',sans-serif;color:#000}
+.hl-btn--higher{background:linear-gradient(135deg,#22d3d1,#1abc9c)}
+.hl-btn--lower{background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff}
+.hl-btn:hover{transform:translateY(-4px);box-shadow:0 6px 15px rgba(0,0,0,0.3)}
+
+/* Info Box */
+.info-box{background:rgba(0,0,0,0.5);padding:8px 14px;border-radius:8px;border-right:4px solid #22d3d1;margin-bottom:8px;display:inline-block}
+.info-box__label{font-size:10px;color:#22d3d1;text-transform:uppercase;letter-spacing:2px}
+.info-box__value{font-size:16px;font-weight:900}
+
+/* Dolls Row */
+.dolls-row{display:flex;justify-content:center;gap:20px;padding:20px;flex-wrap:wrap}
+.doll{text-align:center;animation:doll-entrance 0.5s ease-out backwards}
+.doll:nth-child(1){animation-delay:0s}.doll:nth-child(2){animation-delay:0.1s}.doll:nth-child(3){animation-delay:0.15s}.doll:nth-child(4){animation-delay:0.2s}
+@keyframes doll-entrance{from{transform:translateY(-30px) scale(0);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.doll__body{width:56px;height:80px;border-radius:28px 28px 16px 16px;position:relative;margin:0 auto;box-shadow:0 4px 12px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center}
+.doll__face{font-size:24px;position:relative;z-index:1}
+.doll__name{font-size:11px;margin-top:6px;color:#aaa;font-weight:700}
+.doll--crimson .doll__body{background:linear-gradient(180deg,#d63031,#6c0000)}
+.doll--purple .doll__body{background:linear-gradient(180deg,#6c5ce7,#341f97)}
+.doll--midnight .doll__body{background:linear-gradient(180deg,#2d3436,#0a0a0a)}
+.doll--teal .doll__body{background:linear-gradient(180deg,#00cec9,#006266)}
+.doll--rust .doll__body{background:linear-gradient(180deg,#e67e22,#8b4513)}
+.doll--olive .doll__body{background:linear-gradient(180deg,#6ab04c,#2d5016)}
+.doll--navy .doll__body{background:linear-gradient(180deg,#0984e3,#0a2040)}
+.doll--coral .doll__body{background:linear-gradient(180deg,#e17055,#6c2020)}
+
+/* Murder Options */
+.murder-options{display:flex;flex-direction:column;gap:12px;max-width:450px;margin:0 auto}
+.murder-option{display:flex;align-items:center;gap:14px;padding:14px 18px;background:rgba(255,255,255,0.06);border:2px solid rgba(255,255,255,0.1);border-radius:12px;cursor:pointer;transition:all 0.2s}
+.murder-option:hover{background:rgba(255,255,255,0.12);border-color:rgba(139,34,82,0.6);transform:translateX(-4px)}
+.murder-option--selected{background:rgba(139,34,82,0.3);border-color:#8B2252}
+.murder-option__num{width:36px;height:36px;background:#f1c40f;color:#000;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;border-radius:4px;flex-shrink:0}
+.murder-option__text{font-size:18px;color:#fff;font-weight:600}
+
+/* Death Zone */
+.death-zone{background:linear-gradient(135deg,rgba(139,34,82,0.2),rgba(100,0,0,0.3));border:2px solid rgba(139,34,82,0.5);border-radius:20px;padding:24px;position:relative;overflow:hidden;text-align:center}
+.death-zone::before{content:'💀';position:absolute;top:-20px;left:-20px;font-size:120px;opacity:0.05;transform:rotate(-15deg)}
+.death-zone__title{font-size:24px;font-weight:900;color:#FF6B6B;text-shadow:2px 2px 4px rgba(0,0,0,0.5);text-align:center;margin-bottom:16px}
+
+/* Faker */
+.faker-reveal{text-align:center;padding:40px;animation:fadeIn 0.5s ease-out}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.faker-silhouette{width:200px;height:200px;margin:0 auto;background:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;box-shadow:0 0 40px rgba(192,57,43,0.5)}
+.faker-silhouette--revealed .faker-silhouette__emoji{filter:brightness(1)}
+.faker-silhouette__emoji{font-size:80px;filter:brightness(0);transition:filter 0.5s}
+.faker-silhouette__question{font-size:80px}
+.faker-status{font-size:36px;font-weight:900;margin-top:20px;text-shadow:2px 2px 4px rgba(0,0,0,0.5)}
+.faker-status--caught{color:#e74c3c}
+.faker-status--safe{color:#2ecc71;background:rgba(46,204,113,0.15);padding:8px 20px;border-radius:20px;display:inline-block}
+.faker-frame{border:8px solid;border-radius:30px;padding:30px;border-image:linear-gradient(180deg,#c0392b 0%,#c0392b 20%,transparent 20%,transparent 80%,#c0392b 80%,#c0392b 100%) 1}
+
+/* T-Shirt Shape */
+.tshirt-shape{width:200px;height:240px;position:relative;margin:0 auto;clip-path:polygon(30% 0%,70% 0%,70% 5%,85% 5%,90% 12%,100% 12%,100% 100%,0% 100%,0% 12%,10% 12%,15% 5%,30% 5%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;transition:transform 0.3s}
+.tshirt-shape:hover{transform:scale(1.05)}
+.tshirt-shape--dark{background:#2d3436}.tshirt-shape--white{background:#ecf0f1}.tshirt-shape--red{background:#c0392b}.tshirt-shape--blue{background:#2980b9}
+.tshirt-shape__design{font-size:60px;margin-bottom:8px}
+.tshirt-shape__slogan{font-size:16px;font-weight:900;text-align:center;color:#fff;word-break:break-word}
+.tshirt-shape--white .tshirt-shape__slogan{color:#000}
+.tshirt-shape__owner{position:absolute;bottom:-30px;left:50%;transform:translateX(-50%);background:#000;color:#fff;padding:6px 20px;font-weight:900;font-size:14px;white-space:nowrap;border-radius:4px}
+
+/* Lightning VS */
+.lightning-vs{font-size:80px;color:#f1c40f;text-shadow:4px 4px 0 #000;animation:lightning-flash 0.8s ease infinite;text-align:center;align-self:center}
+@keyframes lightning-flash{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.1)}}
+
+/* Monster Card */
+.monster-card{background:rgba(255,64,129,0.1);border:2px solid rgba(255,64,129,0.3);border-radius:16px;padding:16px;text-align:center;display:inline-block;transition:transform 0.2s}
+.monster-card:hover{transform:scale(1.05)}
+.monster-card__icon{font-size:48px}
+.monster-card__name{font-size:14px;font-weight:700;color:#FF4081;margin-top:4px}
+
+/* Blueprint */
+.blueprint{background:rgba(0,229,255,0.05);border:2px dashed rgba(0,229,255,0.3);border-radius:16px;padding:20px;position:relative}
+.blueprint__label{position:absolute;top:-12px;right:20px;background:#00E5FF;color:#000;padding:4px 16px;font-size:12px;font-weight:900;border-radius:4px}
+
+/* Lie Card */
+.lie-card{background:rgba(218,165,32,0.08);border:2px solid rgba(218,165,32,0.3);border-radius:16px;padding:24px;text-align:center;position:relative;overflow:hidden}
+.lie-card::before{content:'🔍';position:absolute;top:-10px;right:-10px;font-size:60px;opacity:0.1;transform:rotate(15deg)}
+.lie-card__question{font-size:22px;font-weight:700;color:#fff;line-height:1.4}
+
+/* Winner Stamp for TKO result */
+.winner-stamp--inline{position:relative;top:auto;right:auto;width:60px;height:60px;margin:0 auto 10px}
+</style>
+</head>
+<body style="background:#0a0a0a">
+<div class="preview-page">
+
+<h1>Abu Abed Box - Game Visuals</h1>
+<p class="subtitle">Preview of all in-game visual components</p>
+
+<!-- ═══════════════════════════════════════════════════
+     1. QUIPLASH - رد سريع
+     ═══════════════════════════════════════════════════ -->
+<div class="game-section sec-quiplash">
+  <h2>⚡ رد سريع (Quiplash)</h2>
+  <p class="game-label">Voting &amp; Results Screen</p>
+  <div class="demo-box">
+    <div class="speech-bubble" style="margin-bottom:40px">
+      <div class="speech-bubble__text" style="font-size:16px;color:#888">السؤال:</div>
+      <div class="speech-bubble__text">أسوأ شي تقوله في مقابلة عمل؟</div>
+    </div>
+
+    <div class="vs-arena">
+      <div class="vs-card vs-card--winner" style="position:relative">
+        <div class="vs-card__text">"متى الراتب يا عمي؟"</div>
+        <div class="vs-card__author">أبو فهد</div>
+        <div class="voter-tags" style="margin-top:12px">
+          <span class="voter-tag" style="background:#e74c3c">سارة</span>
+          <span class="voter-tag" style="background:#3498db">محمد</span>
+          <span class="voter-tag" style="background:#2ecc71">خالد</span>
+        </div>
+        <div style="font-size:36px;font-weight:900;color:#2ecc71;text-align:center;margin-top:8px">75%</div>
+        <div class="winner-stamp"><div class="winner-stamp__label">فائز!</div></div>
+      </div>
+
+      <div class="vs-badge">VS</div>
+
+      <div class="vs-card" style="opacity:0.7">
+        <div class="vs-card__text">"وين القهوة؟"</div>
+        <div class="vs-card__author">أبو سعود</div>
+        <div class="voter-tags" style="margin-top:12px">
+          <span class="voter-tag" style="background:#9b59b6">نورة</span>
+        </div>
+        <div style="font-size:36px;font-weight:900;color:#e74c3c;text-align:center;margin-top:8px">25%</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     2. GUESSPIONAGE - خمّن النسبة
+     ═══════════════════════════════════════════════════ -->
+<div class="game-section sec-guesspionage">
+  <h2>📊 خمّن النسبة (Guesspionage)</h2>
+  <p class="game-label">Featured Player + Donut Chart + Higher/Lower</p>
+  <div class="demo-box">
+    <div class="demo-row">
+      <div>
+        <div class="featured-player">
+          <div class="featured-player__avatar">🎯</div>
+          <div class="featured-player__name">أبو فهد</div>
+          <div class="featured-player__label">اللاعب المميز</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="donut-chart" style="--pct:67">
+          <div class="donut-chart__inner">
+            <div class="donut-chart__value">67%</div>
+            <div class="donut-chart__symbol">تخمين</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="donut-chart" style="--pct:42;width:120px;height:120px">
+          <div class="donut-chart__inner" style="width:80px;height:80px">
+            <div class="donut-chart__value" style="font-size:28px;color:#DAA520">42%</div>
+            <div class="donut-chart__symbol" style="font-size:10px">حقيقي</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-bottom:16px">
+      <div class="info-box"><div class="info-box__label">سؤال</div><div class="info-box__value">3 / 6</div></div>
+    </div>
+
+    <p style="text-align:center;color:rgba(255,255,255,0.6);margin-bottom:16px">الجواب الحقيقي أعلى أو أقل؟</p>
+    <div style="display:flex;gap:16px;justify-content:center">
+      <button class="hl-btn hl-btn--higher">⬆️ أعلى</button>
+      <button class="hl-btn hl-btn--lower">⬇️ أقل</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     3. TRIVIA MURDER PARTY - حفلة القاتل
+     ═══════════════════════════════════════════════════ -->
+<div class="game-section sec-trivia">
+  <h2>💀 حفلة القاتل (Trivia Murder Party)</h2>
+  <p class="game-label">Murder Options + Dolls + Death Zone</p>
+  <div class="demo-box">
+    <div class="death-zone" style="margin-bottom:24px">
+      <div class="death-zone__title">💀 أجب أو مت!</div>
+      <p style="font-size:20px;font-weight:700;margin-bottom:20px">ما هي عاصمة اليابان؟</p>
+      <div class="murder-options">
+        <div class="murder-option"><span class="murder-option__num">1</span><span class="murder-option__text">طوكيو</span></div>
+        <div class="murder-option murder-option--selected"><span class="murder-option__num">2</span><span class="murder-option__text">أوساكا</span></div>
+        <div class="murder-option"><span class="murder-option__num">3</span><span class="murder-option__text">كيوتو</span></div>
+        <div class="murder-option"><span class="murder-option__num">4</span><span class="murder-option__text">هيروشيما</span></div>
+      </div>
+    </div>
+
+    <p style="text-align:center;color:#aaa;margin-bottom:16px">النتيجة:</p>
+    <div class="dolls-row">
+      <div class="doll doll--crimson"><div class="doll__body"><div class="doll__face">💀</div></div><div class="doll__name">سارة</div></div>
+      <div class="doll doll--purple"><div class="doll__body"><div class="doll__face">💀</div></div><div class="doll__name">محمد</div></div>
+      <div class="doll doll--teal"><div class="doll__body"><div class="doll__face">😌</div></div><div class="doll__name">خالد</div></div>
+      <div class="doll doll--olive"><div class="doll__body"><div class="doll__face">😌</div></div><div class="doll__name">نورة</div></div>
+      <div class="doll doll--navy"><div class="doll__body"><div class="doll__face">😇</div></div><div class="doll__name">فهد</div></div>
+      <div class="doll doll--coral"><div class="doll__body"><div class="doll__face">💀</div></div><div class="doll__name">أحمد</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     4. FAKIN' IT - المزيّف
+     ═══════════════════════════════════════════════════ -->
+<div class="game-section sec-fakinit">
+  <h2>🕵️ المزيّف (Fakin' It)</h2>
+  <p class="game-label">Faker Reveal + Silhouette + Task Cards</p>
+  <div class="demo-box">
+    <div class="demo-row">
+      <!-- Faker Task (hidden) -->
+      <div class="faker-reveal" style="flex:1;min-width:260px;padding:20px">
+        <div class="faker-silhouette faker-silhouette--revealed" style="width:120px;height:120px;margin-bottom:16px">
+          <div class="faker-silhouette__emoji" style="font-size:50px">🕵️</div>
+        </div>
+        <p style="font-size:18px;font-weight:700;color:#FF4466;margin-bottom:4px">أنت المزيّف!</p>
+        <p style="color:rgba(255,255,255,0.5);font-size:13px">ما تعرف المهمة!</p>
+      </div>
+
+      <!-- Normal Task -->
+      <div class="faker-reveal" style="flex:1;min-width:260px;padding:20px">
+        <div style="font-size:48px;margin-bottom:12px">✋</div>
+        <div class="faker-status faker-status--safe" style="font-size:18px;margin-bottom:12px">أيدي الحقيقة</div>
+        <p style="font-size:18px;font-weight:700;margin-bottom:8px">ارفع يدك إذا تحب القهوة!</p>
+      </div>
+
+      <!-- Faker Result -->
+      <div class="faker-reveal" style="flex:1;min-width:260px;padding:20px">
+        <div class="faker-silhouette faker-silhouette--revealed" style="width:120px;height:120px;margin-bottom:12px">
+          <div class="faker-silhouette__emoji" style="font-size:50px">🕵️</div>
+        </div>
+        <div class="faker-status faker-status--caught" style="font-size:22px">🎉 انكشف!</div>
+        <p style="margin-top:8px;font-size:16px">المزيّف: <strong style="color:#FF4466">أبو سعود</strong></p>
+      </div>
+    </div>
+
+    <div class="faker-frame" style="max-width:500px;margin:0 auto">
+      <p style="font-size:18px;font-weight:700;text-align:center;margin-bottom:8px">🗣️ مرحلة النقاش</p>
+      <p style="color:rgba(255,255,255,0.5);text-align:center;font-size:14px">مين تحسون إنه المزيّف؟</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     5. FIBBAGE - كشف الكذاب
+     ═══════════════════════════════════════════════════ -->
+<div class="game-section sec-fibbage">
+  <h2>🎭 كشف الكذاب (Fibbage)</h2>
+  <p class="game-label">Lie Card + Gold Themed Options</p>
+  <div class="demo-box">
+    <div class="demo-row">
+      <div class="lie-card" style="flex:1;max-width:500px">
+        <div class="info-box" style="border-color:rgba(218,165,32,0.5);margin-bottom:12px">
+          <div class="info-box__label" style="color:#DAA520">الفئة</div>
+          <div class="info-box__value">تاريخ وعلوم</div>
+        </div>
+        <div class="lie-card__question">في عام ١٩٦٩، أول شي أكله رواد الفضاء على القمر كان ___</div>
+        <div class="murder-options" style="margin-top:20px">
+          <div class="murder-option" style="border-color:rgba(218,165,32,0.3)">
+            <span class="murder-option__num" style="background:rgba(218,165,32,0.3);color:#DAA520">A</span>
+            <span class="murder-option__text">ديك رومي مشوي</span>
+          </div>
+          <div class="murder-option" style="border-color:rgba(218,165,32,0.3)">
+            <span class="murder-option__num" style="background:rgba(218,165,32,0.3);color:#DAA520">B</span>
+            <span class="murder-option__text">بيكون مع بيض</span>
+          </div>
+          <div class="murder-option" style="border-color:rgba(218,165,32,0.3)">
+            <span class="murder-option__num" style="background:rgba(218,165,32,0.3);color:#DAA520">C</span>
+            <span class="murder-option__text">كبسة حاشي</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     6. DRAWFUL - ارسم لي
+     ═══════════════════════════════════════════════════ -->
+<div class="game-section sec-drawful">
+  <h2>🎨 ارسم لي (Drawful)</h2>
+  <p class="game-label">Speech Bubbles + Drawing Results</p>
+  <div class="demo-box">
+    <div class="demo-row">
+      <div class="speech-bubble" style="flex:1;max-width:400px;margin-bottom:30px">
+        <div class="speech-bubble__text" style="font-size:14px;color:#888">الجواب الصحيح:</div>
+        <div class="speech-bubble__text" style="font-size:22px">قطة تسوق سيارة</div>
+        <div class="speech-bubble__author">🎨 أبو فهد</div>
+      </div>
+    </div>
+
+    <div class="murder-options" style="max-width:500px;margin:0 auto">
+      <div class="murder-option" style="border-color:rgba(0,200,83,0.5);pointer-events:none">
+        <span class="murder-option__num" style="background:rgba(0,200,83,0.2)">✅</span>
+        <span class="murder-option__text">قطة تسوق سيارة</span>
+      </div>
+      <div class="murder-option" style="border-color:rgba(255,255,255,0.1);pointer-events:none">
+        <span class="murder-option__num" style="background:rgba(255,255,255,0.05)">🎭</span>
+        <span class="murder-option__text">كلب يطير (كتبها: سارة)</span>
+      </div>
+      <div class="murder-option" style="border-color:rgba(255,255,255,0.1);pointer-events:none">
+        <span class="murder-option__num" style="background:rgba(255,255,255,0.05)">🎭</span>
+        <span class="murder-option__text">فأر يأكل جبن (كتبها: محمد)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     7. TEE K.O. - حرب التيشيرتات
+     ═══════════════════════════════════════════════════ -->
+<div class="game-section sec-tko">
+  <h2>👕 حرب التيشيرتات (Tee K.O.)</h2>
+  <p class="game-label">T-Shirt Shapes + Lightning VS + Tournament</p>
+  <div class="demo-box">
+    <div class="vs-arena">
+      <div class="tshirt-shape tshirt-shape--dark" style="cursor:pointer">
+        <div class="tshirt-shape__design">🎮</div>
+        <div class="tshirt-shape__slogan">أنا ما أخسر... أنا أخلّي غيري يفوز</div>
+      </div>
+
+      <div class="lightning-vs">⚡</div>
+
+      <div class="tshirt-shape tshirt-shape--red" style="cursor:pointer">
+        <div class="tshirt-shape__design">☕</div>
+        <div class="tshirt-shape__slogan">القهوة قبل الكلام</div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:20px">
+      <p style="color:#aaa;margin-bottom:16px">النتائج:</p>
+      <div class="demo-row">
+        <div class="tshirt-shape tshirt-shape--blue" style="transform:scale(0.7)">
+          <div class="tshirt-shape__design" style="font-size:28px">🥇</div>
+          <div class="tshirt-shape__slogan">أبو فهد</div>
+          <div style="color:#DAA520;font-weight:bold;font-size:14px;margin-top:4px">+3000</div>
+        </div>
+        <div class="tshirt-shape tshirt-shape--white" style="transform:scale(0.6)">
+          <div class="tshirt-shape__design" style="font-size:28px">🥈</div>
+          <div class="tshirt-shape__slogan" style="color:#000">سارة</div>
+          <div style="color:#DAA520;font-weight:bold;font-size:14px;margin-top:4px">+2000</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     8. LOVE MONSTER - الوحش العاشق
+     ═══════════════════════════════════════════════════ -->
+<div class="game-section sec-lovemonster">
+  <h2>💕 الوحش العاشق (Love Monster)</h2>
+  <p class="game-label">Monster Identity Cards</p>
+  <div class="demo-box">
+    <p style="text-align:center;color:#aaa;margin-bottom:16px">هويتك السرية:</p>
+    <div style="text-align:center;margin-bottom:24px">
+      <div class="monster-card" style="margin:0 auto">
+        <div class="monster-card__icon">🐉</div>
+        <div class="monster-card__name">التنين العاشق</div>
+      </div>
+    </div>
+
+    <p style="text-align:center;margin-bottom:16px;font-size:18px;font-weight:700">اختر لاعب تبي تواعده!</p>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center">
+      <div class="monster-card" style="cursor:pointer"><div class="monster-card__icon">🎮</div><div class="monster-card__name">أبو فهد</div></div>
+      <div class="monster-card" style="cursor:pointer;border-color:#FF4081;box-shadow:0 0 20px rgba(255,64,129,0.4)"><div class="monster-card__icon">👑</div><div class="monster-card__name">سارة</div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px">🦊 الثعلب الماكر</div></div>
+      <div class="monster-card" style="cursor:pointer"><div class="monster-card__icon">⚡</div><div class="monster-card__name">محمد</div></div>
+      <div class="monster-card" style="cursor:pointer"><div class="monster-card__icon">🎵</div><div class="monster-card__name">نورة</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     9. INVENTIONS - اختراعات مجنونة
+     ═══════════════════════════════════════════════════ -->
+<div class="game-section sec-inventions">
+  <h2>💡 اختراعات مجنونة (Inventions)</h2>
+  <p class="game-label">Blueprint Cards</p>
+  <div class="demo-box">
+    <div class="blueprint" style="max-width:500px;margin:0 auto 24px">
+      <div class="blueprint__label">💡 المشكلة</div>
+      <p style="font-size:20px;font-weight:700;color:#fff;margin-bottom:8px;margin-top:8px">كيف تخلّي القطط تسمع كلامك؟</p>
+      <span style="background:rgba(0,229,255,0.2);padding:4px 12px;border-radius:10px;font-size:12px;color:#00E5FF">حيوانات</span>
+    </div>
+
+    <p style="text-align:center;color:#aaa;margin-bottom:16px">صوّت لأجنن اختراع:</p>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center">
+      <div class="blueprint" style="flex:1;min-width:200px;max-width:280px;cursor:pointer;text-align:center">
+        <p style="color:#fff;font-weight:700;margin:0">🎧 سماعة ترجمة القطط</p>
+        <div style="color:#DAA520;font-weight:bold;margin-top:8px">+2500</div>
+      </div>
+      <div class="blueprint" style="flex:1;min-width:200px;max-width:280px;cursor:pointer;text-align:center;border-color:#DAA520;box-shadow:0 0 15px rgba(212,175,55,0.3)">
+        <p style="color:#fff;font-weight:700;margin:0">🧲 مغناطيس جذب القطط</p>
+        <div style="color:#DAA520;font-weight:bold;margin-top:8px">+4000 🏆</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
