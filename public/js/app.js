@@ -280,7 +280,7 @@ const App = {
         case 'submitAnswer': this.submitAnswer(); break;
         case 'submitGuess': this.submitGuess(e); break;
         case 'submitFakinAction': this.submitFakinAction(); break;
-        case 'submitDeathAnswer': this.submitDeathAnswer(); break;
+        case 'submitDeathAnswer': this.submitDeathAnswer(btn.dataset.chalice); break;
         case 'submitLie': this.submitLie(); break;
         case 'submitDrawing': this.submitDrawing(); break;
         case 'submitGuessDrawful': this.submitGuessDrawful(); break;
@@ -316,6 +316,9 @@ const App = {
           this.setBrushSize(size, target);
           break;
         }
+        case 'submitTkoSlogans': this.submitTkoSlogans(); break;
+        case 'chooseTkoSlogan': this.chooseTkoSlogan(target.getAttribute('data-slogan'), target); break;
+        case 'submitFinalHL': this.submitFinalHL(target.getAttribute('data-hl'), target); break;
       }
     });
 
@@ -575,6 +578,13 @@ const App = {
       if (hasQuiplash) AudioEngine.quiplash(); else AudioEngine.reveal();
       this.handleQuiplashMatchupResult(data);
     });
+    // Thriplash (final round)
+    s.on('quiplashThriplashVoting', data => this.handleQuiplashThriplashVoting(data));
+    s.on('quiplashThriplashResult', data => {
+      const hasQuiplash = data.results?.some(r => r.quiplash);
+      if (hasQuiplash) AudioEngine.quiplash(); else AudioEngine.reveal();
+      this.handleQuiplashThriplashResult(data);
+    });
 
     // ── خمّن النسبة (Guesspionage) - نظام كامل ──
     s.on('guesspionageQuestion', data => this.handleGuesspionageQuestion(data));
@@ -585,6 +595,7 @@ const App = {
 
     // ── المزيّف (Fakin' It) ──
     s.on('fakinItTask', data => this.handleFakinItTask(data));
+    s.on('fakinItDiscussion', data => this.handleFakinItDiscussion(data));
     s.on('fakinItVoting', data => this.handleFakinItVoting(data));
 
     // ── حفلة القاتل (Trivia Murder) ──
@@ -609,16 +620,24 @@ const App = {
     s.on('drawfulWaiting', data => this.handleDrawfulWaiting(data));
     s.on('drawfulGuessing', data => this.handleDrawfulGuessing(data));
     s.on('drawfulVoting', data => this.handleDrawfulVoting(data));
+    s.on('drawfulDrawingResult', data => this.handleDrawfulDrawingResult(data));
+    s.on('drawingAccepted', data => this.showToast(data.message, 'success'));
 
-    // ── حرب التيشيرتات (T-Shirt Wars) ──
+    // ── حرب التيشيرتات (Tee K.O.) ──
     s.on('tshirtWarsSlogan', data => this.handleTshirtWarsSlogan(data));
+    s.on('tshirtWarsDraw', data => this.handleTshirtWarsDraw(data));
+    s.on('tshirtWarsCombine', data => this.handleTshirtWarsCombine(data));
     s.on('tshirtWarsVoting', data => this.handleTshirtWarsVoting(data));
+    s.on('tshirtWarsMatchResult', data => this.handleTshirtWarsMatchResult(data));
+    s.on('slogansAccepted', () => this.showToast('شعاراتك وصلت!', 'success'));
+    s.on('choiceAccepted', () => this.showToast('اختيارك وصل!', 'success'));
 
     // ── الوحش العاشق (Love Monster) ──
     s.on('loveMonsterPick', data => this.handleLoveMonsterPick(data));
 
-    // ── اختراعات مجنونة (Inventions) ──
+    // ── اختراعات مجنونة (Inventions / Patently Stupid) ──
     s.on('inventionsProblem', data => this.handleInventionsProblem(data));
+    s.on('inventionsDraw', data => this.handleInventionsDraw(data));
     s.on('inventionsVoting', data => this.handleInventionsVoting(data));
 
     // ── تبي ولا ما تبي (Would You Rather) ──
@@ -711,8 +730,10 @@ const App = {
       this.showToast(escapeHtml(data.name) + ' انضم كمتفرج! 👀', 'success');
     });
 
-    // ── Guesspionage Final Round ──
+    // ── Guesspionage Final Round (The Round-Up) ──
     s.on('guesspionageFinalRound', data => this.handleGuesspionageFinalRound(data));
+    s.on('guesspionageFinalQuestion', data => this.handleGuesspionageFinalQuestion(data));
+    s.on('guesspionageFinalAnswer', data => this.handleGuesspionageFinalAnswer(data));
 
     // ── الرجوع والإلغاء ──
     s.on('returnedToLobby', data => {
@@ -1134,9 +1155,9 @@ const App = {
     }, 2500);
   },
 
-  _qlRoundLabels: ['الأولى', 'الثانية', 'الثالثة', 'الرابعة', 'الخامسة'],
-  _qlRoundColors: ['r1', 'r2', 'r3', 'r3', 'r3'],
-  _qlRoundSubtitles: ['يلا نبدأ! ⚡', 'الحين الجد! 🔥', 'آخر فرصة... كل شي مضاعف! 💥', 'لا تضيعها!', 'الجولة الأخيرة!'],
+  _qlRoundLabels: ['الأولى', 'الثانية', 'THRIPLASH!'],
+  _qlRoundColors: ['r1', 'r2', 'r3'],
+  _qlRoundSubtitles: ['يلا نبدأ! ⚡', 'الحين الجد! 🔥', '🔥🔥🔥 الكل يكتب... الكل يصوّت... النقاط ثلاثية!'],
 
   /**
    * Show Quiplash round interstitial (ROUND ONE / ROUND TWO / etc.)
@@ -1171,7 +1192,8 @@ const App = {
   handleQuiplashQuestion(d) {
     // Show round interstitial first, then the question
     this._showQuiplashInterstitial(d.round, d.maxRounds, () => {
-      document.getElementById('gameRound').textContent = 'الجولة ' + d.round + ' من ' + d.maxRounds;
+      const isThriplash = d.thriplash || d.round === d.maxRounds;
+      document.getElementById('gameRound').textContent = isThriplash ? '⚡ THRIPLASH ⚡' : 'الجولة ' + d.round + ' من ' + d.maxRounds;
       this.startTimer(d.timeLimit);
 
       const safetyQuips = d.safetyQuips || [];
@@ -1179,12 +1201,14 @@ const App = {
         ? '<button class="ql-safety-quip" data-action="useSafetyQuip" data-quip="' + escapeHtml(safetyQuips[0]) + '">🎲 مساعدة أبو عابد</button>'
         : '';
 
+      const badge = isThriplash ? '🔥 THRIPLASH - النقاط ثلاثية!' : '⚡ السؤال ' + d.round;
+
       document.getElementById('gameContent').innerHTML =
-        '<div class="ql-prompt-card">' +
-          '<div class="ql-prompt-card__badge">⚡ السؤال ' + d.round + '</div>' +
+        '<div class="ql-prompt-card' + (isThriplash ? ' ql-prompt-card--thriplash' : '') + '">' +
+          '<div class="ql-prompt-card__badge">' + badge + '</div>' +
           '<p class="ql-prompt-card__question">' + escapeHtml(d.question) + '</p>' +
           '<div class="ql-prompt-card__input-wrap">' +
-            '<input type="text" class="ql-prompt-card__input" id="answerInput" placeholder="اكتب إجابتك الأسطورية..." maxlength="100" autocomplete="off">' +
+            '<input type="text" class="ql-prompt-card__input" id="answerInput" placeholder="' + (isThriplash ? 'اكتب أفضل إجابة... النقاط ثلاثية! 🔥' : 'اكتب إجابتك الأسطورية...') + '" maxlength="100" autocomplete="off">' +
             '<span class="ql-prompt-card__char-count" id="qlCharCount">0/100</span>' +
           '</div>' +
           '<button class="ql-prompt-card__submit" data-action="submitAnswer">إرسال ⚡</button>' +
@@ -1468,6 +1492,69 @@ const App = {
     AudioEngine.timesUp();
   },
 
+  // ── Thriplash (Final Round) Handlers ──
+
+  handleQuiplashThriplashVoting(d) {
+    this._qlAnswerSubmitted = false;
+    document.getElementById('gameRound').textContent = '⚡ THRIPLASH ⚡';
+    this.startTimer(d.timeLimit);
+
+    const answers = d.answers || [];
+    const answersHtml = answers.map(a => {
+      return '<div class="ql-thriplash-option" data-action="voteAnswer" data-id="' + escapeHtml(a.playerId) + '">' +
+        '<div class="ql-thriplash-option__text">"' + escapeHtml(a.answer) + '"</div>' +
+      '</div>';
+    }).join('');
+
+    document.getElementById('gameContent').innerHTML =
+      '<div class="ql-thriplash-vote">' +
+        '<div class="ql-thriplash-vote__badge">🔥 THRIPLASH - صوّت لأفضل إجابة!</div>' +
+        '<div class="ql-thriplash-vote__question">' + escapeHtml(d.question) + '</div>' +
+        '<div class="ql-thriplash-vote__options">' + answersHtml + '</div>' +
+        '<div class="ql-vote-progress" id="waitingCount">🗳️ اختر إجابتك المفضلة!</div>' +
+      '</div>';
+  },
+
+  handleQuiplashThriplashResult(d) {
+    try {
+      clearInterval(this.gameTimer);
+      const results = d.results || [];
+      const hasQuiplash = results.some(r => r.quiplash);
+
+      const resultsHtml = results.map((r, i) => {
+        const place = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1) + '.';
+        const avatar = this._gAvatar(r.playerAvatarData, 32, r.playerAvatar);
+        return '<div class="ql-thriplash-result' + (i === 0 ? ' ql-thriplash-result--winner' : '') + '">' +
+          '<div class="ql-thriplash-result__place">' + place + '</div>' +
+          '<div class="ql-thriplash-result__avatar">' + avatar + '</div>' +
+          '<div class="ql-thriplash-result__info">' +
+            '<div class="ql-thriplash-result__name">' + escapeHtml(r.playerName) + '</div>' +
+            '<div class="ql-thriplash-result__answer">"' + escapeHtml(r.answer) + '"</div>' +
+          '</div>' +
+          '<div class="ql-thriplash-result__stats">' +
+            '<div class="ql-thriplash-result__votes">' + r.votes + ' صوت</div>' +
+            '<div class="ql-thriplash-result__points' + (r.quiplash ? ' ql-points--quiplash' : '') + '">+' + r.points + '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+
+      document.getElementById('gameContent').innerHTML =
+        '<div class="ql-thriplash-results">' +
+          '<div class="ql-thriplash-results__header">' +
+            '<div class="ql-thriplash-results__badge">🔥 THRIPLASH 🔥</div>' +
+            '<div class="ql-thriplash-results__question">' + escapeHtml(d.question) + '</div>' +
+          '</div>' +
+          '<div class="ql-thriplash-results__list">' + resultsHtml + '</div>' +
+        '</div>';
+
+      if (hasQuiplash) {
+        setTimeout(() => this._showQuiplashMoment(), 1500);
+      }
+    } catch (e) {
+      console.error('handleQuiplashThriplashResult error:', e);
+    }
+  },
+
   // ═══════════════════════════════════════════════════════════════
   // 📊 خمّن النسبة (Guesspionage) - نظام كامل بالميكانيكيات الحقيقية
   // ═══════════════════════════════════════════════════════════════
@@ -1529,12 +1616,12 @@ const App = {
           '<div class="gspy-question-icon">📊</div>' +
           '<p class="gspy-question-text">' + escapeHtml(d.question) + '</p>' +
         '</div>' +
-        '<div class="gspy-featured-spotlight">' +
-          '<div class="gspy-spotlight-icon">🎯</div>' +
-          '<p class="gspy-spotlight-name">' + escapeHtml(d.featuredPlayerName) + '</p>' +
-          '<p class="gspy-spotlight-label">يخمّن النسبة...</p>' +
-          '<div class="spinner mt-4"></div>' +
+        '<div class="featured-player mt-4">' +
+          '<div class="featured-player__avatar">🎯</div>' +
+          '<div class="featured-player__name">' + escapeHtml(d.featuredPlayerName) + '</div>' +
+          '<div class="featured-player__label">يخمّن النسبة...</div>' +
         '</div>' +
+        '<div class="spinner mt-4"></div>' +
       '</div>';
   },
 
@@ -1545,13 +1632,14 @@ const App = {
     this.startTimer(d.timeLimit);
     document.getElementById('gameContent').innerHTML =
       '<div class="gspy-result-container">' +
-        '<div class="gspy-badge gspy-badge--featured">🎯 تخمينك</div>' +
         '<div class="gspy-question-card gspy-question-card--sm">' +
           '<p class="gspy-question-text">' + escapeHtml(d.question) + '</p>' +
         '</div>' +
-        '<div class="gspy-your-guess">' +
-          '<div class="gspy-guess-number">' + d.yourGuess + '%</div>' +
-          '<p class="gspy-guess-label">تخمينك</p>' +
+        '<div class="donut-chart mt-4 mb-4" style="--pct:' + d.yourGuess + ';margin:0 auto">' +
+          '<div class="donut-chart__inner">' +
+            '<div class="donut-chart__value">' + d.yourGuess + '%</div>' +
+            '<div class="donut-chart__symbol">تخمينك</div>' +
+          '</div>' +
         '</div>' +
         '<div class="gspy-waiting-others">' +
           '<div class="spinner"></div>' +
@@ -1569,13 +1657,11 @@ const App = {
     if (d.commentary) this.showCommentary(d.commentary);
 
     let buttonsHtml =
-      '<button class="gspy-bet-btn gspy-bet-btn--higher" data-action="submitGuess" data-bet="higher" aria-label="الجواب أعلى من التخمين">' +
-        '<span class="gspy-bet-arrow">▲</span>' +
-        '<span class="gspy-bet-text">أعلى</span>' +
+      '<button class="hl-btn hl-btn--higher" data-action="submitGuess" data-bet="higher" aria-label="الجواب أعلى من التخمين">' +
+        '▲ أعلى' +
       '</button>' +
-      '<button class="gspy-bet-btn gspy-bet-btn--lower" data-action="submitGuess" data-bet="lower" aria-label="الجواب أقل من التخمين">' +
-        '<span class="gspy-bet-arrow">▼</span>' +
-        '<span class="gspy-bet-text">أقل</span>' +
+      '<button class="hl-btn hl-btn--lower" data-action="submitGuess" data-bet="lower" aria-label="الجواب أقل من التخمين">' +
+        '▼ أقل' +
       '</button>';
 
     let muchHtml = '';
@@ -1583,15 +1669,11 @@ const App = {
       muchHtml =
         '<div class="gspy-much-label mt-4">🎲 أو راهن أكبر!</div>' +
         '<div class="gspy-bet-buttons gspy-bet-buttons--much">' +
-          '<button class="gspy-bet-btn gspy-bet-btn--much-higher" data-action="submitGuess" data-bet="much_higher" aria-label="الجواب أعلى بكثير">' +
-            '<span class="gspy-bet-arrow">▲▲</span>' +
-            '<span class="gspy-bet-text">أعلى بكثير</span>' +
-            '<span class="gspy-bet-sub">+2000 أو 0!</span>' +
+          '<button class="hl-btn hl-btn--much-higher" data-action="submitGuess" data-bet="much_higher" aria-label="الجواب أعلى بكثير">' +
+            '▲▲ أعلى بكثير<br><span style="font-size:12px;opacity:0.7">+2000 أو 0!</span>' +
           '</button>' +
-          '<button class="gspy-bet-btn gspy-bet-btn--much-lower" data-action="submitGuess" data-bet="much_lower" aria-label="الجواب أقل بكثير">' +
-            '<span class="gspy-bet-arrow">▼▼</span>' +
-            '<span class="gspy-bet-text">أقل بكثير</span>' +
-            '<span class="gspy-bet-sub">+2000 أو 0!</span>' +
+          '<button class="hl-btn hl-btn--much-lower" data-action="submitGuess" data-bet="much_lower" aria-label="الجواب أقل بكثير">' +
+            '▼▼ أقل بكثير<br><span style="font-size:12px;opacity:0.7">+2000 أو 0!</span>' +
           '</button>' +
         '</div>';
     }
@@ -1602,11 +1684,13 @@ const App = {
           '<p class="gspy-question-text">' + escapeHtml(d.question) + '</p>' +
         '</div>' +
         '<div class="gspy-featured-guess-display">' +
-          '<p class="gspy-featured-label">' + escapeHtml(d.featuredPlayerName) + ' خمّن:</p>' +
-          '<div class="gspy-featured-number">' + d.featuredGuess + '%</div>' +
+          '<div class="featured-player mb-2"><div class="featured-player__label">خمّن</div><div class="featured-player__name">' + escapeHtml(d.featuredPlayerName) + '</div></div>' +
+          '<div class="donut-chart mb-3" style="--pct:' + d.featuredGuess + ';margin:0 auto">' +
+            '<div class="donut-chart__inner"><div class="donut-chart__value">' + d.featuredGuess + '%</div></div>' +
+          '</div>' +
         '</div>' +
         '<div class="gspy-challenge-prompt">الجواب الصحيح أعلى أو أقل؟</div>' +
-        '<div class="gspy-bet-buttons">' + buttonsHtml + '</div>' +
+        '<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">' + buttonsHtml + '</div>' +
         muchHtml +
         '<p class="text-muted mt-4" id="waitingCount"></p>' +
       '</div>';
@@ -1707,13 +1791,15 @@ const App = {
       handsOfTruth: '✋',
       numberPressure: '🔢',
       faceValue: '😀',
-      youGottaPoint: '👉'
+      youGottaPoint: '👉',
+      pickASide: '↔️'
     };
     const categoryHints = {
       handsOfTruth: 'ارفع يدك إذا ينطبق عليك!',
       numberPressure: 'ارفع أصابع حسب جوابك!',
       faceValue: 'وريّنا تعبير وجهك!',
-      youGottaPoint: 'أشر على اللاعب!'
+      youGottaPoint: 'أشر على اللاعب!',
+      pickASide: 'ارفع إبهامك لأعلى أو لأسفل!'
     };
     const catIcon = categoryIcons[d.categoryKey] || '🎭';
     const catHint = categoryHints[d.categoryKey] || '';
@@ -1721,22 +1807,23 @@ const App = {
     let html;
     if (d.isFaker) {
       html =
-        '<div class="panel" style="max-width:600px;background:linear-gradient(135deg,#8B0000,#4a0000)">' +
-          '<div class="badge badge--error mb-4">🕵️ أنت المزيّف!</div>' +
-          '<div class="text-4xl mb-4">' + catIcon + '</div>' +
-          '<p class="text-2xl font-bold mb-4">ما تعرف المهمة!</p>' +
-          '<p class="text-muted mb-2">النوع: ' + escapeHtml(d.category) + '</p>' +
-          '<p class="text-muted">حاول تتصرف طبيعي وما ينكشف أمرك!</p>' +
-          '<button class="btn btn--secondary btn--full mt-6" data-action="submitFakinAction">جاهز! 🎭</button>' +
+        '<div class="faker-reveal" style="max-width:600px">' +
+          '<div class="faker-silhouette faker-silhouette--revealed mb-4">' +
+            '<div class="faker-silhouette__emoji">🕵️</div>' +
+          '</div>' +
+          '<p class="text-2xl font-bold mb-2" style="color:#FF4466">أنت المزيّف!</p>' +
+          '<p class="text-lg mb-2" style="color:rgba(255,255,255,0.6)">النوع: ' + escapeHtml(d.category) + ' ' + catIcon + '</p>' +
+          '<p class="text-muted mb-4">ما تعرف المهمة! حاول تتصرف طبيعي</p>' +
+          '<button class="btn btn--secondary btn--full mt-4" data-action="submitFakinAction" style="background:rgba(139,34,82,0.5);border-color:#8B2252">جاهز! 🎭</button>' +
         '</div>';
     } else {
       html =
-        '<div class="panel" style="max-width:600px">' +
-          '<div class="badge badge--warning mb-4">' + escapeHtml(d.category) + '</div>' +
-          '<div class="text-4xl mb-4">' + catIcon + '</div>' +
+        '<div class="faker-reveal" style="max-width:600px">' +
+          '<div style="font-size:64px;margin-bottom:16px">' + catIcon + '</div>' +
+          '<div class="faker-status faker-status--safe mb-4">' + escapeHtml(d.category) + '</div>' +
           (catHint ? '<p class="text-sm text-muted mb-2">' + catHint + '</p>' : '') +
           '<p class="text-sm text-muted mb-2">' + escapeHtml(d.instruction) + '</p>' +
-          '<p class="text-2xl font-bold mb-6">' + escapeHtml(d.task) + '</p>' +
+          '<p class="text-2xl font-bold mb-6" style="color:#fff">' + escapeHtml(d.task) + '</p>' +
           '<button class="btn btn--primary btn--full" data-action="submitFakinAction">جاهز! ✅</button>' +
         '</div>';
     }
@@ -1748,22 +1835,51 @@ const App = {
     ScreenMachine.showLockIn(document.getElementById('gameContent'));
   },
 
-  handleFakinItVoting(d) {
+  handleFakinItDiscussion(d) {
     this.startTimer(d.timeLimit);
+    document.getElementById('gameRound').textContent = 'الجولة ' + d.round + ' من ' + d.maxRounds + ' (نقاش ' + d.subRound + '/' + d.maxSubRounds + ')';
+
     const players = d.players.map(p => {
-      const faceContent = this._gAvatar(p.avatarData, 56, p.avatar);
-      return '<div class="player-avatar" style="cursor:pointer" data-action="votePlayer" data-id="' + escapeHtml(p.id) + '">' +
-        '<div class="player-avatar__face' + (p.avatarData ? ' player-avatar__face--rich' : '') + '" style="background:' + escapeHtml(p.color) + '">' + faceContent + '</div>' +
-        '<span class="player-avatar__name">' + escapeHtml(p.name) + '</span>' +
+      const faceContent = this._gAvatar(p.avatarData, 48, p.avatar);
+      return '<div class="faker-silhouette" style="border:none;background:rgba(255,255,255,0.05)">' +
+        '<div class="player-avatar__face' + (p.avatarData ? ' player-avatar__face--rich' : '') + '" style="background:' + escapeHtml(p.color) + ';width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;border:3px solid #000;box-shadow:3px 3px 0 #000">' + faceContent + '</div>' +
+        '<span style="margin-top:6px;display:block;font-weight:600;color:#fff;font-size:13px">' + escapeHtml(p.name) + '</span>' +
       '</div>';
     }).join('');
 
     document.getElementById('gameContent').innerHTML =
-      '<div class="text-center" style="max-width:800px">' +
-        '<p class="text-xl mb-2">المهمة كانت:</p>' +
-        '<p class="text-2xl font-bold text-accent mb-6">"' + escapeHtml(d.task) + '"</p>' +
-        '<h3 class="text-2xl font-bold mb-4">🕵️ من المزيّف؟</h3>' +
-        '<div class="players-area">' + players + '</div>' +
+      '<div class="faker-reveal" style="max-width:700px">' +
+        '<p class="text-lg mb-2" style="color:rgba(255,255,255,0.6)">المهمة كانت:</p>' +
+        '<p class="text-xl font-bold mb-3" style="color:#FF4466">"' + escapeHtml(d.task) + '"</p>' +
+        '<p class="text-sm mb-4" style="color:rgba(255,255,255,0.4)">(' + escapeHtml(d.category) + ': ' + escapeHtml(d.instruction) + ')</p>' +
+        '<div class="faker-frame mb-4" style="padding:20px">' +
+          '<p class="text-xl font-bold mb-2" style="color:#fff">🗣️ ناقشوا مع بعض!</p>' +
+          '<p class="text-sm mb-4" style="color:rgba(255,255,255,0.5)">مين تحسون إنه المزيّف؟</p>' +
+          '<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">' + players + '</div>' +
+        '</div>' +
+        '<p class="text-sm text-muted">التصويت يبدأ بعد انتهاء النقاش...</p>' +
+      '</div>';
+  },
+
+  handleFakinItVoting(d) {
+    this.startTimer(d.timeLimit);
+    const players = d.players.map(p => {
+      const faceContent = this._gAvatar(p.avatarData, 56, p.avatar);
+      return '<div class="faker-silhouette" style="cursor:pointer" data-action="votePlayer" data-id="' + escapeHtml(p.id) + '">' +
+        '<div class="player-avatar__face' + (p.avatarData ? ' player-avatar__face--rich' : '') + '" style="background:' + escapeHtml(p.color) + ';width:68px;height:68px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:34px;border:4px solid #000;box-shadow:4px 4px 0 #000">' + faceContent + '</div>' +
+        '<span style="margin-top:8px;display:block;font-weight:700;color:#fff">' + escapeHtml(p.name) + '</span>' +
+      '</div>';
+    }).join('');
+
+    document.getElementById('gameContent').innerHTML =
+      '<div class="faker-reveal" style="max-width:800px">' +
+        '<p class="text-lg mb-2" style="color:rgba(255,255,255,0.6)">المهمة كانت:</p>' +
+        '<p class="text-xl font-bold mb-4" style="color:#FF4466">"' + escapeHtml(d.task) + '"</p>' +
+        '<div class="faker-silhouette mb-4" style="border:none;background:none">' +
+          '<div class="faker-silhouette__question">🕵️</div>' +
+        '</div>' +
+        '<h3 class="text-2xl font-bold mb-4" style="color:#fff">من المزيّف؟</h3>' +
+        '<div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center">' + players + '</div>' +
         '<p class="text-muted mt-4" id="waitingCount"></p>' +
       '</div>';
   },
@@ -1783,44 +1899,62 @@ const App = {
     document.getElementById('gameRound').textContent = 'الجولة ' + d.round + ' من ' + d.maxRounds;
     this.startTimer(d.timeLimit);
     const opts = d.options.map((o, i) =>
-      '<button class="btn btn--secondary btn--full" data-action="submitTriviaAnswer" data-id="' + i + '">' + escapeHtml(o) + '</button>'
+      '<div class="murder-option" data-action="submitTriviaAnswer" data-id="' + i + '">' +
+        '<span class="murder-option__num">' + (i + 1) + '</span>' +
+        '<span class="murder-option__text">' + escapeHtml(o) + '</span>' +
+      '</div>'
     ).join('');
 
     document.getElementById('gameContent').innerHTML =
-      '<div class="panel" style="max-width:600px">' +
-        '<div class="badge badge--error mb-4">💀 أجب أو مت!</div>' +
-        '<p class="text-2xl font-bold mb-6">' + escapeHtml(d.question) + '</p>' +
-        '<div class="flex flex-col gap-3">' + opts + '</div>' +
+      '<div class="death-zone">' +
+        '<div class="death-zone__title">💀 أجب أو مت!</div>' +
+        '<p class="text-2xl font-bold mb-6" style="color:#fff">' + escapeHtml(d.question) + '</p>' +
+        '<div class="murder-options">' + opts + '</div>' +
       '</div>';
   },
 
-  submitTriviaAnswer(i, btn) {
-    document.querySelectorAll('#gameContent .btn--secondary').forEach(b => { b.disabled = true; b.style.opacity = '0.5'; });
-    btn.style.opacity = '1';
-    btn.style.borderColor = '#FFD93D';
+  submitTriviaAnswer(i, el) {
+    const opt = el.closest('.murder-option') || el;
+    document.querySelectorAll('.murder-option').forEach(b => { b.style.pointerEvents = 'none'; b.style.opacity = '0.5'; });
+    opt.style.opacity = '1';
+    opt.classList.add('murder-option--selected');
     this.socket.emit('submitAnswer', { code: this.currentRoom, answer: i });
   },
 
   handleTriviaMurderResults(d) {
     try {
       clearInterval(this.gameTimer);
-      let html = '<div class="text-center" style="max-width:600px">';
-      html += '<div class="text-2xl text-accent mb-4">✅ ' + escapeHtml(d.correctAnswer) + '</div>';
+      let html = '<div class="death-zone" style="max-width:600px">';
+      html += '<div class="text-2xl mb-4" style="color:#00e676">✅ ' + escapeHtml(d.correctAnswer) + '</div>';
 
       if (d.newlyDead.length > 0) {
-        html += '<div class="death-panel mt-4 mb-4">';
-        html += '<p class="text-xl font-bold mb-2">💀 ماتوا!</p>';
-        html += '<p class="text-lg">' + d.newlyDead.map(p => escapeHtml(p.name)).join('، ') + '</p>';
+        html += '<div class="dolls-row mb-4">';
+        d.newlyDead.forEach((p, i) => {
+          const colors = ['crimson', 'purple', 'midnight', 'teal', 'rust', 'olive', 'navy', 'coral'];
+          html += '<div class="doll doll--' + colors[i % colors.length] + '">' +
+            '<div class="doll__body"><div class="doll__face">💀</div></div>' +
+            '<div class="doll__name">' + escapeHtml(p.name) + '</div>' +
+          '</div>';
+        });
+        html += '</div>';
+        html += '<p class="text-xl font-bold" style="color:#FF4466">ماتوا!</p>';
         if (d.hasDeathChallenge) {
           html += '<p class="text-muted mt-2">⏳ تحدي الموت قادم...</p>';
         }
-        html += '</div>';
       } else {
-        html += '<p class="text-lg" style="color:#006C35">✅ الكل نجا!</p>';
+        html += '<p class="text-lg" style="color:#00e676">✅ الكل نجا!</p>';
       }
 
-      if (d.survivors.length > 0) {
-        html += '<p class="text-muted mt-2">الأحياء: ' + d.survivors.map(p => escapeHtml(p.name)).join('، ') + '</p>';
+      if (d.survivors && d.survivors.length > 0) {
+        html += '<div class="dolls-row mt-4" style="opacity:0.6">';
+        d.survivors.forEach((p, i) => {
+          const colors = ['teal', 'navy', 'olive', 'coral'];
+          html += '<div class="doll doll--' + colors[i % colors.length] + '" style="transform:scale(0.8)">' +
+            '<div class="doll__body"><div class="doll__face">😌</div></div>' +
+            '<div class="doll__name">' + escapeHtml(p.name) + '</div>' +
+          '</div>';
+        });
+        html += '</div>';
       }
 
       html += '</div>';
@@ -1832,58 +1966,118 @@ const App = {
   },
 
   handleDeathChallenge(d) {
-    // يُرسل فقط للاعبين الميتين
+    // يُرسل فقط للاعبين الميتين - different UI per challenge type
     this.startTimer(d.timeLimit);
+    const type = d.challengeType || 'write';
+    const icon = d.icon || '💀';
+    let inputHtml = '';
+
+    if (type === 'chalice') {
+      const optCount = d.options || 5;
+      const chaliceEmojis = ['🏆', '🥂', '🍷', '🫗', '🥃'];
+      let btns = '<div class="murder-options" style="flex-direction:row;flex-wrap:wrap;justify-content:center">';
+      for (let i = 1; i <= optCount; i++) {
+        btns += '<div class="murder-option" data-action="submitDeathAnswer" data-chalice="' + i + '" style="min-width:60px;justify-content:center">' +
+          '<span style="font-size:28px">' + (chaliceEmojis[i-1] || i) + '</span>' +
+        '</div>';
+      }
+      btns += '</div>';
+      inputHtml = btns;
+    } else {
+      const placeholder = type === 'math' ? 'اكتب الجواب (رقم)...' :
+                          type === 'mindmeld' ? 'اكتب كلمة واحدة فقط...' :
+                          'إجابتك السريعة...';
+      inputHtml =
+        '<input type="text" class="input mb-4" id="deathInput" placeholder="' + placeholder + '" maxlength="50" ' +
+          'style="background:rgba(255,255,255,0.1);color:#fff;border-color:#8B2252">' +
+        '<button class="btn btn--primary btn--full" data-action="submitDeathAnswer" style="background:#8B2252">أنقذ نفسك! 🏃</button>';
+    }
+
     document.getElementById('gameContent').innerHTML =
-      '<div class="death-panel" style="max-width:500px">' +
-        '<div class="text-4xl mb-4">💀</div>' +
-        '<h3 class="text-2xl font-bold mb-2">تحدي الموت!</h3>' +
-        '<p class="text-xl mb-6">' + escapeHtml(d.challenge) + '</p>' +
-        '<input type="text" class="input mb-4" id="deathInput" placeholder="إجابتك السريعة..." maxlength="50" style="background:rgba(255,255,255,0.1);color:#fff;border-color:#8B2252">' +
-        '<button class="btn btn--primary btn--full" data-action="submitDeathAnswer" style="background:#8B2252">أنقذ نفسك! 🏃</button>' +
+      '<div class="death-zone">' +
+        '<div class="death-zone__title">⚔️ أرضية القتل!</div>' +
+        '<div style="font-size:64px;margin-bottom:16px">' + icon + '</div>' +
+        '<p class="text-xl mb-6" style="color:#fff">' + escapeHtml(d.challenge) + '</p>' +
+        inputHtml +
       '</div>';
     document.getElementById('deathInput')?.focus();
   },
 
-  submitDeathAnswer() {
+  submitDeathAnswer(chaliceValue) {
     if (this._submitting) return;
-    const answer = document.getElementById('deathInput')?.value?.trim();
-    if (!answer) return this.showToast('اكتب شي!', 'error');
+    let answer;
+    if (chaliceValue) {
+      answer = String(chaliceValue);
+    } else {
+      answer = document.getElementById('deathInput')?.value?.trim();
+      if (!answer) return this.showToast('اكتب شي!', 'error');
+    }
     this._submitting = true;
     this.socket.emit('submitAnswer', { code: this.currentRoom, answer });
     ScreenMachine.showLockIn(document.getElementById('gameContent'));
   },
 
   handleDeathChallengeStarted(d) {
-    // يُرسل لكل اللاعبين - الأحياء يشوفون إن فيه تحدي
     const gc = document.getElementById('gameContent');
     if (!gc) return;
-    // لا نحدّث إلا إذا اللاعب حي (الميتين عندهم شاشة التحدي)
     const currentContent = gc.innerHTML;
-    if (currentContent.includes('تحدي الموت')) return; // اللاعب الميت عنده شاشة التحدي
+    if (currentContent.includes('أرضية القتل')) return;
     gc.innerHTML =
-      '<div class="text-center">' +
-        '<div class="text-5xl mb-4">⚔️</div>' +
-        '<h3 class="text-2xl font-bold mb-4">تحدي الموت جاري!</h3>' +
-        '<p class="text-muted">' + d.deadPlayers.map(p => escapeHtml(p.name)).join('، ') + ' يحاولون النجاة...</p>' +
+      '<div class="death-zone">' +
+        '<div class="death-zone__title">⚔️ تحدي الموت جاري!</div>' +
+        '<div class="dolls-row mb-4">' +
+          d.deadPlayers.map((p, i) => {
+            const colors = ['crimson', 'purple', 'midnight', 'teal'];
+            return '<div class="doll doll--' + colors[i % colors.length] + '">' +
+              '<div class="doll__body"><div class="doll__face">💀</div></div>' +
+              '<div class="doll__name">' + escapeHtml(p.name) + '</div>' +
+            '</div>';
+          }).join('') +
+        '</div>' +
+        '<p class="text-muted">يحاولون النجاة...</p>' +
       '</div>';
   },
 
   handleDeathChallengeResult(d) {
     try {
       clearInterval(this.gameTimer);
-      let html = '<div class="text-center" style="max-width:500px">';
+      let html = '<div class="death-zone">';
 
-      if (d.revived.length > 0) {
-        html += '<div class="text-3xl mb-4">🎉</div>';
-        html += '<p class="text-xl font-bold" style="color:#006C35">نجوا من الموت!</p>';
-        html += '<p class="text-lg mt-2">' + d.revived.map(p => escapeHtml(p.name)).join('، ') + '</p>';
+      if (d.challengeType === 'chalice' && d.poisonChoice) {
+        const chaliceEmojis = ['🏆', '🥂', '🍷', '🫗', '🥃'];
+        html += '<div class="text-2xl mb-3" style="color:#FF4466">الكأس المسموم كان: ' + (chaliceEmojis[d.poisonChoice - 1] || d.poisonChoice) + ' رقم ' + d.poisonChoice + '</div>';
+      } else if (d.challengeType === 'math' && d.correctAnswer) {
+        html += '<div class="text-lg mb-3 text-muted">الجواب الصحيح: ' + escapeHtml(d.correctAnswer) + '</div>';
       }
 
-      if (d.stillDead.length > 0) {
-        html += '<div class="text-3xl mt-4 mb-2">💀</div>';
-        html += '<p class="text-xl font-bold" style="color:#8B2252">ما نجوا...</p>';
-        html += '<p class="text-lg mt-2">' + d.stillDead.map(p => escapeHtml(p.name)).join('، ') + '</p>';
+      if (d.revived && d.revived.length > 0) {
+        html += '<div class="dolls-row mb-4">';
+        d.revived.forEach((p, i) => {
+          const colors = ['teal', 'olive', 'navy', 'coral'];
+          html += '<div class="doll doll--' + colors[i % colors.length] + '">' +
+            '<div class="doll__body"><div class="doll__face">😇</div></div>' +
+            '<div class="doll__name">' + escapeHtml(p.name) + '</div>' +
+          '</div>';
+        });
+        html += '</div>';
+        html += '<p class="text-xl font-bold" style="color:#00e676">نجوا من الموت! 🎉</p>';
+      }
+
+      if (d.stillDead && d.stillDead.length > 0) {
+        html += '<div class="dolls-row mt-4 mb-4">';
+        d.stillDead.forEach((p, i) => {
+          const colors = ['crimson', 'purple', 'midnight', 'rust'];
+          html += '<div class="doll doll--' + colors[i % colors.length] + '">' +
+            '<div class="doll__body"><div class="doll__face">💀</div></div>' +
+            '<div class="doll__name">' + escapeHtml(p.name) + '</div>' +
+          '</div>';
+        });
+        html += '</div>';
+        html += '<p class="text-xl font-bold" style="color:#FF4466">ما نجوا...</p>';
+      }
+
+      if (d.challengeType === 'mindmeld') {
+        html += '<div class="text-sm mt-3 text-muted">🧠 التوافق الذهني: لازم كلكم تكتبون نفس الكلمة!</div>';
       }
 
       html += '</div>';
@@ -1901,12 +2095,14 @@ const App = {
   handleFibbageQuestion(d) {
     document.getElementById('gameRound').textContent = 'الجولة ' + d.round + ' من ' + d.maxRounds;
     this.startTimer(d.timeLimit);
+    const categoryBadge = d.category ? '<div class="info-box mb-3"><div class="info-box__label">الفئة</div><div class="info-box__value">' + escapeHtml(d.category) + '</div></div>' : '';
     document.getElementById('gameContent').innerHTML =
-      '<div class="panel" style="max-width:600px">' +
-        '<div class="badge badge--warning mb-4">🎭 اكتب كذبة</div>' +
-        '<p class="text-2xl font-bold mb-6">' + escapeHtml(d.question) + '</p>' +
-        '<input type="text" class="input mb-4" id="lieInput" placeholder="كذبتك المقنعة..." maxlength="50">' +
-        '<button class="btn btn--primary btn--full" data-action="submitLie">إرسال 🎭</button>' +
+      '<div class="lie-card">' +
+        categoryBadge +
+        '<div class="lie-card__question">' + escapeHtml(d.question) + '</div>' +
+        '<p class="text-sm mb-4" style="color:rgba(255,255,255,0.6)">اكتب إجابة كاذبة تبدو مقنعة عشان تخدع الباقين!</p>' +
+        '<input type="text" class="input mb-4" id="lieInput" placeholder="كذبتك المقنعة..." maxlength="50" style="background:rgba(255,255,255,0.1);color:#fff;border-color:rgba(218,165,32,0.4)">' +
+        '<button class="btn btn--primary btn--full" data-action="submitLie" style="background:linear-gradient(135deg,#DAA520,#B8860B);border-color:#000">إرسال 🎭</button>' +
       '</div>';
     document.getElementById('lieInput')?.focus();
   },
@@ -1923,17 +2119,18 @@ const App = {
 
   handleFibbageVoting(d) {
     this.startTimer(d.timeLimit);
-    const opts = d.options.map(o =>
-      '<div class="vote-option" data-action="guessFibbage" data-id="' + escapeHtml(o.id) + '">' +
-        '<div class="vote-option__text">' + escapeHtml(o.text) + '</div>' +
+    const opts = d.options.map((o, i) =>
+      '<div class="murder-option" style="border-color:rgba(218,165,32,0.3)" data-action="guessFibbage" data-id="' + escapeHtml(o.id) + '">' +
+        '<span class="murder-option__num" style="background:rgba(218,165,32,0.3);color:#DAA520">' + String.fromCharCode(65 + i) + '</span>' +
+        '<span class="murder-option__text">' + escapeHtml(o.text) + '</span>' +
       '</div>'
     ).join('');
 
     document.getElementById('gameContent').innerHTML =
-      '<div class="panel" style="max-width:600px">' +
-        '<p class="text-xl mb-2">اختر الإجابة الصحيحة:</p>' +
-        '<p class="text-2xl font-bold text-accent mb-6">' + escapeHtml(d.question) + '</p>' +
-        '<div class="flex flex-col gap-3">' + opts + '</div>' +
+      '<div class="lie-card">' +
+        '<div class="lie-card__question" style="font-size:20px;margin-bottom:16px">' + escapeHtml(d.question) + '</div>' +
+        '<p class="text-sm mb-4" style="color:rgba(255,255,255,0.5)">🔍 اختر الإجابة الصحيحة من بين الكذب!</p>' +
+        '<div class="murder-options">' + opts + '</div>' +
         '<p class="text-muted text-center mt-4" id="waitingCount"></p>' +
       '</div>';
   },
@@ -1953,7 +2150,6 @@ const App = {
     document.getElementById('gameRound').textContent = 'الجولة ' + d.round + ' من ' + d.maxRounds;
     this.startTimer(d.timeLimit);
 
-    // إنشاء الكانفاس وأدوات الرسم
     const colors = DRAW_COLORS.map((c, i) =>
       '<div class="color-swatch' + (i === 0 ? ' active' : '') + '" style="background:' + c + '" data-action="setDrawColor" data-color="' + c + '"></div>'
     ).join('');
@@ -1964,9 +2160,14 @@ const App = {
       '</div>'
     ).join('');
 
+    const allDrawBadge = d.allDraw
+      ? '<p class="text-sm text-muted mb-2">الكل يرسمون في نفس الوقت!</p>'
+      : '';
+
     document.getElementById('gameContent').innerHTML =
       '<div class="drawing-area">' +
         '<div class="badge badge--primary mb-2">🎨 ارسم!</div>' +
+        allDrawBadge +
         '<p class="text-xl font-bold mb-4">' + escapeHtml(d.prompt) + '</p>' +
         '<canvas class="drawing-canvas" id="drawCanvas" width="400" height="300"></canvas>' +
         '<div class="drawing-tools mt-3">' +
@@ -1999,27 +2200,33 @@ const App = {
   handleDrawfulGuessing(d) {
     this.startTimer(d.timeLimit);
     const isDrawer = d.drawerId === this.myId;
+    const presentInfo = d.presentNum ? ' (رسمة ' + d.presentNum + '/' + d.presentTotal + ')' : '';
+    document.getElementById('gameRound').textContent = 'الجولة ' + d.round + presentInfo;
 
     if (isDrawer) {
       document.getElementById('gameContent').innerHTML =
         '<div class="text-center">' +
-          '<div class="text-3xl mb-4">🎨</div>' +
-          '<h3 class="text-xl font-bold mb-2">أنت الرسام - انتظر التخمينات!</h3>' +
-          '<div id="drawingDisplay" style="max-width:400px;margin:0 auto"></div>' +
+          '<div class="speech-bubble mb-4" style="margin:0 auto">' +
+            '<div class="speech-bubble__text">🎨 هذي رسمتك - انتظر التخمينات!</div>' +
+          '</div>' +
+          '<div id="drawingDisplay" style="max-width:400px;margin:0 auto;border-radius:16px;overflow:hidden"></div>' +
           '<p class="text-muted mt-4" id="waitingCount">ننتظر التخمينات...</p>' +
         '</div>';
     } else {
+      const drawerLabel = d.drawerName ? '<div class="speech-bubble__author">🎨 ' + escapeHtml(d.drawerName) + '</div>' : '';
       document.getElementById('gameContent').innerHTML =
-        '<div class="panel" style="max-width:600px;width:100%">' +
-          '<div class="badge badge--info mb-4">🤔 ما هذي الرسمة؟</div>' +
-          '<div id="drawingDisplay" style="max-width:400px;margin:0 auto;margin-bottom:20px"></div>' +
-          '<input type="text" class="input mb-4" id="guessInput" placeholder="تخمينك..." maxlength="50">' +
+        '<div style="max-width:600px;width:100%">' +
+          '<div class="speech-bubble mb-4" style="margin:0 auto">' +
+            '<div class="speech-bubble__text">🤔 اكتب عنوان مزيّف!</div>' +
+            drawerLabel +
+          '</div>' +
+          '<div id="drawingDisplay" style="max-width:400px;margin:0 auto;margin-bottom:20px;border-radius:16px;overflow:hidden"></div>' +
+          '<input type="text" class="input mb-4" id="guessInput" placeholder="اكتب عنوان مزيّف..." maxlength="50">' +
           '<button class="btn btn--primary btn--full" data-action="submitGuessDrawful">إرسال 🤔</button>' +
         '</div>';
       document.getElementById('guessInput')?.focus();
     }
 
-    // عرض الرسمة
     this.renderDrawing(d.drawing, document.getElementById('drawingDisplay'));
   },
 
@@ -2034,21 +2241,65 @@ const App = {
     this.startTimer(d.timeLimit);
     const isDrawer = d.drawerId === this.myId;
 
-    const opts = d.options.map(o =>
-      '<div class="vote-option" ' + (isDrawer ? 'style="cursor:default"' : 'data-action="guessFibbage" data-id="' + escapeHtml(o.id) + '"') + '>' +
-        '<div class="vote-option__text">' + escapeHtml(o.text) + '</div>' +
+    const opts = d.options.map((o, i) =>
+      '<div class="murder-option" style="border-color:rgba(0,200,83,0.3)" ' + (isDrawer ? '' : 'data-action="guessFibbage" data-id="' + escapeHtml(o.id) + '"') + '>' +
+        '<span class="murder-option__num" style="background:rgba(0,200,83,0.2);color:#00C853">' + String.fromCharCode(65 + i) + '</span>' +
+        '<span class="murder-option__text">' + escapeHtml(o.text) + '</span>' +
       '</div>'
     ).join('');
 
     document.getElementById('gameContent').innerHTML =
-      '<div class="panel" style="max-width:600px;width:100%">' +
-        '<div class="badge badge--primary mb-4">🗳️ ' + (isDrawer ? 'انتظر التصويت' : 'أي تخمين صحيح؟') + '</div>' +
-        '<div id="drawingDisplay" style="max-width:300px;margin:0 auto;margin-bottom:16px"></div>' +
-        '<div class="flex flex-col gap-3">' + opts + '</div>' +
+      '<div style="max-width:600px;width:100%">' +
+        '<div class="speech-bubble mb-4" style="margin:0 auto">' +
+          '<div class="speech-bubble__text">' + (isDrawer ? '🎨 انتظر التصويت' : '🤔 أي تخمين صحيح؟') + '</div>' +
+        '</div>' +
+        '<div id="drawingDisplay" style="max-width:300px;margin:0 auto;margin-bottom:16px;border-radius:16px;overflow:hidden"></div>' +
+        '<div class="murder-options">' + opts + '</div>' +
         '<p class="text-muted text-center mt-4" id="waitingCount"></p>' +
       '</div>';
 
     this.renderDrawing(d.drawing, document.getElementById('drawingDisplay'));
+  },
+
+  handleDrawfulDrawingResult(d) {
+    clearInterval(this.gameTimer);
+    const correctText = d.options.find(o => o.isCorrect);
+
+    let html = '<div class="text-center" style="max-width:600px">';
+    html += '<div id="drawingDisplay" style="max-width:300px;margin:0 auto;margin-bottom:16px;border-radius:16px;overflow:hidden"></div>';
+    html += '<div class="speech-bubble mb-4" style="margin:0 auto">';
+    html += '<div class="speech-bubble__text" style="font-size:14px;color:#888">الجواب الصحيح:</div>';
+    html += '<div class="speech-bubble__text" style="font-size:22px;color:#000">' + escapeHtml(d.prompt) + '</div>';
+    html += '<div class="speech-bubble__author">🎨 ' + escapeHtml(d.drawerName) + '</div>';
+    html += '</div>';
+
+    if (d.options) {
+      html += '<div class="murder-options mb-4">';
+      d.options.forEach(o => {
+        const icon = o.isCorrect ? '✅' : '🎭';
+        const author = o.authorName ? ' (كتبها: ' + escapeHtml(o.authorName) + ')' : '';
+        html += '<div class="murder-option" style="pointer-events:none;border-color:' + (o.isCorrect ? 'rgba(0,200,83,0.5)' : 'rgba(255,255,255,0.1)') + '">' +
+          '<span class="murder-option__num" style="background:' + (o.isCorrect ? 'rgba(0,200,83,0.2)' : 'rgba(255,255,255,0.05)') + '">' + icon + '</span>' +
+          '<span class="murder-option__text">' + escapeHtml(o.text) + author + '</span>' +
+        '</div>';
+      });
+      html += '</div>';
+    }
+
+    if (d.hasMore) {
+      html += '<p class="text-sm text-muted">الرسمة التالية قريباً... (' + d.presentNum + '/' + d.presentTotal + ')</p>';
+    }
+
+    html += '</div>';
+    document.getElementById('gameContent').innerHTML = html;
+    this.renderDrawing(d.drawing, document.getElementById('drawingDisplay'));
+
+    if (d.playerResults) {
+      const me = d.playerResults.find(r => r.playerId === this.myId);
+      if (me && me.points > 0) {
+        AudioEngine.correctAnswer();
+      }
+    }
   },
 
   // ── وظائف الكانفاس ──
@@ -2847,44 +3098,146 @@ const App = {
     this._submitting = false;
     this.showScreen('gameScreen');
     this.setTheme('tshirtwars');
-    this.showRoundInfo(d.round, d.maxRounds, '👕 حرب التيشيرتات');
+    this.showRoundInfo(d.round, d.maxRounds, '👕 Tee K.O.');
     this.startTimer(d.timeLimit);
-    this.setHint('اكتب أفضل شعار للتيشيرت!');
+    this.setHint('اكتب شعارات للتيشيرت!');
 
-    const gc = document.getElementById('gameContent');
-    gc.innerHTML =
-      '<div class="game-prompt">' +
-        '<div class="game-prompt__icon">👕</div>' +
-        '<p class="game-prompt__text">' + escapeHtml(d.slogan) + '</p>' +
-      '</div>' +
-      '<div class="answer-section">' +
-        '<input type="text" class="input input--game" id="answerInput" placeholder="اكتب شعارك هنا..." maxlength="100" autocomplete="off">' +
-        '<button class="btn btn--primary btn--lg btn--full mt-3" data-action="submitAnswer">إرسال الشعار 👕</button>' +
+    const count = d.sloganCount || 2;
+    let inputs = '';
+    for (let i = 0; i < count; i++) {
+      inputs += '<input type="text" class="input input--game mb-3" id="sloganInput' + i + '" placeholder="شعار ' + (i + 1) + '..." maxlength="100" autocomplete="off">';
+    }
+
+    document.getElementById('gameContent').innerHTML =
+      '<div style="max-width:600px">' +
+        '<div class="tshirt-shape tshirt-shape--dark" style="margin:0 auto 20px;transform:scale(0.7);pointer-events:none">' +
+          '<div class="tshirt-shape__design">👕</div>' +
+          '<div class="tshirt-shape__slogan">الخطوة 1: الشعارات</div>' +
+        '</div>' +
+        (d.prompt ? '<p class="text-lg mb-2" style="color:rgba(255,255,255,0.6)">الموضوع:</p><p class="text-xl font-bold mb-4" style="color:#FFD93D">' + escapeHtml(d.prompt) + '</p>' : '') +
+        '<p class="text-muted mb-4">اكتب ' + count + ' شعارات مضحكة للتيشيرت:</p>' +
+        inputs +
+        '<button class="btn btn--primary btn--full mt-3" data-action="submitTkoSlogans" style="background:linear-gradient(135deg,#e74c3c,#c0392b);border-color:#000">إرسال الشعارات 👕</button>' +
       '</div>';
-    document.getElementById('answerInput')?.focus();
+    document.getElementById('sloganInput0')?.focus();
+  },
+
+  submitTkoSlogans() {
+    const slogans = [];
+    for (let i = 0; i < 2; i++) {
+      const el = document.getElementById('sloganInput' + i);
+      if (el && el.value.trim()) slogans.push(el.value.trim());
+    }
+    if (slogans.length === 0) return this.showToast('اكتب شعار واحد على الأقل!', 'error');
+    this.socket.emit('tkoSubmitSlogans', { code: this.currentRoom, slogans });
+    ScreenMachine.showLockIn(document.getElementById('gameContent'));
+  },
+
+  handleTshirtWarsDraw(d) {
+    this.showRoundInfo(d.round, d.maxRounds, '👕 Tee K.O.');
+    this.startTimer(d.timeLimit);
+    this.setHint('ارسم تصميم التيشيرت!');
+
+    const colors = DRAW_COLORS.map((c, i) =>
+      '<div class="color-swatch' + (i === 0 ? ' active' : '') + '" style="background:' + c + '" data-action="setDrawColor" data-color="' + c + '"></div>'
+    ).join('');
+    const sizes = DRAW_SIZES.map((s, i) =>
+      '<div class="brush-size' + (i === 1 ? ' active' : '') + '" data-action="setBrushSize" data-size="' + s + '">' +
+        '<div style="width:' + Math.min(s, 20) + 'px;height:' + Math.min(s, 20) + 'px;background:currentColor;border-radius:50%"></div>' +
+      '</div>'
+    ).join('');
+
+    document.getElementById('gameContent').innerHTML =
+      '<div class="drawing-area">' +
+        '<div class="badge badge--warning mb-2">🎨 الخطوة 2: التصميم</div>' +
+        '<p class="text-lg mb-4">ارسم تصميم تيشيرتك!</p>' +
+        '<canvas class="drawing-canvas" id="drawCanvas" width="400" height="300"></canvas>' +
+        '<div class="drawing-tools mt-3">' +
+          colors +
+          '<div style="width:2px;height:30px;background:rgba(255,255,255,0.3);margin:0 8px"></div>' +
+          sizes +
+          '<div style="width:2px;height:30px;background:rgba(255,255,255,0.3);margin:0 8px"></div>' +
+          '<button class="btn--undo" data-action="undoStroke">↩️</button>' +
+          '<button class="btn--undo" data-action="setEraser">🧹</button>' +
+          '<button class="btn btn--ghost btn--sm" data-action="clearCanvas">🗑️</button>' +
+        '</div>' +
+        '<button class="btn btn--primary btn--full mt-4" data-action="submitDrawing">أرسل التصميم 🎨</button>' +
+      '</div>';
+    this.initCanvas();
+  },
+
+  handleTshirtWarsCombine(d) {
+    this.startTimer(d.timeLimit);
+    this.setHint('اختر شعار لتيشيرتك!');
+
+    let sloganBtns = '';
+    d.slogans.forEach(s => {
+      sloganBtns += '<button class="btn btn--secondary btn--full mb-2" data-action="chooseTkoSlogan" data-slogan="' + escapeHtml(s.text) + '">' + escapeHtml(s.text) + '</button>';
+    });
+
+    document.getElementById('gameContent').innerHTML =
+      '<div style="max-width:600px">' +
+        '<div class="tshirt-shape tshirt-shape--white" style="margin:0 auto 20px">' +
+          '<div class="tshirt-shape__design" id="drawingDisplay"></div>' +
+          '<div class="tshirt-shape__slogan" style="color:#000">اختر شعار ⬇️</div>' +
+        '</div>' +
+        '<p class="text-lg mb-4" style="color:#fff">اختر شعار يناسب تصميمك:</p>' +
+        sloganBtns +
+      '</div>';
+    this.renderDrawing(d.drawing, document.getElementById('drawingDisplay'));
+  },
+
+  chooseTkoSlogan(slogan, btn) {
+    document.querySelectorAll('[data-action="chooseTkoSlogan"]').forEach(b => { b.disabled = true; b.style.opacity = '0.5'; });
+    btn.style.opacity = '1';
+    btn.style.borderColor = '#006C35';
+    this.socket.emit('tkoChooseSlogan', { code: this.currentRoom, slogan });
   },
 
   handleTshirtWarsVoting(d) {
     this._submitting = false;
     this.startTimer(d.timeLimit);
-    this.setHint('صوّت لأفضل شعار!');
+    this.setHint('صوّت لأفضل تيشيرت!');
 
-    const gc = document.getElementById('gameContent');
-    let html =
-      '<div class="game-prompt">' +
-        '<div class="game-prompt__icon">👕</div>' +
-        '<p class="game-prompt__text">' + escapeHtml(d.slogan) + '</p>' +
-      '</div>' +
-      '<div class="vote-grid">';
+    if (d.phase === 'tournament' && d.matchup) {
+      const tkoColors = ['dark', 'white', 'red', 'blue'];
+      let html = '<div class="text-center mb-4"><p class="text-muted">مباراة ' + d.matchNum + '/' + d.totalMatches + '</p></div>';
+      html += '<div class="vs-arena">';
+      d.matchup.forEach((shirt, idx) => {
+        const color = tkoColors[idx % tkoColors.length];
+        if (idx > 0) html += '<div class="lightning-vs">⚡</div>';
+        html += '<div class="tshirt-shape tshirt-shape--' + color + '" data-action="voteAnswer" data-id="' + escapeHtml(shirt.id) + '" style="cursor:pointer">' +
+          '<div class="tshirt-shape__design" id="tkoShirt' + escapeHtml(shirt.id) + '"></div>' +
+          '<div class="tshirt-shape__slogan">' + escapeHtml(shirt.slogan) + '</div>' +
+        '</div>';
+      });
+      html += '</div>';
+      document.getElementById('gameContent').innerHTML = html;
 
-    d.answers.forEach(a => {
-      html +=
-        '<button class="vote-option" data-action="voteAnswer" data-id="' + a.id + '">' +
-          '<span class="vote-option__text">' + escapeHtml(a.text) + '</span>' +
-        '</button>';
-    });
+      d.matchup.forEach(shirt => {
+        const container = document.getElementById('tkoShirt' + shirt.id);
+        if (container) this.renderDrawing(shirt.drawing, container);
+      });
+    } else {
+      const gc = document.getElementById('gameContent');
+      gc.innerHTML = '<div class="text-center"><p>التصويت جاري...</p></div>';
+    }
+  },
+
+  handleTshirtWarsMatchResult(d) {
+    clearInterval(this.gameTimer);
+    let html = '<div class="text-center" style="max-width:600px">';
+    html += '<div class="winner-stamp mb-4"><div class="winner-stamp__label">🏆 فائز!</div></div>';
+    html += '<p class="text-2xl font-bold mb-4" style="color:#FFD93D">' + escapeHtml(d.winner.name) + '</p>';
+    html += '<div class="tshirt-shape tshirt-shape--dark" style="margin:0 auto 16px;transform:scale(1.1)">';
+    html += '<div class="tshirt-shape__design" id="winnerShirt"></div>';
+    html += '<div class="tshirt-shape__slogan">' + escapeHtml(d.winner.slogan) + '</div>';
     html += '</div>';
-    gc.innerHTML = html;
+    html += '<p class="text-muted">' + d.winner.votes + ' vs ' + d.loser.votes + ' أصوات</p>';
+    html += '<p class="text-sm text-muted mt-4">المباراة التالية قريباً...</p>';
+    html += '</div>';
+    document.getElementById('gameContent').innerHTML = html;
+    this.renderDrawing(d.winner.drawing, document.getElementById('winnerShirt'));
   },
 
   // ═══════════════════════════════════════════════════════
@@ -2897,22 +3250,31 @@ const App = {
     this.setTheme('lovemonster');
     this.showRoundInfo(d.round, d.maxRounds, '💕 الوحش العاشق');
     this.startTimer(d.timeLimit);
-    this.setHint('اختر مين تبي ترسل له رسالة!');
+    this.setHint('اختر مين تبي تواعد!');
+
+    const myMonster = d.myMonster;
+    let monsterBadge = '';
+    if (myMonster) {
+      monsterBadge = '<div class="monster-card mb-4" style="margin:0 auto"><div class="monster-card__icon">' + escapeHtml(myMonster.icon) + '</div><div class="monster-card__name">' + escapeHtml(myMonster.name) + '</div></div>';
+    }
 
     const gc = document.getElementById('gameContent');
     let html =
       '<div class="game-prompt">' +
         '<div class="game-prompt__icon">💕</div>' +
-        '<p class="game-prompt__text">اختر لاعب ترسل له رسالة مواعدة!</p>' +
+        '<p class="game-prompt__text">اختر لاعب تبي تواعده!</p>' +
       '</div>' +
-      '<div class="vote-grid">';
+      monsterBadge +
+      '<div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center">';
 
     d.players.forEach(p => {
+      const revealTag = p.monsterRevealed ? '<div class="monster-card__name" style="font-size:11px;margin-top:4px">' + escapeHtml(p.monsterRevealed.icon) + ' ' + escapeHtml(p.monsterRevealed.name) + '</div>' : '';
       html +=
-        '<button class="vote-option vote-option--player" data-action="submitLoveChoice" data-id="' + p.id + '">' +
-          '<span class="vote-option__avatar">' + (p.avatar || '🎮') + '</span>' +
-          '<span class="vote-option__text">' + escapeHtml(p.name) + '</span>' +
-        '</button>';
+        '<div class="monster-card" data-action="submitLoveChoice" data-id="' + p.id + '" style="cursor:pointer">' +
+          '<div class="monster-card__icon">' + (p.avatar || '🎮') + '</div>' +
+          '<div class="monster-card__name">' + escapeHtml(p.name) + '</div>' +
+          revealTag +
+        '</div>';
     });
     html += '</div>';
     gc.innerHTML = html;
@@ -2935,20 +3297,54 @@ const App = {
     this.setTheme('inventions');
     this.showRoundInfo(d.round, d.maxRounds, '💡 اختراعات مجنونة');
     this.startTimer(d.timeLimit);
-    this.setHint('اكتب اختراعك المجنون!');
+    this.setHint('اكتب اسم اختراعك!');
+
+    const stepLabel = d.hasDrawing ? '<p class="text-sm mb-2" style="color:rgba(255,255,255,0.5)">الخطوة 1: اسم الاختراع (بعدها ترسمه)</p>' : '';
 
     const gc = document.getElementById('gameContent');
     gc.innerHTML =
-      '<div class="game-prompt">' +
-        '<div class="game-prompt__icon">💡</div>' +
-        '<p class="game-prompt__text">' + escapeHtml(d.problem) + '</p>' +
+      '<div class="blueprint mb-4">' +
+        '<div class="blueprint__label">💡 المشكلة</div>' +
+        '<p style="font-size:20px;font-weight:700;color:#fff;margin-bottom:8px">' + escapeHtml(d.problem) + '</p>' +
         '<span class="game-tag">' + escapeHtml(d.category) + '</span>' +
       '</div>' +
+      stepLabel +
       '<div class="answer-section">' +
-        '<textarea class="input input--game input--textarea" id="answerInput" placeholder="اكتب اختراعك هنا..." maxlength="200" rows="3"></textarea>' +
-        '<button class="btn btn--primary btn--lg btn--full mt-3" data-action="submitAnswer">إرسال الاختراع 💡</button>' +
+        '<textarea class="input input--game input--textarea" id="answerInput" placeholder="اكتب اسم اختراعك ووصفه..." maxlength="200" rows="3"></textarea>' +
+        '<button class="btn btn--primary btn--lg btn--full mt-3" data-action="submitAnswer">إرسال 💡</button>' +
       '</div>';
     document.getElementById('answerInput')?.focus();
+  },
+
+  handleInventionsDraw(d) {
+    this.startTimer(d.timeLimit);
+    this.setHint('ارسم اختراعك!');
+
+    const colors = DRAW_COLORS.map((c, i) =>
+      '<div class="color-swatch' + (i === 0 ? ' active' : '') + '" style="background:' + c + '" data-action="setDrawColor" data-color="' + c + '"></div>'
+    ).join('');
+    const sizes = DRAW_SIZES.map((s, i) =>
+      '<div class="brush-size' + (i === 1 ? ' active' : '') + '" data-action="setBrushSize" data-size="' + s + '">' +
+        '<div style="width:' + Math.min(s, 20) + 'px;height:' + Math.min(s, 20) + 'px;background:currentColor;border-radius:50%"></div>' +
+      '</div>'
+    ).join('');
+
+    document.getElementById('gameContent').innerHTML =
+      '<div class="drawing-area">' +
+        '<div class="blueprint mb-3" style="padding:12px 16px"><div class="blueprint__label">🎨 الخطوة 2: ارسم اختراعك</div><p style="color:#fff;margin:0">' + escapeHtml(d.problem) + '</p></div>' +
+        '<canvas class="drawing-canvas" id="drawCanvas" width="400" height="300"></canvas>' +
+        '<div class="drawing-tools mt-3">' +
+          colors +
+          '<div style="width:2px;height:30px;background:rgba(255,255,255,0.3);margin:0 8px"></div>' +
+          sizes +
+          '<div style="width:2px;height:30px;background:rgba(255,255,255,0.3);margin:0 8px"></div>' +
+          '<button class="btn--undo" data-action="undoStroke">↩️</button>' +
+          '<button class="btn--undo" data-action="setEraser">🧹</button>' +
+          '<button class="btn btn--ghost btn--sm" data-action="clearCanvas">🗑️</button>' +
+        '</div>' +
+        '<button class="btn btn--primary btn--full mt-4" data-action="submitDrawing">أرسل الرسمة 🎨</button>' +
+      '</div>';
+    this.initCanvas();
   },
 
   handleInventionsVoting(d) {
@@ -2958,20 +3354,29 @@ const App = {
 
     const gc = document.getElementById('gameContent');
     let html =
-      '<div class="game-prompt">' +
-        '<div class="game-prompt__icon">💡</div>' +
-        '<p class="game-prompt__text">' + escapeHtml(d.problem) + '</p>' +
+      '<div class="blueprint mb-4" style="padding:12px 16px">' +
+        '<div class="blueprint__label">💡 المشكلة</div>' +
+        '<p style="color:#fff;margin:0;font-size:18px">' + escapeHtml(d.problem) + '</p>' +
       '</div>' +
-      '<div class="vote-grid">';
+      '<div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center">';
 
     d.inventions.forEach(inv => {
+      const hasDrawing = inv.drawing && inv.drawing !== '[]';
       html +=
-        '<button class="vote-option" data-action="voteAnswer" data-id="' + inv.id + '">' +
-          '<span class="vote-option__text">' + escapeHtml(inv.text) + '</span>' +
-        '</button>';
+        '<div class="blueprint" data-action="voteAnswer" data-id="' + inv.id + '" style="cursor:pointer;flex:1;min-width:200px;max-width:280px;transition:transform 0.2s,box-shadow 0.2s">' +
+          (hasDrawing ? '<div id="invDraw' + escapeHtml(inv.id) + '" style="max-width:180px;margin:0 auto 8px"></div>' : '') +
+          '<p style="color:#fff;font-weight:700;text-align:center;margin:0">' + escapeHtml(inv.text) + '</p>' +
+        '</div>';
     });
     html += '</div>';
     gc.innerHTML = html;
+
+    d.inventions.forEach(inv => {
+      if (inv.drawing && inv.drawing !== '[]') {
+        const container = document.getElementById('invDraw' + inv.id);
+        if (container) this.renderDrawing(inv.drawing, container);
+      }
+    });
   },
 
   // ── نتائج الجولة ──
@@ -3172,16 +3577,27 @@ const App = {
       case 'fakinit':
         resultHtml =
           '<div class="faker-reveal">' +
-            '<div class="faker-reveal__icon">' + (d.caught ? '🎉' : '🕵️') + '</div>' +
-            '<p class="text-2xl font-bold mt-4">' + (d.caught ? 'انكشف المزيّف!' : 'المزيّف نجا!') + '</p>' +
-            '<p class="text-xl mt-2">المزيّف: <strong>' + escapeHtml(d.fakerName) + '</strong></p>' +
+            '<div class="faker-silhouette' + (d.caught ? ' faker-silhouette--revealed' : '') + ' mb-4">' +
+              '<div class="faker-silhouette__emoji">' + (d.caught ? '🕵️' : '❓') + '</div>' +
+            '</div>' +
+            '<div class="faker-status ' + (d.caught ? 'faker-status--caught' : 'faker-status--safe') + ' mb-4">' +
+              (d.caught ? '🎉 انكشف المزيّف!' : '🕵️ المزيّف نجا!') +
+            '</div>' +
+            '<p class="text-xl mt-2" style="color:#fff">المزيّف: <strong style="color:#FF4466">' + escapeHtml(d.fakerName) + '</strong></p>' +
           '</div>';
         break;
 
       case 'triviamurder':
-        resultHtml = '<div class="text-2xl text-accent mb-4">✅ ' + escapeHtml(d.correctAnswer) + '</div>';
+        resultHtml = '<div class="death-zone mb-4" style="padding:20px"><div class="text-2xl" style="color:#00e676">✅ ' + escapeHtml(d.correctAnswer) + '</div></div>';
         if (d.newlyDead && d.newlyDead.length > 0) {
-          resultHtml += '<p style="color:#8B2252">💀 ' + d.newlyDead.map(p => escapeHtml(p.name)).join('، ') + '</p>';
+          resultHtml += '<div class="dolls-row mb-3">';
+          d.newlyDead.forEach((p, i) => {
+            const colors = ['crimson', 'purple', 'midnight'];
+            resultHtml += '<div class="doll doll--' + colors[i % colors.length] + '" style="transform:scale(0.7)">' +
+              '<div class="doll__body"><div class="doll__face">💀</div></div>' +
+              '<div class="doll__name">' + escapeHtml(p.name) + '</div></div>';
+          });
+          resultHtml += '</div>';
         }
         if (d.revived && d.revived.length > 0) {
           resultHtml += '<p style="color:#006C35" class="mt-2">🎉 نجوا: ' + d.revived.map(p => escapeHtml(p.name)).join('، ') + '</p>';
@@ -3190,8 +3606,10 @@ const App = {
 
       case 'fibbage':
         resultHtml =
-          '<p class="text-xl mb-2">الإجابة الصحيحة:</p>' +
-          '<p class="text-2xl font-bold text-accent mb-4">' + escapeHtml(d.correctAnswer) + '</p>';
+          '<div class="lie-card mb-4" style="padding:20px">' +
+            '<p class="text-sm" style="color:rgba(255,255,255,0.5)">الإجابة الصحيحة:</p>' +
+            '<div class="lie-card__question" style="color:#DAA520">' + escapeHtml(d.correctAnswer) + '</div>' +
+          '</div>';
         if (d.playerResults) {
           resultHtml += '<div class="flex flex-col gap-2 mb-4" style="max-width:400px;width:100%">';
           d.playerResults.forEach(pr => {
@@ -3199,9 +3617,9 @@ const App = {
             if (pr.guessedCorrect) info += '✅ خمّن صح ';
             if (pr.fooledCount > 0) info += '🤥 خدع ' + pr.fooledCount;
             resultHtml +=
-              '<div class="flex justify-between items-center p-2" style="background:rgba(255,255,255,0.05);border-radius:8px">' +
-                '<span>' + escapeHtml(pr.playerName) + ' ' + info + '</span>' +
-                '<span style="color:#D4AF37">+' + pr.points + '</span>' +
+              '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(255,255,255,0.05);border-radius:10px;border-right:3px solid ' + (pr.guessedCorrect ? '#DAA520' : 'transparent') + '">' +
+                '<span style="color:#fff">' + escapeHtml(pr.playerName) + ' ' + info + '</span>' +
+                '<span style="color:#DAA520;font-weight:bold">+' + pr.points + '</span>' +
               '</div>';
           });
           resultHtml += '</div>';
@@ -3210,10 +3628,12 @@ const App = {
 
       case 'drawful':
         resultHtml =
-          '<p class="text-xl mb-2">الكلمة كانت:</p>' +
-          '<p class="text-2xl font-bold text-accent mb-4">' + escapeHtml(d.prompt) + '</p>';
+          '<div class="speech-bubble mb-4" style="margin:0 auto">' +
+            '<div class="speech-bubble__text" style="font-size:14px;color:rgba(0,0,0,0.5)">الكلمة كانت:</div>' +
+            '<div class="speech-bubble__text" style="font-size:22px">' + escapeHtml(d.prompt) + '</div>' +
+          '</div>';
         if (d.drawing) {
-          resultHtml += '<div id="resultDrawing" style="max-width:300px;margin:0 auto;margin-bottom:16px"></div>';
+          resultHtml += '<div id="resultDrawing" style="max-width:300px;margin:0 auto;margin-bottom:16px;border-radius:16px;overflow:hidden"></div>';
         }
         if (d.playerResults) {
           resultHtml += '<div class="flex flex-col gap-2 mb-4" style="max-width:400px;width:100%">';
@@ -3222,9 +3642,9 @@ const App = {
             if (pr.guessedCorrect) info += '✅ ';
             if (pr.fooledCount > 0) info += '🤥×' + pr.fooledCount;
             resultHtml +=
-              '<div class="flex justify-between items-center p-2" style="background:rgba(255,255,255,0.05);border-radius:8px">' +
-                '<span>' + escapeHtml(pr.playerName) + ' ' + info + '</span>' +
-                '<span style="color:#D4AF37">+' + pr.points + '</span>' +
+              '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(255,255,255,0.05);border-radius:10px;border-right:3px solid ' + (pr.guessedCorrect ? '#00C853' : 'transparent') + '">' +
+                '<span style="color:#fff">' + escapeHtml(pr.playerName) + ' ' + info + '</span>' +
+                '<span style="color:#D4AF37;font-weight:bold">+' + pr.points + '</span>' +
               '</div>';
           });
           resultHtml += '</div>';
@@ -3232,25 +3652,25 @@ const App = {
         break;
 
       case 'tshirtwars':
-        resultHtml =
-          '<div class="game-prompt mb-4">' +
-            '<div class="game-prompt__icon">👕</div>' +
-            '<p class="game-prompt__text">' + escapeHtml(d.slogan) + '</p>' +
-          '</div>';
+        if (d.slogan) {
+          resultHtml =
+            '<div class="tshirt-shape tshirt-shape--dark mb-4" style="margin:0 auto;transform:scale(0.8)">' +
+              '<div class="tshirt-shape__design">👕</div>' +
+              '<div class="tshirt-shape__slogan">' + escapeHtml(d.slogan) + '</div>' +
+            '</div>';
+        }
         if (d.results) {
-          resultHtml += '<div class="flex flex-col gap-3 mb-4" style="max-width:450px;width:100%">';
+          const tkoColors = ['dark', 'red', 'blue', 'white'];
+          resultHtml += '<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:16px">';
           d.results.forEach((r, i) => {
             const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
+            const color = tkoColors[i % tkoColors.length];
             resultHtml +=
-              '<div class="flex justify-between items-center p-3" style="background:rgba(255,255,255,0.05);border-radius:12px;border-right:4px solid ' + (i === 0 ? '#D4AF37' : 'transparent') + '">' +
-                '<div>' +
-                  '<span class="font-bold">' + medal + ' ' + escapeHtml(r.playerName) + '</span>' +
-                  '<p class="text-sm text-muted mt-1">"' + escapeHtml(r.text) + '"</p>' +
-                '</div>' +
-                '<div class="text-left">' +
-                  '<div style="color:#D4AF37;font-weight:bold">+' + r.points + '</div>' +
-                  '<div class="text-sm text-muted">' + r.percentage + '% (' + r.votes + ' صوت)</div>' +
-                '</div>' +
+              '<div class="tshirt-shape tshirt-shape--' + color + '" style="transform:scale(' + (i === 0 ? '1' : '0.8') + ');' + (i === 0 ? 'box-shadow:0 0 20px rgba(212,175,55,0.5)' : '') + '">' +
+                '<div class="tshirt-shape__design" style="font-size:24px">' + medal + '</div>' +
+                '<div class="tshirt-shape__slogan">' + escapeHtml(r.text || r.playerName) + '</div>' +
+                '<div class="tshirt-shape__owner" style="visibility:visible;opacity:1">' + escapeHtml(r.playerName) + '</div>' +
+                '<div style="color:#D4AF37;font-weight:bold;font-size:14px;margin-top:4px">+' + r.points + '</div>' +
               '</div>';
           });
           resultHtml += '</div>';
@@ -3258,47 +3678,45 @@ const App = {
         break;
 
       case 'lovemonster':
-        resultHtml = '<div class="game-prompt mb-4"><div class="game-prompt__icon">💕</div></div>';
+        resultHtml = '<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:16px">';
         if (d.results) {
-          resultHtml += '<div class="flex flex-col gap-3 mb-4" style="max-width:450px;width:100%">';
           d.results.forEach(r => {
             let info = '';
             if (r.mutual) info = '💕 توافق متبادل!';
             else if (r.picked) info = '💌 أرسل لـ ' + escapeHtml(r.picked);
             else info = '😴 ما أرسل';
-            if (r.receivedCount > 0) info += ' • 💌×' + r.receivedCount + ' وصلته';
+            if (r.receivedCount > 0) info += ' • 💌×' + r.receivedCount;
             resultHtml +=
-              '<div class="flex justify-between items-center p-3" style="background:rgba(255,255,255,0.05);border-radius:12px;border-right:4px solid ' + (r.mutual ? '#D4AF37' : 'transparent') + '">' +
-                '<div>' +
-                  '<span class="font-bold">' + escapeHtml(r.playerName) + '</span>' +
-                  '<p class="text-sm text-muted mt-1">' + info + '</p>' +
-                '</div>' +
-                '<span style="color:#D4AF37;font-weight:bold">+' + r.points + '</span>' +
+              '<div class="monster-card" style="' + (r.mutual ? 'border-color:#FF4081;box-shadow:0 0 20px rgba(255,64,129,0.4)' : '') + '">' +
+                '<div class="monster-card__icon">' + (r.avatar || '💕') + '</div>' +
+                '<div class="monster-card__name">' + escapeHtml(r.playerName) + '</div>' +
+                '<div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:4px">' + info + '</div>' +
+                '<div style="color:#FF4081;font-weight:bold;margin-top:4px">+' + r.points + '</div>' +
               '</div>';
           });
-          resultHtml += '</div>';
         }
+        resultHtml += '</div>';
         break;
 
       case 'inventions':
         resultHtml =
-          '<div class="game-prompt mb-4">' +
-            '<div class="game-prompt__icon">💡</div>' +
-            '<p class="game-prompt__text">' + escapeHtml(d.problem) + '</p>' +
+          '<div class="blueprint mb-4" style="padding:12px 16px">' +
+            '<div class="blueprint__label">💡 المشكلة</div>' +
+            '<p style="color:#fff;margin:0">' + escapeHtml(d.problem) + '</p>' +
           '</div>';
         if (d.results) {
           resultHtml += '<div class="flex flex-col gap-3 mb-4" style="max-width:450px;width:100%">';
           d.results.forEach((r, i) => {
             const medal = i === 0 ? '🏆' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
             resultHtml +=
-              '<div class="flex justify-between items-center p-3" style="background:rgba(255,255,255,0.05);border-radius:12px;border-right:4px solid ' + (i === 0 ? '#D4AF37' : 'transparent') + '">' +
+              '<div class="blueprint" style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;' + (i === 0 ? 'border-color:#D4AF37;box-shadow:0 0 15px rgba(212,175,55,0.3)' : '') + '">' +
                 '<div>' +
-                  '<span class="font-bold">' + medal + ' ' + escapeHtml(r.playerName) + '</span>' +
-                  '<p class="text-sm text-muted mt-1">"' + escapeHtml(r.text) + '"</p>' +
+                  '<span style="font-weight:bold;color:#fff">' + medal + ' ' + escapeHtml(r.playerName) + '</span>' +
+                  '<p style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:4px">"' + escapeHtml(r.text) + '"</p>' +
                 '</div>' +
-                '<div class="text-left">' +
+                '<div style="text-align:left">' +
                   '<div style="color:#D4AF37;font-weight:bold">+' + r.points + '</div>' +
-                  '<div class="text-sm text-muted">' + r.percentage + '% (' + r.votes + ' صوت)</div>' +
+                  '<div style="font-size:12px;color:rgba(255,255,255,0.4)">' + r.percentage + '% (' + r.votes + ' صوت)</div>' +
                 '</div>' +
               '</div>';
           });
@@ -3805,6 +4223,61 @@ const App = {
       answer: JSON.stringify(Array.from(this._finalPicks))
     });
     ScreenMachine.showLockIn(document.getElementById('gameContent'));
+  },
+
+  // The Round-Up: rapid-fire higher/lower
+  handleGuesspionageFinalQuestion(d) {
+    this._submitting = false;
+    document.getElementById('gameRound').textContent = '🏆 The Round-Up (' + d.questionNum + '/' + d.totalQuestions + ')';
+    this.startTimer(d.timeLimit);
+
+    document.getElementById('gameContent').innerHTML =
+      '<div class="text-center" style="max-width:600px">' +
+        '<div class="info-box mb-4"><div class="info-box__label">سؤال</div><div class="info-box__value">' + d.questionNum + ' / ' + d.totalQuestions + '</div></div>' +
+        '<p class="text-xl font-bold mb-4" style="color:#fff">' + escapeHtml(d.question) + '</p>' +
+        '<div class="donut-chart mb-4" style="--pct:' + d.shownPercent + ';margin:0 auto">' +
+          '<div class="donut-chart__inner">' +
+            '<div class="donut-chart__value">' + d.shownPercent + '%</div>' +
+          '</div>' +
+        '</div>' +
+        '<p class="text-muted mb-4">الجواب الحقيقي أعلى أو أقل؟</p>' +
+        '<div style="display:flex;gap:16px;justify-content:center">' +
+          '<button class="hl-btn hl-btn--higher" data-action="submitFinalHL" data-hl="higher">⬆️ أعلى</button>' +
+          '<button class="hl-btn hl-btn--lower" data-action="submitFinalHL" data-hl="lower">⬇️ أقل</button>' +
+        '</div>' +
+      '</div>';
+  },
+
+  submitFinalHL(choice, btn) {
+    if (this._submitting) return;
+    this._submitting = true;
+    document.querySelectorAll('[data-action="submitFinalHL"]').forEach(b => { b.disabled = true; b.style.opacity = '0.5'; });
+    btn.style.opacity = '1';
+    btn.style.borderColor = '#D4AF37';
+    this.socket.emit('submitAnswer', { code: this.currentRoom, answer: choice });
+  },
+
+  handleGuesspionageFinalAnswer(d) {
+    clearInterval(this.gameTimer);
+    const isHigher = d.realPercent > d.shownPercent;
+
+    document.getElementById('gameContent').innerHTML =
+      '<div class="text-center" style="max-width:600px">' +
+        '<p class="text-lg mb-4" style="color:rgba(255,255,255,0.7)">' + escapeHtml(d.question) + '</p>' +
+        '<div style="display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:16px">' +
+          '<div class="donut-chart" style="--pct:' + d.shownPercent + ';width:80px;height:80px;opacity:0.4">' +
+            '<div class="donut-chart__inner" style="width:50px;height:50px"><div class="donut-chart__value" style="font-size:16px;text-decoration:line-through">' + d.shownPercent + '%</div></div>' +
+          '</div>' +
+          '<div style="font-size:32px">' + (isHigher ? '⬆️' : '⬇️') + '</div>' +
+          '<div class="donut-chart" style="--pct:' + d.realPercent + ';width:100px;height:100px;margin:0 auto">' +
+            '<div class="donut-chart__inner" style="width:64px;height:64px"><div class="donut-chart__value" style="color:#DAA520">' + d.realPercent + '%</div></div>' +
+          '</div>' +
+        '</div>' +
+        '<p class="text-xl font-bold" style="color:' + (d.correctAnswer === 'higher' ? '#00C853' : '#FF5252') + '">' +
+          (d.correctAnswer === 'higher' ? 'أعلى!' : 'أقل!') +
+        '</p>' +
+        '<p class="text-sm text-muted mt-4">السؤال التالي قريباً...</p>' +
+      '</div>';
   },
 
   // ═══════════════════════════════════════════════════════════════
