@@ -2341,6 +2341,184 @@
   line-height: 1.1;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+ * RECONNECT OVERLAY - Full-screen disconnect/offline UI
+ * ═══════════════════════════════════════════════════════════════ */
+
+.reconnect-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-max, 9999);
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.reconnect-overlay--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.reconnect-overlay__card {
+  text-align: center;
+  padding: var(--space-10, 40px) var(--space-8, 32px);
+  max-width: 360px;
+  width: 90%;
+}
+
+.reconnect-overlay__icon {
+  font-size: 64px;
+  animation: reconnect-pulse 2s ease-in-out infinite;
+  margin-bottom: var(--space-4, 16px);
+}
+@keyframes reconnect-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.15); opacity: 0.7; }
+}
+
+.reconnect-overlay__title {
+  font-size: var(--text-2xl, 1.5rem);
+  font-weight: var(--font-black, 900);
+  color: #fff;
+  margin-bottom: var(--space-2, 8px);
+}
+
+.reconnect-overlay__sub {
+  font-size: var(--text-sm, 0.875rem);
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: var(--space-6, 24px);
+}
+
+.reconnect-overlay__bar {
+  width: 200px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  margin: 0 auto var(--space-4, 16px);
+  overflow: hidden;
+}
+.reconnect-overlay__bar-fill {
+  height: 100%;
+  width: 30%;
+  background: var(--theme-accent, #00e676);
+  border-radius: 2px;
+  animation: reconnect-bar 1.5s ease-in-out infinite;
+}
+@keyframes reconnect-bar {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(600%); }
+}
+
+.reconnect-overlay__timer {
+  font-size: var(--text-xs, 0.75rem);
+  color: rgba(255, 255, 255, 0.35);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ * CONNECTION BADGE - Small fixed badge
+ * ═══════════════════════════════════════════════════════════════ */
+
+.conn-badge {
+  position: fixed;
+  bottom: 12px;
+  right: 12px;
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  pointer-events: none;
+  transition: opacity 0.3s, background 0.3s, color 0.3s;
+}
+.conn-badge--connected {
+  background: rgba(0, 230, 118, 0.2);
+  color: #00e676;
+  border: 1px solid rgba(0, 230, 118, 0.4);
+}
+.conn-badge--disconnected {
+  background: rgba(255, 68, 68, 0.2);
+  color: #ff4444;
+  border: 1px solid rgba(255, 68, 68, 0.4);
+}
+.conn-badge--reconnecting {
+  background: rgba(255, 165, 0, 0.2);
+  color: #ffa500;
+  border: 1px solid rgba(255, 165, 0, 0.4);
+}
+.conn-badge--offline {
+  background: rgba(255, 68, 68, 0.3);
+  color: #ff6666;
+  border: 1px solid rgba(255, 68, 68, 0.5);
+}
+.conn-badge--fading {
+  opacity: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ * TAP FEEDBACK SYSTEM - Active state + touch targets
+ * ═══════════════════════════════════════════════════════════════ */
+
+/* Global touch-action optimization for game area */
+#gameContent { touch-action: manipulation; }
+
+/* Minimum touch target: 44px (WCAG 2.5.5) on interactive elements */
+.btn { min-height: 48px; }
+.game-card { min-height: 48px; }
+[data-action] { min-height: 44px; }
+
+/* Tap ripple feedback */
+.btn:active,
+.game-card:active,
+[data-action]:active {
+  transition-duration: 50ms;
+}
+
+/* Visual press feedback for vote/game options on mobile */
+@media (pointer: coarse) {
+  .murder-option:active,
+  .lie-card:active,
+  .monster-card:active,
+  .blueprint:active,
+  .faker-silhouette:active,
+  .tshirt-shape:active,
+  .hl-btn:active {
+    transform: scale(0.96);
+    filter: brightness(0.9);
+    transition: transform 80ms ease, filter 80ms ease;
+  }
+
+  /* Larger touch targets for draw tools */
+  .draw-tools .btn,
+  .draw-color-btn,
+  .draw-size-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+/* Reduced motion: skip tap animations */
+[data-reduced-motion="true"] .btn:active,
+[data-reduced-motion="true"] [data-action]:active {
+  transform: none;
+}
+[data-reduced-motion="true"] .reconnect-overlay__icon {
+  animation: none;
+}
+[data-reduced-motion="true"] .reconnect-overlay__bar-fill {
+  animation: none;
+  width: 100%;
+  opacity: 0.5;
+}
+
 /* ─── Responsive TV-safe adjustments ─── */
 @media (max-width: 768px) {
   :root {
