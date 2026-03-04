@@ -1,0 +1,19 @@
+expert_name,method_name,dose_g,total_water_g,ice_g,ratio,temperature_c,ode2_setting_estimate,bloom_g,bloom_time_s,pours_count,pour_steps,target_total_time_s,agitation,verification_status
+James Hoffmann,Structured Even Extraction,30,500,,1:16.7,97 (Hario page) / boiling,4-5,60,45,2,"60g bloom w/ swirl; vigorous spiral to 300g (0:45-1:15); gentle center pour to 500g (1:15-1:45)",210,Swirl (bloom) + stir 1x CW/CCW + final swirl,Verified
+James Hoffmann,Structured Even Extraction (Iced),32.5,300,200,~1:15.4,95,3.5-4.5,65,,1,"65g bloom; pour remainder at 0:45",175,,Verified
+Tetsu Kasuya,4:6 Method,20,300,,1:15,92,5.5-6.5,,,5,"Competition: 50/70/60/60/60. Simplified: 60g x5. Each when bed runs dry.",210,None,Verified
+Tetsu Kasuya,Ice Brew (Alternative),50,100,500,1:12,,,,,,"500g ice on bed + 100g cold water — slow melt 4-15 hours",,None,Verified
+Scott Rao,Two-Pour V60 Method,20,330,,~1:16.5,97,4-5,60,,3,"60g bloom + aggressive spin; pour to 200g + gentle spin (at 40s); pour to 330g + gentle spin (when 70% drained)",240-270,Spin after each pour (aggressive on bloom; gentle on pours),Verified
+Matt Winton,Five-Pour Method,20,300,,1:15,93/88,5-6,,,5,"60g x5 — next when bed nearly dry. Dual-kettle: 93°C bloom then ~88°C later pours.",210,None (aggressive pour height for agitation),Verified
+Emi Fukahori,Hybrid Immersion Method,17,220,,~1:12.9,80/95,,"50 (stage 1)",,3,"50g at 80°C immersion (0:00-0:45); 100g at 95°C drip (0:45-1:45); 70g at 80°C immersion (1:45-2:30); drain (2:30-2:55). GINA brewer not V60.",175,,Verified
+Patrik Rolf,April Coffee V60 Method,20,300,,1:15,92,5.5-6.5,,,6,"50g x6 at 0:00/0:40/1:10/1:40/2:10/2:40 — aggressive circular pours",200-210,Aggressive circular pours,Verified
+Lance Hedrick,Versatile V60 Recipe,20,340,,1:17,100,4-5,100,,4,"50g at 0:00 + swirl; 50g at 0:30 + swirl; 120g at 1:00 + swirl; 120g at 1:30 + swirl",150-210,Swirl/spin after each pour,Verified
+Lance Hedrick,Ultimate Flash Brew (Iced),20,240,60,~1:15 total,93-100,,60,60,3,"60g bloom (wait 1 min); 90g pour (at 1:00); 90g pour (at 1:45). Stir 60g ice into brew.",150-205,Minimal / gentle swirl,Verified
+Jonathan Gagné,V60 Recipe (coffeeadastra.com),22,374,,1:17,100,4-5,77,,3,"77g bloom; pour to 200g + spin; pour to 374g + spin",243,Spin after each pour,Verified
+Tim Wendelboe,Staged Pour Method,32.5,500,,1:15.4,,,60,30,3,"60g bloom + stir (30s); pour to 200g; continue to 500g in circular motions",180-210,Stir during bloom,Partial
+Ben Put (Monogram Coffee),Monogram Coffee V60 Recipe,21,340,,1:16,93,4.5-5.5,50,30,3,"50g bloom (30s); pour to 250g; pour to 340g",150-180,,Verified
+Elika Liftee,No verified V60 recipe,,,,,,,,,,"Competition used Kalita Wave (10g dose ~1:12.5). Previously listed 15g/250g likely from Onyx Kalita Wave guide.",,None,Unknown
+Morgan Eckroth,No published V60 recipe,,,,,,,,,,2022 USBC Champion / WBC Runner-Up. Espresso-focused.,,None,Unknown
+Hidenori Izaki,No published V60 recipe,,,,,,,,,,2014 WBC Champion.,,None,Unknown
+Benny Wong,No published V60 recipe,,,,,,,,,,2016 WBrC 4th place. Competition used Melitta brewer.,,None,Unknown
+John Gordon,No published V60 recipe,,,,,,,,,,3x UK Barista Champion. Espresso career only.,,None,Unknown

@@ -1,0 +1,346 @@
+The Definitive Guide to 15 V60 Pour-Over Masters and Their Exact Recipes
+
+Across the modern specialty coffee world, a small group of brewers, educators, competitors, and innovators have shaped how the V60 is brewed today. While their philosophies differ — some favor agitation, others reject it entirely — a surprising convergence exists in their core parameters:
+
+• Ratios cluster between 1:15 and 1:17
+• Water temperatures are typically 92–100°C
+• Bloom phases range between 2×–3.5× dose
+• Final brew times target 2:30–4:30
+• Even extraction is universally diagnosed by a flat bed
+
+This document consolidates the brewing approaches of 15 influential figures and translates their grind philosophies into Fellow Ode Gen 2 equivalents.
+
+---
+
+Fellow Ode Gen 2 Reference
+
+Approximate range: ~275–1,160 microns (community-measured; Fellow does not publish official micron specs)
+Dial range: 1–11 (31 total steps, ~3 clicks per numbered position)
+
+NOTE: All Ode Gen 2 grind mappings below are community estimates. None come from the experts themselves.
+
+General mapping (from Fellow hopper lid guide + community consensus):
+
+Ode 2 1–3 → Prismo / AeroPress (espresso-style)
+Ode 2 3–6 → AeroPress (standard)
+Ode 2 4–8 → Pour-over (V60, Chemex) — start at 5 for V60
+Ode 2 6–7 → Cupping
+Ode 2 7–9 → Batch brew / electric drip
+Ode 2 8–10 → French Press
+Ode 2 9–11 → Cold Brew
+
+Target drawdown across most methods: 2:30–3:30.
+
+---
+
+1. James Hoffmann — The Structured Even Extraction Method
+
+Dose: 30g
+Water: 500g
+Ratio: 1:16.7
+Temperature: "The hotter, the better" — just off boil for light roasts; Hario Europe page lists 97°C
+Grind: Medium-fine (Ode 2: ~4–5)
+
+Bloom:
+60g water (2× dose, up to 3× if needed)
+45 seconds
+Swirl brewer to saturate
+
+Pour 1:
+0:45–1:15
+Vigorous spiral from center outward to 300g
+
+Pour 2:
+1:15–1:45
+Gentle center pour to 500g
+
+Stir once clockwise and counterclockwise
+Final swirl
+
+Drawdown: ~3:30
+
+Iced version (verified):
+
+Dose: 32.5g
+Hot water: 300g
+Ice in server: 200g
+Temp: 95°C
+Grind: Ode 2: ~3.5–4.5 (finer than hot)
+
+Bloom: 65g
+Pour remainder at 0:45
+Total brew: ~2:55
+
+Note: 32.5g dose maintains ~1:15.4 ratio against 500g total liquid (300g water + 200g ice).
+
+---
+
+2. Tetsu Kasuya — 4:6 Method (2016 World Brewers Cup Champion)
+
+Dose: 20g
+Water: 300g
+Ratio: 1:15
+Temperature: 92°C (competition parameter; Philocoffea recommends ~93°C for light roasts)
+Grind: Coarse (Ode 2: ~5.5–6.5)
+
+Competition pour structure (unequal):
+
+50g (0:00)
+70g (0:45)
+60g (1:30)
+60g (2:10)
+60g (2:40)
+
+Simplified version: 5 × 60g equal pours.
+
+Each begins when bed runs dry.
+No swirl or stir.
+
+Total time: ~3:30
+
+Alternative Ice Brew (verified — Kurasu Kyoto / Kasuya's YouTube):
+
+Dose: 50g
+Ice placed directly on bed: 500g
+Cold water: 100g
+
+Slow melt extraction over 4–15 hours. Ratio: 1:12.
+Note: Kasuya describes this as experimental — "lacks reproducibility." A second variant uses 300g ice + 300g cold water (same 1:12 ratio).
+
+---
+
+3. Scott Rao — Two-Pour V60 Method (verified via Hario UK)
+
+Dose: 20g
+Water: 330g
+Ratio: ~1:16.5
+Temp: 97°C (kettle temperature; his broader philosophy is "as hot as possible")
+Grind: Ode 2: ~4–5
+
+Bloom:
+60g
+Aggressive spin
+
+After 40s:
+Pour to 200g
+Gentle spin
+
+When ~70% drained (his exact wording):
+Pour to 330g
+Gentle spin
+
+Total time: 4:00–4:30
+
+Note: This is his two-pour method for home use. He also has a faster one-pour café method (under 2:15). Recommends plastic V60 for heat retention. Targets 22–24.5% extraction.
+
+---
+
+4. Matt Winton — Five-Pour Method (2021 World Brewers Cup Champion)
+
+Dose: 20g
+Water: 300g
+Ratio: 1:15
+Temp: 93°C bloom, ~88°C for later pours (dual-kettle system)
+Grind: Coarse (Ode 2: ~5–6)
+
+Five pours of 60g each
+Begin next pour when bed nearly dry
+No stirring; relies on aggressive pour height for agitation
+
+Total time: ~3:30 (home adaptation; competition routine may run longer)
+
+Note: Previously listed as "Pulse Turbulence Method" — this name does not appear in any verified source. Consistently called the "Five-Pour Method" or "5-Pour V60."
+
+---
+
+5. Emi Fukahori — Hybrid Immersion Method (2018 World Brewers Cup Champion)
+
+Dose: 17g
+Water: 220g
+Ratio: ~1:12.9
+Grind: Coarse
+Brewer: GINA by Goat Story (V60-shaped cone with valve — NOT a standard Hario V60)
+
+Two-temperature extraction:
+
+Stage 1 (0:00–0:45): 50g at 80°C, valve closed (immersion)
+Stage 2 (0:45–1:45): 100g at 95°C, valve open (drip)
+Stage 3 (1:45–2:30): 70g at 80°C, valve closed (immersion)
+Stage 4 (2:30–2:55): Drain (drawdown)
+
+Total: ~2:55
+
+Note: Low ratio justified by Laurina varietal (naturally low caffeine, resistant to over-extraction). First woman to win WBrC. Method has been widely adapted to the Hario Switch.
+
+---
+
+6. Patrik Rolf — April Coffee V60 Method (2019 WBrC Silver Medalist)
+
+Dose: 20g
+Water: 300g
+Ratio: 1:15
+Temp: 92°C
+Grind: Coarse (Ode 2: ~5.5–6.5)
+
+Six pours:
+
+50g × 6 (at 0:00, 0:40, 1:10, 1:40, 2:10, 2:40)
+
+All aggressive circular pours
+
+~3:20–3:30
+
+Source: aprilcoffeeroasters.com blog, "How we Brew Coffee with a V60 Filter Brewer" (August 2018), authored by Patrik Rolf Karlsson.
+
+Note: Previously listed as "Multi-Pour Turbulence" — this name does not appear in any verified source. The recipe has no branded name.
+
+---
+
+7. Lance Hedrick — Versatile V60 Recipe
+
+Dose: 20g
+Water: 340g
+Ratio: 1:17
+Temp: 100°C
+Grind: Medium, ~720 microns (Ode 2: ~4–5)
+
+Pour 1 (bloom):
+50g at 0:00, swirl
+
+Pour 2 (second bloom):
+50g at 0:30, swirl
+
+Main pour 1:
+120g at 1:00, swirl
+
+Main pour 2:
+120g at 1:30, swirl
+
+~2:30–3:30 (target ~3:00)
+
+Note: Previously listed as "Double Bloom" — that name belongs to a different recipe by Standout Coffee (Lukas/@nordkaffeeguy). Hedrick calls this his "Ultimate Pourover Recipe" or "V60 Brew: A Versatile Recipe for Any Coffee."
+
+Iced adaptation (verified — "Ultimate Flash Brew" YouTube video):
+
+Dose: 20g
+Brew water: 240g
+Ice added after: 60g (8:2 water-to-ice ratio)
+Pour schedule: bloom 60g (wait 1 min), pour 90g (at 1:00), pour 90g (at 1:45)
+Stir ice into brew until cooled to 5–15°C, then serve over fresh ice.
+
+---
+
+8. Jonathan Gagné — V60 Recipe (astrophysicist, author of "The Physics of Filter Coffee")
+
+Dose: 22g
+Water: 374g
+Ratio: 1:17
+Temp: 100°C
+Grind: Ode 2: ~4–5
+
+Bloom:
+77g (3.5× dose)
+
+Two pours after bloom (to 200g, then to 374g)
+Spin after each
+
+Total: ~4:03
+
+Source: coffeeadastra.com, "A V60 Pour Over Video" (June 2019). Credits Scott Rao's method as primary influence.
+
+Note: Previously listed as "Physics-Based Method" — he does not name his method.
+
+---
+
+9. Tim Wendelboe — Staged Pour Method (2004 World Barista Champion)
+
+Published recipe (timwendelboe.no):
+
+Dose: 32.5g (scaled as 65g per liter)
+Water: 500g
+Ratio: 1:15.4 (65g/L)
+Temp: Not published on his website
+Grind: Ode 2: ~3.5–5 (adjust by taste)
+
+Bloom: ~60g, stir to saturate, 30 seconds
+Pour to 200g
+Continue in circular motions to 500g
+
+Total: ~3:00–3:30
+
+Note: Previously described as "Continuous Pour" — his published method actually uses staged pours (bloom → pour to 200g → continue to 500g), not a single unbroken pour. "Stir during bloom" is confirmed. Temperature of 96–100°C appears in community sources but is not on his official website.
+
+---
+
+10. Ben Put — Monogram Coffee V60 Recipe (7× Canadian Barista Champion)
+
+Dose: 21g
+Water: 340g
+Ratio: 1:16
+Temp: 93°C (200°F)
+Grind: Medium-coarse (Ode 2: ~4.5–5.5)
+
+Bloom: 50g, 30 seconds
+
+Main pour to 250g
+Final pour to 340g
+
+~2:30–3:00
+
+Source: monogramcoffee.com/blogs/news/brew-series-pourover (July 2021, authored by Jill Hoff). This is the Monogram Coffee house recipe; Ben Put is co-founder.
+
+---
+
+11. Elika Liftee (2× US Brewers Cup Champion, 2020 & 2022)
+
+No verified personal V60 recipe found.
+
+The parameters previously listed (15g/250g/96°C/bloom 50g) likely originate from Onyx Coffee Lab's Kalita Wave brew guide (16g/250g/50g bloom), not a V60 recipe. Liftee's competition routines used the Kalita Wave, not the V60.
+
+His verified competition parameters (Kalita Wave):
+Dose: 10g
+Ratio: ~1:12.5
+Extraction: 23%
+Brewer: Kalita Wave
+
+---
+
+12–15. No Published V60 Recipes
+
+Morgan Eckroth — 2022 USBC Champion, 2022 WBC Runner-Up. Primarily espresso-focused content creator.
+Hidenori Izaki — 2014 World Barista Champion.
+Benny Wong — 2016 WBrC 4th place (Hong Kong). Competition used Melitta brewer, not V60.
+John Gordon — 3× UK Barista Champion, 4× WBC competitor. Espresso career, no V60/WBrC record.
+
+No fully published V60 recipes available for any of the above.
+
+---
+
+Japanese Iced Brewing Styles
+
+Traditional flash brew:
+Hot water replaces 60% of total
+Ice replaces 40%
+
+Post-brew dilution:
+All hot water extracts
+Ice added after
+
+Ice-on-bed:
+Slow melt extraction (Kasuya variant)
+
+---
+
+Shared Consensus
+
+• Ratios: 1:15–1:17
+• Temperature: near boiling
+• Flat bed = even extraction
+
+Major Divides
+
+• Agitation vs none
+• Fine vs coarse grind
+• Few pours vs pulse pours
+
+Dial-in always depends on taste outcome.

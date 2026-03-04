@@ -1,0 +1,14 @@
+expert_name,method_name,dose_g,total_water_g,ice_g,ratio,temperature_c,ode2_setting_estimate,bloom_g,bloom_time_s,pours_count,pour_steps,target_total_time_s,agitation,verification_status
+James Hoffmann,Structured Even Extraction,30,500,,1:16.7,97 (Hario) / boiling,4-5,60,45,2,"60g bloom w/ swirl; vigorous spiral to 300g (0:45-1:15); gentle center pour to 500g (1:15-1:45)",210,Swirl (bloom) + stir 1x CW/CCW + final swirl,Verified
+James Hoffmann,Structured Even Extraction (Iced),32.5,300,200,~1:15.4,95,3.5-4.5,65,,1,"65g bloom; pour remainder at 0:45",175,,Verified
+Tetsu Kasuya,4:6 Method,20,300,,1:15,92,5.5-6.5,,,5,"Competition: 50/70/60/60/60. Simplified: 60g x5. Each when bed runs dry.",210,None,Verified
+Tetsu Kasuya,Ice Brew (Experimental),50,100,500,1:12,,,,,,"500g ice on bed + 100g cold water — slow melt 4-15 hours",,None,Verified
+Scott Rao,Two-Pour V60 Method,20,330,,~1:16.5,97,4-5,60,,3,"60g bloom + aggressive spin; pour to 200g + gentle spin (at 40s); pour to 330g + gentle spin (when 70% drained)",240-270,Spin after each pour,Verified
+Matt Winton,Five-Pour Method,20,300,,1:15,93/88,5-6,,,5,"60g x5 — next when bed nearly dry. Dual-kettle: 93°C bloom / ~88°C later.",210,None (aggressive pour height),Verified
+Emi Fukahori,Hybrid Immersion Method,17,220,,~1:12.9,80/95,,,,,GINA brewer. 50g@80°C immersion; 100g@95°C drip; 70g@80°C immersion; drain.,175,,Verified
+Patrik Rolf,April Coffee V60 Method,20,300,,1:15,92,5.5-6.5,,,6,"50g x6 at 0:00/0:40/1:10/1:40/2:10/2:40 — aggressive circular pours",200-210,Aggressive circular pours,Verified
+Lance Hedrick,Versatile V60 Recipe,20,340,,1:17,100,4-5,100,,4,"50g@0:00+swirl; 50g@0:30+swirl; 120g@1:00+swirl; 120g@1:30+swirl",150-210,Swirl after each pour,Verified
+Lance Hedrick,Ultimate Flash Brew (Iced),20,240,60,~1:15 total,93-100,,60,60,3,"60g bloom (1 min); 90g@1:00; 90g@1:45. Stir 60g ice into brew.",150-205,Minimal,Verified
+Jonathan Gagné,V60 Recipe,22,374,,1:17,100,4-5,77,,3,"77g bloom; pour to 200g + spin; pour to 374g + spin",243,Spin after each pour,Verified
+Tim Wendelboe,Staged Pour Method,32.5,500,,1:15.4,Unverified,3.5-5,60,30,3,"60g bloom + stir (30s); pour to 200g; continue to 500g",180-210,Stir during bloom,Partial
+Ben Put (Monogram Coffee),Monogram Coffee V60 Recipe,21,340,,1:16,93,4.5-5.5,50,30,3,"50g bloom (30s); pour to 250g; pour to 340g",150-180,,Verified
