@@ -7,8 +7,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="V60 Masters">
 <meta name="theme-color" content="#1a0f08">
-<meta name="description" content="دليلك الشامل لتحضير أفضل قهوة V60 — 13 وصفة موثّقة من 10 خبراء عالميين">
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☕</text></svg>">
+<meta name="description" content="دليلك الشامل لتحضير أفضل قهوة V60 — 23 وصفة موثّقة من خبراء عالميين">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.svg">
 <title>V60 Masters - وصفات V60</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Tajawal:wght@400;500;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -851,6 +852,8 @@ body{padding:0;background:#fff;color:#000;font-size:11pt}
 <div class="rate-stars" id="rateStars"></div>
 <input class="brew-grind en" id="brewGrind" type="text" placeholder="إعداد الطحنة (اختياري)">
 <textarea class="brew-note" id="brewNote" placeholder="ملاحظات... (اختياري)"></textarea>
+<div id="tastingFormSlot"></div>
+<div id="beanSelectorSlot" style="margin:8px 0"></div>
 <button class="brew-save-btn" id="brewSaveBtn">&#128190; احفظ بالسجل</button>
 <button class="brew-skip" id="brewSkipBtn">تخطّي</button>
 </div>
@@ -894,6 +897,13 @@ body{padding:0;background:#fff;color:#000;font-size:11pt}
 <script src="coffeeKnowledgeBase.js"></script>
 <script src="troubleshooting-data.js"></script>
 <script src="newRecipes.js"></script>
+<script src="grind-dial.js"></script>
+<script src="calibration-wizard.js"></script>
+<script src="brew-along.js"></script>
+<script src="custom-recipe.js"></script>
+<script src="tasting-journal.js"></script>
+<script src="bean-library.js"></script>
+<script src="cost-tracker.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════════════════
 // V60 Masters — Complete App Engine (_build_app.js)
@@ -1354,6 +1364,9 @@ const D = [
 // ─── MERGE NEW RECIPES (from newRecipes.js) ─────────────────────────────────
 if (typeof NEW_RECIPES !== 'undefined') D.push(...NEW_RECIPES);
 
+// ─── MERGE CUSTOM RECIPES (from custom-recipe.js) ───────────────────────────
+if (typeof mergeCustomRecipes === 'function') mergeCustomRecipes();
+
 // ─── LEARN TIPS ──────────────────────────────────────────────────────────────
 const TIPS = [
   "ما تشطف الفلتر — الشطف يزيل طعم الورق ويسخّن الأداة",
@@ -1549,7 +1562,7 @@ function cardH(r, idx) {
   return '<div class="cd ' + (r.type === 'iced' ? 'ic' : 'ht') + '" data-id="' + r.id + '" style="animation-delay:' + delay + 'ms">' +
     '<div class="cd-r1"><div><div class="cd-name"><span class="en">' + exName + '</span></div><div class="cd-meth">' + r.mA + '</div></div>' +
     '<div class="bgs"><span class="bg ' + (r.type === 'iced' ? 'b-iced' : 'b-hot') + '">' + (r.type === 'iced' ? 'مثلّج' : 'حار') + '</span>' +
-    '<span class="bg" style="background:var(--bg2);color:var(--t2)">' + r.diff + '</span></div></div>' +
+    '<span class="bg" style="background:var(--bg2);color:var(--t2)">' + r.diff + '</span>' + (r.custom && typeof renderCustomRecipeBadge === 'function' ? renderCustomRecipeBadge() : '') + '</div></div>' +
     '<div class="rating"><span class="stars">' + starsHTML(r.pop) + '</span><span class="rating-txt">شعبية المجتمع</span></div>' +
     '<div class="fl-mini">' +
     flB(f.sw, 5, '#e74c3c') + '<span class="fl-m-l">حلاوة</span>' +
@@ -1579,7 +1592,7 @@ function render() {
     g.innerHTML = '<div class="empty"><b>\u2615</b><h3>ما لقينا وصفات</h3><p>عدّل الفلاتر</p></div>';
     return;
   }
-  g.innerHTML = f.map((r, i) => cardH(r, i)).join('');
+  g.innerHTML = f.map((r, i) => cardH(r, i)).join('') + (typeof renderCreateCard === 'function' ? renderCreateCard() : '');
   g.querySelectorAll('.cd').forEach(c => c.onclick = () => openD(+c.dataset.id));
 
   // Animate stats on first load
@@ -1706,7 +1719,15 @@ function renderDetail(r, scale) {
     '<div class="ig-i"><span class="ig-l">التحريك</span><span class="ig-v">' + (r.agit || 'بدون') + '</span></div>' +
     '<div class="ig-i"><span class="ig-l">Ode Gen 2</span><span class="ig-v en">' + r.ode + '</span></div>' +
     '<div class="ig-i"><span class="ig-l">الصعوبة</span><span class="ig-v">' + r.diff + '</span></div>' +
-    '</div></div>' +
+    '</div>' +
+    // Grind Dial
+    '<div id="detailGrindDial" style="margin:12px 0"></div>' +
+    // Calibration badge + button
+    (typeof renderCalibrationBadge === 'function' ? renderCalibrationBadge(r.id) : '') +
+    '<button style="width:100%;padding:10px;background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r2);font-size:12px;font-weight:700;font-family:Cairo;cursor:pointer;color:var(--t2);margin:8px 0" onclick="if(typeof openCalibrationWizard===\'function\')openCalibrationWizard(' + r.id + ',\'' + (r.mA || '').replace(/'/g, "\\'") + '\',' + r.oMin + ',' + r.oMax + ')">&#9881; معايرة الطاحونة لهالوصفة</button>' +
+    // Cost badge
+    (typeof renderCostBadge === 'function' ? renderCostBadge(r.dose) : '') +
+    '</div>' +
 
     // Flavor bars
     '<div class="sc"><h3>\u{1F3A8} ملف النكهة</h3>' +
@@ -1753,6 +1774,11 @@ function renderDetail(r, scale) {
     '<button class="bb" style="flex:1;justify-content:center;padding:12px" onclick="openShare(' + r.id + ')">\u{1F4E4} مشاركة</button>' +
     '<button class="bb" style="flex:1;justify-content:center;padding:12px;background:var(--bg2);color:var(--t1);border:1.5px solid var(--border)" onclick="openCompare(' + r.id + ')">\u{1F504} مقارنة</button>' +
     '</div></div>';
+
+  // Render grind dial in detail view
+  if (typeof renderGrindDial === 'function' && $('detailGrindDial')) {
+    try { renderGrindDial('detailGrindDial', r.oMin, r.oMax); } catch (e) { console.warn('Grind dial error:', e); }
+  }
 
   // Notes auto-save
   const notesEl = $('detailNotes');
@@ -1936,6 +1962,7 @@ function renderBrewUI(r) {
     '<div class="brew-dots" id="brewDots">' + r.steps.map((_, i) => '<div class="bd' + (i < brewStepIdx ? ' dn' : (i === brewStepIdx ? ' cr' : '')) + '"></div>').join('') + '</div>' +
     // Auto-advance toggle
     '<label style="font-size:11px;opacity:.5;display:flex;align-items:center;gap:6px;cursor:pointer;font-family:Tajawal"><input type="checkbox" id="brewAuto" ' + (brewAutoAdvance ? 'checked' : '') + ' onchange="brewAutoAdvance=this.checked"> تقدّم تلقائي</label>' +
+    (typeof renderBrewAlongToggle === 'function' ? renderBrewAlongToggle() : '') +
     '</div>' +
     '<div class="brew-bot">' +
     '<button class="brew-btn bpause" id="brewPauseBtn" onclick="toggleBrewPause()">\u23F8 وقف</button>' +
@@ -1970,8 +1997,17 @@ function tickBrew() {
       const parts = nextStep.t.replace('~', '').split(':');
       if (parts.length === 2) {
         const targetSec = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+        // Brew-along countdown
+        if (typeof speakCountdown === 'function' && brewElapsed >= targetSec - 5 && brewElapsed < targetSec - 4) {
+          speakCountdown(5);
+        }
         if (brewElapsed >= targetSec && brewElapsed < targetSec + 1) {
           nextBrewStep();
+          // Brew-along speak next step
+          if (typeof speakStep === 'function') {
+            var ns = brewRecipe.steps[brewStepIdx];
+            if (ns) speakStep(ns.l, ns.add, ns.total);
+          }
         }
       }
     }
@@ -2041,12 +2077,27 @@ function finishBrew() {
   const bw = $('brew');
   if (bw) bw.classList.remove('on');
 
+  // Brew-along finish announcement
+  if (typeof speakFinish === 'function') speakFinish();
+  if (typeof resetBrewAlongState === 'function') resetBrewAlongState();
+
   // Show rating dialog
   brewRating = 0;
   const bd = $('brewDone');
   if (bd) {
     bd.classList.add('on');
     renderRateStars();
+    // Inject tasting form
+    var tastingSlot = $('tastingFormSlot');
+    if (tastingSlot && typeof renderTastingForm === 'function') {
+      tastingSlot.innerHTML = renderTastingForm();
+      if (typeof initTastingFormListeners === 'function') initTastingFormListeners();
+    }
+    // Inject bean selector
+    var beanSlot = $('beanSelectorSlot');
+    if (beanSlot && typeof renderBeanSelector === 'function') {
+      beanSlot.innerHTML = '<label style="font-size:11px;color:var(--t3);font-weight:700;display:block;margin-bottom:4px">&#127811; نوع البن المستخدم</label>' + renderBeanSelector();
+    }
   }
 }
 
@@ -2106,6 +2157,24 @@ if ($('brewSaveBtn')) {
       temp: brewRecipeForLog ? brewRecipeForLog.temp : 0,
       date: dateStr
     };
+    // Add tasting data if available
+    if (typeof getTastingData === 'function') {
+      var td = getTastingData();
+      if (td && (td.acidity || td.sweetness || td.body || td.clarity || td.flavorTags.length || td.photo)) {
+        entry.tasting = td;
+      }
+    }
+
+    // Link selected bean
+    var beanSel = $('beanSelector');
+    if (beanSel && beanSel.value) {
+      entry.beanId = parseInt(beanSel.value);
+      // Deduct bean weight
+      if (typeof deductBeanWeight === 'function' && entry.dose) {
+        deductBeanWeight(entry.beanId, entry.dose);
+      }
+    }
+
     brewLog.push(entry);
     safeSave('v60log', brewLog);
     closeDone();
@@ -2570,6 +2639,24 @@ function renderTools() {
     toolOde.parentNode.insertBefore(gc, toolOde.nextSibling);
   }
 
+  // Bean Library
+  var toolsContainer = document.querySelector('#tools .tool-card') ? document.querySelector('#tools .tool-card').parentNode : $('tools');
+  if (toolsContainer && typeof renderBeanLibrary === 'function' && !$('beanLibraryCard')) {
+    var blCard = document.createElement('div');
+    blCard.id = 'beanLibraryCard';
+    blCard.innerHTML = renderBeanLibrary();
+    toolsContainer.insertBefore(blCard, toolsContainer.firstChild);
+  }
+
+  // Cost Tracker
+  if (toolsContainer && typeof renderCostTool === 'function' && !$('costTrackerCard')) {
+    var ctCard = document.createElement('div');
+    ctCard.id = 'costTrackerCard';
+    ctCard.innerHTML = renderCostTool();
+    toolsContainer.appendChild(ctCard);
+    if (typeof initCostTracker === 'function') initCostTracker();
+  }
+
   // Initial calcs
   calcRatio(); calcIced(); calcYield(); calcCaffeine();
 }
@@ -2668,6 +2755,15 @@ function initMyBrewsTabs() {
     badgesTab.onclick = () => { document.querySelectorAll('.stab').forEach(x => x.classList.remove('on')); badgesTab.classList.add('on'); curSub = 'badges'; renderMyBrews(); };
     tabsEl.appendChild(badgesTab);
   }
+  // Journal tab (tasting journal)
+  if (!tabsEl.querySelector('[data-sub="journal"]') && typeof renderJournalTab === 'function') {
+    const journalTab = document.createElement('button');
+    journalTab.className = 'stab';
+    journalTab.dataset.sub = 'journal';
+    journalTab.textContent = '\u{1F4DD} التذوق';
+    journalTab.onclick = () => { document.querySelectorAll('.stab').forEach(x => x.classList.remove('on')); journalTab.classList.add('on'); curSub = 'journal'; renderMyBrews(); };
+    tabsEl.appendChild(journalTab);
+  }
 }
 initMyBrewsTabs();
 
@@ -2680,6 +2776,7 @@ function renderMyBrews() {
     case 'log': renderLog(c); break;
     case 'stats': renderStats(c); break;
     case 'badges': renderBadges(c); break;
+    case 'journal': if (typeof renderJournalTab === 'function') renderJournalTab(c); else renderLog(c); break;
     default: renderFavs(c);
   }
 }
@@ -3066,6 +3163,14 @@ window.copyShare = copyShare;
 try {
   render();
   initOnboard();
+
+  // Initialize new features
+  if (typeof initBrewAlong === 'function') initBrewAlong();
+
+  // Register service worker for PWA
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(function(e) { console.warn('SW registration failed:', e); });
+  }
 
   // System theme listener
   if (window.matchMedia) {

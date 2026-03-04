@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <rect width="192" height="192" rx="32" fill="#1A0F08"/>
+  <!-- V60 dripper body -->
+  <path d="M56 52 L136 52 L112 148 L80 148 Z" fill="none" stroke="#C67C4E" stroke-width="5" stroke-linejoin="round"/>
+  <!-- Ridges inside dripper -->
+  <line x1="72" y1="68" x2="84" y2="132" stroke="#C67C4E" stroke-width="1.5" opacity="0.5"/>
+  <line x1="96" y1="56" x2="96" y2="144" stroke="#C67C4E" stroke-width="1.5" opacity="0.5"/>
+  <line x1="120" y1="68" x2="108" y2="132" stroke="#C67C4E" stroke-width="1.5" opacity="0.5"/>
+  <!-- Dripper top rim -->
+  <ellipse cx="96" cy="52" rx="42" ry="6" fill="none" stroke="#C67C4E" stroke-width="4"/>
+  <!-- Steam lines -->
+  <path d="M82 36 Q82 28 86 22" fill="none" stroke="#C67C4E" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/>
+  <path d="M96 32 Q96 22 100 14" fill="none" stroke="#C67C4E" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/>
+  <path d="M110 36 Q110 28 114 22" fill="none" stroke="#C67C4E" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/>
+  <!-- Server/carafe below -->
+  <path d="M76 152 L72 168 Q72 176 80 176 L112 176 Q120 176 120 168 L116 152" fill="none" stroke="#C67C4E" stroke-width="3" stroke-linejoin="round" opacity="0.7"/>
+  <!-- Drip -->
+  <circle cx="96" cy="154" r="2.5" fill="#C67C4E" opacity="0.8"/>
+</svg>

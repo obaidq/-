@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="80" fill="#1A0F08"/>
+  <!-- V60 dripper body -->
+  <path d="M144 132 L368 132 L304 400 L208 400 Z" fill="none" stroke="#C67C4E" stroke-width="10" stroke-linejoin="round"/>
+  <!-- Ridges inside dripper -->
+  <line x1="188" y1="172" x2="220" y2="360" stroke="#C67C4E" stroke-width="3" opacity="0.5"/>
+  <line x1="232" y1="152" x2="240" y2="384" stroke="#C67C4E" stroke-width="3" opacity="0.5"/>
+  <line x1="256" y1="140" x2="256" y2="392" stroke="#C67C4E" stroke-width="3" opacity="0.5"/>
+  <line x1="280" y1="152" x2="272" y2="384" stroke="#C67C4E" stroke-width="3" opacity="0.5"/>
+  <line x1="324" y1="172" x2="292" y2="360" stroke="#C67C4E" stroke-width="3" opacity="0.5"/>
+  <!-- Dripper top rim -->
+  <ellipse cx="256" cy="132" rx="116" ry="16" fill="none" stroke="#C67C4E" stroke-width="8"/>
+  <!-- Steam lines -->
+  <path d="M216 96 Q216 72 224 52" fill="none" stroke="#C67C4E" stroke-width="6" stroke-linecap="round" opacity="0.6"/>
+  <path d="M256 84 Q256 56 264 32" fill="none" stroke="#C67C4E" stroke-width="6" stroke-linecap="round" opacity="0.6"/>
+  <path d="M296 96 Q296 72 304 52" fill="none" stroke="#C67C4E" stroke-width="6" stroke-linecap="round" opacity="0.6"/>
+  <!-- Server/carafe below -->
+  <path d="M200 408 L188 452 Q188 472 212 472 L300 472 Q324 472 324 452 L312 408" fill="none" stroke="#C67C4E" stroke-width="7" stroke-linejoin="round" opacity="0.7"/>
+  <!-- Drip -->
+  <circle cx="256" cy="412" r="6" fill="#C67C4E" opacity="0.8"/>
+  <!-- V60 text -->
+  <text x="256" y="480" text-anchor="middle" font-family="sans-serif" font-weight="bold" font-size="28" fill="#C67C4E" opacity="0.4">V60 MASTERS</text>
+</svg>
