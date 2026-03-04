@@ -123,6 +123,92 @@ const AvatarSystem = {
       color: '#fa709a',
       styles: ['fun-emoji', 'bottts', 'croodles', 'thumbs'],
       seeds: ['Wild-Card', 'Chaos-Agent', 'Random-Rex', 'Surprise-Sultan', 'Crazy-Falcon', 'Unpredictable', 'Joker-Wild', 'Madness-King']
+    },
+
+    // ═══════════════════════════════════════════════════════════
+    // NEW CHARACTER ARCHETYPES (V7.1)
+    // 8 additional heroes inspired by Saudi culture & personality
+    // ═══════════════════════════════════════════════════════════
+
+    {
+      id: 'chef',
+      nameAr: 'الشيف',
+      nameEn: 'The Chef',
+      descAr: 'طبّاخ ماهر - كبسة ومندي وكل شي سعودي لذيذ!',
+      icon: '👨‍🍳',
+      color: '#FF6F00',
+      styles: ['avataaars', 'big-smile', 'open-peeps', 'micah'],
+      seeds: ['Chef-Sultan', 'Kabsa-King', 'Mandi-Master', 'Spice-Sheikh']
+    },
+    {
+      id: 'traveler',
+      nameAr: 'المسافر',
+      nameEn: 'The Traveler',
+      descAr: 'دايم مسافر - من الرياض لطوكيو ما يوقف!',
+      icon: '✈️',
+      color: '#0288D1',
+      styles: ['adventurer', 'lorelei', 'personas', 'open-peeps'],
+      seeds: ['Globe-Trotter', 'Desert-Nomad', 'Jet-Setter', 'Wanderer-Waleed']
+    },
+    {
+      id: 'expert',
+      nameAr: 'الخبير',
+      nameEn: 'The Expert',
+      descAr: 'خبير القهوة والشاي - يعرف كل نوع ومزاج!',
+      icon: '☕',
+      color: '#5D4037',
+      styles: ['notionists', 'avataaars', 'lorelei', 'micah'],
+      seeds: ['Coffee-Connoisseur', 'Chai-Champion', 'Brew-Boss', 'Qahwa-King']
+    },
+    {
+      id: 'legend',
+      nameAr: 'الأسطورة',
+      nameEn: 'The Legend',
+      descAr: 'لاعب أسطوري - كل مباراة يكتب تاريخ جديد!',
+      icon: '🏆',
+      color: '#FFD700',
+      styles: ['pixel-art', 'adventurer', 'big-smile', 'thumbs'],
+      seeds: ['Legend-Fahd', 'Golden-Hawk', 'Champion-Crown', 'Epic-Emir']
+    },
+    {
+      id: 'ninja',
+      nameAr: 'النينجا',
+      nameEn: 'The Ninja',
+      descAr: 'سريع وخفي - يسرق النقاط بدون ما تحس!',
+      icon: '🥷',
+      color: '#263238',
+      styles: ['pixel-art', 'bottts', 'adventurer', 'personas'],
+      seeds: ['Shadow-Blade', 'Silent-Storm', 'Night-Ninja', 'Stealth-Saif']
+    },
+    {
+      id: 'merchant',
+      nameAr: 'التاجر',
+      nameEn: 'The Merchant',
+      descAr: 'رجل أعمال ذكي - يتفاوض ويكسب دايماً!',
+      icon: '💰',
+      color: '#2E7D32',
+      styles: ['avataaars', 'notionists', 'open-peeps', 'lorelei'],
+      seeds: ['Gold-Merchant', 'Bazaar-Boss', 'Deal-Maker', 'Souq-Sultan']
+    },
+    {
+      id: 'poet',
+      nameAr: 'الشاعر',
+      nameEn: 'The Poet',
+      descAr: 'شاعر فصيح - كلامه قصيدة وإجاباته أدب!',
+      icon: '📜',
+      color: '#7B1FA2',
+      styles: ['lorelei', 'notionists', 'croodles', 'micah'],
+      seeds: ['Verse-Vizier', 'Rhyme-Royal', 'Poem-Prince', 'Qasida-King']
+    },
+    {
+      id: 'diver',
+      nameAr: 'الغواص',
+      nameEn: 'The Diver',
+      descAr: 'غواص لؤلؤ خليجي - يغوص عميق ويطلع كنوز!',
+      icon: '🤿',
+      color: '#00838F',
+      styles: ['adventurer', 'fun-emoji', 'big-smile', 'bottts'],
+      seeds: ['Pearl-Hunter', 'Deep-Diver', 'Ocean-Omran', 'Gulf-Ghost']
     }
   ],
 

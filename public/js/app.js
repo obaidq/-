@@ -151,9 +151,12 @@ const ScreenMachine = {
 
 function escapeHtml(str) {
   if (!str || typeof str !== 'string') return '';
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -280,7 +283,7 @@ const App = {
         case 'submitAnswer': this.submitAnswer(); break;
         case 'submitGuess': this.submitGuess(e); break;
         case 'submitFakinAction': this.submitFakinAction(); break;
-        case 'submitDeathAnswer': this.submitDeathAnswer(btn.dataset.chalice); break;
+        case 'submitDeathAnswer': this.submitDeathAnswer(target.getAttribute('data-chalice')); break;
         case 'submitLie': this.submitLie(); break;
         case 'submitDrawing': this.submitDrawing(); break;
         case 'submitGuessDrawful': this.submitGuessDrawful(); break;
@@ -350,10 +353,10 @@ const App = {
         case 'toggleHideRoomCode': this.toggleHideRoomCode(); break;
         case 'toggleReady': this.toggleReady(); break;
         case 'toggleSettings': this.toggleSettings(); break;
-        case 'confirmExit': if (confirm('متأكد تبي تطلع؟')) location.reload(); break;
+        case 'confirmExit': if (confirm('متأكد تبي تطلع؟')) { this.socket.disconnect(); location.reload(); } break;
         case 'sendEmoji': this.sendEmoji(target.getAttribute('data-emoji')); break;
         case 'toggleReducedMotion': this.toggleReducedMotion(target.checked); break;
-        case 'toggleDarkMode': this.toggleDarkMode(target.checked); break;
+        // Dark mode toggle removed - replaced by theme selector
         case 'pauseGame': this.pauseGame(); break;
         case 'skipQuestion': this.skipQuestion(); break;
         case 'showKickMenu': this.showKickMenu(); break;
@@ -374,17 +377,21 @@ const App = {
       this.setIntensity(e.target.value);
     });
 
+    // ── Theme mode selector (dark/light/default) ──
+    document.getElementById('themeModeSelect')?.addEventListener('change', (e) => {
+      this.setThemeMode(e.target.value);
+    });
+
     // ── Chat enter key ──
     document.getElementById('chatInput')?.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') this.sendChat();
     });
 
-    // ── Dark mode init ──
-    if (localStorage.getItem('darkMode') === 'true') {
-      document.body.setAttribute('data-dark-mode', 'true');
-      const toggle = document.getElementById('darkModeToggle');
-      if (toggle) toggle.checked = true;
-    }
+    // ── Theme mode init ──
+    const savedThemeMode = localStorage.getItem('themeMode') || 'default';
+    this.setThemeMode(savedThemeMode);
+    const themeModeSelect = document.getElementById('themeModeSelect');
+    if (themeModeSelect) themeModeSelect.value = savedThemeMode;
 
     // ── Room code auto-uppercase ──
     document.getElementById('roomCodeInput')?.addEventListener('input', (e) => {
@@ -2991,9 +2998,32 @@ const App = {
   // 🌙 Dark Mode
   // ═══════════════════════════════════════════════════════════════
 
-  toggleDarkMode(checked) {
-    document.body.setAttribute('data-dark-mode', checked ? 'true' : 'false');
-    localStorage.setItem('darkMode', checked);
+  // ═══════════════════════════════════════════════════════════════
+  // 🎨 Theme Mode System (dark / light / default)
+  // ═══════════════════════════════════════════════════════════════
+
+  setThemeMode(mode) {
+    // Clear all theme attributes first
+    document.body.removeAttribute('data-dark-mode');
+    document.body.removeAttribute('data-light-mode');
+
+    switch (mode) {
+      case 'dark':
+        document.body.setAttribute('data-dark-mode', 'true');
+        break;
+      case 'light':
+        document.body.setAttribute('data-light-mode', 'true');
+        break;
+      default:
+        // Default theme - no extra attributes needed
+        break;
+    }
+
+    localStorage.setItem('themeMode', mode);
+
+    // Update select if it exists and doesn't match
+    const sel = document.getElementById('themeModeSelect');
+    if (sel && sel.value !== mode) sel.value = mode;
   },
 
   // ═══════════════════════════════════════════════════════════════

@@ -1721,13 +1721,1286 @@
  * V7 NEW FEATURES - Dark Mode, Chat, Achievements, New Games
  * ═══════════════════════════════════════════════════════════════ */
 
-/* ─── Dark Mode ─── */
+/* ═══════════════════════════════════════════════════════════════
+ * DARK MODE - الوضع الداكن (Complete System)
+ * Rich, deep, immersive dark theme with glass/depth effects
+ * ═══════════════════════════════════════════════════════════════ */
+
 [data-dark-mode="true"] {
-  --color-primary-900: #000;
-  --color-primary-800: #0a0a0a;
+  /* ─── Core Palette ─── */
+  --color-primary-900: #050508;
+  --color-primary-800: #0c0c14;
+  --color-primary-700: #12121f;
+  --color-primary-600: #1a1a2e;
+  --color-primary-500: #22223a;
+  --color-primary-400: #2d2d48;
+  --color-primary-300: #3d3d5c;
+
+  /* ─── Theme Overrides ─── */
+  --theme-bg-primary: #080810;
+  --theme-bg-secondary: #0c0c18;
+
+  /* ─── Surface / Glass (Dark) ─── */
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-bg-strong: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.07);
+  --glass-border-strong: rgba(255, 255, 255, 0.14);
+  --surface-dark: rgba(0, 0, 0, 0.55);
+  --surface-darker: rgba(0, 0, 0, 0.75);
+  --surface-card: rgba(10, 10, 22, 0.85);
+  --surface-elevated: rgba(255, 255, 255, 0.03);
+
+  /* ─── Card System ─── */
+  --card-bg: rgba(10, 10, 22, 0.88);
+  --card-border: rgba(255, 255, 255, 0.06);
+  --card-shadow: 0 8px 40px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.04);
+
+  /* ─── Shadow System (Dark) ─── */
+  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.6);
+  --shadow-xl: 0 16px 50px rgba(0, 0, 0, 0.65);
+  --shadow-2xl: 0 24px 60px rgba(0, 0, 0, 0.7);
+
+  /* ─── Text ─── */
+  --theme-text-primary: #f0f0f5;
+  --theme-text-secondary: #a0a0b8;
+
+  color-scheme: dark;
 }
-[data-dark-mode="true"] .panel { background: rgba(0,0,0,0.9); }
-[data-dark-mode="true"] .game-card { background: rgba(0,0,0,0.8); }
+
+/* ─── Body / Background ─── */
+[data-dark-mode="true"] body {
+  background: #080810;
+  color: #f0f0f5;
+}
+
+[data-dark-mode="true"] .bg {
+  background: linear-gradient(135deg, #080810 0%, #0c0c18 30%, #0a0a1e 60%, #080810 100%);
+}
+
+[data-dark-mode="true"] .bg__overlay {
+  background: radial-gradient(ellipse at center, transparent 0%, rgba(8, 8, 16, 0.95) 85%);
+}
+
+/* ─── Panels ─── */
+[data-dark-mode="true"] .panel {
+  background: rgba(12, 12, 24, 0.88);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
+              inset 0 1px 0 rgba(255, 255, 255, 0.04),
+              0 0 40px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(24px);
+}
+
+[data-dark-mode="true"] .panel--solid {
+  background: #0c0c18;
+}
+
+[data-dark-mode="true"] .panel--accent {
+  border-color: rgba(var(--theme-accent), 0.2);
+}
+
+/* ─── Cards ─── */
+[data-dark-mode="true"] .card {
+  background: rgba(14, 14, 28, 0.92);
+  border-color: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+[data-dark-mode="true"] .card__header {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-dark-mode="true"] .card__body {
+  color: #d0d0e0;
+}
+
+[data-dark-mode="true"] .card__footer {
+  background: rgba(0, 0, 0, 0.3);
+  border-top-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-dark-mode="true"] .card--clickable:hover {
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.6);
+}
+
+/* ─── Game Cards ─── */
+[data-dark-mode="true"] .game-card {
+  background: rgba(14, 14, 28, 0.92);
+  border-color: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 6px 0 rgba(0, 0, 0, 0.3);
+}
+
+[data-dark-mode="true"] .game-card:hover {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 12px 0 rgba(0, 0, 0, 0.2);
+}
+
+[data-dark-mode="true"] .game-card__body {
+  background: transparent;
+}
+
+[data-dark-mode="true"] .game-card__title {
+  color: #f0f0f5;
+}
+
+[data-dark-mode="true"] .game-card__desc {
+  color: #9090a8;
+}
+
+[data-dark-mode="true"] .game-card__meta .game-tag,
+[data-dark-mode="true"] .game-card__tags .game-tag {
+  background: rgba(255, 255, 255, 0.06);
+  color: #b0b0c8;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ─── Buttons ─── */
+[data-dark-mode="true"] .btn--ghost {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #e0e0f0;
+}
+
+[data-dark-mode="true"] .btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+[data-dark-mode="true"] .btn--primary {
+  box-shadow: 0 6px 0 rgba(0, 80, 30, 0.7), 0 4px 16px rgba(0, 200, 83, 0.15);
+}
+
+[data-dark-mode="true"] .btn--secondary {
+  box-shadow: 0 6px 0 rgba(180, 130, 0, 0.6), 0 4px 16px rgba(255, 217, 61, 0.1);
+}
+
+[data-dark-mode="true"] .btn--danger {
+  box-shadow: 0 6px 0 rgba(180, 20, 20, 0.6), 0 4px 16px rgba(255, 71, 87, 0.1);
+}
+
+/* ─── Input Fields ─── */
+[data-dark-mode="true"] .input {
+  background: rgba(16, 16, 32, 0.9);
+  color: #f0f0f5;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+[data-dark-mode="true"] .input:focus {
+  border-color: var(--theme-accent);
+  box-shadow: 0 0 0 4px rgba(0, 230, 118, 0.12),
+              inset 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+[data-dark-mode="true"] .input::placeholder {
+  color: #606080;
+}
+
+/* ─── Room Code ─── */
+[data-dark-mode="true"] .room-code {
+  background: rgba(14, 14, 28, 0.95);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+}
+
+[data-dark-mode="true"] .room-code__label {
+  color: #8080a0;
+}
+
+[data-dark-mode="true"] .room-code__value {
+  color: #f0f0f5;
+  text-shadow: 0 0 20px rgba(var(--theme-accent), 0.3);
+}
+
+[data-dark-mode="true"] .room-display {
+  background: rgba(14, 14, 28, 0.9);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-dark-mode="true"] .room-display__code {
+  color: #f0f0f5;
+}
+
+/* ─── Modal ─── */
+[data-dark-mode="true"] .modal-overlay {
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(12px);
+}
+
+[data-dark-mode="true"] .modal {
+  background: linear-gradient(180deg, rgba(16, 16, 32, 0.98), rgba(10, 10, 20, 0.98));
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.7),
+              0 0 60px rgba(0, 0, 0, 0.4);
+}
+
+[data-dark-mode="true"] .modal__header {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-dark-mode="true"] .modal__body {
+  color: #b0b0c8;
+}
+
+[data-dark-mode="true"] .modal__footer {
+  border-top-color: rgba(255, 255, 255, 0.06);
+}
+
+/* ─── Toast ─── */
+[data-dark-mode="true"] .toast--success {
+  box-shadow: 0 8px 32px rgba(0, 200, 83, 0.25);
+}
+
+[data-dark-mode="true"] .toast--error {
+  box-shadow: 0 8px 32px rgba(255, 71, 87, 0.25);
+}
+
+[data-dark-mode="true"] .toast--info {
+  box-shadow: 0 8px 32px rgba(0, 210, 211, 0.25);
+}
+
+/* ─── Timer ─── */
+[data-dark-mode="true"] .timer {
+  box-shadow: 0 4px 0 rgba(0, 100, 30, 0.8), 0 4px 24px rgba(0, 200, 83, 0.2);
+}
+
+[data-dark-mode="true"] .game-timer {
+  text-shadow: 0 0 12px rgba(0, 230, 118, 0.4);
+}
+
+/* ─── Progress ─── */
+[data-dark-mode="true"] .progress {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.04);
+}
+
+/* ─── Badges ─── */
+[data-dark-mode="true"] .badge {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ─── Divider ─── */
+[data-dark-mode="true"] .divider {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+}
+
+/* ─── Tip Box ─── */
+[data-dark-mode="true"] .tip-box {
+  background: rgba(0, 200, 83, 0.05);
+  border-color: rgba(0, 200, 83, 0.12);
+}
+
+/* ─── Game HUD ─── */
+[data-dark-mode="true"] .game-hud {
+  background: rgba(6, 6, 14, 0.85);
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px);
+}
+
+[data-dark-mode="true"] .game-footer {
+  background: rgba(6, 6, 14, 0.85);
+  border-top-color: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px);
+}
+
+/* ─── Player Cards ─── */
+[data-dark-mode="true"] .player-card__name {
+  color: #f0f0f5;
+}
+
+[data-dark-mode="true"] .player-card__status {
+  color: #7070a0;
+}
+
+/* ─── Scoreboard ─── */
+[data-dark-mode="true"] .scoreboard {
+  background: rgba(12, 12, 24, 0.9);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-dark-mode="true"] .scoreboard-row {
+  border-bottom-color: rgba(255, 255, 255, 0.04);
+}
+
+/* ─── Settings Modal ─── */
+[data-dark-mode="true"] .settings-modal__content {
+  background: rgba(12, 12, 24, 0.97);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-dark-mode="true"] .settings-label {
+  color: #d0d0e0;
+}
+
+[data-dark-mode="true"] .settings-select {
+  background: rgba(16, 16, 32, 0.9);
+  color: #f0f0f5;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ─── Chat ─── */
+[data-dark-mode="true"] .chat-container {
+  background: rgba(8, 8, 18, 0.97);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-dark-mode="true"] .chat-input {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+[data-dark-mode="true"] .chat-toggle {
+  background: rgba(8, 8, 18, 0.95);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ─── Emoji Bar ─── */
+[data-dark-mode="true"] .emoji-bar {
+  background: rgba(12, 12, 24, 0.95);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-dark-mode="true"] .emoji-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ─── Avatar Picker ─── */
+[data-dark-mode="true"] .avatar-picker {
+  background: rgba(12, 12, 24, 0.97);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-dark-mode="true"] .avatar-picker-backdrop {
+  background: rgba(0, 0, 0, 0.85);
+}
+
+[data-dark-mode="true"] .avatar-tab {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.06);
+  color: #b0b0c8;
+}
+
+[data-dark-mode="true"] .avatar-tab--active {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--theme-accent);
+  color: #f0f0f5;
+}
+
+[data-dark-mode="true"] .avatar-option {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-dark-mode="true"] .avatar-option:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+[data-dark-mode="true"] .avatar-select-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ─── How-To Steps ─── */
+[data-dark-mode="true"] .how-step {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+/* ─── Countdown ─── */
+[data-dark-mode="true"] .countdown-overlay {
+  background: rgba(4, 4, 12, 0.92);
+}
+
+/* ─── Pause ─── */
+[data-dark-mode="true"] .pause-content {
+  background: rgba(12, 12, 24, 0.95);
+}
+
+/* ─── Round Intro ─── */
+[data-dark-mode="true"] .round-intro {
+  background: rgba(4, 4, 12, 0.95);
+}
+
+[data-dark-mode="true"] .round-intro__card {
+  background: rgba(14, 14, 28, 0.95);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ─── Boot Screen ─── */
+[data-dark-mode="true"] .boot-bar {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* ─── Winner Showcase ─── */
+[data-dark-mode="true"] .winner-showcase {
+  text-shadow: 0 0 40px rgba(255, 215, 0, 0.3);
+}
+
+/* ─── Scrollbar (Dark) ─── */
+[data-dark-mode="true"] ::-webkit-scrollbar-track {
+  background: #0c0c18;
+}
+
+[data-dark-mode="true"] ::-webkit-scrollbar-thumb {
+  background: #2d2d48;
+}
+
+[data-dark-mode="true"] ::-webkit-scrollbar-thumb:hover {
+  background: #3d3d5c;
+}
+
+/* ─── Achievement Toast (Dark) ─── */
+[data-dark-mode="true"] .achievement-toast {
+  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
+}
+
+/* ─── WYR (Dark) ─── */
+[data-dark-mode="true"] .wyr-option {
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.6);
+}
+
+[data-dark-mode="true"] .wyr-result--a {
+  background: rgba(255, 111, 0, 0.12);
+  border-color: rgba(255, 160, 0, 0.4);
+}
+
+[data-dark-mode="true"] .wyr-result--b {
+  background: rgba(21, 101, 192, 0.12);
+  border-color: rgba(66, 165, 245, 0.4);
+}
+
+/* ─── Commentary Bar (Dark) ─── */
+[data-dark-mode="true"] .commentary-bar {
+  background: rgba(8, 8, 18, 0.95);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+/* ─── Kick Modal (Dark) ─── */
+[data-dark-mode="true"] #kickModal .settings-modal__content {
+  background: rgba(12, 12, 24, 0.97);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ * DARK MODE - PER-GAME THEME VARIANTS
+ * Each game maintains identity with darkened surfaces
+ * ═══════════════════════════════════════════════════════════════ */
+
+[data-dark-mode="true"][data-theme="hub"] {
+  --theme-bg-primary: #050810;
+  --theme-bg-secondary: #08101a;
+  --theme-glow: rgba(0, 230, 118, 0.08);
+}
+
+[data-dark-mode="true"][data-theme="quiplash"] {
+  --theme-bg-primary: #06061e;
+  --theme-bg-secondary: #0e062e;
+  --theme-glow: rgba(255, 217, 61, 0.06);
+}
+
+[data-dark-mode="true"][data-theme="guesspionage"] {
+  --theme-bg-primary: #040e04;
+  --theme-bg-secondary: #001208;
+  --theme-glow: rgba(0, 255, 65, 0.05);
+}
+
+[data-dark-mode="true"][data-theme="fakinit"] {
+  --theme-bg-primary: #120606;
+  --theme-bg-secondary: #1a060e;
+  --theme-glow: rgba(255, 107, 157, 0.06);
+}
+
+[data-dark-mode="true"][data-theme="triviamurder"] {
+  --theme-bg-primary: #0e0008;
+  --theme-bg-secondary: #080004;
+  --theme-glow: rgba(255, 71, 87, 0.08);
+}
+
+[data-dark-mode="true"][data-theme="fibbage"] {
+  --theme-bg-primary: #0e0a04;
+  --theme-bg-secondary: #080602;
+  --theme-glow: rgba(255, 179, 0, 0.06);
+}
+
+[data-dark-mode="true"][data-theme="drawful"] {
+  --theme-bg-primary: #060610;
+  --theme-bg-secondary: #0a041a;
+  --theme-glow: rgba(165, 94, 234, 0.06);
+}
+
+[data-dark-mode="true"][data-theme="tshirtwars"] {
+  --theme-bg-primary: #040e0e;
+  --theme-bg-secondary: #061212;
+  --theme-glow: rgba(0, 210, 211, 0.06);
+}
+
+[data-dark-mode="true"][data-theme="lovemonster"] {
+  --theme-bg-primary: #0e0308;
+  --theme-bg-secondary: #12040a;
+  --theme-glow: rgba(255, 105, 180, 0.08);
+}
+
+[data-dark-mode="true"][data-theme="inventions"] {
+  --theme-bg-primary: #060e00;
+  --theme-bg-secondary: #0a1200;
+  --theme-glow: rgba(118, 255, 3, 0.05);
+}
+
+[data-dark-mode="true"][data-theme="wouldyourather"] {
+  --theme-bg-primary: #04080e;
+  --theme-bg-secondary: #040a12;
+  --theme-glow: rgba(68, 138, 255, 0.06);
+}
+
+[data-dark-mode="true"][data-theme="whosaidit"] {
+  --theme-bg-primary: #08040e;
+  --theme-bg-secondary: #0e0612;
+  --theme-glow: rgba(224, 64, 251, 0.06);
+}
+
+[data-dark-mode="true"][data-theme="speedround"] {
+  --theme-bg-primary: #0e0800;
+  --theme-bg-secondary: #120c00;
+  --theme-glow: rgba(255, 171, 0, 0.08);
+}
+
+[data-dark-mode="true"][data-theme="twotruths"] {
+  --theme-bg-primary: #000e08;
+  --theme-bg-secondary: #001204;
+  --theme-glow: rgba(29, 233, 182, 0.06);
+}
+
+[data-dark-mode="true"][data-theme="splittheroom"] {
+  --theme-bg-primary: #04000e;
+  --theme-bg-secondary: #08001a;
+  --theme-glow: rgba(124, 77, 255, 0.06);
+}
+
+[data-dark-mode="true"][data-theme="emojidecode"] {
+  --theme-bg-primary: #0e0400;
+  --theme-bg-secondary: #120800;
+  --theme-glow: rgba(255, 109, 0, 0.06);
+}
+
+[data-dark-mode="true"][data-theme="debateme"] {
+  --theme-bg-primary: #04040e;
+  --theme-bg-secondary: #04080e;
+  --theme-glow: rgba(64, 196, 255, 0.06);
+}
+
+[data-dark-mode="true"][data-theme="acrophobia"] {
+  --theme-bg-primary: #060e04;
+  --theme-bg-secondary: #0a1204;
+  --theme-glow: rgba(178, 255, 89, 0.05);
+}
+
+[data-dark-mode="true"][data-theme="victory"] {
+  --theme-bg-primary: #0e0800;
+  --theme-bg-secondary: #120a00;
+  --theme-glow: rgba(255, 215, 0, 0.1);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ * LIGHT MODE - الوضع الفاتح (Complete System)
+ * Clean, warm, modern light theme
+ * ═══════════════════════════════════════════════════════════════ */
+
+[data-light-mode="true"] {
+  /* ─── Core Palette ─── */
+  --color-primary-900: #f7f8fa;
+  --color-primary-800: #eef0f4;
+  --color-primary-700: #dde0e8;
+  --color-primary-600: #c8ccd8;
+  --color-primary-500: #006633;
+  --color-primary-400: #008040;
+  --color-primary-300: #00994d;
+
+  /* ─── Theme Overrides ─── */
+  --theme-bg-primary: #f5f6f8;
+  --theme-bg-secondary: #eceef2;
+  --theme-accent: #00C853;
+
+  /* ─── Surface / Glass (Light) ─── */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-bg-strong: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.06);
+  --glass-border-strong: rgba(0, 0, 0, 0.12);
+  --surface-dark: rgba(0, 0, 0, 0.04);
+  --surface-darker: rgba(0, 0, 0, 0.08);
+  --surface-card: rgba(255, 255, 255, 0.95);
+  --surface-elevated: rgba(255, 255, 255, 0.98);
+
+  /* ─── Card System ─── */
+  --card-bg: rgba(255, 255, 255, 0.97);
+  --card-border: rgba(0, 0, 0, 0.06);
+  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+
+  /* ─── Shadow System (Light) ─── */
+  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 16px 50px rgba(0, 0, 0, 0.15);
+  --shadow-2xl: 0 24px 60px rgba(0, 0, 0, 0.18);
+
+  /* ─── Button Shadows ─── */
+  --shadow-btn: 0 4px 0 rgba(0, 0, 0, 0.1);
+  --shadow-btn-hover: 0 6px 0 rgba(0, 0, 0, 0.1);
+  --shadow-btn-active: 0 1px 0 rgba(0, 0, 0, 0.1);
+
+  /* ─── Text ─── */
+  --theme-text-primary: #1a1a2e;
+  --theme-text-secondary: #5a5a78;
+
+  color-scheme: light;
+}
+
+/* ─── Body / Background ─── */
+[data-light-mode="true"] body {
+  background: #f5f6f8;
+  color: #1a1a2e;
+}
+
+[data-light-mode="true"] .bg {
+  background: linear-gradient(135deg, #f5f6f8 0%, #eceef2 30%, #e8eaf0 60%, #f5f6f8 100%);
+}
+
+[data-light-mode="true"] .bg__glow {
+  opacity: 0.1;
+}
+
+[data-light-mode="true"] .bg__overlay {
+  background: radial-gradient(ellipse at center, transparent 0%, rgba(245, 246, 248, 0.7) 85%);
+}
+
+[data-light-mode="true"] .bg__pattern {
+  opacity: 0.04;
+}
+
+/* ─── Panels ─── */
+[data-light-mode="true"] .panel {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06),
+              inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  color: #1a1a2e;
+}
+
+[data-light-mode="true"] .panel--solid {
+  background: #ffffff;
+}
+
+/* ─── Cards ─── */
+[data-light-mode="true"] .card {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+[data-light-mode="true"] .card__body {
+  color: #3a3a50;
+}
+
+[data-light-mode="true"] .card__footer {
+  background: #f8f9fa;
+  border-top-color: rgba(0, 0, 0, 0.04);
+}
+
+/* ─── Game Cards ─── */
+[data-light-mode="true"] .game-card {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06), 0 4px 0 rgba(0, 0, 0, 0.04);
+}
+
+[data-light-mode="true"] .game-card:hover {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1), 0 8px 0 rgba(0, 0, 0, 0.03);
+}
+
+[data-light-mode="true"] .game-card__title {
+  color: #1a1a2e;
+}
+
+[data-light-mode="true"] .game-card__desc {
+  color: #5a5a78;
+}
+
+[data-light-mode="true"] .game-card__meta .game-tag,
+[data-light-mode="true"] .game-card__tags .game-tag {
+  background: rgba(0, 0, 0, 0.04);
+  color: #5a5a78;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+/* ─── Buttons ─── */
+[data-light-mode="true"] .btn--ghost {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #1a1a2e;
+}
+
+[data-light-mode="true"] .btn--ghost:hover {
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+[data-light-mode="true"] .btn--primary {
+  box-shadow: 0 4px 0 rgba(0, 80, 30, 0.3), 0 4px 12px rgba(0, 200, 83, 0.15);
+}
+
+[data-light-mode="true"] .btn--danger {
+  box-shadow: 0 4px 0 rgba(180, 20, 20, 0.3);
+}
+
+/* ─── Input Fields ─── */
+[data-light-mode="true"] .input {
+  background: #ffffff;
+  color: #1a1a2e;
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.04), 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+[data-light-mode="true"] .input:focus {
+  border-color: var(--theme-accent);
+  box-shadow: 0 0 0 4px rgba(0, 200, 83, 0.12),
+              inset 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+[data-light-mode="true"] .input::placeholder {
+  color: #9e9eb8;
+}
+
+/* ─── Room Code ─── */
+[data-light-mode="true"] .room-code {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+[data-light-mode="true"] .room-code__label {
+  color: #7a7a98;
+}
+
+[data-light-mode="true"] .room-code__value {
+  color: #006633;
+}
+
+[data-light-mode="true"] .room-display {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-light-mode="true"] .room-display__code {
+  color: #006633;
+}
+
+[data-light-mode="true"] .room-display__label {
+  color: #7a7a98;
+}
+
+/* ─── Modal ─── */
+[data-light-mode="true"] .modal-overlay {
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+}
+
+[data-light-mode="true"] .modal {
+  background: linear-gradient(180deg, #ffffff, #f8f9fa);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.15);
+}
+
+[data-light-mode="true"] .modal__header {
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-light-mode="true"] .modal__title {
+  color: #1a1a2e;
+}
+
+[data-light-mode="true"] .modal__body {
+  color: #3a3a50;
+}
+
+[data-light-mode="true"] .modal__footer {
+  border-top-color: rgba(0, 0, 0, 0.06);
+}
+
+/* ─── Toast ─── */
+[data-light-mode="true"] .toast {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+/* ─── Timer ─── */
+[data-light-mode="true"] .timer {
+  box-shadow: 0 4px 0 rgba(0, 100, 30, 0.3), 0 4px 16px rgba(0, 200, 83, 0.15);
+}
+
+/* ─── Badges ─── */
+[data-light-mode="true"] .badge {
+  background: rgba(0, 0, 0, 0.05);
+  color: #4a4a68;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-light-mode="true"] .badge--primary { background: rgba(0, 200, 83, 0.1); color: #006633; border-color: rgba(0, 200, 83, 0.2); }
+[data-light-mode="true"] .badge--success { background: rgba(0, 200, 83, 0.1); color: #006633; border-color: rgba(0, 200, 83, 0.2); }
+[data-light-mode="true"] .badge--warning { background: rgba(255, 179, 0, 0.1); color: #8a6800; border-color: rgba(255, 179, 0, 0.2); }
+[data-light-mode="true"] .badge--error { background: rgba(255, 71, 87, 0.1); color: #c62828; border-color: rgba(255, 71, 87, 0.2); }
+[data-light-mode="true"] .badge--info { background: rgba(0, 210, 211, 0.1); color: #006064; border-color: rgba(0, 210, 211, 0.2); }
+
+/* ─── Divider ─── */
+[data-light-mode="true"] .divider {
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.08), transparent);
+}
+
+/* ─── Tip Box ─── */
+[data-light-mode="true"] .tip-box {
+  background: rgba(0, 200, 83, 0.06);
+  border-color: rgba(0, 200, 83, 0.15);
+}
+
+[data-light-mode="true"] .tip-box__text {
+  color: #006633;
+}
+
+/* ─── Progress ─── */
+[data-light-mode="true"] .progress {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.04);
+}
+
+/* ─── Game HUD ─── */
+[data-light-mode="true"] .game-hud {
+  background: rgba(255, 255, 255, 0.88);
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(20px);
+}
+
+[data-light-mode="true"] .game-hud__title {
+  color: #1a1a2e;
+  text-shadow: none;
+}
+
+[data-light-mode="true"] .game-hud__round {
+  color: #7a7a98;
+}
+
+[data-light-mode="true"] .game-footer {
+  background: rgba(255, 255, 255, 0.88);
+  border-top-color: rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(20px);
+}
+
+[data-light-mode="true"] .game-footer__hint {
+  color: #006633;
+}
+
+/* ─── Player Cards ─── */
+[data-light-mode="true"] .player-card__name {
+  color: #1a1a2e;
+}
+
+[data-light-mode="true"] .player-card__score {
+  color: #006633;
+}
+
+[data-light-mode="true"] .player-card__status {
+  color: #7a7a98;
+}
+
+/* ─── Scoreboard ─── */
+[data-light-mode="true"] .scoreboard {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-light-mode="true"] .scoreboard-row {
+  border-bottom-color: rgba(0, 0, 0, 0.04);
+}
+
+/* ─── Settings ─── */
+[data-light-mode="true"] .settings-modal__content {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #1a1a2e;
+}
+
+[data-light-mode="true"] .settings-label {
+  color: #3a3a50;
+}
+
+[data-light-mode="true"] .settings-select {
+  background: #ffffff;
+  color: #1a1a2e;
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+/* ─── Chat (Light) ─── */
+[data-light-mode="true"] .chat-container {
+  background: rgba(255, 255, 255, 0.97);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-light-mode="true"] .chat-msg { color: #3a3a50; }
+
+[data-light-mode="true"] .chat-input {
+  background: rgba(0, 0, 0, 0.04);
+  color: #1a1a2e;
+}
+
+[data-light-mode="true"] .chat-input-wrap {
+  border-top-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-light-mode="true"] .chat-toggle {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+/* ─── Emoji Bar (Light) ─── */
+[data-light-mode="true"] .emoji-bar {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-light-mode="true"] .emoji-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* ─── Avatar Picker (Light) ─── */
+[data-light-mode="true"] .avatar-picker {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-light-mode="true"] .avatar-picker-backdrop {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+[data-light-mode="true"] .avatar-picker__header h2 {
+  color: #1a1a2e;
+}
+
+[data-light-mode="true"] .avatar-tab {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.06);
+  color: #5a5a78;
+}
+
+[data-light-mode="true"] .avatar-tab--active {
+  background: rgba(0, 200, 83, 0.08);
+  border-color: #00C853;
+  color: #006633;
+}
+
+[data-light-mode="true"] .avatar-option {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-light-mode="true"] .avatar-option:hover {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+[data-light-mode="true"] .avatar-option__name,
+[data-light-mode="true"] .avatar-option__desc {
+  color: #3a3a50;
+}
+
+[data-light-mode="true"] .avatar-select-btn {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-light-mode="true"] .avatar-select-btn__label,
+[data-light-mode="true"] .avatar-select-btn__name {
+  color: #3a3a50;
+}
+
+/* ─── How-To Steps (Light) ─── */
+[data-light-mode="true"] .how-step {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-light-mode="true"] .how-step__text {
+  color: #3a3a50;
+}
+
+/* ─── Countdown (Light) ─── */
+[data-light-mode="true"] .countdown-overlay {
+  background: rgba(255, 255, 255, 0.92);
+}
+
+[data-light-mode="true"] .countdown-number {
+  color: #006633;
+  text-shadow: 0 4px 24px rgba(0, 102, 51, 0.2);
+}
+
+/* ─── Pause (Light) ─── */
+[data-light-mode="true"] .pause-content {
+  background: #ffffff;
+  color: #1a1a2e;
+}
+
+/* ─── Round Intro (Light) ─── */
+[data-light-mode="true"] .round-intro {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+[data-light-mode="true"] .round-intro__card {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #1a1a2e;
+}
+
+/* ─── Boot Screen (Light) ─── */
+[data-light-mode="true"] .boot-bar {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+[data-light-mode="true"] .boot-tip {
+  color: #5a5a78;
+}
+
+[data-light-mode="true"] .boot-version {
+  color: #9e9eb8;
+}
+
+/* ─── Logo (Light) ─── */
+[data-light-mode="true"] .logo__box {
+  color: #006633;
+}
+
+[data-light-mode="true"] .logo__name {
+  color: #1a1a2e;
+}
+
+[data-light-mode="true"] .tagline {
+  color: #5a5a78;
+}
+
+/* ─── Saudi Footer (Light) ─── */
+[data-light-mode="true"] .saudi-footer {
+  color: #7a7a98;
+}
+
+/* ─── Text utilities (Light) ─── */
+[data-light-mode="true"] .text-white { color: #1a1a2e; }
+[data-light-mode="true"] .text-muted { color: #7a7a98; }
+[data-light-mode="true"] .text-accent { color: #006633; }
+
+/* ─── WYR (Light) ─── */
+[data-light-mode="true"] .wyr-title {
+  color: #e6a800;
+  text-shadow: none;
+}
+
+[data-light-mode="true"] .wyr-option {
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.12);
+}
+
+[data-light-mode="true"] .wyr-vs {
+  color: #1a1a2e;
+  text-shadow: none;
+}
+
+[data-light-mode="true"] .wyr-result--a {
+  background: rgba(255, 111, 0, 0.06);
+  border-color: rgba(255, 160, 0, 0.3);
+}
+
+[data-light-mode="true"] .wyr-result--b {
+  background: rgba(21, 101, 192, 0.06);
+  border-color: rgba(66, 165, 245, 0.3);
+}
+
+[data-light-mode="true"] .wyr-result__pct {
+  color: #e6a800;
+}
+
+/* ─── Achievement Toast (Light) ─── */
+[data-light-mode="true"] .achievement-toast {
+  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.2);
+}
+
+/* ─── Commentary Bar (Light) ─── */
+[data-light-mode="true"] .commentary-bar {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.06);
+  color: #3a3a50;
+}
+
+/* ─── Winner Showcase (Light) ─── */
+[data-light-mode="true"] .winner-showcase {
+  text-shadow: none;
+}
+
+/* ─── Scrollbar (Light) ─── */
+[data-light-mode="true"] ::-webkit-scrollbar-track {
+  background: #f0f0f4;
+}
+
+[data-light-mode="true"] ::-webkit-scrollbar-thumb {
+  background: #c8c8d8;
+}
+
+[data-light-mode="true"] ::-webkit-scrollbar-thumb:hover {
+  background: #a8a8c0;
+}
+
+/* ─── Selection (Light) ─── */
+[data-light-mode="true"] ::selection {
+  background: #00C853;
+  color: #ffffff;
+}
+
+/* ─── Focus (Light) ─── */
+[data-light-mode="true"] :focus-visible {
+  outline-color: #00C853;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ * LIGHT MODE - PER-GAME THEME VARIANTS
+ * Each game keeps identity with lightened, warm surfaces
+ * ═══════════════════════════════════════════════════════════════ */
+
+[data-light-mode="true"][data-theme="hub"] {
+  --theme-bg-primary: #f0f5f2;
+  --theme-bg-secondary: #e8efe8;
+  --theme-glow: rgba(0, 200, 83, 0.06);
+}
+
+[data-light-mode="true"][data-theme="quiplash"] {
+  --theme-bg-primary: #f2f0fa;
+  --theme-bg-secondary: #ebe8f5;
+  --theme-glow: rgba(255, 217, 61, 0.06);
+}
+
+[data-light-mode="true"][data-theme="guesspionage"] {
+  --theme-bg-primary: #eef5ef;
+  --theme-bg-secondary: #e5f0e6;
+  --theme-glow: rgba(0, 200, 83, 0.05);
+}
+
+[data-light-mode="true"][data-theme="fakinit"] {
+  --theme-bg-primary: #faf0f2;
+  --theme-bg-secondary: #f5e8ec;
+  --theme-glow: rgba(255, 107, 157, 0.06);
+}
+
+[data-light-mode="true"][data-theme="triviamurder"] {
+  --theme-bg-primary: #f5eef0;
+  --theme-bg-secondary: #efe5e8;
+  --theme-glow: rgba(255, 71, 87, 0.06);
+}
+
+[data-light-mode="true"][data-theme="fibbage"] {
+  --theme-bg-primary: #f8f4ee;
+  --theme-bg-secondary: #f2ece4;
+  --theme-glow: rgba(255, 179, 0, 0.06);
+}
+
+[data-light-mode="true"][data-theme="drawful"] {
+  --theme-bg-primary: #f2eff8;
+  --theme-bg-secondary: #eae5f2;
+  --theme-glow: rgba(165, 94, 234, 0.06);
+}
+
+[data-light-mode="true"][data-theme="tshirtwars"] {
+  --theme-bg-primary: #eef5f5;
+  --theme-bg-secondary: #e5f0f0;
+  --theme-glow: rgba(0, 210, 211, 0.06);
+}
+
+[data-light-mode="true"][data-theme="lovemonster"] {
+  --theme-bg-primary: #faeff3;
+  --theme-bg-secondary: #f5e5eb;
+  --theme-glow: rgba(255, 105, 180, 0.06);
+}
+
+[data-light-mode="true"][data-theme="inventions"] {
+  --theme-bg-primary: #f2f8ee;
+  --theme-bg-secondary: #eaf2e4;
+  --theme-glow: rgba(118, 255, 3, 0.04);
+}
+
+[data-light-mode="true"][data-theme="wouldyourather"] {
+  --theme-bg-primary: #eef2f8;
+  --theme-bg-secondary: #e5ecf2;
+  --theme-glow: rgba(68, 138, 255, 0.06);
+}
+
+[data-light-mode="true"][data-theme="whosaidit"] {
+  --theme-bg-primary: #f4eff8;
+  --theme-bg-secondary: #ede5f2;
+  --theme-glow: rgba(224, 64, 251, 0.06);
+}
+
+[data-light-mode="true"][data-theme="speedround"] {
+  --theme-bg-primary: #f8f2ee;
+  --theme-bg-secondary: #f2ece4;
+  --theme-glow: rgba(255, 171, 0, 0.06);
+}
+
+[data-light-mode="true"][data-theme="twotruths"] {
+  --theme-bg-primary: #eef8f2;
+  --theme-bg-secondary: #e5f2ea;
+  --theme-glow: rgba(29, 233, 182, 0.06);
+}
+
+[data-light-mode="true"][data-theme="splittheroom"] {
+  --theme-bg-primary: #f0eef8;
+  --theme-bg-secondary: #e8e5f2;
+  --theme-glow: rgba(124, 77, 255, 0.06);
+}
+
+[data-light-mode="true"][data-theme="emojidecode"] {
+  --theme-bg-primary: #f8f0ee;
+  --theme-bg-secondary: #f2e8e4;
+  --theme-glow: rgba(255, 109, 0, 0.06);
+}
+
+[data-light-mode="true"][data-theme="debateme"] {
+  --theme-bg-primary: #eef0f5;
+  --theme-bg-secondary: #e5e8ef;
+  --theme-glow: rgba(64, 196, 255, 0.06);
+}
+
+[data-light-mode="true"][data-theme="acrophobia"] {
+  --theme-bg-primary: #f0f5ef;
+  --theme-bg-secondary: #e8f0e5;
+  --theme-glow: rgba(178, 255, 89, 0.04);
+}
+
+[data-light-mode="true"][data-theme="victory"] {
+  --theme-bg-primary: #f8f4ee;
+  --theme-bg-secondary: #f2ece2;
+  --theme-glow: rgba(255, 215, 0, 0.08);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ * REDUCED MOTION + DARK/LIGHT
+ * ═══════════════════════════════════════════════════════════════ */
+
+@media (prefers-color-scheme: dark) {
+  [data-auto-theme="true"] {
+    --theme-bg-primary: #080810;
+    --theme-bg-secondary: #0c0c18;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-dark-mode="true"] .bg__glow,
+  [data-light-mode="true"] .bg__glow {
+    animation: none;
+  }
+}
 
 /* ─── Chat System ─── */
 .chat-container {
