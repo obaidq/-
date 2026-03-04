@@ -893,6 +893,7 @@ body{padding:0;background:#fff;color:#000;font-size:11pt}
 </div>
 <script src="coffeeKnowledgeBase.js"></script>
 <script src="troubleshooting-data.js"></script>
+<script src="newRecipes.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════════════════
 // V60 Masters — Complete App Engine (_build_app.js)
@@ -1350,6 +1351,9 @@ const D = [
   }
 ];
 
+// ─── MERGE NEW RECIPES (from newRecipes.js) ─────────────────────────────────
+if (typeof NEW_RECIPES !== 'undefined') D.push(...NEW_RECIPES);
+
 // ─── LEARN TIPS ──────────────────────────────────────────────────────────────
 const TIPS = [
   "ما تشطف الفلتر — الشطف يزيل طعم الورق ويسخّن الأداة",
@@ -1383,7 +1387,7 @@ const BADGE_DEFS = [
   { id: 'ten', icon: '\u{1F3C5}', title: '10 تحضيرات', desc: 'حضّرت 10 أكواب', check: log => log.length >= 10 },
   { id: 'fifty', icon: '\u{1F3C6}', title: '50 تحضير', desc: 'حضّرت 50 كوب — محترف!', check: log => log.length >= 50 },
   { id: 'hundred', icon: '\u{1F451}', title: '100 تحضير', desc: 'حضّرت 100 كوب — أسطورة!', check: log => log.length >= 100 },
-  { id: 'allRecipes', icon: '\u{1F30D}', title: 'كل الوصفات', desc: 'جرّبت كل 13 وصفة', check: log => { const ids = new Set(log.map(e => e.recipeId)); return ids.size >= 13; } },
+  { id: 'allRecipes', icon: '\u{1F30D}', title: 'كل الوصفات', desc: 'جرّبت كل الوصفات', check: log => { const ids = new Set(log.map(e => e.recipeId)); return ids.size >= D.length; } },
   { id: 'icedExp', icon: '\u2744\uFE0F', title: 'مستكشف المثلّج', desc: 'جرّبت كل الوصفات المثلّجة', check: log => { const icedIds = D.filter(r => r.type === 'iced').map(r => r.id); const done = new Set(log.map(e => e.recipeId)); return icedIds.every(id => done.has(id)); } },
   { id: 'fiveStar', icon: '\u2B50', title: 'خمس نجوم', desc: 'حصلت على تقييم 5 نجوم', check: log => log.some(e => e.rating === 5) },
   { id: 'streak7', icon: '\u{1F525}', title: 'أسبوع متواصل', desc: 'حضّرت 7 أيام متواصلة', check: log => {
