@@ -2531,3 +2531,20 @@
     font-size: 4rem;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+ * PER-GAME FONT FAMILIES
+ * Each game theme declares --theme-font-header and --theme-font-body
+ * in tokens.css. Apply them to headings and body text here.
+ * ═══════════════════════════════════════════════════════════════ */
+
+[data-theme] .panel__title,
+[data-theme] h2,
+[data-theme] h3 {
+  font-family: var(--theme-font-header);
+}
+
+[data-theme] .panel__body,
+[data-theme] p {
+  font-family: var(--theme-font-body);
+}
