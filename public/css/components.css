@@ -300,7 +300,7 @@
 
 .input--code {
   font-size: var(--text-4xl);
-  letter-spacing: 0.3em;
+  letter-spacing: normal;
   text-transform: uppercase;
   font-family: var(--font-display), var(--font-primary);
   padding: var(--space-5) var(--space-6);
@@ -579,7 +579,7 @@
   content: '';
   position: absolute;
   top: -10px;
-  right: -6px;
+  inset-inline-end: -6px;
   font-size: var(--text-lg);
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
 }
@@ -625,7 +625,7 @@
   font-family: var(--font-display), var(--font-primary);
   font-size: var(--text-5xl);
   font-weight: var(--font-black);
-  letter-spacing: 0.2em;
+  letter-spacing: normal;
   color: var(--color-primary-700);
   line-height: 1;
 }
@@ -743,7 +743,7 @@
 
 .game-card__body {
   padding: var(--space-5);
-  text-align: right;
+  text-align: end;
 }
 
 .game-card__title {
