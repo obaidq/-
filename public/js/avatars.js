@@ -281,6 +281,116 @@ const AvatarSystem = {
       animation: 'avatar-paint',
       borderStyle: '3px solid rgba(240,147,251,0.5)',
       glowColor: 'rgba(240,147,251,0.4)'
+    },
+    tshirtwars: {
+      label: 'حرب التيشيرتات',
+      dicebearStyle: 'fun-emoji',        // Colorful graffiti blobs
+      cssClass: 'game-avatar--tshirtwars',
+      svgFilter: 'none',
+      bgGradient: 'linear-gradient(135deg, #0D0D1A 0%, #1A1A2E 100%)',
+      animation: 'avatar-spray',
+      borderStyle: '3px solid rgba(255,23,68,0.5)',
+      glowColor: 'rgba(255,23,68,0.4)'
+    },
+    lovemonster: {
+      label: 'وحش الحب',
+      dicebearStyle: 'lorelei',          // Soft romantic portraits
+      cssClass: 'game-avatar--lovemonster',
+      svgFilter: 'none',
+      bgGradient: 'linear-gradient(135deg, #1C0A2E 0%, #2D1B4E 100%)',
+      animation: 'avatar-heartbeat',
+      borderStyle: '3px solid rgba(255,105,180,0.5)',
+      glowColor: 'rgba(255,105,180,0.4)'
+    },
+    inventions: {
+      label: 'اختراعات مجنونة',
+      dicebearStyle: 'bottts',           // Steampunk robot gears
+      cssClass: 'game-avatar--inventions',
+      svgFilter: 'none',
+      bgGradient: 'linear-gradient(135deg, #FFF8E7 0%, #F5E6C8 100%)',
+      animation: 'avatar-gear',
+      borderStyle: '3px solid rgba(205,127,50,0.5)',
+      glowColor: 'rgba(205,127,50,0.4)'
+    },
+    wouldyourather: {
+      label: 'شو تختار؟',
+      dicebearStyle: 'thumbs',           // Split decision thumbs
+      cssClass: 'game-avatar--wouldyourather',
+      svgFilter: 'none',
+      bgGradient: 'linear-gradient(135deg, #0A0E2A 0%, #141852 100%)',
+      animation: 'avatar-split',
+      borderStyle: '3px solid rgba(0,176,255,0.5)',
+      glowColor: 'rgba(0,176,255,0.4)'
+    },
+    whosaidit: {
+      label: 'مين قال؟',
+      dicebearStyle: 'adventurer',       // Mystery detective characters
+      cssClass: 'game-avatar--whosaidit',
+      svgFilter: 'none',
+      bgGradient: 'linear-gradient(135deg, #1A1A3E 0%, #2D2D5E 100%)',
+      animation: 'avatar-ink',
+      borderStyle: '3px solid rgba(156,39,176,0.5)',
+      glowColor: 'rgba(156,39,176,0.4)'
+    },
+    speedround: {
+      label: 'الجولة السريعة',
+      dicebearStyle: 'pixel-art',        // Fast retro pixel racers
+      cssClass: 'game-avatar--speedround',
+      svgFilter: 'none',
+      bgGradient: 'linear-gradient(135deg, #0D0D0D 0%, #1A1A1A 100%)',
+      animation: 'avatar-zap',
+      borderStyle: '3px solid rgba(255,235,59,0.6)',
+      glowColor: 'rgba(255,235,59,0.4)'
+    },
+    twotruths: {
+      label: 'حقيقتين وكذبة',
+      dicebearStyle: 'avataaars',        // Poker-face bluffing avatars
+      cssClass: 'game-avatar--twotruths',
+      svgFilter: 'none',
+      bgGradient: 'linear-gradient(135deg, #1A1A2E 0%, #0D0D1A 100%)',
+      animation: 'avatar-polygraph',
+      borderStyle: '3px solid rgba(76,175,80,0.5)',
+      glowColor: 'rgba(76,175,80,0.4)'
+    },
+    splittheroom: {
+      label: 'اقسم الغرفة',
+      dicebearStyle: 'shapes',           // Abstract split shapes
+      cssClass: 'game-avatar--splittheroom',
+      svgFilter: 'none',
+      bgGradient: 'linear-gradient(135deg, #1B0A2E 0%, #4A0E78 100%)',
+      animation: 'avatar-rift',
+      borderStyle: '3px solid rgba(233,30,99,0.5)',
+      glowColor: 'rgba(233,30,99,0.4)'
+    },
+    emojidecode: {
+      label: 'فكّ الإيموجي',
+      dicebearStyle: 'fun-emoji',        // Rainbow emoji faces
+      cssClass: 'game-avatar--emojidecode',
+      svgFilter: 'none',
+      bgGradient: 'linear-gradient(135deg, #0A0A1A 0%, #1A1A2E 100%)',
+      animation: 'avatar-emoji-glow',
+      borderStyle: '3px solid rgba(255,193,7,0.5)',
+      glowColor: 'rgba(255,193,7,0.4)'
+    },
+    debateme: {
+      label: 'ناظرني',
+      dicebearStyle: 'notionists',       // Formal courtroom faces
+      cssClass: 'game-avatar--debateme',
+      svgFilter: 'none',
+      bgGradient: 'linear-gradient(135deg, #2C1810 0%, #4A3728 100%)',
+      animation: 'avatar-gavel',
+      borderStyle: '3px solid rgba(121,85,72,0.6)',
+      glowColor: 'rgba(121,85,72,0.4)'
+    },
+    acrophobia: {
+      label: 'رهبة الحروف',
+      dicebearStyle: 'pixel-art',        // Typewriter pixel letters
+      cssClass: 'game-avatar--acrophobia',
+      svgFilter: 'none',
+      bgGradient: 'linear-gradient(135deg, #2D5F3A 0%, #1A472A 100%)',
+      animation: 'avatar-typewriter',
+      borderStyle: '3px solid rgba(96,125,139,0.5)',
+      glowColor: 'rgba(96,125,139,0.4)'
     }
   },
 

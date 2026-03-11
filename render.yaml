@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: abu-abed-box
+    runtime: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: PORT
+        fromService: true
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: PROFANITY_MODE
+        value: moderate

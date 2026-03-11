@@ -238,7 +238,19 @@ function sanitizeAvatarData(data) {
 function sanitizeName(name) {
   if (!name || typeof name !== 'string') return 'لاعب';
   // إزالة المحارف الخطيرة والحد الأقصى 20 حرف
-  return name.replace(/[<>&"'/\\]/g, '').trim().substring(0, 20) || 'لاعب';
+  let clean = name.replace(/[<>&"'/\\]/g, '').trim().substring(0, 20) || 'لاعب';
+  // تصفية الألفاظ البذيئة من الاسم
+  const effectiveMode = CONFIG.familyMode ? 'strict' : CONFIG.profanityMode;
+  const filterResult = filterText(clean, effectiveMode);
+  if (!filterResult.allowed) {
+    // الاسم يحتوي على ألفاظ غير لائقة - استخدم النص المفلتر أو اسم افتراضي
+    clean = filterResult.text && filterResult.text.trim().length > 0
+      ? filterResult.text
+      : 'لاعب';
+  } else {
+    clean = filterResult.text;
+  }
+  return clean || 'لاعب';
 }
 
 /**
@@ -709,7 +721,7 @@ io.on('connection', (socket) => {
       io.to(code).emit('playerAnswered', { playerId: socket.id, count: answeredCount, total: room.players.size });
       if (answeredCount >= room.players.size) {
         clearRoundTimer(room);
-        setTimeout(() => calculateGuesspionageFinalResults(room), 800);
+        setTimeout(() => showFinalRoundResults(room), 800);
       }
       return;
     }
@@ -856,7 +868,7 @@ io.on('connection', (socket) => {
       // Legacy single-drawer mode fallback
       room.gameData.drawing = drawing;
       clearRoundTimer(room);
-      startDrawfulGuessing(room);
+      presentNextDrawfulDrawing(room);
     } else if (room.currentGame === 'tshirtwars' && room.gameData.tkoPhase === 'drawing') {
       // Tee K.O.: Store drawing for this player
       if (room.gameData.playerDrawings[socket.id]) return; // already submitted
@@ -882,7 +894,7 @@ io.on('connection', (socket) => {
       // other drawing games
       player.currentAnswer = drawing;
       player._isDrawing = true;
-      checkAllAnswered(room);
+      allPlayersAnswered(room);
     }
   });
 
@@ -1260,11 +1272,24 @@ io.on('connection', (socket) => {
         }
       }
 
+      // تعليق مغادرة اللاعب
+      const leaveComment = CONFIG.commentaryEnabled
+        ? generateCommentary('lobby', 'playerLeave', { name: disconnectedPlayer ? disconnectedPlayer.name : 'لاعب' })
+        : null;
+
       // إبلاغ الباقين
       io.to(code).emit('playerLeft', {
         players: getPlayerList(room),
-        leftPlayer: disconnectedPlayer ? disconnectedPlayer.name : 'لاعب'
+        leftPlayer: disconnectedPlayer ? disconnectedPlayer.name : 'لاعب',
+        commentary: leaveComment
       });
+
+      // تعليق قلة اللاعبين (أقل من 3 لاعبين)
+      const activePlayers = Array.from(room.players.values()).filter(p => !p.isAudience);
+      if (CONFIG.commentaryEnabled && activePlayers.length < 3 && activePlayers.length > 0) {
+        const fewComment = generateCommentary('lobby', 'fewPlayers', { count: activePlayers.length });
+        if (fewComment) io.to(code).emit('commentary', fewComment);
+      }
 
       // لو اللعبة شغالة والتحقق من الإجابات
       if (room.state === 'playing') {
@@ -1597,6 +1622,12 @@ function setRoundTimer(room, timeLimit, onTimeout) {
   room.roundTimer = setTimeout(() => {
     console.log('⏰ انتهى الوقت! - غرفة:', room.code);
 
+    // تعليق انتهاء الوقت
+    if (CONFIG.commentaryEnabled) {
+      const c = generateCommentary('timer', 'timeout');
+      if (c) io.to(room.code).emit('commentary', c);
+    }
+
     // تقديم تلقائي للاعبين اللي ما أجابوا
     // For Quiplash: use safety quip instead of __timeout__ if available
     const safetyQuips = room.gameData && room.gameData.safetyQuips;
@@ -1634,6 +1665,12 @@ function setVoteTimer(room, timeLimit, onTimeout) {
   room.roundTimer = setTimeout(() => {
     console.log('⏰ انتهى وقت التصويت! - غرفة:', room.code);
 
+    // تعليق انتهاء وقت التصويت
+    if (CONFIG.commentaryEnabled) {
+      const c = generateCommentary('timer', 'timeout');
+      if (c) io.to(room.code).emit('commentary', c);
+    }
+
     // تقديم تلقائي للاعبين اللي ما صوتوا
     const voters = getEligibleVoters(room);
     voters.forEach(p => {
@@ -1657,7 +1694,7 @@ function setVoteTimer(room, timeLimit, onTimeout) {
  * Real Jackbox mechanics:
  * - Rounds 1 & 2: Each matchup pair gets a unique prompt
  * - Round 3 (Thriplash): ONE prompt for ALL players, everyone writes, everyone votes
- * - Points per vote: R1=100, R2=200, R3=300
+ * - Points per vote: R1=100, R2=150, R3=200
  * - QUIPLASH = unanimous vote = bonus points
  */
 function startQuiplashRound(room) {
@@ -1715,6 +1752,11 @@ function startQuiplashRound(room) {
 
   const timeLimit = 60;
 
+  // تعليق عرض سؤال رد سريع
+  const questionShowComment = CONFIG.commentaryEnabled
+    ? generateCommentary('quiplash', 'questionShow', { round: room.currentRound + 1 })
+    : null;
+
   // Send each player THEIR matchup's unique prompt
   room.players.forEach((p, id) => {
     const myMatchup = room.gameData.playerMatchupMap.get(id);
@@ -1726,7 +1768,8 @@ function startQuiplashRound(room) {
       maxRounds: room.maxRounds,
       question,
       timeLimit,
-      safetyQuips: safetyQuips.slice(0, 2)
+      safetyQuips: safetyQuips.slice(0, 2),
+      commentary: questionShowComment
     });
   });
 
@@ -1753,13 +1796,18 @@ function startQuiplashThriplash(room) {
 
   const timeLimit = 60;
 
+  const thriplashShowComment = CONFIG.commentaryEnabled
+    ? generateCommentary('quiplash', 'questionShow', { round: room.currentRound + 1, thriplash: true })
+    : null;
+
   io.to(room.code).emit('quiplashQuestion', {
     round: room.currentRound + 1,
     maxRounds: room.maxRounds,
     question,
     timeLimit,
     safetyQuips: safetyQuips.slice(0, 2),
-    thriplash: true
+    thriplash: true,
+    commentary: thriplashShowComment
   });
 
   setRoundTimer(room, timeLimit, () => {
@@ -1843,6 +1891,10 @@ function startQuiplashThriplashVoting(room) {
 
   const timeLimit = 30;
 
+  const thriplashVotingComment = CONFIG.commentaryEnabled
+    ? generateCommentary('quiplash', 'votingStart', { thriplash: true })
+    : null;
+
   io.to(room.code).emit('quiplashThriplashVoting', {
     round: room.currentRound + 1,
     question: room.gameData.question,
@@ -1850,7 +1902,8 @@ function startQuiplashThriplashVoting(room) {
       playerId: a.playerId,
       answer: a.answer
     }))),
-    timeLimit
+    timeLimit,
+    commentary: thriplashVotingComment
   });
 
   setVoteTimer(room, timeLimit, () => {
@@ -1888,13 +1941,18 @@ function presentQuiplashMatchup(room) {
 
   const timeLimit = 30;
 
+  const votingStartComment = CONFIG.commentaryEnabled
+    ? generateCommentary('quiplash', 'votingStart', { matchup: idx + 1, total: votingMatchups.length })
+    : null;
+
   io.to(room.code).emit('quiplashVoting', {
     round: room.currentRound + 1,
     question: matchupData.question, // Each matchup has its own question!
     answers: shuffle(answers),
     matchupNumber: idx + 1,
     totalMatchups: votingMatchups.length,
-    timeLimit
+    timeLimit,
+    commentary: votingStartComment
   });
 
   // مؤقت التصويت
@@ -3153,12 +3211,17 @@ function startFibbageRound(room) {
     if (question.q.includes(key)) { category = val; break; }
   }
 
+  const fibbageWriteComment = CONFIG.commentaryEnabled
+    ? generateCommentary('fibbage', 'writeYourLie', { round: room.currentRound + 1 })
+    : null;
+
   io.to(room.code).emit('fibbageQuestion', {
     round: room.currentRound + 1,
     maxRounds: room.maxRounds,
     question: question.q,
     category,
-    timeLimit
+    timeLimit,
+    commentary: fibbageWriteComment
   });
 
   // مؤقت كتابة الإجابات الكاذبة
@@ -3279,6 +3342,19 @@ function calculateFibbageResults(room) {
     });
   });
 
+  // تعليق على نتائج كشف الكذاب
+  let fibbageResultComment = null;
+  if (CONFIG.commentaryEnabled) {
+    const totalFooled = playerResults.reduce((sum, r) => sum + (r.fooledCount || 0), 0);
+    const totalCorrect = playerResults.filter(r => r.guessedCorrect).length;
+    if (totalFooled === 0) {
+      fibbageResultComment = generateCommentary('fibbage', 'nobodyFooled');
+    } else if (totalFooled >= room.players.size - 1) {
+      const topFooler = playerResults.reduce((best, r) => (r.fooledCount > (best.fooledCount || 0) ? r : best), {});
+      fibbageResultComment = generateCommentary('fibbage', 'manyFooled', { name: topFooler.playerName, count: totalFooled });
+    }
+  }
+
   io.to(room.code).emit('roundResults', {
     game: 'fibbage',
     round: room.currentRound + 1,
@@ -3294,7 +3370,8 @@ function calculateFibbageResults(room) {
     })),
     playerResults,
     players: getPlayerList(room),
-    isLastRound: room.currentRound >= room.maxRounds - 1
+    isLastRound: room.currentRound >= room.maxRounds - 1,
+    commentary: fibbageResultComment
   });
 }
 
@@ -3327,6 +3404,11 @@ function startDrawfulRound(room) {
 
     const timeLimit = 90;
 
+    // تعليق بدء مرحلة الرسم
+    const drawfulTurnComment = CONFIG.commentaryEnabled
+      ? generateCommentary('drawful', 'yourTurn', { round: room.currentRound + 1 })
+      : null;
+
     // Send each player their unique prompt - ALL draw simultaneously
     playerIds.forEach(pid => {
       io.to(pid).emit('drawfulYourTurn', {
@@ -3334,7 +3416,8 @@ function startDrawfulRound(room) {
         maxRounds: room.maxRounds,
         prompt: room.gameData.playerPrompts[pid],
         timeLimit,
-        allDraw: true // flag: everyone draws, no waiting screen
+        allDraw: true, // flag: everyone draws, no waiting screen
+        commentary: drawfulTurnComment
       });
     });
 
@@ -3542,6 +3625,18 @@ function calculateDrawfulResults(room) {
   const idx = room.gameData.presentationIndex;
   const hasMore = idx + 1 < order.length;
 
+  // تعليق على نتائج الرسمة
+  let drawfulResultComment = null;
+  if (CONFIG.commentaryEnabled) {
+    const correctGuessers = playerResults.filter(r => r.guessedCorrect);
+    const nonDrawerResults = playerResults.filter(r => !r.isDrawer);
+    if (correctGuessers.length === 0 && nonDrawerResults.length > 0) {
+      drawfulResultComment = generateCommentary('drawful', 'nobodyGuessed', { drawerName: drawer ? drawer.name : 'الرسام' });
+    } else if (correctGuessers.length >= nonDrawerResults.length * 0.7 && nonDrawerResults.length > 0) {
+      drawfulResultComment = generateCommentary('drawful', 'manyGuessed', { drawerName: drawer ? drawer.name : 'الرسام', count: correctGuessers.length });
+    }
+  }
+
   // Show per-drawing results
   io.to(room.code).emit('drawfulDrawingResult', {
     game: 'drawful',
@@ -3561,7 +3656,8 @@ function calculateDrawfulResults(room) {
     presentNum: idx + 1,
     presentTotal: order.length,
     players: getPlayerList(room),
-    isLastRound: room.currentRound >= room.maxRounds - 1
+    isLastRound: room.currentRound >= room.maxRounds - 1,
+    commentary: drawfulResultComment
   });
 
   // Auto-advance to next drawing after delay
@@ -3642,11 +3738,20 @@ function startTkoDrawing(room) {
 
   const timeLimit = 90;
 
-  io.to(room.code).emit('tshirtWarsDraw', {
-    round: room.currentRound + 1,
-    maxRounds: room.maxRounds,
-    timeLimit,
-    phase: 'drawing'
+  // Send each player a random draw prompt as inspiration for their t-shirt design
+  const drawPrompts = content.tshirtwars.drawPrompts || [];
+  const playerIds = Array.from(room.players.keys());
+  playerIds.forEach(id => {
+    const prompt = drawPrompts.length > 0
+      ? drawPrompts[Math.floor(Math.random() * drawPrompts.length)]
+      : null;
+    io.to(id).emit('tshirtWarsDraw', {
+      round: room.currentRound + 1,
+      maxRounds: room.maxRounds,
+      timeLimit,
+      phase: 'drawing',
+      drawPrompt: prompt
+    });
   });
 
   // Timer: after time, collect whatever drawings exist
@@ -3904,10 +4009,38 @@ function startLoveMonsterRound(room) {
 
   const timeLimit = room._extendedTimers ? 60 : 45;
 
+  // Assign a random powerup to one random player at the start of each round
+  const powerups = content.lovemonster.powerups || [];
+  let roundPowerup = null;
+  if (powerups.length > 0 && playerIds.length > 0) {
+    const powerupPlayer = playerIds[Math.floor(Math.random() * playerIds.length)];
+    const powerup = powerups[Math.floor(Math.random() * powerups.length)];
+    roundPowerup = { playerId: powerupPlayer, ...powerup };
+    room.gameData.currentPowerup = roundPowerup;
+
+    // Apply powerup effect: store for results phase
+    if (powerup.name === 'سحر العيون' || powerup.name === 'مرآة') {
+      // These reveal who picked/messaged the player - applied during results
+      room.gameData.powerupReveal = powerupPlayer;
+    } else if (powerup.name === 'كيوبيد') {
+      // Extra pick - player can pick two people this round
+      room.gameData.extraPick = powerupPlayer;
+    } else if (powerup.name === 'قفل القلب') {
+      // Protected from cancel - their match cannot be nullified
+      room.gameData.protectedPlayer = powerupPlayer;
+    }
+    // 'قلب مكسور' effect is passive info - shown in results
+  }
+
   // Each player picks who to "date" + sees their monster identity
   playerIds.forEach(id => {
     const others = playerIds.filter(pid => pid !== id);
     const myMonster = room.gameData.monsterAssignments[id];
+    const myPowerup = (roundPowerup && roundPowerup.playerId === id) ? {
+      name: roundPowerup.name,
+      icon: roundPowerup.icon,
+      desc: roundPowerup.desc
+    } : null;
 
     io.to(id).emit('loveMonsterPick', {
       round: room.currentRound + 1,
@@ -3921,6 +4054,8 @@ function startLoveMonsterRound(room) {
         };
       }),
       myMonster,
+      myPowerup,
+      hasExtraPick: room.gameData.extraPick === id,
       timeLimit,
       messages: content.lovemonster.messages
     });
@@ -5347,6 +5482,36 @@ function sendRoundResults(room, extraData = {}) {
   };
   if (CONFIG.commentaryEnabled && !resultData.commentary) {
     resultData.commentary = generateResultCommentary(room.currentGame, resultData);
+  }
+
+  // تعليقات تغيّر الترتيب: comeback و newLeader
+  if (CONFIG.commentaryEnabled && resultData.players && resultData.players.length >= 2) {
+    const sorted = [...resultData.players].sort((a, b) => b.score - a.score);
+
+    // results.newLeader - تغيّر المتصدر
+    const prevLeaderId = room._previousLeaderId || null;
+    const currentLeader = sorted[0];
+    if (prevLeaderId && currentLeader && currentLeader.id !== prevLeaderId) {
+      const newLeaderComment = generateCommentary('results', 'newLeader', { name: currentLeader.name });
+      if (newLeaderComment) resultData.newLeaderCommentary = newLeaderComment;
+    }
+    if (currentLeader) room._previousLeaderId = currentLeader.id;
+
+    // results.comeback - لاعب قفز مرتبتين أو أكثر
+    if (room._previousRankings) {
+      for (const player of sorted) {
+        const prevRank = room._previousRankings.get(player.id);
+        const currentRank = sorted.indexOf(player);
+        if (prevRank !== undefined && prevRank - currentRank >= 2) {
+          const comebackComment = generateCommentary('results', 'comeback', { name: player.name, jumped: prevRank - currentRank });
+          if (comebackComment) resultData.comebackCommentary = comebackComment;
+          break; // تعليق واحد فقط لأكبر قفزة
+        }
+      }
+    }
+    // تحديث الترتيب السابق
+    room._previousRankings = new Map();
+    sorted.forEach((p, idx) => room._previousRankings.set(p.id, idx));
   }
 
   // إضافة تعليق انتقالي بين الجولات
