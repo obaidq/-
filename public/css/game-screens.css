@@ -1360,13 +1360,13 @@
   animation: bubble-pop 0.4s cubic-bezier(0.34,1.56,0.64,1);
 }
 .speech-bubble::after {
-  content: ''; position: absolute; bottom: -22px; left: 40px;
+  content: ''; position: absolute; bottom: -22px; inset-inline-start: 40px;
   width: 0; height: 0;
   border-left: 16px solid transparent; border-right: 16px solid transparent;
   border-top: 22px solid #fff;
 }
 .speech-bubble::before {
-  content: ''; position: absolute; bottom: -28px; left: 36px;
+  content: ''; position: absolute; bottom: -28px; inset-inline-start: 36px;
   width: 0; height: 0;
   border-left: 20px solid transparent; border-right: 20px solid transparent;
   border-top: 28px solid #000;
@@ -1406,7 +1406,7 @@
 .vs-card__text { font-size: 24px; font-weight: 900; color: #000; text-align: center; }
 .vs-card__author { font-size: 14px; color: #888; text-align: center; margin-top: 8px; }
 .vs-card__after { /* tail */
-  content: ''; position: absolute; bottom: -20px; left: 30px;
+  content: ''; position: absolute; bottom: -20px; inset-inline-start: 30px;
   border-left: 12px solid transparent; border-right: 12px solid transparent;
   border-top: 20px solid #fff;
 }
@@ -1770,7 +1770,7 @@
 
 /* ─── Achievement Toast ─── */
 .achievement-container {
-  position: fixed; top: 80px; right: 12px; z-index: 10000;
+  position: fixed; top: 80px; inset-inline-end: 12px; z-index: 10000;
   display: flex; flex-direction: column; gap: 8px;
 }
 .achievement-toast {
@@ -1900,8 +1900,8 @@
  * ═══════════════════════════════════════════════════════════════ */
 
 /* ─── Shared Result Row ─── */
-.result-row { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:rgba(255,255,255,0.05); border-radius:12px; border-right:4px solid transparent; }
-.result-row--top { border-right-color:#D4AF37; background:rgba(212,175,55,0.08); }
+.result-row { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:rgba(255,255,255,0.05); border-radius:12px; border-inline-end:4px solid transparent; }
+.result-row--top { border-inline-end-color:#D4AF37; background:rgba(212,175,55,0.08); }
 
 /* ─── Would You Rather ─── */
 .wyr-results-card { max-width:500px; width:100%; margin:0 auto 16px; }
@@ -1911,7 +1911,7 @@
 .wyr-bar--a { background:linear-gradient(135deg, #00B0FF, #0091EA); color:#fff; }
 .wyr-bar--b { background:linear-gradient(135deg, #FF6D00, #E65100); color:#fff; }
 .wyr-bar__label { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
-.wyr-bar__pct { flex-shrink:0; margin-right:8px; }
+.wyr-bar__pct { flex-shrink:0; margin-inline-end:8px; }
 
 /* ─── Who Said It ─── */
 .wsi-reveal-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; max-width:600px; margin:0 auto; }
@@ -1926,12 +1926,12 @@
 .speed-results__answer { font-size:24px; font-weight:900; color:#00E676; margin-bottom:16px; }
 .speed-results__ranking { display:flex; flex-direction:column; gap:8px; max-width:450px; width:100%; margin:0 auto; }
 .speed-results__row { display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:10px; background:rgba(255,255,255,0.05); }
-.speed-results__row--correct { border-right:3px solid #00E676; }
+.speed-results__row--correct { border-inline-end:3px solid #00E676; }
 .speed-results__row--wrong { opacity:0.5; }
 .speed-results__place { font-size:20px; min-width:28px; text-align:center; }
 .speed-results__name { font-weight:700; flex:1; }
 .speed-results__ans { flex-shrink:0; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.speed-results__pts { color:#D4AF37; font-weight:900; min-width:50px; text-align:left; }
+.speed-results__pts { color:#D4AF37; font-weight:900; min-width:50px; text-align:start; }
 
 /* ─── Emoji Decode ─── */
 .emoji-results { text-align:center; margin-bottom:16px; }
@@ -1943,7 +1943,7 @@
 .tt-results { max-width:450px; width:100%; margin:0 auto 16px; text-align:center; }
 .tt-featured-name { font-size:20px; font-weight:900; color:#D4AF37; margin-bottom:12px; }
 .tt-statements { display:flex; flex-direction:column; gap:8px; }
-.tt-statement { padding:14px 18px; border-radius:12px; display:flex; align-items:center; gap:12px; text-align:right; }
+.tt-statement { padding:14px 18px; border-radius:12px; display:flex; align-items:center; gap:12px; text-align:end; }
 .tt-statement--truth { background:rgba(76,175,80,0.12); border:2px solid rgba(76,175,80,0.3); }
 .tt-statement--lie { background:rgba(244,67,54,0.12); border:2px solid rgba(244,67,54,0.5); animation:tt-lie-reveal 0.6s ease-out; }
 .tt-statement__icon { font-size:14px; font-weight:900; flex-shrink:0; min-width:70px; }
@@ -1977,11 +1977,11 @@
 .acro-results { text-align:center; margin-bottom:16px; }
 .acro-results__letters { font-size:48px; font-weight:900; color:#607D8B; font-family:'Bangers',sans-serif; margin-bottom:4px; text-shadow:2px 2px 0 rgba(0,0,0,0.3); }
 .acro-results__category { font-size:14px; color:rgba(96,125,139,0.7); margin-bottom:16px; }
-.acro-result-row { display:flex; justify-content:space-between; align-items:flex-start; padding:12px 16px; background:rgba(255,255,255,0.05); border-radius:12px; border-right:4px solid transparent; }
-.acro-result-row--winner { border-right-color:#D4AF37; background:rgba(212,175,55,0.08); }
+.acro-result-row { display:flex; justify-content:space-between; align-items:flex-start; padding:12px 16px; background:rgba(255,255,255,0.05); border-radius:12px; border-inline-end:4px solid transparent; }
+.acro-result-row--winner { border-inline-end-color:#D4AF37; background:rgba(212,175,55,0.08); }
 .acro-result-row__main { flex:1; }
 .acro-result-row__text { font-size:14px; color:rgba(255,255,255,0.6); margin-top:4px; font-style:italic; }
-.acro-result-row__score { text-align:left; flex-shrink:0; margin-right:12px; }
+.acro-result-row__score { text-align:start; flex-shrink:0; margin-inline-end:12px; }
 .acro-result-row__pts { color:#D4AF37; font-weight:900; }
 
 
@@ -2427,7 +2427,7 @@
 .conn-badge {
   position: fixed;
   bottom: 12px;
-  right: 12px;
+  inset-inline-end: 12px;
   z-index: 9998;
   display: flex;
   align-items: center;
