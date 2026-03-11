@@ -1,0 +1,38 @@
+{
+  "project_goal": "Abu Abed Box — Saudi Arabic multiplayer party game platform with 17 games, Node.js + Express + Socket.IO, vanilla JS/CSS client",
+  "session_assumptions": [
+    "Target audience: Saudi Arabian young adults (18-35) at group gatherings",
+    "Stack: Node.js 18+, Express 4, Socket.IO 4, vanilla JS, CSS3, no frameworks",
+    "All UI Arabic-first, RTL layout, mobile-controller + TV-display pattern",
+    "No new npm dependencies",
+    "Design Bible v1.0 defines all 17 game palettes, typography, moods, cultural elements",
+    "Existing codebase: ~200KB server.js, full client SPA, 6 working games",
+    "Deployment: Render.com / Railway free tier initially",
+    "Legal: inspired-by Jackbox function, original expression throughout"
+  ],
+  "recommended_build_order": [
+    "1. Fix 8 Guesspionage bugs in server.js",
+    "2. Implement Quiplash CSS component library (.ql-* classes)",
+    "3. Build split-screen voting UI + vote stacking bars",
+    "4. Implement staged reveal sequence with gauge animation",
+    "5. Add safety quip system (server + client + content)",
+    "6. Expand ar-SA.json with 100+ questions + commentary",
+    "7. Build Web Audio API synthesizer for UI SFX",
+    "8. Implement round interstitials and game flow transitions",
+    "9. Build audience live polling for Guesspionage",
+    "10. Add host streaming controls panel",
+    "11. Create SVG pattern library (Al Sadu, geometric, mashrabiya)",
+    "12. Commission external visual assets from briefs",
+    "13. Commission external audio assets from specs",
+    "14. Create deployment configs (Dockerfile, render.yaml)",
+    "15. Build remaining 11 game UIs",
+    "16. Integration testing"
+  ],
+  "first_5_actions": [
+    "Fix bugs 1-4: Guesspionage scoring, player threshold, round count, maxRounds",
+    "Fix bugs 5-8: slider stepper, extended timers, audience, gauge animation",
+    "Implement .ql-* CSS components (split-screen, speech bubbles, vote bars, QUIPLASH overlay)",
+    "Build staged reveal sequence with timed beats and gauge needle",
+    "Expand ar-SA.json with 60+ questions, safety quips, commentary lines"
+  ]
+}
