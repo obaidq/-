@@ -709,7 +709,7 @@ io.on('connection', (socket) => {
       io.to(code).emit('playerAnswered', { playerId: socket.id, count: answeredCount, total: room.players.size });
       if (answeredCount >= room.players.size) {
         clearRoundTimer(room);
-        setTimeout(() => calculateGuesspionageFinalResults(room), 800);
+        setTimeout(() => showFinalRoundResults(room), 800);
       }
       return;
     }
@@ -856,7 +856,7 @@ io.on('connection', (socket) => {
       // Legacy single-drawer mode fallback
       room.gameData.drawing = drawing;
       clearRoundTimer(room);
-      startDrawfulGuessing(room);
+      presentNextDrawfulDrawing(room);
     } else if (room.currentGame === 'tshirtwars' && room.gameData.tkoPhase === 'drawing') {
       // Tee K.O.: Store drawing for this player
       if (room.gameData.playerDrawings[socket.id]) return; // already submitted
@@ -882,7 +882,7 @@ io.on('connection', (socket) => {
       // other drawing games
       player.currentAnswer = drawing;
       player._isDrawing = true;
-      checkAllAnswered(room);
+      allPlayersAnswered(room);
     }
   });
 
@@ -1657,7 +1657,7 @@ function setVoteTimer(room, timeLimit, onTimeout) {
  * Real Jackbox mechanics:
  * - Rounds 1 & 2: Each matchup pair gets a unique prompt
  * - Round 3 (Thriplash): ONE prompt for ALL players, everyone writes, everyone votes
- * - Points per vote: R1=100, R2=200, R3=300
+ * - Points per vote: R1=100, R2=150, R3=200
  * - QUIPLASH = unanimous vote = bonus points
  */
 function startQuiplashRound(room) {
@@ -3642,11 +3642,20 @@ function startTkoDrawing(room) {
 
   const timeLimit = 90;
 
-  io.to(room.code).emit('tshirtWarsDraw', {
-    round: room.currentRound + 1,
-    maxRounds: room.maxRounds,
-    timeLimit,
-    phase: 'drawing'
+  // Send each player a random draw prompt as inspiration for their t-shirt design
+  const drawPrompts = content.tshirtwars.drawPrompts || [];
+  const playerIds = Array.from(room.players.keys());
+  playerIds.forEach(id => {
+    const prompt = drawPrompts.length > 0
+      ? drawPrompts[Math.floor(Math.random() * drawPrompts.length)]
+      : null;
+    io.to(id).emit('tshirtWarsDraw', {
+      round: room.currentRound + 1,
+      maxRounds: room.maxRounds,
+      timeLimit,
+      phase: 'drawing',
+      drawPrompt: prompt
+    });
   });
 
   // Timer: after time, collect whatever drawings exist
@@ -3904,10 +3913,38 @@ function startLoveMonsterRound(room) {
 
   const timeLimit = room._extendedTimers ? 60 : 45;
 
+  // Assign a random powerup to one random player at the start of each round
+  const powerups = content.lovemonster.powerups || [];
+  let roundPowerup = null;
+  if (powerups.length > 0 && playerIds.length > 0) {
+    const powerupPlayer = playerIds[Math.floor(Math.random() * playerIds.length)];
+    const powerup = powerups[Math.floor(Math.random() * powerups.length)];
+    roundPowerup = { playerId: powerupPlayer, ...powerup };
+    room.gameData.currentPowerup = roundPowerup;
+
+    // Apply powerup effect: store for results phase
+    if (powerup.name === 'سحر العيون' || powerup.name === 'مرآة') {
+      // These reveal who picked/messaged the player - applied during results
+      room.gameData.powerupReveal = powerupPlayer;
+    } else if (powerup.name === 'كيوبيد') {
+      // Extra pick - player can pick two people this round
+      room.gameData.extraPick = powerupPlayer;
+    } else if (powerup.name === 'قفل القلب') {
+      // Protected from cancel - their match cannot be nullified
+      room.gameData.protectedPlayer = powerupPlayer;
+    }
+    // 'قلب مكسور' effect is passive info - shown in results
+  }
+
   // Each player picks who to "date" + sees their monster identity
   playerIds.forEach(id => {
     const others = playerIds.filter(pid => pid !== id);
     const myMonster = room.gameData.monsterAssignments[id];
+    const myPowerup = (roundPowerup && roundPowerup.playerId === id) ? {
+      name: roundPowerup.name,
+      icon: roundPowerup.icon,
+      desc: roundPowerup.desc
+    } : null;
 
     io.to(id).emit('loveMonsterPick', {
       round: room.currentRound + 1,
@@ -3921,6 +3958,8 @@ function startLoveMonsterRound(room) {
         };
       }),
       myMonster,
+      myPowerup,
+      hasExtraPick: room.gameData.extraPick === id,
       timeLimit,
       messages: content.lovemonster.messages
     });
