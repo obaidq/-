@@ -216,6 +216,7 @@ const App = {
     } catch (e) { /* sessionStorage not available */ }
 
     this.setupSocketEvents();
+    this._setupOfflineDetection();
 
     // تهيئة نظام الصوت
     if (typeof AudioEngine !== 'undefined') {
@@ -4383,38 +4384,109 @@ const App = {
   // مؤشر حالة الاتصال
   // ═══════════════════════════════════════════════════════════════
 
+  // ── Offline detection ──
+  _setupOfflineDetection() {
+    window.addEventListener('online', () => {
+      this._isOffline = false;
+      if (this._connectionState !== 'connected') {
+        this._updateConnectionState('reconnecting');
+      }
+    });
+    window.addEventListener('offline', () => {
+      this._isOffline = true;
+      this._updateConnectionState('offline');
+    });
+  },
+
   _updateConnectionState(state) {
+    const prev = this._connectionState;
     this._connectionState = state;
+
+    // ── Small indicator badge (always present) ──
     let indicator = document.getElementById('connectionIndicator');
     if (!indicator) {
       indicator = document.createElement('div');
       indicator.id = 'connectionIndicator';
-      indicator.style.cssText = 'position:fixed;bottom:12px;right:12px;z-index:9999;display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;pointer-events:none;transition:all 0.3s';
+      indicator.className = 'conn-badge';
       document.body.appendChild(indicator);
     }
+
+    // ── Full-screen reconnect overlay ──
+    let overlay = document.getElementById('reconnectOverlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'reconnectOverlay';
+      overlay.className = 'reconnect-overlay';
+      overlay.innerHTML =
+        '<div class="reconnect-overlay__card">' +
+          '<div class="reconnect-overlay__icon" id="reconnectIcon">📡</div>' +
+          '<div class="reconnect-overlay__title" id="reconnectTitle">جاري إعادة الاتصال...</div>' +
+          '<div class="reconnect-overlay__sub" id="reconnectSub">لا تقفل الصفحة</div>' +
+          '<div class="reconnect-overlay__bar"><div class="reconnect-overlay__bar-fill"></div></div>' +
+          '<div class="reconnect-overlay__timer" id="reconnectTimer"></div>' +
+        '</div>';
+      document.body.appendChild(overlay);
+    }
+
     switch (state) {
       case 'connected':
-        indicator.style.background = 'rgba(0,230,118,0.2)';
-        indicator.style.color = '#00e676';
-        indicator.style.border = '1px solid rgba(0,230,118,0.4)';
+        indicator.className = 'conn-badge conn-badge--connected';
         indicator.textContent = '● متصل';
-        setTimeout(() => { indicator.style.opacity = '0'; }, 3000);
+        overlay.classList.remove('reconnect-overlay--visible');
+        if (this._reconnectStart) {
+          this._reconnectStart = null;
+          if (this._reconnectInterval) {
+            clearInterval(this._reconnectInterval);
+            this._reconnectInterval = null;
+          }
+        }
+        // Auto-fade the badge after 3s
+        setTimeout(() => {
+          if (this._connectionState === 'connected') {
+            indicator.classList.add('conn-badge--fading');
+          }
+        }, 3000);
         break;
+
       case 'disconnected':
-        indicator.style.background = 'rgba(255,68,68,0.2)';
-        indicator.style.color = '#ff4444';
-        indicator.style.border = '1px solid rgba(255,68,68,0.4)';
-        indicator.style.opacity = '1';
+        indicator.className = 'conn-badge conn-badge--disconnected';
         indicator.textContent = '● منقطع';
+        this._showReconnectOverlay('📡', 'انقطع الاتصال', 'جاري المحاولة...');
         this.showToast('انقطع الاتصال!', 'error');
         break;
+
       case 'reconnecting':
-        indicator.style.background = 'rgba(255,165,0,0.2)';
-        indicator.style.color = '#ffa500';
-        indicator.style.border = '1px solid rgba(255,165,0,0.4)';
-        indicator.style.opacity = '1';
+        indicator.className = 'conn-badge conn-badge--reconnecting';
         indicator.textContent = '● جاري إعادة الاتصال...';
+        this._showReconnectOverlay('🔄', 'جاري إعادة الاتصال...', 'لا تقفل الصفحة');
         break;
+
+      case 'offline':
+        indicator.className = 'conn-badge conn-badge--offline';
+        indicator.textContent = '● بدون إنترنت';
+        this._showReconnectOverlay('📵', 'ما فيه إنترنت!', 'وصّل الإنترنت وبنرجع تلقائي');
+        break;
+    }
+  },
+
+  _showReconnectOverlay(icon, title, sub) {
+    const overlay = document.getElementById('reconnectOverlay');
+    if (!overlay) return;
+    document.getElementById('reconnectIcon').textContent = icon;
+    document.getElementById('reconnectTitle').textContent = title;
+    document.getElementById('reconnectSub').textContent = sub;
+    overlay.classList.add('reconnect-overlay--visible');
+
+    // Start timer
+    if (!this._reconnectStart) {
+      this._reconnectStart = Date.now();
+      const timerEl = document.getElementById('reconnectTimer');
+      if (this._reconnectInterval) clearInterval(this._reconnectInterval);
+      this._reconnectInterval = setInterval(() => {
+        if (!this._reconnectStart) return;
+        const elapsed = Math.floor((Date.now() - this._reconnectStart) / 1000);
+        if (timerEl) timerEl.textContent = elapsed + ' ثانية';
+      }, 1000);
     }
   }
 };

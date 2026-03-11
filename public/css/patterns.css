@@ -1118,3 +1118,235 @@
   transition: none !important;
   animation: none !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+ * DESIGN BIBLE V1.0 - EFFECT UTILITIES
+ * Noise, Vignette, CRT, Neon, Halftone, Candlelight, Shake
+ * ═══════════════════════════════════════════════════════════════ */
+
+/* ── SVG Noise Grain Overlay ── */
+.fx-noise::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.fx-noise--heavy::before { opacity: 0.08; }
+.fx-noise--light::before { opacity: 0.03; }
+
+/* ── Radial Vignette ── */
+.fx-vignette::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.6) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.fx-vignette--heavy::after {
+  background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.75) 100%);
+}
+
+.fx-vignette--light::after {
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.4) 100%);
+}
+
+/* ── CRT Scanlines (for Guesspionage, Emoji Decode) ── */
+.fx-scanlines::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 1px,
+    rgba(0, 255, 65, 0.03) 1px,
+    rgba(0, 255, 65, 0.03) 2px
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ── Neon Glow Text ── */
+.fx-neon-cyan {
+  text-shadow: 0 0 7px #00FFFF, 0 0 10px #00FFFF, 0 0 21px #00FFFF, 0 0 42px #00FFAA;
+}
+
+.fx-neon-magenta {
+  text-shadow: 0 0 7px #FF00FF, 0 0 10px #FF00FF, 0 0 21px #FF00FF, 0 0 42px #FF00AA;
+}
+
+.fx-neon-green {
+  text-shadow: 0 0 7px #00FF41, 0 0 10px #00FF41, 0 0 21px #00FF41, 0 0 42px #00FF41;
+}
+
+.fx-neon-gold {
+  text-shadow: 0 0 7px #FFD700, 0 0 10px #FFD700, 0 0 21px #FFD700, 0 0 42px #FFB347;
+}
+
+.fx-neon-pink {
+  text-shadow: 0 0 7px #FF007F, 0 0 10px #FF007F, 0 0 21px #FF007F, 0 0 42px #FF1493;
+}
+
+/* ── Halftone Dots (for Fakin' It retro style) ── */
+.fx-halftone::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, #000 1px, transparent 1px);
+  background-size: 4px 4px;
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Candlelight Flicker (for Murder Party) ── */
+.fx-candlelight {
+  animation: fx-flicker 3s ease-in-out infinite;
+}
+
+@keyframes fx-flicker {
+  0%, 100% { opacity: 1; }
+  25%, 75% { opacity: 0.9; }
+  50% { opacity: 0.8; }
+}
+
+/* ── Screen Shake (for reveals, impacts) ── */
+.fx-shake {
+  animation: fx-shake 0.4s ease-in-out;
+}
+
+@keyframes fx-shake {
+  0%, 100% { transform: translate(0); }
+  25% { transform: translate(-2px, 2px); }
+  75% { transform: translate(2px, -2px); }
+}
+
+/* ── Speech Bubble (for Quiplash) ── */
+.fx-speech-bubble {
+  background: #FFF;
+  border-radius: 14px;
+  padding: 16px 24px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  direction: rtl;
+  position: relative;
+}
+
+.fx-speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  right: 20px;
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 12px solid #FFF;
+}
+
+/* ── Fog Particles (for Murder Party, Love Monster) ── */
+.fx-fog {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 80%, rgba(255,255,255,0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(255,255,255,0.03) 0%, transparent 50%);
+  animation: fx-fog-drift 20s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes fx-fog-drift {
+  0% { transform: translateX(-20px) translateY(10px); }
+  100% { transform: translateX(20px) translateY(-10px); }
+}
+
+/* ── Bokeh Lights (for Love Monster, Who Said It) ── */
+.fx-bokeh {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 15% 30%, rgba(255,20,147,0.08) 0%, transparent 30%),
+    radial-gradient(circle at 75% 60%, rgba(0,255,127,0.06) 0%, transparent 25%),
+    radial-gradient(circle at 50% 80%, rgba(255,215,0,0.05) 0%, transparent 35%),
+    radial-gradient(circle at 85% 15%, rgba(179,136,255,0.07) 0%, transparent 20%);
+  animation: fx-bokeh-float 15s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes fx-bokeh-float {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.05); opacity: 1; }
+}
+
+/* ── Al Sadu Pattern Border (loading bars, cultural borders) ── */
+.fx-sadu-border {
+  border-image: repeating-linear-gradient(
+    90deg,
+    #8B0000 0px, #8B0000 4px,
+    #000 4px, #000 8px,
+    #F5E6CA 8px, #F5E6CA 12px,
+    #000 12px, #000 16px,
+    #8B6914 16px, #8B6914 20px,
+    #000 20px, #000 24px
+  ) 4;
+  border-width: 4px;
+  border-style: solid;
+}
+
+/* ── Mashrabiya Frame (Islamic lattice for modals) ── */
+.fx-mashrabiya-frame {
+  border: 3px solid var(--theme-gold, #C9A96E);
+  border-radius: 16px;
+  box-shadow:
+    inset 0 0 0 2px rgba(201, 169, 110, 0.2),
+    0 0 20px rgba(201, 169, 110, 0.1);
+  position: relative;
+}
+
+/* ── Star Particles (for cosmic themes) ── */
+.fx-stars {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.6) 50%, transparent 50%),
+    radial-gradient(1px 1px at 30% 50%, rgba(255,255,255,0.4) 50%, transparent 50%),
+    radial-gradient(1px 1px at 50% 10%, rgba(255,255,255,0.5) 50%, transparent 50%),
+    radial-gradient(1px 1px at 70% 70%, rgba(255,255,255,0.3) 50%, transparent 50%),
+    radial-gradient(1px 1px at 90% 40%, rgba(255,255,255,0.5) 50%, transparent 50%),
+    radial-gradient(2px 2px at 20% 80%, rgba(255,255,255,0.7) 50%, transparent 50%),
+    radial-gradient(2px 2px at 60% 30%, rgba(255,255,255,0.6) 50%, transparent 50%),
+    radial-gradient(2px 2px at 80% 90%, rgba(255,255,255,0.4) 50%, transparent 50%);
+  animation: fx-stars-twinkle 4s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes fx-stars-twinkle {
+  0% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+/* ── Neon Grid Floor (for arcade/cosmic themes) ── */
+.fx-neon-grid {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background:
+    linear-gradient(rgba(0,229,255,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  transform: perspective(500px) rotateX(60deg);
+  transform-origin: bottom;
+  pointer-events: none;
+  z-index: 0;
+}
