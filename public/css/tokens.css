@@ -53,9 +53,17 @@
    * TYPOGRAPHY - Playful & Bold
    * ───────────────────────────────────────────────────────────── */
 
-  --font-primary: 'Rubik', 'Tajawal', sans-serif;
-  --font-display: 'Bangers', 'Black Ops One', 'Rubik', sans-serif;
-  --font-arabic: 'Tajawal', 'Rubik', sans-serif;
+  /* Design Bible Typography System */
+  --font-primary: 'Cairo', 'Tajawal', sans-serif;
+  --font-display: 'Lalezar', 'Noto Kufi Arabic', sans-serif;
+  --font-arabic: 'Cairo', 'Tajawal', sans-serif;
+  --font-headers: 'Noto Kufi Arabic', 'Cairo', sans-serif;
+  --font-labels: 'Lemonada', 'Cairo', sans-serif;
+  --font-body: 'Readex Pro', 'Cairo', sans-serif;
+  --font-numbers: 'Changa', 'Cairo', sans-serif;
+  --font-impact: 'Jomhuria', 'Lalezar', sans-serif;
+  --font-formal: 'El Messiri', 'Cairo', sans-serif;
+  --font-ui: 'Tajawal', 'Cairo', sans-serif;
 
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
@@ -254,12 +262,20 @@
  * THEME VARIABLES
  * ═══════════════════════════════════════════════════════════════ */
 :root {
-  --theme-bg-primary: #001a0e;
-  --theme-bg-secondary: #002815;
-  --theme-accent: #00e676;
+  /* Platform-level: Arabian Majlis deep navy */
+  --theme-bg-primary: #1A1A2E;
+  --theme-bg-secondary: #16213E;
+  --theme-accent: #FFB347;
+  --theme-gold: #C9A96E;
+  --theme-cream: #F5F0E8;
+  --theme-nav: #FFD700;
   --theme-text-primary: var(--color-neutral-white);
   --theme-text-secondary: var(--color-neutral-300);
   --theme-pattern: none;
+  /* Saudi cultural colors */
+  --saudi-green: #009000;
+  --saudi-gold: #FFD700;
+  --desert-sand: #F5E6CA;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -301,25 +317,26 @@
  * Each game gets a primary gradient + accent for the background
  * ═══════════════════════════════════════════════════════════════ */
 
-[data-theme="hub"]          { --theme-hue1: #001a0e; --theme-hue2: #002815; --theme-accent: #00e676; --theme-glow: rgba(0, 230, 118, 0.15); }
-[data-theme="quiplash"]     { --theme-hue1: #0a0a2e; --theme-hue2: #1a0a3e; --theme-accent: #FFD93D; --theme-glow: rgba(255, 217, 61, 0.12); }
-[data-theme="guesspionage"] { --theme-hue1: #0a1a0a; --theme-hue2: #001f0f; --theme-accent: #00ff41; --theme-glow: rgba(0, 255, 65, 0.10); }
-[data-theme="fakinit"]      { --theme-hue1: #1a0a0a; --theme-hue2: #2a0a1a; --theme-accent: #FF6B9D; --theme-glow: rgba(255, 107, 157, 0.12); }
-[data-theme="triviamurder"] { --theme-hue1: #1a0011; --theme-hue2: #0d000a; --theme-accent: #FF4757; --theme-glow: rgba(255, 71, 87, 0.15); }
-[data-theme="fibbage"]      { --theme-hue1: #1a1508; --theme-hue2: #0d0b04; --theme-accent: #FFB300; --theme-glow: rgba(255, 179, 0, 0.12); }
-[data-theme="drawful"]      { --theme-hue1: #0a0a1e; --theme-hue2: #15082a; --theme-accent: #A55EEA; --theme-glow: rgba(165, 94, 234, 0.12); }
-[data-theme="tshirtwars"]   { --theme-hue1: #001a1a; --theme-hue2: #002020; --theme-accent: #00D2D3; --theme-glow: rgba(0, 210, 211, 0.12); }
-[data-theme="lovemonster"]  { --theme-hue1: #1a050f; --theme-hue2: #200815; --theme-accent: #FF69B4; --theme-glow: rgba(255, 105, 180, 0.15); }
-[data-theme="inventions"]   { --theme-hue1: #0d1a00; --theme-hue2: #152200; --theme-accent: #76FF03; --theme-glow: rgba(118, 255, 3, 0.10); }
-[data-theme="wouldyourather"]{ --theme-hue1: #0a0f1a; --theme-hue2: #0a1520; --theme-accent: #448AFF; --theme-glow: rgba(68, 138, 255, 0.12); }
-[data-theme="whosaidit"]    { --theme-hue1: #120a1a; --theme-hue2: #1a0a20; --theme-accent: #E040FB; --theme-glow: rgba(224, 64, 251, 0.12); }
-[data-theme="speedround"]   { --theme-hue1: #1a1200; --theme-hue2: #201800; --theme-accent: #FFAB00; --theme-glow: rgba(255, 171, 0, 0.15); }
-[data-theme="twotruths"]    { --theme-hue1: #001a12; --theme-hue2: #00200a; --theme-accent: #1DE9B6; --theme-glow: rgba(29, 233, 182, 0.12); }
-[data-theme="splittheroom"] { --theme-hue1: #0a001a; --theme-hue2: #10002a; --theme-accent: #7C4DFF; --theme-glow: rgba(124, 77, 255, 0.12); }
-[data-theme="emojidecode"]  { --theme-hue1: #1a0a00; --theme-hue2: #201000; --theme-accent: #FF6D00; --theme-glow: rgba(255, 109, 0, 0.12); }
-[data-theme="debateme"]     { --theme-hue1: #0a0a1a; --theme-hue2: #0a101a; --theme-accent: #40C4FF; --theme-glow: rgba(64, 196, 255, 0.12); }
-[data-theme="acrophobia"]   { --theme-hue1: #0f1a0a; --theme-hue2: #15200a; --theme-accent: #B2FF59; --theme-glow: rgba(178, 255, 89, 0.10); }
-[data-theme="victory"]      { --theme-hue1: #1a1000; --theme-hue2: #201500; --theme-accent: #FFD700; --theme-glow: rgba(255, 215, 0, 0.20); }
+/* ── Design Bible V1.0 Per-Game Palettes ── */
+[data-theme="hub"]          { --theme-hue1: #1A1A2E; --theme-hue2: #16213E; --theme-accent: #FFB347; --theme-accent2: #C9A96E; --theme-accent3: #F5F0E8; --theme-glow: rgba(255, 179, 71, 0.15); --theme-font-header: 'Noto Kufi Arabic', sans-serif; --theme-font-body: 'Cairo', sans-serif; }
+[data-theme="quiplash"]     { --theme-hue1: #2D1B69; --theme-hue2: #1A1145; --theme-accent: #FFD700; --theme-accent2: #00E5FF; --theme-accent3: #FF4081; --theme-glow: rgba(255, 215, 0, 0.12); --theme-font-header: 'Noto Kufi Arabic', sans-serif; --theme-font-body: 'Cairo', sans-serif; }
+[data-theme="guesspionage"] { --theme-hue1: #0D1117; --theme-hue2: #1A2332; --theme-accent: #00FF41; --theme-accent2: #FF1744; --theme-accent3: #00BCD4; --theme-glow: rgba(0, 255, 65, 0.10); --theme-font-header: 'Changa', sans-serif; --theme-font-body: 'Tajawal', sans-serif; }
+[data-theme="fakinit"]      { --theme-hue1: #E07A5F; --theme-hue2: #F4D35E; --theme-accent: #42A5F5; --theme-accent2: #C62828; --theme-accent3: #FDD835; --theme-glow: rgba(66, 165, 245, 0.12); --theme-font-header: 'Lemonada', sans-serif; --theme-font-body: 'Cairo', sans-serif; }
+[data-theme="triviamurder"] { --theme-hue1: #0D0D0D; --theme-hue2: #1A1A1A; --theme-accent: #2ECC40; --theme-accent2: #CC0000; --theme-accent3: #FFB347; --theme-glow: rgba(46, 204, 64, 0.15); --theme-font-header: 'Jomhuria', sans-serif; --theme-font-body: 'Cairo', sans-serif; }
+[data-theme="fibbage"]      { --theme-hue1: #1A1A5E; --theme-hue2: #0D0D3A; --theme-accent: #FFD700; --theme-accent2: #4CAF50; --theme-accent3: #FF5722; --theme-glow: rgba(255, 215, 0, 0.12); --theme-font-header: 'Cairo', sans-serif; --theme-font-body: 'Readex Pro', sans-serif; }
+[data-theme="drawful"]      { --theme-hue1: #F5C842; --theme-hue2: #E8B830; --theme-accent: #C5A55A; --theme-accent2: #00897B; --theme-accent3: #1A1A1A; --theme-glow: rgba(197, 165, 90, 0.12); --theme-font-header: 'El Messiri', sans-serif; --theme-font-body: 'Cairo', sans-serif; }
+[data-theme="tshirtwars"]   { --theme-hue1: #0D0D1A; --theme-hue2: #1A1A2E; --theme-accent: #FF007F; --theme-accent2: #00BFFF; --theme-accent3: #FFD700; --theme-glow: rgba(255, 0, 127, 0.12); --theme-font-header: 'Noto Kufi Arabic', sans-serif; --theme-font-body: 'Changa', sans-serif; }
+[data-theme="lovemonster"]  { --theme-hue1: #1C0A2E; --theme-hue2: #2D1B4E; --theme-accent: #FF1493; --theme-accent2: #00FF7F; --theme-accent3: #FFD700; --theme-glow: rgba(255, 20, 147, 0.15); --theme-font-header: 'Lemonada', sans-serif; --theme-font-body: 'Tajawal', sans-serif; }
+[data-theme="inventions"]   { --theme-hue1: #FFF8E7; --theme-hue2: #F5E6C8; --theme-accent: #2980B9; --theme-accent2: #FF8C00; --theme-accent3: #27AE60; --theme-glow: rgba(41, 128, 185, 0.10); --theme-font-header: 'Noto Kufi Arabic', sans-serif; --theme-font-body: 'Cairo', sans-serif; }
+[data-theme="wouldyourather"]{ --theme-hue1: #0A0E2A; --theme-hue2: #141852; --theme-accent: #FF2D7B; --theme-accent2: #00E5FF; --theme-accent3: #FFD700; --theme-glow: rgba(255, 45, 123, 0.12); --theme-font-header: 'Changa', sans-serif; --theme-font-body: 'Cairo', sans-serif; }
+[data-theme="whosaidit"]    { --theme-hue1: #1A1A3E; --theme-hue2: #2D2D5E; --theme-accent: #FFB800; --theme-accent2: #00BFA5; --theme-accent3: #B388FF; --theme-glow: rgba(255, 184, 0, 0.12); --theme-font-header: 'Lemonada', sans-serif; --theme-font-body: 'Cairo', sans-serif; }
+[data-theme="speedround"]   { --theme-hue1: #0D0D0D; --theme-hue2: #1A1A1A; --theme-accent: #FF1744; --theme-accent2: #00E676; --theme-accent3: #2979FF; --theme-glow: rgba(255, 23, 68, 0.15); --theme-font-header: 'Cairo', sans-serif; --theme-font-body: 'Changa', sans-serif; }
+[data-theme="twotruths"]    { --theme-hue1: #1A1A2E; --theme-hue2: #0D0D1A; --theme-accent: #E63946; --theme-accent2: #2ECC71; --theme-accent3: #F4D35E; --theme-glow: rgba(230, 57, 70, 0.12); --theme-font-header: 'Cairo', sans-serif; --theme-font-body: 'Readex Pro', sans-serif; }
+[data-theme="splittheroom"] { --theme-hue1: #1B0A2E; --theme-hue2: #4A0E78; --theme-accent: #7B2FBE; --theme-accent2: #00CED1; --theme-accent3: #F5E6CA; --theme-glow: rgba(123, 47, 190, 0.12); --theme-font-header: 'Noto Kufi Arabic', sans-serif; --theme-font-body: 'El Messiri', sans-serif; }
+[data-theme="emojidecode"]  { --theme-hue1: #0A0A1A; --theme-hue2: #1A1A2E; --theme-accent: #FF00FF; --theme-accent2: #00FFFF; --theme-accent3: #FFE600; --theme-glow: rgba(255, 0, 255, 0.12); --theme-font-header: 'Changa', sans-serif; --theme-font-body: 'Cairo', sans-serif; }
+[data-theme="debateme"]     { --theme-hue1: #2C1810; --theme-hue2: #4A3728; --theme-accent: #C9A96E; --theme-accent2: #1B3A5C; --theme-accent3: #8B0000; --theme-glow: rgba(201, 169, 110, 0.12); --theme-font-header: 'El Messiri', sans-serif; --theme-font-body: 'Cairo', sans-serif; }
+[data-theme="acrophobia"]   { --theme-hue1: #2D5F3A; --theme-hue2: #1A472A; --theme-accent: #F5F0EB; --theme-accent2: #8B6914; --theme-accent3: #C8102E; --theme-glow: rgba(245, 240, 235, 0.10); --theme-font-header: 'Noto Kufi Arabic', sans-serif; --theme-font-body: 'Lemonada', sans-serif; }
+[data-theme="victory"]      { --theme-hue1: #1A1A2E; --theme-hue2: #16213E; --theme-accent: #FFD700; --theme-accent2: #C9A96E; --theme-accent3: #F5F0E8; --theme-glow: rgba(255, 215, 0, 0.20); --theme-font-header: 'Lalezar', sans-serif; --theme-font-body: 'Cairo', sans-serif; }
 
 html {
   color-scheme: dark;
