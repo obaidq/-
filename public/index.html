@@ -528,6 +528,14 @@
         </div>
       </div>
 
+      <!-- Playlist Mode Button (host only) -->
+      <div id="playlistSection" class="w-full text-center mt-3" style="display:none">
+        <button class="btn btn--accent btn--lg" onclick="App.showPlaylistPicker()" style="background:linear-gradient(135deg,#FF6B9D,#A55EEA);border:3px solid #000;font-size:18px;padding:14px 32px">
+          🎮 بلاي ليست بارتي
+          <span style="display:block;font-size:12px;opacity:0.8;margin-top:2px">اختر كذا لعبة ورا بعض!</span>
+        </button>
+      </div>
+
       <!-- Waiting message (non-host) -->
       <div id="waitingMessage" style="display:none">
         <p class="text-muted">⏳ انتظر المضيف يختار لعبة...</p>
@@ -543,6 +551,7 @@
         <div class="flex gap-2 justify-center flex-wrap mt-2" id="hostControlsAdvanced">
           <button class="btn btn--ghost btn--sm" data-action="pauseGame" id="pauseBtn">⏸️ إيقاف مؤقت</button>
           <button class="btn btn--ghost btn--sm" data-action="skipQuestion">⏭️ تخطي السؤال</button>
+          <button class="btn btn--ghost btn--sm" data-action="toggleStreamMode" id="streamModeBtn">📺 وضع البث</button>
           <button class="btn btn--ghost btn--sm" data-action="showKickMenu">🚫 طرد لاعب</button>
         </div>
       </div>
@@ -596,6 +605,7 @@
     <div id="winnerDisplay" class="winner-showcase mb-6"></div>
     <div class="scoreboard" id="finalScoreboard"></div>
     <div id="gameAwards" class="awards hidden"></div>
+    <div id="gameConditions" class="hidden"></div>
     <div class="flex justify-center gap-4 mt-6" id="resultsActions"></div>
   </div>
 

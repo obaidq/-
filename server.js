@@ -121,6 +121,14 @@ function validateDrawingData(drawing) {
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
+// TV/Spectator display route — auto-enables stream mode via query param
+app.get('/tv', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+app.get('/tv/:code', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // ═══════════════════════════════════════════════════════════════════
 // تحميل المحتوى من ملف اللغة العربية
 // ═══════════════════════════════════════════════════════════════════
@@ -691,6 +699,7 @@ io.on('connection', (socket) => {
       }
     }
     player.currentAnswer = processedAnswer;
+    player._answerTimestamp = Date.now();
     touchRoom(room);
 
     // ── حالة خاصة: تتبع ترتيب الإجابات في الألعاب السريعة ──
@@ -975,6 +984,40 @@ io.on('connection', (socket) => {
   });
 
   // ─────────────────────────────────────────────
+  // بدء قائمة ألعاب (Party Playlist Mode)
+  // ─────────────────────────────────────────────
+  socket.on('startPlaylist', ({ code, games }) => {
+    const room = rooms.get(code);
+    if (!room) return socket.emit('error', { message: 'الغرفة غير موجودة!' });
+    if (socket.id !== room.hostId) return socket.emit('error', { message: 'بس المضيف يقدر يبدأ!' });
+    if (room.players.size < 2) return socket.emit('error', { message: 'لازم لاعبين على الأقل!' });
+    if (room.state === 'playing') return socket.emit('error', { message: 'اللعبة شغالة!' });
+    if (!Array.isArray(games) || games.length < 2) return socket.emit('error', { message: 'اختر لعبتين على الأقل!' });
+
+    const validGames = ['quiplash', 'guesspionage', 'fakinit', 'triviamurder', 'fibbage', 'drawful', 'tshirtwars', 'lovemonster', 'inventions', 'wouldyourather', 'whosaidit', 'speedround', 'twotruths', 'splittheroom', 'emojidecode', 'debateme', 'acrophobia'];
+    const playlist = games.filter(g => validGames.includes(g)).slice(0, 8); // max 8 games
+    if (playlist.length < 2) return socket.emit('error', { message: 'اختر لعبتين صالحتين على الأقل!' });
+
+    room._playlist = playlist;
+    room._playlistIndex = 0;
+    room._playlistScores = {}; // cumulative scores across games
+    room.players.forEach((p, id) => { room._playlistScores[id] = 0; });
+
+    io.to(code).emit('playlistStarted', {
+      playlist: playlist,
+      totalGames: playlist.length,
+      currentIndex: 0
+    });
+
+    console.log('🎵 بلاي ليست بدأت:', playlist.length, 'ألعاب - غرفة:', code);
+
+    // Start the first game after a brief transition
+    setTimeout(() => {
+      startPlaylistGame(room);
+    }, 2000);
+  });
+
+  // ─────────────────────────────────────────────
   // العودة إلى اللوبي
   // ─────────────────────────────────────────────
   socket.on('backToLobby', (code) => {
@@ -1218,6 +1261,21 @@ io.on('connection', (socket) => {
     room.gameData = {};
     startGameRound(room);
     console.log('⏭️ سؤال متخطى - غرفة:', code);
+  });
+
+  // ─────────────────────────────────────────────
+  // وضع البث / الستريم (Stream Mode for OBS/TV)
+  // ─────────────────────────────────────────────
+  socket.on('toggleStreamMode', (code) => {
+    if (typeof code !== 'string') return;
+    const room = rooms.get(code);
+    if (!room || socket.id !== room.hostId) return;
+    room._streamMode = !room._streamMode;
+    io.to(code).emit('streamModeChanged', {
+      streamMode: room._streamMode,
+      message: room._streamMode ? '📺 وضع البث مفعّل — شاشة نظيفة للستريم' : '📺 وضع البث معطّل'
+    });
+    console.log('📺 وضع البث:', room._streamMode ? 'مفعّل' : 'معطّل', '- غرفة:', code);
   });
 
   // ─────────────────────────────────────────────
@@ -1739,6 +1797,7 @@ function startQuiplashRound(room) {
   room.gameData.currentMatchupIndex = 0;
   room.gameData.matchupResults = [];
   room.gameData.phase = 'answering';
+  room.gameData.answeringStartedAt = Date.now(); // for speed bonus tracking
   room.gameData.playerMatchupMap = new Map(); // maps playerId → { matchupIndex, question }
 
   // Build player-to-matchup mapping
@@ -2022,11 +2081,39 @@ function calculateQuiplashResults(room) {
     const voteCount = votes[id] || 0;
     let points = isJinx ? 0 : voteCount * pointsPerVote;
     let quiplash = false;
+    let speedBonus = 0;
+    let streakBonus = 0;
 
     // بونص الإجماع: لو كل الأصوات لك (و فيه أصوات أصلاً) - لا ينطبق في حالة الجينكس
     if (!isJinx && totalVoters > 0 && voteCount === totalVoters) {
       points += 200;
       quiplash = true;
+    }
+
+    // Speed bonus: +50 if answered within 15 seconds
+    if (!isJinx && voteCount > 0 && player._answerTimestamp && room.gameData.answeringStartedAt) {
+      const answerMs = player._answerTimestamp - room.gameData.answeringStartedAt;
+      if (answerMs <= 15000) {
+        speedBonus = 50;
+        points += speedBonus;
+      }
+    }
+
+    // Streak bonus: +100 if won 3+ matchups in a row
+    if (!isJinx && room.gameStats) {
+      // Check if this player is winning this matchup
+      const otherIds = matchup.filter(mid => mid !== id);
+      const isWinning = otherIds.every(oid => (votes[id] || 0) > (votes[oid] || 0));
+      if (isWinning && voteCount > 0) {
+        const currentStreak = (room.gameStats.streaks.get(id) || 0) + 1;
+        room.gameStats.streaks.set(id, currentStreak);
+        if (currentStreak >= 3) {
+          streakBonus = 100;
+          points += streakBonus;
+        }
+      } else {
+        room.gameStats.streaks.set(id, 0);
+      }
     }
 
     player.score += points;
@@ -2053,6 +2140,8 @@ function calculateQuiplashResults(room) {
       points,
       quiplash,
       jinx: isJinx,
+      speedBonus,
+      streakBonus,
       avatar: player.avatar,
       avatarData: player.avatarData || null
     };
@@ -5653,6 +5742,188 @@ function computeGameAwards(room) {
 /**
  * إنهاء اللعبة وعرض النتائج النهائية
  */
+// ═══════════════════════════════════════════════════════════════════
+// 🎵 Party Playlist Mode — Auto-advance between games
+// ═══════════════════════════════════════════════════════════════════
+
+function startPlaylistGame(room) {
+  if (!room._playlist || room._playlistIndex >= room._playlist.length) {
+    endPlaylist(room);
+    return;
+  }
+
+  const game = room._playlist[room._playlistIndex];
+  const playerCount = room.players.size;
+  const guesspionageRounds = playerCount <= 6 ? playerCount * 2 + 1 : playerCount + 1;
+  // Shorter rounds in playlist mode (keep pace up)
+  const playlistRounds = {
+    quiplash: 2, guesspionage: Math.min(guesspionageRounds, 5), fakinit: 2,
+    triviamurder: 3, fibbage: 2, drawful: 2, tshirtwars: 2, lovemonster: 3,
+    inventions: 2, wouldyourather: 3, whosaidit: 2, speedround: 6,
+    twotruths: 2, splittheroom: 3, emojidecode: 3, debateme: 2, acrophobia: 2
+  };
+
+  const gameNames = {
+    quiplash: '⚡ رد سريع', guesspionage: '📊 خمّن النسبة', fakinit: '🕵️ المزيّف',
+    triviamurder: '💀 حفلة القاتل', fibbage: '🎭 كشف الكذاب', drawful: '🎨 ارسم لي',
+    tshirtwars: '👕 حرب التيشيرتات', lovemonster: '💕 الوحش العاشق', inventions: '💡 اختراعات مجنونة',
+    wouldyourather: '🤔 تبي ولا ما تبي', whosaidit: '💬 من قال؟', speedround: '⚡ أسرع واحد',
+    twotruths: '✌️ حقيقتين وكذبة', splittheroom: '🔀 سبليت ذا روم', emojidecode: '🎭 فك الرموز',
+    debateme: '⚖️ المحكمة', acrophobia: '🔤 الأسماء'
+  };
+
+  // Send transition screen before starting
+  io.to(room.code).emit('playlistTransition', {
+    nextGame: game,
+    nextGameName: gameNames[game] || game,
+    gameNumber: room._playlistIndex + 1,
+    totalGames: room._playlist.length,
+    standings: getPlaylistStandings(room)
+  });
+
+  // Actually start the game after transition animation
+  setTimeout(() => {
+    room.currentGame = game;
+    room.currentRound = 0;
+    room.maxRounds = playlistRounds[game] || 3;
+    room.state = 'playing';
+    room.gameData = {};
+    room.usedQuestions = new Set();
+    touchRoom(room);
+
+    room.players.forEach(p => {
+      p.score = 0;
+      p.currentAnswer = null;
+      p.currentVote = null;
+      p.isAlive = true;
+      p.isReady = false;
+    });
+
+    // Set up team mode if needed
+    room.teamMode = false;
+
+    // Set up game stats
+    room.gameStats = {
+      roundScores: new Map(), fooledCounts: new Map(), correctGuesses: new Map(),
+      fastestAnswer: null, votesReceived: new Map(), streaks: new Map(),
+      quiplashCount: new Map(), matchupWins: new Map(), zeroVotes: new Map()
+    };
+    room.players.forEach((p, id) => {
+      room.gameStats.roundScores.set(id, []);
+      room.gameStats.fooledCounts.set(id, 0);
+      room.gameStats.correctGuesses.set(id, 0);
+      room.gameStats.votesReceived.set(id, 0);
+      room.gameStats.streaks.set(id, 0);
+      room.gameStats.quiplashCount.set(id, 0);
+      room.gameStats.matchupWins.set(id, 0);
+      room.gameStats.zeroVotes.set(id, 0);
+    });
+
+    io.to(room.code).emit('gameStarted', {
+      game,
+      gameName: gameNames[game],
+      maxRounds: room.maxRounds,
+      players: getPlayerList(room),
+      commentary: CONFIG.commentaryEnabled ? generateCommentary('lobby', 'gameStarting') : null,
+      playlistMode: true,
+      playlistIndex: room._playlistIndex,
+      playlistTotal: room._playlist.length
+    });
+
+    setTimeout(() => startGameRound(room), 1500);
+  }, 4000); // 4 seconds for transition animation
+}
+
+function endPlaylist(room) {
+  // Calculate final cumulative standings
+  const standings = getPlaylistStandings(room);
+  const winner = standings[0];
+
+  io.to(room.code).emit('playlistEnded', {
+    standings,
+    winner,
+    totalGames: room._playlist ? room._playlist.length : 0,
+    commentary: CONFIG.commentaryEnabled && winner
+      ? generateCommentary('results', 'winner', { name: winner.name })
+      : null
+  });
+
+  room.state = 'results';
+  room._playlist = null;
+  room._playlistIndex = 0;
+  console.log('🏆 البلاي ليست انتهت! الفائز:', winner ? winner.name : 'لا يوجد', '- غرفة:', room.code);
+}
+
+function getPlaylistStandings(room) {
+  const scores = room._playlistScores || {};
+  return getPlayerList(room).map(p => ({
+    ...p,
+    playlistScore: scores[p.id] || 0
+  })).sort((a, b) => b.playlistScore - a.playlistScore);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🎭 Smosh-Style Conditions (Punishments & Rewards)
+// Lighthearted party stakes for winners and losers
+// ═══════════════════════════════════════════════════════════════
+
+const PUNISHMENT_POOL = [
+  { icon: '🎤', text: 'يغني مقطع من أغنية يختارها الفائز', tier: 'mild' },
+  { icon: '💃', text: 'يرقص ١٠ ثواني بدون موسيقى', tier: 'mild' },
+  { icon: '🤳', text: 'يسجل ستوري يقول فيها "أنا الخسران"', tier: 'spicy' },
+  { icon: '🧎', text: 'يسوي سجدة شكر للفائز (تمثيل)', tier: 'mild' },
+  { icon: '📞', text: 'يتصل على آخر شخص بسجله ويقول له نكتة', tier: 'spicy' },
+  { icon: '🍋', text: 'يأكل شريحة ليمون بدون ما يتكشر', tier: 'mild' },
+  { icon: '🗣️', text: 'يقلد صوت أي لاعب يختاره الفائز', tier: 'mild' },
+  { icon: '👑', text: 'يمدح الفائز ٣٠ ثانية بدون توقف', tier: 'mild' },
+  { icon: '🫡', text: 'يسلم عسكري للفائز', tier: 'mild' },
+  { icon: '🎭', text: 'يمثل مشهد مسلسل يختاره الفائز', tier: 'spicy' },
+  { icon: '📱', text: 'يخلي الفائز يكتب ستاتس بجواله', tier: 'spicy' },
+  { icon: '🧊', text: 'يحط ثلجة على رقبته ١٠ ثواني', tier: 'mild' },
+  { icon: '🗯️', text: 'يقول "أنا أضعف لاعب" بأعلى صوته', tier: 'mild' },
+  { icon: '🫣', text: 'يبي يخلي الكل يضحك بدون ما يضحك', tier: 'mild' },
+  { icon: '🎵', text: 'يغني الأذكار بنغمة أغنية', tier: 'mild' },
+];
+
+const REWARD_POOL = [
+  { icon: '👑', text: 'يختار اللعبة الجاية' },
+  { icon: '🎯', text: 'يبدأ بـ ٥٠ نقطة إضافية' },
+  { icon: '⏱️', text: 'يحصل وقت إضافي في الجولة الجاية' },
+  { icon: '🛡️', text: 'محصّن من الخسارة في الجولة الجاية' },
+  { icon: '🎪', text: 'يختار عقوبة إضافية للخسران' },
+  { icon: '📣', text: 'يحكم على أداء الخسران' },
+  { icon: '🏆', text: 'يلبس تاج البطل (وهمي) للجولة الجاية' },
+];
+
+function generateConditions(finalResults, game) {
+  if (!finalResults || finalResults.length < 2) return null;
+
+  const winner = finalResults[0];
+  const loser = finalResults[finalResults.length - 1];
+
+  // 40% chance to show conditions (keeps it exciting but not every round)
+  if (Math.random() > 0.4) return null;
+
+  const punishment = PUNISHMENT_POOL[Math.floor(Math.random() * PUNISHMENT_POOL.length)];
+  const reward = REWARD_POOL[Math.floor(Math.random() * REWARD_POOL.length)];
+
+  return {
+    punishment: {
+      player: loser.name,
+      playerId: loser.id,
+      icon: punishment.icon,
+      text: punishment.text,
+      tier: punishment.tier,
+    },
+    reward: {
+      player: winner.name,
+      playerId: winner.id,
+      icon: reward.icon,
+      text: reward.text,
+    },
+  };
+}
+
 function endGame(room) {
   clearRoundTimer(room);
   room.state = 'results';
@@ -5684,22 +5955,52 @@ function endGame(room) {
   // نصيحة عشوائية
   const tip = content.tips[Math.floor(Math.random() * content.tips.length)];
 
+  // 🎭 Smosh-style punishment/reward conditions
+  const conditions = generateConditions(finalResults, room.currentGame);
+
   const winComment = CONFIG.commentaryEnabled && winner
     ? generateCommentary('results', 'winner', { name: winner.name })
     : null;
+
+  // Playlist mode: accumulate scores and check if more games
+  const isPlaylist = room._playlist && room._playlistIndex < room._playlist.length;
+
+  if (isPlaylist) {
+    // Add this game's scores to cumulative playlist scores
+    room.players.forEach((p, id) => {
+      room._playlistScores[id] = (room._playlistScores[id] || 0) + p.score;
+    });
+  }
 
   io.to(room.code).emit('gameEnded', {
     game: room.currentGame,
     finalResults,
     winner,
     awards,
+    conditions,
     tip,
     commentary: winComment,
     teamMode: room.teamMode || false,
-    teamResults
+    teamResults,
+    playlistMode: isPlaylist,
+    playlistIndex: isPlaylist ? room._playlistIndex : null,
+    playlistTotal: isPlaylist ? room._playlist.length : null,
+    playlistStandings: isPlaylist ? getPlaylistStandings(room) : null
   });
 
   console.log('🏆 اللعبة انتهت! الفائز:', winner ? winner.name : 'لا يوجد', '- غرفة:', room.code);
+
+  // Playlist mode: auto-advance to next game after results display
+  if (isPlaylist) {
+    room._playlistIndex++;
+    if (room._playlistIndex >= room._playlist.length) {
+      // All games done — show final playlist results
+      setTimeout(() => endPlaylist(room), 8000);
+    } else {
+      // Auto-advance to next game
+      setTimeout(() => startPlaylistGame(room), 8000);
+    }
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════
