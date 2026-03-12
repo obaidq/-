@@ -379,6 +379,8 @@ const App = {
         case 'kickPlayer': this.kickPlayer(target.getAttribute('data-id')); break;
         case 'toggleChat': this.toggleChat(); break;
         case 'sendChat': this.sendChat(); break;
+        case 'startPlaylist': this.startPlaylist(); break;
+        case 'togglePlaylistGame': this.togglePlaylistGame(target); break;
       }
     });
 
@@ -565,17 +567,10 @@ const App = {
         if (hudCode && this.currentRoom) hudCode.textContent = this.currentRoom;
       };
 
-      // Quiplash gets a special game splash before countdown
-      if (data.game === 'quiplash') {
-        this._showQuiplashGameSplash(() => {
-          this.showCountdown(enterGame);
-        });
-      } else {
-        // Show game intro card → countdown → game screen
-        ScreenMachine.showRoundIntro('١', null, gameInfo ? gameInfo.icon + ' ' + gameInfo.name : '', () => {
-          this.showCountdown(enterGame);
-        });
-      }
+      // Show game-specific splash for ALL games, then countdown
+      this._showGameSplash(data.game, gameInfo, () => {
+        this.showCountdown(enterGame);
+      });
     });
 
     // ── إجابات وتصويتات ──
@@ -749,6 +744,29 @@ const App = {
       const btn = document.getElementById('streamModeBtn');
       if (btn) btn.textContent = data.streamMode ? '📺 وضع البث: مفعّل ✅' : '📺 وضع البث';
       this.showToast(data.message, 'success');
+    });
+
+    // ── Party Playlist ──
+    s.on('playlistStarted', data => {
+      this._playlist = data.playlist;
+      this._playlistIndex = 0;
+      this.showToast('🎮 بلاي ليست بارتي! ' + data.playlist.length + ' ألعاب', 'success');
+    });
+
+    s.on('playlistTransition', data => {
+      this._playlistIndex = data.nextIndex;
+      const nextGame = data.nextGame;
+      const gi = GAMES[nextGame];
+      // Show transition overlay with standings
+      this._showPlaylistTransition(data.standings, nextGame, gi, data.nextIndex, data.total);
+    });
+
+    s.on('playlistEnded', data => {
+      this._playlist = null;
+      AudioEngine.stopMusic();
+      AudioEngine.drumRoll(2);
+      setTimeout(() => { AudioEngine.victory(); AudioEngine.applause(); }, 2000);
+      this._showPlaylistFinalResults(data.standings);
     });
 
     // ── Audience ──
@@ -979,6 +997,137 @@ const App = {
   },
 
   // ═══════════════════════════════════════════════════════════════
+  // 🎮 Party Playlist Mode
+  // ═══════════════════════════════════════════════════════════════
+
+  _playlistQueue: [],
+
+  togglePlaylistGame(target) {
+    const game = target.getAttribute('data-game');
+    if (!game) return;
+    const idx = this._playlistQueue.indexOf(game);
+    if (idx > -1) {
+      this._playlistQueue.splice(idx, 1);
+      target.classList.remove('playlist-game--selected');
+      target.querySelector('.playlist-game__num')?.remove();
+    } else {
+      if (this._playlistQueue.length >= 8) {
+        this.showToast('أقصى عدد 8 ألعاب!', 'error');
+        return;
+      }
+      this._playlistQueue.push(game);
+      target.classList.add('playlist-game--selected');
+      const numEl = document.createElement('span');
+      numEl.className = 'playlist-game__num';
+      numEl.textContent = this._playlistQueue.length;
+      target.appendChild(numEl);
+    }
+    // Update all numbers
+    document.querySelectorAll('.playlist-game--selected .playlist-game__num').forEach((n, i) => {
+      n.textContent = i + 1;
+    });
+    const startBtn = document.getElementById('startPlaylistBtn');
+    if (startBtn) startBtn.disabled = this._playlistQueue.length < 2;
+  },
+
+  startPlaylist() {
+    if (!this.isHost || !this.currentRoom || this._playlistQueue.length < 2) return;
+    this.socket.emit('startPlaylist', { code: this.currentRoom, games: this._playlistQueue.slice() });
+  },
+
+  showPlaylistPicker() {
+    const modal = document.getElementById('playlistModal');
+    if (modal) { modal.classList.remove('hidden'); return; }
+
+    const el = document.createElement('div');
+    el.id = 'playlistModal';
+    el.className = 'modal-overlay';
+    el.innerHTML =
+      '<div class="modal-content" style="max-width:500px">' +
+        '<h2 style="text-align:center;margin-bottom:16px">🎮 بلاي ليست بارتي</h2>' +
+        '<p style="text-align:center;color:rgba(255,255,255,0.6);margin-bottom:20px">اختر ٢-٨ ألعاب بالترتيب</p>' +
+        '<div class="playlist-grid">' +
+          Object.keys(GAMES).map(g => {
+            const gi = GAMES[g];
+            return '<button class="playlist-game" data-action="togglePlaylistGame" data-game="' + g + '">' +
+              '<span class="playlist-game__icon">' + gi.icon + '</span>' +
+              '<span class="playlist-game__name">' + escapeHtml(gi.name) + '</span>' +
+            '</button>';
+          }).join('') +
+        '</div>' +
+        '<div style="display:flex;gap:12px;margin-top:20px;justify-content:center">' +
+          '<button class="btn btn--primary" id="startPlaylistBtn" data-action="startPlaylist" disabled>🚀 ابدأ البلاي ليست</button>' +
+          '<button class="btn btn--ghost" onclick="document.getElementById(\'playlistModal\').classList.add(\'hidden\')">إلغاء</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(el);
+  },
+
+  _showPlaylistTransition(standings, nextGame, gameInfo, nextIndex, total) {
+    const theme = this._gameSplashThemes[nextGame] || { bg1: '#0A1F0E', bg2: '#000', accent: '#00C853', glow: 'rgba(0,200,83,0.5)' };
+    const el = document.createElement('div');
+    el.className = 'playlist-transition';
+    el.style.background = 'radial-gradient(ellipse at center, ' + theme.bg1 + ' 0%, ' + theme.bg2 + ' 80%)';
+
+    const standingsHtml = standings.slice(0, 5).map((s, i) => {
+      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1) + '.';
+      return '<div class="playlist-standing">' +
+        '<span class="playlist-standing__medal">' + medal + '</span>' +
+        '<span class="playlist-standing__name">' + escapeHtml(s.name) + '</span>' +
+        '<span class="playlist-standing__score" style="color:' + theme.accent + '">' + s.score + '</span>' +
+      '</div>';
+    }).join('');
+
+    el.innerHTML =
+      '<div class="playlist-transition__progress">' + (nextIndex + 1) + ' / ' + total + '</div>' +
+      '<div class="playlist-transition__standings">' + standingsHtml + '</div>' +
+      '<div class="playlist-transition__next">' +
+        '<div class="playlist-transition__next-label">اللعبة الجاية</div>' +
+        '<div class="playlist-transition__next-icon" style="filter:drop-shadow(0 0 30px ' + theme.glow + ')">' + (gameInfo ? gameInfo.icon : '🎮') + '</div>' +
+        '<div class="playlist-transition__next-name" style="color:' + theme.accent + '">' + (gameInfo ? escapeHtml(gameInfo.name) : '') + '</div>' +
+      '</div>';
+
+    document.body.appendChild(el);
+    if (typeof AudioEngine !== 'undefined') AudioEngine.whoosh();
+
+    setTimeout(() => {
+      el.classList.add('playlist-transition--exit');
+      setTimeout(() => el.remove(), 600);
+    }, 3500);
+  },
+
+  _showPlaylistFinalResults(standings) {
+    const gc = document.getElementById('gameContent');
+    if (!gc) return;
+    this.showScreen('gameScreen');
+
+    const podiumHtml = standings.slice(0, 3).map((s, i) => {
+      const crowns = ['👑', '🥈', '🥉'];
+      const sizes = ['120px', '90px', '70px'];
+      return '<div class="playlist-podium__entry" style="order:' + [1,0,2][i] + '">' +
+        '<div style="font-size:' + sizes[i] + '">' + crowns[i] + '</div>' +
+        '<div class="playlist-podium__name">' + escapeHtml(s.name) + '</div>' +
+        '<div class="playlist-podium__score">' + s.score + '</div>' +
+      '</div>';
+    }).join('');
+
+    const restHtml = standings.slice(3).map((s, i) => {
+      return '<div class="playlist-rest-row">' +
+        '<span>' + (i + 4) + '. ' + escapeHtml(s.name) + '</span>' +
+        '<span>' + s.score + '</span>' +
+      '</div>';
+    }).join('');
+
+    gc.innerHTML =
+      '<div class="playlist-final">' +
+        '<h1 class="playlist-final__title">🏆 النتائج النهائية</h1>' +
+        '<div class="playlist-podium">' + podiumHtml + '</div>' +
+        (restHtml ? '<div class="playlist-rest">' + restHtml + '</div>' : '') +
+        '<button class="btn btn--primary" style="margin-top:32px" data-action="backToLobby">🔙 رجوع للوبي</button>' +
+      '</div>';
+  },
+
+  // ═══════════════════════════════════════════════════════════════
   // عرض اللاعبين
   // ═══════════════════════════════════════════════════════════════
 
@@ -1070,6 +1219,8 @@ const App = {
     if (gamesSection) gamesSection.style.display = this.isHost ? 'block' : 'none';
     if (waitingMessage) waitingMessage.style.display = this.isHost ? 'none' : 'block';
     if (familySection) familySection.style.display = this.isHost ? 'block' : 'none';
+    const playlistSection = document.getElementById('playlistSection');
+    if (playlistSection) playlistSection.style.display = this.isHost ? 'block' : 'none';
   },
 
   toggleFamilyMode() {
@@ -1161,12 +1312,63 @@ const App = {
   },
 
   // ═══════════════════════════════════════════════════════════════
+  // 🎮 Universal Game Splash - Themed intro for all 17 games
+  // ═══════════════════════════════════════════════════════════════
+
+  _gameSplashThemes: {
+    quiplash:       { bg1: '#2D1B69', bg2: '#1A1145', accent: '#FFD700', glow: 'rgba(255,215,0,0.5)' },
+    guesspionage:   { bg1: '#0D1117', bg2: '#1A2332', accent: '#00FF41', glow: 'rgba(0,255,65,0.5)' },
+    fakinit:        { bg1: '#8B3A2A', bg2: '#6B2A1A', accent: '#42A5F5', glow: 'rgba(66,165,245,0.5)' },
+    triviamurder:   { bg1: '#0D0D0D', bg2: '#1A1A1A', accent: '#2ECC40', glow: 'rgba(46,204,64,0.5)' },
+    fibbage:        { bg1: '#1A1A5E', bg2: '#0D0D3A', accent: '#FFD700', glow: 'rgba(255,215,0,0.5)' },
+    drawful:        { bg1: '#7A6420', bg2: '#5A4A15', accent: '#C5A55A', glow: 'rgba(197,165,90,0.5)' },
+    tshirtwars:     { bg1: '#0D0D1A', bg2: '#1A1A2E', accent: '#FF007F', glow: 'rgba(255,0,127,0.5)' },
+    lovemonster:    { bg1: '#1C0A2E', bg2: '#2D1B4E', accent: '#FF1493', glow: 'rgba(255,20,147,0.5)' },
+    inventions:     { bg1: '#1A3A5C', bg2: '#0D2840', accent: '#2980B9', glow: 'rgba(41,128,185,0.5)' },
+    wouldyourather: { bg1: '#0A0E2A', bg2: '#141852', accent: '#FF2D7B', glow: 'rgba(255,45,123,0.5)' },
+    whosaidit:      { bg1: '#1A1A3E', bg2: '#2D2D5E', accent: '#FFB800', glow: 'rgba(255,184,0,0.5)' },
+    speedround:     { bg1: '#0D0D0D', bg2: '#1A1A1A', accent: '#FF1744', glow: 'rgba(255,23,68,0.5)' },
+    twotruths:      { bg1: '#1A1A2E', bg2: '#0D0D1A', accent: '#E63946', glow: 'rgba(230,57,70,0.5)' },
+    splittheroom:   { bg1: '#1B0A2E', bg2: '#4A0E78', accent: '#7B2FBE', glow: 'rgba(123,47,190,0.5)' },
+    emojidecode:    { bg1: '#0A0A1A', bg2: '#1A1A2E', accent: '#FF00FF', glow: 'rgba(255,0,255,0.5)' },
+    debateme:       { bg1: '#2C1810', bg2: '#4A3728', accent: '#C9A96E', glow: 'rgba(201,169,110,0.5)' },
+    acrophobia:     { bg1: '#2D5F3A', bg2: '#1A472A', accent: '#F5F0EB', glow: 'rgba(245,240,235,0.5)' },
+  },
+
+  /**
+   * Universal game splash - themed intro screen for ALL 17 games
+   */
+  _showGameSplash(game, gameInfo, callback) {
+    if (!gameInfo) { if (callback) callback(); return; }
+    const theme = this._gameSplashThemes[game] || { bg1: '#0A1F0E', bg2: '#000', accent: '#00C853', glow: 'rgba(0,200,83,0.5)' };
+    const el = document.createElement('div');
+    el.className = 'ql-game-splash';
+    el.style.background = 'radial-gradient(ellipse at center, ' + theme.bg1 + ' 0%, ' + theme.bg2 + ' 80%)';
+    el.innerHTML =
+      '<div class="ql-game-splash__icon" style="filter:drop-shadow(0 0 40px ' + theme.glow + ')">' + gameInfo.icon + '</div>' +
+      '<div class="ql-game-splash__title" style="color:' + theme.accent + ';text-shadow:4px 4px 0 #000, 0 0 40px ' + theme.glow + '">' + escapeHtml(gameInfo.name) + '</div>' +
+      '<div class="ql-game-splash__subtitle">' + escapeHtml(gameInfo.hint) + '</div>';
+    document.body.appendChild(el);
+
+    if (typeof AudioEngine !== 'undefined') AudioEngine.whoosh();
+
+    setTimeout(() => {
+      el.classList.add('ql-game-splash--exit');
+      setTimeout(() => {
+        el.remove();
+        if (callback) callback();
+      }, 600);
+    }, 2500);
+  },
+
+  // ═══════════════════════════════════════════════════════════════
   // ⚡ رد سريع (Quiplash) - Cinematic Jackbox-Style
   // ═══════════════════════════════════════════════════════════════
 
   // Round interstitial labels
   /**
    * Show Quiplash game splash (intro screen before countdown)
+   * @deprecated Use _showGameSplash() instead
    */
   _showQuiplashGameSplash(callback) {
     const el = document.createElement('div');
@@ -4080,6 +4282,31 @@ const App = {
           '</div>'
         ).join('');
       awardsEl.classList.remove('hidden');
+    }
+
+    // 🎭 Smosh-style conditions (punishments & rewards)
+    const condEl = document.getElementById('gameConditions');
+    if (condEl && d.conditions) {
+      const c = d.conditions;
+      condEl.innerHTML =
+        '<div class="conditions-card">' +
+          '<h3 class="conditions-card__title">🎭 العقوبات والمكافآت</h3>' +
+          '<div class="conditions-card__row conditions-card__row--punishment">' +
+            '<span class="conditions-card__icon">' + c.punishment.icon + '</span>' +
+            '<div>' +
+              '<div class="conditions-card__player">' + escapeHtml(c.punishment.player) + ' (الخسران)</div>' +
+              '<div class="conditions-card__text">' + escapeHtml(c.punishment.text) + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="conditions-card__row conditions-card__row--reward">' +
+            '<span class="conditions-card__icon">' + c.reward.icon + '</span>' +
+            '<div>' +
+              '<div class="conditions-card__player">' + escapeHtml(c.reward.player) + ' (البطل)</div>' +
+              '<div class="conditions-card__text">' + escapeHtml(c.reward.text) + '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      condEl.classList.remove('hidden');
     }
 
     const actionsEl = document.getElementById('resultsActions');
