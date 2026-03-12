@@ -218,6 +218,22 @@ const App = {
     this.setupSocketEvents();
     this._setupOfflineDetection();
 
+    // Auto-enable stream mode via URL parameter (?stream) or /tv route
+    const urlParams = new URLSearchParams(window.location.search);
+    const isTvRoute = window.location.pathname.startsWith('/tv');
+    if (urlParams.has('stream') || isTvRoute) {
+      document.body.classList.add('stream-mode');
+      this._streamMode = true;
+    }
+    // Auto-fill room code from /tv/:code route
+    if (isTvRoute) {
+      const tvCode = window.location.pathname.split('/tv/')[1];
+      if (tvCode) {
+        const codeInput = document.getElementById('roomCodeInput');
+        if (codeInput) codeInput.value = tvCode.toUpperCase();
+      }
+    }
+
     // تهيئة نظام الصوت
     if (typeof AudioEngine !== 'undefined') {
       AudioEngine.init();
@@ -357,6 +373,7 @@ const App = {
         case 'toggleDarkMode': this.toggleDarkMode(target.checked); break;
         case 'pauseGame': this.pauseGame(); break;
         case 'skipQuestion': this.skipQuestion(); break;
+        case 'toggleStreamMode': this.toggleStreamMode(); break;
         case 'showKickMenu': this.showKickMenu(); break;
         case 'closeKickMenu': this.closeKickMenu(); break;
         case 'kickPlayer': this.kickPlayer(target.getAttribute('data-id')); break;
@@ -726,6 +743,14 @@ const App = {
       this.showToast(data.message, 'success');
     });
 
+    s.on('streamModeChanged', data => {
+      this._streamMode = data.streamMode;
+      document.body.classList.toggle('stream-mode', data.streamMode);
+      const btn = document.getElementById('streamModeBtn');
+      if (btn) btn.textContent = data.streamMode ? '📺 وضع البث: مفعّل ✅' : '📺 وضع البث';
+      this.showToast(data.message, 'success');
+    });
+
     // ── Audience ──
     s.on('audienceJoined', data => {
       this.showToast(escapeHtml(data.name) + ' انضم كمتفرج! 👀', 'success');
@@ -946,6 +971,11 @@ const App = {
   toggleExtendedTimers() {
     if (!this.isHost || !this.currentRoom) return;
     this.socket.emit('toggleExtendedTimers', this.currentRoom);
+  },
+
+  toggleStreamMode() {
+    if (!this.isHost || !this.currentRoom) return;
+    this.socket.emit('toggleStreamMode', this.currentRoom);
   },
 
   // ═══════════════════════════════════════════════════════════════

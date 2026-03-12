@@ -121,6 +121,14 @@ function validateDrawingData(drawing) {
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
+// TV/Spectator display route — auto-enables stream mode via query param
+app.get('/tv', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+app.get('/tv/:code', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // ═══════════════════════════════════════════════════════════════════
 // تحميل المحتوى من ملف اللغة العربية
 // ═══════════════════════════════════════════════════════════════════
@@ -1218,6 +1226,21 @@ io.on('connection', (socket) => {
     room.gameData = {};
     startGameRound(room);
     console.log('⏭️ سؤال متخطى - غرفة:', code);
+  });
+
+  // ─────────────────────────────────────────────
+  // وضع البث / الستريم (Stream Mode for OBS/TV)
+  // ─────────────────────────────────────────────
+  socket.on('toggleStreamMode', (code) => {
+    if (typeof code !== 'string') return;
+    const room = rooms.get(code);
+    if (!room || socket.id !== room.hostId) return;
+    room._streamMode = !room._streamMode;
+    io.to(code).emit('streamModeChanged', {
+      streamMode: room._streamMode,
+      message: room._streamMode ? '📺 وضع البث مفعّل — شاشة نظيفة للستريم' : '📺 وضع البث معطّل'
+    });
+    console.log('📺 وضع البث:', room._streamMode ? 'مفعّل' : 'معطّل', '- غرفة:', code);
   });
 
   // ─────────────────────────────────────────────
