@@ -841,43 +841,43 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
- * 💕 LOVE MONSTER THEME - الوحش العاشق
- * Arabian Night Romance - ليلة رومانسية عربية
+ * 😂 TRY NOT TO LOL THEME - لا تضحك
+ * Smosh TNTL Inspired - كوميدي تحت الضغط
  * ═══════════════════════════════════════════════════════════════ */
 
-[data-theme="lovemonster"] {
-  --theme-bg-primary: #1A0015;
-  --theme-bg-secondary: #2E0029;
-  --theme-accent: #FF4081;
+[data-theme="trynottolol"] {
+  --theme-bg-primary: #1A0A2E;
+  --theme-bg-secondary: #2E1B69;
+  --theme-accent: #FFD700;
   --theme-text-primary: #ffffff;
-  --theme-text-secondary: #ff80ab;
-  --theme-glow: rgba(255, 64, 129, 0.4);
-  --theme-card-bg: rgba(255, 64, 129, 0.08);
-  --theme-card-border: rgba(255, 64, 129, 0.3);
-  --game-card-bg: linear-gradient(135deg, #C2185B, #FF4081);
+  --theme-text-secondary: #FFF176;
+  --theme-glow: rgba(255, 215, 0, 0.4);
+  --theme-card-bg: rgba(255, 215, 0, 0.08);
+  --theme-card-border: rgba(255, 215, 0, 0.3);
+  --game-card-bg: linear-gradient(135deg, #6C3483, #FFD700);
 }
 
-[data-theme="lovemonster"] .bg {
+[data-theme="trynottolol"] .bg {
   background: linear-gradient(135deg, #1A0015 0%, #2E0029 50%, #1A0015 100%);
 }
-[data-theme="lovemonster"] .game-hud {
+[data-theme="trynottolol"] .game-hud {
   background: rgba(26, 0, 21, 0.95);
   border-bottom: 2px solid rgba(255, 64, 129, 0.3);
 }
-[data-theme="lovemonster"] .game-footer {
+[data-theme="trynottolol"] .game-footer {
   background: rgba(26, 0, 21, 0.9);
   border-top: 1px solid rgba(255, 64, 129, 0.2);
 }
-[data-theme="lovemonster"] .panel { border-color: rgba(255, 64, 129, 0.2); }
-[data-theme="lovemonster"] .btn--primary {
+[data-theme="trynottolol"] .panel { border-color: rgba(255, 64, 129, 0.2); }
+[data-theme="trynottolol"] .btn--primary {
   background: linear-gradient(135deg, #C2185B, #FF4081);
   box-shadow: 0 4px 15px rgba(255, 64, 129, 0.3);
 }
-[data-theme="lovemonster"] .vote-option--player {
+[data-theme="trynottolol"] .vote-option--player {
   border-color: rgba(255, 128, 171, 0.2);
   background: rgba(46, 0, 41, 0.6);
 }
-[data-theme="lovemonster"] .vote-option--player:hover {
+[data-theme="trynottolol"] .vote-option--player:hover {
   border-color: #FF4081;
   box-shadow: 0 0 15px rgba(255, 64, 129, 0.2);
 }
@@ -952,13 +952,13 @@
 }
 [data-theme="speedround"] .bg { background: linear-gradient(135deg, #1a0500 0%, #3d0c00 50%, #1a0500 100%); }
 
-[data-theme="twotruths"] {
-  --theme-bg-primary: #0a1a0e; --theme-bg-secondary: #1a3d1f;
-  --theme-accent: #66BB6A; --theme-text-primary: #fff; --theme-text-secondary: #a5d6a7;
-  --theme-glow: rgba(102,187,106,0.4); --theme-card-bg: rgba(102,187,106,0.08);
-  --theme-card-border: rgba(102,187,106,0.3);
+[data-theme="backseatgamer"] {
+  --theme-bg-primary: #0D1B2A; --theme-bg-secondary: #1B2838;
+  --theme-accent: #00E5FF; --theme-text-primary: #fff; --theme-text-secondary: #80DEEA;
+  --theme-glow: rgba(0,229,255,0.4); --theme-card-bg: rgba(0,229,255,0.08);
+  --theme-card-border: rgba(0,229,255,0.3);
 }
-[data-theme="twotruths"] .bg { background: linear-gradient(135deg, #0a1a0e 0%, #1a3d1f 50%, #0a1a0e 100%); }
+[data-theme="backseatgamer"] .bg { background: linear-gradient(135deg, #0D1B2A 0%, #1B2838 50%, #0D1B2A 100%); }
 
 [data-theme="splittheroom"] {
   --theme-bg-primary: #0e0a1a; --theme-bg-secondary: #1f153d;
@@ -968,13 +968,13 @@
 }
 [data-theme="splittheroom"] .bg { background: linear-gradient(135deg, #0e0a1a 0%, #1f153d 50%, #0e0a1a 100%); }
 
-[data-theme="emojidecode"] {
-  --theme-bg-primary: #1a0a15; --theme-bg-secondary: #3d1530;
-  --theme-accent: #F06292; --theme-text-primary: #fff; --theme-text-secondary: #f48fb1;
-  --theme-glow: rgba(240,98,146,0.4); --theme-card-bg: rgba(240,98,146,0.08);
-  --theme-card-border: rgba(240,98,146,0.3);
+[data-theme="courtroom"] {
+  --theme-bg-primary: #1A1205; --theme-bg-secondary: #2D1F0A;
+  --theme-accent: #D4AF37; --theme-text-primary: #fff; --theme-text-secondary: #FFD54F;
+  --theme-glow: rgba(212,175,55,0.4); --theme-card-bg: rgba(212,175,55,0.08);
+  --theme-card-border: rgba(212,175,55,0.3);
 }
-[data-theme="emojidecode"] .bg { background: linear-gradient(135deg, #1a0a15 0%, #3d1530 50%, #1a0a15 100%); }
+[data-theme="courtroom"] .bg { background: linear-gradient(135deg, #1A1205 0%, #2D1F0A 50%, #1A1205 100%); }
 
 [data-theme="debateme"] {
   --theme-bg-primary: #0f1114; --theme-bg-secondary: #1c2024;
@@ -984,13 +984,13 @@
 }
 [data-theme="debateme"] .bg { background: linear-gradient(135deg, #0f1114 0%, #1c2024 50%, #0f1114 100%); }
 
-[data-theme="acrophobia"] {
-  --theme-bg-primary: #0a1a17; --theme-bg-secondary: #153d33;
-  --theme-accent: #26A69A; --theme-text-primary: #fff; --theme-text-secondary: #80cbc4;
-  --theme-glow: rgba(38,166,154,0.4); --theme-card-bg: rgba(38,166,154,0.08);
-  --theme-card-border: rgba(38,166,154,0.3);
+[data-theme="punishmentwheel"] {
+  --theme-bg-primary: #2E0A0A; --theme-bg-secondary: #4A0E0E;
+  --theme-accent: #FF4444; --theme-text-primary: #fff; --theme-text-secondary: #FF8A80;
+  --theme-glow: rgba(255,68,68,0.4); --theme-card-bg: rgba(255,68,68,0.08);
+  --theme-card-border: rgba(255,68,68,0.3);
 }
-[data-theme="acrophobia"] .bg { background: linear-gradient(135deg, #0a1a17 0%, #153d33 50%, #0a1a17 100%); }
+[data-theme="punishmentwheel"] .bg { background: linear-gradient(135deg, #2E0A0A 0%, #4A0E0E 50%, #2E0A0A 100%); }
 
 /* ═══════════════════════════════════════════════════════════════
  * RESULTS / VICTORY THEME - شاشة الفوز 🏆

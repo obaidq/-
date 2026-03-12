@@ -13,16 +13,16 @@
  *   🎭 كشف الكذاب (Fibbage)
  *   🎨 ارسم لي (Drawful)
  *   👕 حرب التيشيرتات (T-Shirt Wars)
- *   💕 الوحش العاشق (Love Monster)
+ *   😂 لا تضحك (Try Not To LOL)
  *   💡 اختراعات مجنونة (Mad Inventions)
  *   🤔 تبي ولا ما تبي (Would You Rather)
  *   💬 من قال؟ (Who Said It)
  *   ⚡ أسرع واحد (Speed Round)
- *   ✌️ حقيقتين وكذبة (Two Truths One Lie)
+ *   🎮 سوّاق أعمى (Backseat Gamer)
  *   🔀 سبليت ذا روم (Split the Room)
- *   🎭 فك الرموز (Emoji Decode)
+ *   👨‍⚖️ المحكمة الكبرى (Courtroom)
  *   ⚖️ المحكمة (Debate Me)
- *   🔤 الأسماء (Acrophobia)
+ *   🎡 عجلة العقاب (Punishment Wheel)
  */
 
 // ═══════════════════════════════════════════════════════════════════
@@ -531,7 +531,7 @@ io.on('connection', (socket) => {
     if (room.state === 'playing') return socket.emit('error', { message: 'اللعبة شغالة بالفعل!' });
 
     // التحقق من صحة اسم اللعبة
-    const validGames = ['quiplash', 'guesspionage', 'fakinit', 'triviamurder', 'fibbage', 'drawful', 'tshirtwars', 'lovemonster', 'inventions', 'wouldyourather', 'whosaidit', 'speedround', 'twotruths', 'splittheroom', 'emojidecode', 'debateme', 'acrophobia'];
+    const validGames = ['quiplash', 'guesspionage', 'fakinit', 'triviamurder', 'fibbage', 'drawful', 'tshirtwars', 'trynottolol', 'inventions', 'wouldyourather', 'whosaidit', 'speedround', 'backseatgamer', 'splittheroom', 'courtroom', 'debateme', 'punishmentwheel'];
     if (!validGames.includes(game)) {
       return socket.emit('error', { message: 'لعبة غير معروفة!' });
     }
@@ -550,16 +550,16 @@ io.on('connection', (socket) => {
       fibbage: 3,
       drawful: 3,
       tshirtwars: 3,
-      lovemonster: 4,
+      trynottolol: 4,
       inventions: 3,
       wouldyourather: 5,
       whosaidit: 3,
       speedround: 10,
-      twotruths: 3,
+      backseatgamer: 4,
       splittheroom: 5,
-      emojidecode: 5,
+      courtroom: 3,
       debateme: 3,
-      acrophobia: 3
+      punishmentwheel: 5
     };
 
     // إعداد الغرفة للعبة
@@ -630,16 +630,16 @@ io.on('connection', (socket) => {
       fibbage: '🎭 كشف الكذاب',
       drawful: '🎨 ارسم لي',
       tshirtwars: '👕 حرب التيشيرتات',
-      lovemonster: '💕 الوحش العاشق',
+      trynottolol: '😂 لا تضحك',
       inventions: '💡 اختراعات مجنونة',
       wouldyourather: '🤔 تبي ولا ما تبي',
       whosaidit: '💬 من قال؟',
       speedround: '⚡ أسرع واحد',
-      twotruths: '✌️ حقيقتين وكذبة',
+      backseatgamer: '🎮 سوّاق أعمى',
       splittheroom: '🔀 سبليت ذا روم',
-      emojidecode: '🎭 فك الرموز',
+      courtroom: '👨‍⚖️ المحكمة الكبرى',
       debateme: '⚖️ المحكمة',
-      acrophobia: '🔤 الأسماء'
+      punishmentwheel: '🎡 عجلة العقاب'
     };
 
     const startComment = CONFIG.commentaryEnabled
@@ -684,7 +684,7 @@ io.on('connection', (socket) => {
     if (typeof answer === 'string') {
       const trimmed = answer.trim().substring(0, 200);
       // Only filter free-text games (not trivia choices or guesspionage bets)
-      const freeTextGames = ['quiplash', 'fibbage', 'drawful', 'tshirtwars', 'inventions', 'whosaidit', 'splittheroom', 'debateme', 'acrophobia'];
+      const freeTextGames = ['quiplash', 'fibbage', 'drawful', 'tshirtwars', 'inventions', 'whosaidit', 'splittheroom', 'debateme', 'punishmentwheel', 'trynottolol', 'courtroom', 'backseatgamer'];
       const isFreeText = freeTextGames.includes(room.currentGame) ||
         (room.currentGame === 'triviamurder' && room.gameData.phase === 'deathChallenge');
       if (isFreeText) {
@@ -703,13 +703,15 @@ io.on('connection', (socket) => {
     touchRoom(room);
 
     // ── حالة خاصة: تتبع ترتيب الإجابات في الألعاب السريعة ──
-    if ((room.currentGame === 'speedround' || room.currentGame === 'emojidecode') && room.gameData.answerOrder) {
+    if ((room.currentGame === 'speedround' || room.currentGame === 'backseatgamer' || room.currentGame === 'punishmentwheel') && room.gameData.answerOrder) {
       if (!room.gameData.answerOrder.includes(socket.id)) {
         // تحقق من صحة الإجابة قبل إضافتها للترتيب
-        const q = room.gameData.question || room.gameData.puzzle;
+        const q = room.gameData.question || room.gameData.challenge;
         if (q && processedAnswer !== '__timeout__') {
-          const correctAnswer = q.a;
-          const checkAnswers = room.currentGame === 'emojidecode'
+          const correctAnswer = q.a || q.word;
+          const checkAnswers = (room.currentGame === 'backseatgamer')
+            ? (Array.isArray(q.keywords) ? q.keywords : [q.word || correctAnswer])
+            : (room.currentGame === 'punishmentwheel')
             ? (Array.isArray(q.keywords) ? q.keywords : [correctAnswer])
             : (Array.isArray(correctAnswer) ? correctAnswer : [correctAnswer]);
           const playerAns = processedAnswer.trim().toLowerCase();
@@ -994,7 +996,7 @@ io.on('connection', (socket) => {
     if (room.state === 'playing') return socket.emit('error', { message: 'اللعبة شغالة!' });
     if (!Array.isArray(games) || games.length < 2) return socket.emit('error', { message: 'اختر لعبتين على الأقل!' });
 
-    const validGames = ['quiplash', 'guesspionage', 'fakinit', 'triviamurder', 'fibbage', 'drawful', 'tshirtwars', 'lovemonster', 'inventions', 'wouldyourather', 'whosaidit', 'speedround', 'twotruths', 'splittheroom', 'emojidecode', 'debateme', 'acrophobia'];
+    const validGames = ['quiplash', 'guesspionage', 'fakinit', 'triviamurder', 'fibbage', 'drawful', 'tshirtwars', 'trynottolol', 'inventions', 'wouldyourather', 'whosaidit', 'speedround', 'backseatgamer', 'splittheroom', 'courtroom', 'debateme', 'punishmentwheel'];
     const playlist = games.filter(g => validGames.includes(g)).slice(0, 8); // max 8 games
     if (playlist.length < 2) return socket.emit('error', { message: 'اختر لعبتين صالحتين على الأقل!' });
 
@@ -1393,8 +1395,8 @@ function startGameRound(room) {
     case 'tshirtwars':
       startTshirtWarsRound(room);
       break;
-    case 'lovemonster':
-      startLoveMonsterRound(room);
+    case 'trynottolol':
+      startTryNotToLolRound(room);
       break;
     case 'inventions':
       startInventionsRound(room);
@@ -1408,20 +1410,20 @@ function startGameRound(room) {
     case 'speedround':
       startSpeedRound(room);
       break;
-    case 'twotruths':
-      startTwoTruthsRound(room);
+    case 'backseatgamer':
+      startBackseatGamerRound(room);
       break;
     case 'splittheroom':
       startSplitTheRoomRound(room);
       break;
-    case 'emojidecode':
-      startEmojiDecodeRound(room);
+    case 'courtroom':
+      startCourtroomRound(room);
       break;
     case 'debateme':
       startDebateMeRound(room);
       break;
-    case 'acrophobia':
-      startAcrophobiaRound(room);
+    case 'punishmentwheel':
+      startPunishmentWheelRound(room);
       break;
     default:
       console.log('❌ لعبة غير معروفة:', room.currentGame);
@@ -1464,8 +1466,8 @@ function handleAllAnswered(room) {
     case 'tshirtwars':
       startTshirtWarsVoting(room);
       break;
-    case 'lovemonster':
-      calculateLoveMonsterResults(room);
+    case 'trynottolol':
+      startTryNotToLolVoting(room);
       break;
     case 'inventions':
       if (room.gameData.phase === 'inventing') {
@@ -1487,11 +1489,11 @@ function handleAllAnswered(room) {
     case 'speedround':
       calculateSpeedRoundResults(room);
       break;
-    case 'twotruths':
-      if (room.gameData.phase === 'writing') {
-        startTwoTruthsGuessing(room);
+    case 'backseatgamer':
+      if (room.gameData.phase === 'describing') {
+        startBackseatGamerGuessing(room);
       } else {
-        calculateTwoTruthsResults(room);
+        calculateBackseatGamerResults(room);
       }
       break;
     case 'splittheroom':
@@ -1501,8 +1503,12 @@ function handleAllAnswered(room) {
         calculateSplitTheRoomResults(room);
       }
       break;
-    case 'emojidecode':
-      calculateEmojiDecodeResults(room);
+    case 'courtroom':
+      if (room.gameData.phase === 'arguing') {
+        startCourtroomVoting(room);
+      } else {
+        calculateCourtroomResults(room);
+      }
       break;
     case 'debateme':
       if (room.gameData.phase === 'arguing') {
@@ -1511,12 +1517,8 @@ function handleAllAnswered(room) {
         calculateDebateMeResults(room);
       }
       break;
-    case 'acrophobia':
-      if (room.gameData.phase === 'writing') {
-        startAcrophobiaVoting(room);
-      } else {
-        calculateAcrophobiaResults(room);
-      }
+    case 'punishmentwheel':
+      calculatePunishmentWheelResults(room);
       break;
     default:
       sendRoundResults(room, {});
@@ -1554,8 +1556,8 @@ function calculateVoteResults(room) {
     case 'whosaidit':
       calculateWhoSaidItResults(room);
       break;
-    case 'twotruths':
-      calculateTwoTruthsResults(room);
+    case 'backseatgamer':
+      calculateBackseatGamerResults(room);
       break;
     case 'splittheroom':
       calculateSplitTheRoomResults(room);
@@ -1563,8 +1565,14 @@ function calculateVoteResults(room) {
     case 'debateme':
       calculateDebateMeResults(room);
       break;
-    case 'acrophobia':
-      calculateAcrophobiaResults(room);
+    case 'trynottolol':
+      calculateTryNotToLolResults(room);
+      break;
+    case 'courtroom':
+      calculateCourtroomResults(room);
+      break;
+    case 'punishmentwheel':
+      calculatePunishmentWheelResults(room);
       break;
     default:
       sendRoundResults(room, {});
@@ -1576,7 +1584,7 @@ function calculateVoteResults(room) {
  */
 function getEligibleVoters(room) {
   // Include audience in vote-based games
-  const includeAudience = ['quiplash', 'fibbage', 'drawful', 'tshirtwars', 'inventions', 'acrophobia', 'debateme'].includes(room.currentGame);
+  const includeAudience = ['quiplash', 'fibbage', 'drawful', 'tshirtwars', 'inventions', 'trynottolol', 'courtroom', 'debateme'].includes(room.currentGame);
 
   switch (room.currentGame) {
     case 'quiplash': {
@@ -1596,17 +1604,18 @@ function getEligibleVoters(room) {
       return Array.from(room.players.values()).filter(p => p.id !== room.gameData.drawerId);
     case 'whosaidit':
       return Array.from(room.players.values()).filter(p => !p.isAudience);
-    case 'twotruths':
-      // اللاعب المميز ما يصوت
-      return Array.from(room.players.values()).filter(p => !p.isAudience && p.id !== room.gameData.featuredPlayerId);
+    case 'trynottolol':
+      // الكل يصوتون
+      return Array.from(room.players.values());
+    case 'courtroom':
+      // هيئة المحلفين بس يصوتون
+      return Array.from(room.players.values()).filter(p => !p.isAudience && p.id !== room.gameData.prosecutorId && p.id !== room.gameData.defenderId);
     case 'splittheroom':
       // اللاعب اللي كتب السيناريو ما يصوت
       return Array.from(room.players.values()).filter(p => !p.isAudience && p.id !== room.gameData.fillerId);
     case 'debateme':
       // الكل يصوتون بس ما يصوتون لفريقهم
       return Array.from(room.players.values()).filter(p => !p.isAudience);
-    case 'acrophobia':
-      return Array.from(room.players.values()); // الجمهور يقدر يصوت
     default:
       return Array.from(room.players.values()).filter(p => !p.isAudience);
   }
@@ -4071,159 +4080,6 @@ function calculateTshirtWarsResults(room) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// 💕 الوحش العاشق (Love Monster)
-// ═══════════════════════════════════════════════════════════════════
-
-/**
- * Monster Seeking Monster - Real Jackbox flow:
- * 1. Each player has a secret monster identity
- * 2. Players send messages to try to get dates
- * 3. Players pick who to date
- * 4. Matches revealed + monster power activated
- */
-function startLoveMonsterRound(room) {
-  const playerIds = Array.from(room.players.keys());
-  room.gameData.phase = 'messaging';
-  room.gameData.messages = new Map();
-
-  // Assign monster identities (first round only)
-  if (!room.gameData.monsterAssignments) {
-    room.gameData.monsterAssignments = {};
-    const monsters = shuffle([...content.lovemonster.monsters]);
-    playerIds.forEach((id, i) => {
-      room.gameData.monsterAssignments[id] = monsters[i % monsters.length];
-    });
-    room.gameData.revealedMonsters = {};
-  }
-
-  const timeLimit = room._extendedTimers ? 60 : 45;
-
-  // Assign a random powerup to one random player at the start of each round
-  const powerups = content.lovemonster.powerups || [];
-  let roundPowerup = null;
-  if (powerups.length > 0 && playerIds.length > 0) {
-    const powerupPlayer = playerIds[Math.floor(Math.random() * playerIds.length)];
-    const powerup = powerups[Math.floor(Math.random() * powerups.length)];
-    roundPowerup = { playerId: powerupPlayer, ...powerup };
-    room.gameData.currentPowerup = roundPowerup;
-
-    // Apply powerup effect: store for results phase
-    if (powerup.name === 'سحر العيون' || powerup.name === 'مرآة') {
-      // These reveal who picked/messaged the player - applied during results
-      room.gameData.powerupReveal = powerupPlayer;
-    } else if (powerup.name === 'كيوبيد') {
-      // Extra pick - player can pick two people this round
-      room.gameData.extraPick = powerupPlayer;
-    } else if (powerup.name === 'قفل القلب') {
-      // Protected from cancel - their match cannot be nullified
-      room.gameData.protectedPlayer = powerupPlayer;
-    }
-    // 'قلب مكسور' effect is passive info - shown in results
-  }
-
-  // Each player picks who to "date" + sees their monster identity
-  playerIds.forEach(id => {
-    const others = playerIds.filter(pid => pid !== id);
-    const myMonster = room.gameData.monsterAssignments[id];
-    const myPowerup = (roundPowerup && roundPowerup.playerId === id) ? {
-      name: roundPowerup.name,
-      icon: roundPowerup.icon,
-      desc: roundPowerup.desc
-    } : null;
-
-    io.to(id).emit('loveMonsterPick', {
-      round: room.currentRound + 1,
-      maxRounds: room.maxRounds,
-      players: others.map(pid => {
-        const p = room.players.get(pid);
-        const revealed = room.gameData.revealedMonsters[pid];
-        return {
-          id: pid, name: p.name, avatar: p.avatar, avatarData: p.avatarData,
-          monsterRevealed: revealed || null
-        };
-      }),
-      myMonster,
-      myPowerup,
-      hasExtraPick: room.gameData.extraPick === id,
-      timeLimit,
-      messages: content.lovemonster.messages
-    });
-  });
-
-  setRoundTimer(room, timeLimit, () => {
-    handleAllAnswered(room);
-  });
-}
-
-function calculateLoveMonsterResults(room) {
-  clearRoundTimer(room);
-  const playerIds = Array.from(room.players.keys());
-  const choices = new Map();
-  const receivedFrom = new Map();
-
-  playerIds.forEach(id => { receivedFrom.set(id, []); });
-
-  room.players.forEach((p, id) => {
-    if (p.currentAnswer && p.currentAnswer !== '__timeout__') {
-      choices.set(id, p.currentAnswer);
-      const recv = receivedFrom.get(p.currentAnswer);
-      if (recv) recv.push(id);
-    }
-  });
-
-  // Reveal one monster this round (rotate through players)
-  const unrevealed = playerIds.filter(id => !room.gameData.revealedMonsters[id]);
-  let revealedThisRound = null;
-  if (unrevealed.length > 0) {
-    const revealId = unrevealed[Math.floor(Math.random() * unrevealed.length)];
-    revealedThisRound = {
-      playerId: revealId,
-      playerName: room.players.get(revealId)?.name,
-      monster: room.gameData.monsterAssignments[revealId]
-    };
-    room.gameData.revealedMonsters[revealId] = room.gameData.monsterAssignments[revealId];
-  }
-
-  const results = [];
-  room.players.forEach((p, id) => {
-    const pickedId = choices.get(id);
-    const pickedPlayer = pickedId ? room.players.get(pickedId) : null;
-    const receivedCount = (receivedFrom.get(id) || []).length;
-
-    let points = 0;
-    let mutual = false;
-    if (pickedId && choices.get(pickedId) === id) {
-      points = 1000;
-      mutual = true;
-    }
-    points += receivedCount * 200;
-    p.score += points;
-
-    results.push({
-      playerId: id,
-      playerName: p.name,
-      picked: pickedPlayer ? pickedPlayer.name : null,
-      receivedCount,
-      mutual,
-      points,
-      monster: room.gameData.revealedMonsters[id] || null
-    });
-  });
-
-  results.sort((a, b) => b.points - a.points);
-
-  io.to(room.code).emit('roundResults', {
-    game: 'lovemonster',
-    round: room.currentRound + 1,
-    maxRounds: room.maxRounds,
-    results,
-    revealedMonster: revealedThisRound,
-    players: getPlayerList(room),
-    isLastRound: room.currentRound >= room.maxRounds - 1
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════════
 // 💡 اختراعات مجنونة (Mad Inventions)
 // ═══════════════════════════════════════════════════════════════════
 
@@ -4742,192 +4598,6 @@ function calculateSpeedRoundResults(room) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// ✌️ حقيقتين وكذبة (Two Truths One Lie) - 3 جولات
-// ═══════════════════════════════════════════════════════════════════
-
-/**
- * بدء جولة حقيقتين وكذبة
- * المرحلة الأولى: اللاعب المميز يكتب حقيقتين وكذبة واحدة
- * المرحلة الثانية: الباقين يخمنون أي وحدة الكذبة
- * النقاط: 500 لكل من خمّن صح، 500 للاعب المميز لكل من انخدع
- */
-function startTwoTruthsRound(room) {
-  // اختيار اللاعب المميز (بالدور)
-  const playerIds = Array.from(room.players.keys());
-  const featuredIndex = room.currentRound % playerIds.length;
-  const featuredId = playerIds[featuredIndex];
-  const featuredPlayer = room.players.get(featuredId);
-
-  room.gameData.featuredPlayerId = featuredId;
-  room.gameData.phase = 'writing';
-
-  // اختيار تلميح من المحتوى
-  const hint = content.twotruths && content.twotruths.hints
-    ? pickQuestion(room, content.twotruths.hints)
-    : 'اكتب شي عنك!';
-
-  const timeLimit = room._extendedTimers ? 90 : 60;
-
-  // إرسال للاعب المميز
-  io.to(featuredId).emit('twoTruthsWrite', {
-    round: room.currentRound + 1,
-    maxRounds: room.maxRounds,
-    hint,
-    isFeatured: true,
-    timeLimit
-  });
-
-  // إبلاغ الباقين بالانتظار
-  socket_broadcast(room, featuredId, 'twoTruthsWaiting', {
-    round: room.currentRound + 1,
-    maxRounds: room.maxRounds,
-    featuredPlayerName: featuredPlayer.name,
-    timeLimit
-  });
-
-  // مؤقت الكتابة - بس اللاعب المميز يجاوب
-  clearRoundTimer(room);
-  room.roundTimer = setTimeout(() => {
-    const fp = room.players.get(featuredId);
-    if (fp && fp.currentAnswer === null) {
-      fp.currentAnswer = '__timeout__';
-    }
-    startTwoTruthsGuessing(room);
-  }, (timeLimit * 1000) + 2000);
-}
-
-/**
- * بدء مرحلة التخمين في حقيقتين وكذبة
- */
-function startTwoTruthsGuessing(room) {
-  clearRoundTimer(room);
-  room.gameData.phase = 'guessing';
-
-  const featuredId = room.gameData.featuredPlayerId;
-  const featuredPlayer = room.players.get(featuredId);
-  let statements = [];
-
-  // تحليل إجابة اللاعب المميز (3 عبارات + أي وحدة الكذبة)
-  if (featuredPlayer && featuredPlayer.currentAnswer && featuredPlayer.currentAnswer !== '__timeout__') {
-    try {
-      const parsed = JSON.parse(featuredPlayer.currentAnswer);
-      statements = parsed.statements || [];
-      room.gameData.lieIndex = parsed.lieIndex; // فهرس الكذبة (0, 1, أو 2)
-    } catch (e) {
-      statements = [featuredPlayer.currentAnswer, '...', '...'];
-      room.gameData.lieIndex = 0;
-    }
-  } else {
-    // اللاعب ما كتب شي
-    statements = ['ما كتب شي ١', 'ما كتب شي ٢', 'ما كتب شي ٣'];
-    room.gameData.lieIndex = 0;
-  }
-
-  room.gameData.statements = statements;
-
-  // إعادة تعيين إجابات الباقين فقط
-  room.players.forEach((p, id) => {
-    if (id !== featuredId) {
-      p.currentAnswer = null;
-      p.currentVote = null;
-    }
-  });
-
-  const timeLimit = room._extendedTimers ? 30 : 20;
-
-  io.to(room.code).emit('twoTruthsGuessing', {
-    round: room.currentRound + 1,
-    featuredPlayerName: featuredPlayer ? featuredPlayer.name : 'لاعب',
-    featuredPlayerId: featuredId,
-    statements,
-    timeLimit
-  });
-
-  setVoteTimer(room, timeLimit, () => {
-    calculateTwoTruthsResults(room);
-  });
-}
-
-/**
- * حساب نتائج حقيقتين وكذبة
- */
-function calculateTwoTruthsResults(room) {
-  clearRoundTimer(room);
-
-  const featuredId = room.gameData.featuredPlayerId;
-  const featuredPlayer = room.players.get(featuredId);
-  const lieIndex = room.gameData.lieIndex;
-  const statements = room.gameData.statements || [];
-  const playerResults = [];
-  let fooledCount = 0;
-
-  room.players.forEach((p, id) => {
-    if (id === featuredId) return;
-
-    let points = 0;
-    let guessedCorrect = false;
-
-    if (p.currentVote !== null && p.currentVote !== '__timeout__') {
-      const guessedIndex = parseInt(p.currentVote);
-      if (guessedIndex === lieIndex) {
-        guessedCorrect = true;
-        points = 500;
-      } else {
-        fooledCount++;
-      }
-    } else {
-      fooledCount++;
-    }
-
-    p.score += points;
-
-    // تتبع الإحصائيات
-    if (room.gameStats && guessedCorrect) {
-      room.gameStats.correctGuesses.set(id, (room.gameStats.correctGuesses.get(id) || 0) + 1);
-    }
-
-    playerResults.push({
-      playerId: id,
-      playerName: p.name,
-      guessedIndex: p.currentVote !== '__timeout__' ? parseInt(p.currentVote) : null,
-      guessedCorrect,
-      points
-    });
-  });
-
-  // نقاط اللاعب المميز - 500 لكل من انخدع
-  let featuredPoints = fooledCount * 500;
-  if (featuredPlayer) {
-    featuredPlayer.score += featuredPoints;
-
-    // تتبع الإحصائيات
-    if (room.gameStats && fooledCount > 0) {
-      room.gameStats.fooledCounts.set(featuredId, (room.gameStats.fooledCounts.get(featuredId) || 0) + fooledCount);
-    }
-  }
-
-  playerResults.unshift({
-    playerId: featuredId,
-    playerName: featuredPlayer ? featuredPlayer.name : 'لاعب',
-    isFeatured: true,
-    fooledCount,
-    points: featuredPoints
-  });
-
-  io.to(room.code).emit('roundResults', {
-    game: 'twotruths',
-    round: room.currentRound + 1,
-    maxRounds: room.maxRounds,
-    featuredPlayerName: featuredPlayer ? featuredPlayer.name : 'لاعب',
-    statements,
-    lieIndex,
-    playerResults,
-    players: getPlayerList(room),
-    isLastRound: room.currentRound >= room.maxRounds - 1
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════════
 // 🔀 سبليت ذا روم (Split the Room) - 5 جولات
 // ═══════════════════════════════════════════════════════════════════
 
@@ -5098,104 +4768,6 @@ function calculateSplitTheRoomResults(room) {
     percentYes,
     percentNo,
     splitDiff,
-    playerResults,
-    players: getPlayerList(room),
-    isLastRound: room.currentRound >= room.maxRounds - 1
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// 🎭 فك الرموز (Emoji Decode) - 5 جولات
-// ═══════════════════════════════════════════════════════════════════
-
-/**
- * بدء جولة فك الرموز
- * - عرض تسلسل إيموجي + الفئة
- * - اللاعبين يكتبون تخمينهم
- * - مقارنة مرنة (هل الإجابة تحتوي على الكلمات المفتاحية)
- * - أول إجابة صحيحة: 1000، الباقي: 500، خطأ: 0
- * - مؤقت: 15 ثانية
- */
-function startEmojiDecodeRound(room) {
-  const puzzle = pickQuestion(room, content.emojidecode.puzzles);
-  room.gameData.puzzle = puzzle;
-  room.gameData.phase = 'guessing';
-  room.gameData.answerOrder = [];
-
-  const timeLimit = 15;
-
-  io.to(room.code).emit('emojiDecodeQuestion', {
-    round: room.currentRound + 1,
-    maxRounds: room.maxRounds,
-    emojis: puzzle.emojis,
-    category: puzzle.category || '',
-    hint: puzzle.hint || '',
-    timeLimit
-  });
-
-  setRoundTimer(room, timeLimit, () => {
-    calculateEmojiDecodeResults(room);
-  });
-}
-
-/**
- * حساب نتائج فك الرموز
- */
-function calculateEmojiDecodeResults(room) {
-  clearRoundTimer(room);
-
-  const puzzle = room.gameData.puzzle;
-  const correctAnswer = puzzle.a;
-  const keywords = Array.isArray(puzzle.keywords) ? puzzle.keywords : [correctAnswer];
-  const answerOrder = room.gameData.answerOrder || [];
-  const playerResults = [];
-
-  room.players.forEach((p, id) => {
-    let points = 0;
-    let isCorrect = false;
-
-    if (p.currentAnswer && p.currentAnswer !== '__timeout__') {
-      const playerAnswer = p.currentAnswer.trim().toLowerCase();
-
-      // مقارنة مشددة - الإجابة لازم تكون 2 حرف على الأقل
-      isCorrect = playerAnswer.length >= 2 && keywords.some(kw => {
-        const kwLower = kw.trim().toLowerCase();
-        return playerAnswer === kwLower ||
-               playerAnswer.includes(kwLower) ||
-               (playerAnswer.length >= 3 && kwLower.includes(playerAnswer));
-      });
-
-      if (isCorrect) {
-        // استخدام answerOrder لتحديد الأول (بدل ترتيب Map)
-        const orderIdx = answerOrder.indexOf(id);
-        if (orderIdx === 0) {
-          points = 1000; // أول إجابة صحيحة
-        } else {
-          points = 500;
-        }
-      }
-    }
-
-    p.score += points;
-
-    playerResults.push({
-      playerId: id,
-      playerName: p.name,
-      answer: p.currentAnswer !== '__timeout__' ? p.currentAnswer : null,
-      isCorrect,
-      points
-    });
-  });
-
-  playerResults.sort((a, b) => b.points - a.points);
-
-  io.to(room.code).emit('roundResults', {
-    game: 'emojidecode',
-    round: room.currentRound + 1,
-    maxRounds: room.maxRounds,
-    emojis: puzzle.emojis,
-    correctAnswer: Array.isArray(correctAnswer) ? correctAnswer : correctAnswer,
-    category: puzzle.category || '',
     playerResults,
     players: getPlayerList(room),
     isLastRound: room.currentRound >= room.maxRounds - 1
@@ -5411,41 +4983,39 @@ function calculateDebateMeResults(room) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// 🔤 الأسماء (Acrophobia) - 3 جولات
+// 😂 لا تضحك (Try Not To LOL) - Smosh TNTL inspired
 // ═══════════════════════════════════════════════════════════════════
 
-/**
- * بدء جولة الأسماء
- * المرحلة الأولى: عرض أحرف عربية عشوائية + اللاعبين يكتبون اختصار/عبارة
- * المرحلة الثانية: التصويت لأفضل اختصار
- * النقاط: كل صوت = 500 نقطة
- */
-function startAcrophobiaRound(room) {
-  // توليد أحرف عربية عشوائية
-  const arabicLetters = ['ا', 'ب', 'ت', 'ث', 'ج', 'ح', 'خ', 'د', 'ذ', 'ر', 'ز', 'س', 'ش', 'ص', 'ض', 'ط', 'ظ', 'ع', 'غ', 'ف', 'ق', 'ك', 'ل', 'م', 'ن', 'ه', 'و', 'ي'];
-  const letterCount = 3 + Math.floor(Math.random() * 2); // 3 أو 4 أحرف
-  const letters = [];
-  for (let i = 0; i < letterCount; i++) {
-    letters.push(arabicLetters[Math.floor(Math.random() * arabicLetters.length)]);
-  }
-
-  // اختيار فئة من المحتوى
-  const category = content.acrophobia && content.acrophobia.categories
-    ? content.acrophobia.categories[Math.floor(Math.random() * content.acrophobia.categories.length)]
-    : 'اكتب أي عبارة!';
-
-  room.gameData.letters = letters;
-  room.gameData.category = category;
+function startTryNotToLolRound(room) {
+  const prompt = pickQuestion(room, content.trynottolol.prompts);
+  room.gameData.prompt = prompt;
   room.gameData.phase = 'writing';
+
+  // Pick a "judge" player who must try NOT to laugh (rotating)
+  const playerIds = Array.from(room.players.keys());
+  const judgeIndex = room.currentRound % playerIds.length;
+  const judgeId = playerIds[judgeIndex];
+  room.gameData.judgeId = judgeId;
 
   const timeLimit = room._extendedTimers ? 60 : 45;
 
-  io.to(room.code).emit('acrophobiaLetters', {
+  // Send to judge - they wait and see the prompt
+  io.to(judgeId).emit('tryNotToLolJudge', {
     round: room.currentRound + 1,
     maxRounds: room.maxRounds,
-    letters,
-    category,
+    prompt: prompt.text || prompt,
     timeLimit
+  });
+
+  // Send to other players - they write funny answers
+  playerIds.filter(id => id !== judgeId).forEach(id => {
+    io.to(id).emit('tryNotToLolWrite', {
+      round: room.currentRound + 1,
+      maxRounds: room.maxRounds,
+      prompt: prompt.text || prompt,
+      judgeName: room.players.get(judgeId)?.name || 'القاضي',
+      timeLimit
+    });
   });
 
   setRoundTimer(room, timeLimit, () => {
@@ -5453,71 +5023,70 @@ function startAcrophobiaRound(room) {
   });
 }
 
-/**
- * بدء مرحلة التصويت في الأسماء
- */
-function startAcrophobiaVoting(room) {
+function startTryNotToLolVoting(room) {
   clearRoundTimer(room);
   room.gameData.phase = 'voting';
 
-  // جمع الإجابات
-  const acronyms = [];
+  const judgeId = room.gameData.judgeId;
+  const answers = [];
+
   room.players.forEach((p, id) => {
-    if (p.currentAnswer && p.currentAnswer !== '__timeout__') {
-      acronyms.push({ id, text: p.currentAnswer, playerName: p.name });
+    if (id !== judgeId && p.currentAnswer && p.currentAnswer !== '__timeout__') {
+      answers.push({ id, text: p.currentAnswer, playerName: p.name });
     }
   });
 
-  if (acronyms.length < 2) {
+  if (answers.length < 1) {
     sendRoundResults(room, { message: 'ما فيه إجابات كافية!' });
     return;
   }
 
-  // خلط الإجابات
-  room.gameData.acronyms = shuffle(acronyms);
-
-  // إعادة تعيين التصويتات
+  room.gameData.answers = shuffle(answers);
   room.players.forEach(p => { p.currentVote = null; });
 
   const timeLimit = room._extendedTimers ? 30 : 20;
 
-  io.to(room.code).emit('acrophobiaVoting', {
+  // Judge picks funniest (the one that "made them laugh")
+  // Everyone else also votes
+  io.to(room.code).emit('tryNotToLolVoting', {
     round: room.currentRound + 1,
-    letters: room.gameData.letters,
-    category: room.gameData.category,
-    acronyms: room.gameData.acronyms.map(a => ({ id: a.id, text: a.text })),
+    prompt: room.gameData.prompt.text || room.gameData.prompt,
+    answers: room.gameData.answers.map(a => ({ id: a.id, text: a.text })),
+    judgeId,
+    judgeName: room.players.get(judgeId)?.name || 'القاضي',
     timeLimit
   });
 
   setVoteTimer(room, timeLimit, () => {
-    calculateAcrophobiaResults(room);
+    calculateTryNotToLolResults(room);
   });
 }
 
-/**
- * حساب نتائج الأسماء
- */
-function calculateAcrophobiaResults(room) {
+function calculateTryNotToLolResults(room) {
   clearRoundTimer(room);
 
-  const acronyms = room.gameData.acronyms || [];
+  const judgeId = room.gameData.judgeId;
+  const answers = room.gameData.answers || [];
   const voteCounts = {};
-  acronyms.forEach(a => { voteCounts[a.id] = 0; });
+  answers.forEach(a => { voteCounts[a.id] = 0; });
 
-  // حساب الأصوات (اللاعب ما يصوت لنفسه)
+  let judgeVote = null;
+
   room.players.forEach((p, id) => {
     if (p.currentVote && p.currentVote !== '__timeout__' && voteCounts.hasOwnProperty(p.currentVote) && p.currentVote !== id) {
       voteCounts[p.currentVote]++;
+      if (id === judgeId) judgeVote = p.currentVote;
     }
   });
 
-  const results = acronyms.map(a => {
+  const results = answers.map(a => {
     const votes = voteCounts[a.id] || 0;
-    const points = votes * 500;
+    const wasJudgePick = (a.id === judgeVote);
+    // Judge pick = 1000 bonus, each vote = 500
+    const points = (wasJudgePick ? 1000 : 0) + (votes * 500);
     const player = room.players.get(a.id);
     if (player) player.score += points;
 
-    // تتبع الإحصائيات
     if (room.gameStats && votes > 0) {
       room.gameStats.votesReceived.set(a.id, (room.gameStats.votesReceived.get(a.id) || 0) + votes);
     }
@@ -5527,21 +5096,420 @@ function calculateAcrophobiaResults(room) {
       playerName: a.playerName,
       text: a.text,
       votes,
+      wasJudgePick,
       points
     };
   });
 
-  results.sort((a, b) => b.votes - a.votes);
+  // Judge gets points if they "held it" (didn't vote for anyone with most votes)
+  const maxVotes = Math.max(...results.map(r => r.votes), 0);
+  const topAnswer = results.find(r => r.votes === maxVotes);
+  let judgeHeldIt = judgeVote !== topAnswer?.playerId;
+  let judgePoints = judgeHeldIt ? 500 : 0;
+  const judge = room.players.get(judgeId);
+  if (judge) judge.score += judgePoints;
+
+  results.sort((a, b) => b.points - a.points);
 
   io.to(room.code).emit('roundResults', {
-    game: 'acrophobia',
+    game: 'trynottolol',
     round: room.currentRound + 1,
     maxRounds: room.maxRounds,
-    letters: room.gameData.letters,
-    category: room.gameData.category,
+    prompt: room.gameData.prompt.text || room.gameData.prompt,
+    judgeName: judge?.name || 'القاضي',
+    judgeHeldIt,
+    judgePoints,
     results,
     players: getPlayerList(room),
     isLastRound: room.currentRound >= room.maxRounds - 1
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// 👨‍⚖️ المحكمة الكبرى (Courtroom) - Smosh & Order inspired
+// ═══════════════════════════════════════════════════════════════════
+
+function startCourtroomRound(room) {
+  const accusation = pickQuestion(room, content.courtroom.accusations);
+  room.gameData.accusation = accusation;
+  room.gameData.phase = 'arguing';
+
+  // Assign roles: one prosecutor, one defender, rest are jury
+  const playerIds = Array.from(room.players.keys());
+  const prosecutorIndex = (room.currentRound * 2) % playerIds.length;
+  const defenderIndex = (room.currentRound * 2 + 1) % playerIds.length;
+
+  room.gameData.prosecutorId = playerIds[prosecutorIndex];
+  room.gameData.defenderId = playerIds[defenderIndex];
+  room.gameData.juryIds = playerIds.filter((id, i) => i !== prosecutorIndex && i !== defenderIndex);
+
+  const timeLimit = room._extendedTimers ? 60 : 45;
+
+  playerIds.forEach(id => {
+    let role = 'jury';
+    if (id === room.gameData.prosecutorId) role = 'prosecutor';
+    if (id === room.gameData.defenderId) role = 'defender';
+
+    io.to(id).emit('courtroomWrite', {
+      round: room.currentRound + 1,
+      maxRounds: room.maxRounds,
+      accusation: accusation.text || accusation,
+      role,
+      prosecutorName: room.players.get(room.gameData.prosecutorId)?.name,
+      defenderName: room.players.get(room.gameData.defenderId)?.name,
+      timeLimit
+    });
+  });
+
+  setRoundTimer(room, timeLimit, () => {
+    handleAllAnswered(room);
+  });
+}
+
+function startCourtroomVoting(room) {
+  clearRoundTimer(room);
+  room.gameData.phase = 'voting';
+
+  const prosecutorId = room.gameData.prosecutorId;
+  const defenderId = room.gameData.defenderId;
+  const prosecutor = room.players.get(prosecutorId);
+  const defender = room.players.get(defenderId);
+
+  const prosecutorArg = prosecutor?.currentAnswer !== '__timeout__' ? prosecutor?.currentAnswer : 'ما قدم حجة!';
+  const defenderArg = defender?.currentAnswer !== '__timeout__' ? defender?.currentAnswer : 'ما قدم دفاع!';
+
+  room.gameData.prosecutorArg = prosecutorArg;
+  room.gameData.defenderArg = defenderArg;
+
+  // Reset votes for jury
+  room.players.forEach(p => { p.currentVote = null; });
+
+  const timeLimit = room._extendedTimers ? 25 : 15;
+
+  io.to(room.code).emit('courtroomVoting', {
+    round: room.currentRound + 1,
+    accusation: room.gameData.accusation.text || room.gameData.accusation,
+    prosecutorName: prosecutor?.name || 'المدعي',
+    defenderName: defender?.name || 'المدافع',
+    prosecutorArg,
+    defenderArg,
+    prosecutorId,
+    defenderId,
+    timeLimit
+  });
+
+  setVoteTimer(room, timeLimit, () => {
+    calculateCourtroomResults(room);
+  });
+}
+
+function calculateCourtroomResults(room) {
+  clearRoundTimer(room);
+
+  const prosecutorId = room.gameData.prosecutorId;
+  const defenderId = room.gameData.defenderId;
+  let guiltyVotes = 0;
+  let innocentVotes = 0;
+
+  room.players.forEach((p, id) => {
+    if (id === prosecutorId || id === defenderId) return;
+    if (p.currentVote === 'guilty') guiltyVotes++;
+    else if (p.currentVote === 'innocent') innocentVotes++;
+  });
+
+  const totalVotes = guiltyVotes + innocentVotes;
+  const verdict = guiltyVotes > innocentVotes ? 'guilty' : innocentVotes > guiltyVotes ? 'innocent' : 'hung';
+
+  // Winner gets 1000, loser gets 200 for participating
+  const prosecutorWon = verdict === 'guilty';
+  const defenderWon = verdict === 'innocent';
+
+  let prosecutorPts = prosecutorWon ? 1000 : 200;
+  let defenderPts = defenderWon ? 1000 : 200;
+  if (verdict === 'hung') { prosecutorPts = 500; defenderPts = 500; }
+
+  const prosecutor = room.players.get(prosecutorId);
+  const defender = room.players.get(defenderId);
+  if (prosecutor) prosecutor.score += prosecutorPts;
+  if (defender) defender.score += defenderPts;
+
+  // Jury members who voted with majority get 300
+  const playerResults = [];
+  room.players.forEach((p, id) => {
+    if (id === prosecutorId || id === defenderId) return;
+    let pts = 0;
+    if (verdict !== 'hung') {
+      if ((p.currentVote === 'guilty' && verdict === 'guilty') ||
+          (p.currentVote === 'innocent' && verdict === 'innocent')) {
+        pts = 300;
+      }
+    } else {
+      pts = 100; // everyone gets something in a hung jury
+    }
+    p.score += pts;
+    playerResults.push({ playerId: id, playerName: p.name, vote: p.currentVote, points: pts });
+  });
+
+  io.to(room.code).emit('roundResults', {
+    game: 'courtroom',
+    round: room.currentRound + 1,
+    maxRounds: room.maxRounds,
+    accusation: room.gameData.accusation.text || room.gameData.accusation,
+    verdict,
+    guiltyVotes,
+    innocentVotes,
+    prosecutorName: prosecutor?.name,
+    defenderName: defender?.name,
+    prosecutorArg: room.gameData.prosecutorArg,
+    defenderArg: room.gameData.defenderArg,
+    prosecutorPts,
+    defenderPts,
+    playerResults,
+    players: getPlayerList(room),
+    isLastRound: room.currentRound >= room.maxRounds - 1
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// 🎮 سوّاق أعمى (Backseat Gamer) - Smosh Backseat Gaming inspired
+// ═══════════════════════════════════════════════════════════════════
+
+function startBackseatGamerRound(room) {
+  const challenge = pickQuestion(room, content.backseatgamer.challenges);
+  room.gameData.challenge = challenge;
+  room.gameData.phase = 'describing';
+
+  // Pick describer (rotating)
+  const playerIds = Array.from(room.players.keys());
+  const describerIndex = room.currentRound % playerIds.length;
+  const describerId = playerIds[describerIndex];
+  room.gameData.describerId = describerId;
+
+  const timeLimit = room._extendedTimers ? 45 : 30;
+
+  // Describer sees the word + taboo words
+  io.to(describerId).emit('backseatGamerDescribe', {
+    round: room.currentRound + 1,
+    maxRounds: room.maxRounds,
+    word: challenge.word || challenge,
+    tabooWords: challenge.taboo || [],
+    category: challenge.category || '',
+    timeLimit
+  });
+
+  // Others must guess
+  playerIds.filter(id => id !== describerId).forEach(id => {
+    io.to(id).emit('backseatGamerGuess', {
+      round: room.currentRound + 1,
+      maxRounds: room.maxRounds,
+      describerName: room.players.get(describerId)?.name || 'الواصف',
+      category: challenge.category || '',
+      timeLimit
+    });
+  });
+
+  room.gameData.answerOrder = [];
+
+  setRoundTimer(room, timeLimit, () => {
+    handleAllAnswered(room);
+  });
+}
+
+function startBackseatGamerGuessing(room) {
+  // Describer submitted their clue, now show it to guessers
+  clearRoundTimer(room);
+  room.gameData.phase = 'guessing';
+
+  const describerId = room.gameData.describerId;
+  const describer = room.players.get(describerId);
+  const clue = describer?.currentAnswer !== '__timeout__' ? describer?.currentAnswer : 'ما قدر يوصف!';
+  room.gameData.clue = clue;
+
+  // Reset other players' answers
+  room.players.forEach((p, id) => {
+    if (id !== describerId) {
+      p.currentAnswer = null;
+    }
+  });
+  room.gameData.answerOrder = [];
+
+  const timeLimit = 20;
+
+  io.to(room.code).emit('backseatGamerClue', {
+    round: room.currentRound + 1,
+    clue,
+    describerName: describer?.name || 'الواصف',
+    describerId,
+    category: room.gameData.challenge.category || '',
+    timeLimit
+  });
+
+  setRoundTimer(room, timeLimit, () => {
+    calculateBackseatGamerResults(room);
+  });
+}
+
+function calculateBackseatGamerResults(room) {
+  clearRoundTimer(room);
+
+  const describerId = room.gameData.describerId;
+  const challenge = room.gameData.challenge;
+  const correctWord = (challenge.word || challenge).toString().trim().toLowerCase();
+  const keywords = challenge.keywords || [correctWord];
+  const answerOrder = room.gameData.answerOrder || [];
+  const playerResults = [];
+  let anyoneGuessed = false;
+
+  room.players.forEach((p, id) => {
+    if (id === describerId) return;
+
+    let points = 0;
+    let isCorrect = false;
+
+    if (p.currentAnswer && p.currentAnswer !== '__timeout__') {
+      const playerAnswer = p.currentAnswer.trim().toLowerCase();
+      isCorrect = playerAnswer.length >= 2 && keywords.some(kw => {
+        const kwLower = kw.trim().toLowerCase();
+        return playerAnswer === kwLower || playerAnswer.includes(kwLower) || (playerAnswer.length >= 3 && kwLower.includes(playerAnswer));
+      });
+
+      if (isCorrect) {
+        anyoneGuessed = true;
+        const orderIdx = answerOrder.indexOf(id);
+        points = orderIdx === 0 ? 1000 : 500;
+      }
+    }
+
+    p.score += points;
+    playerResults.push({
+      playerId: id,
+      playerName: p.name,
+      answer: p.currentAnswer !== '__timeout__' ? p.currentAnswer : null,
+      isCorrect,
+      points
+    });
+  });
+
+  // Describer gets points if anyone guessed correctly
+  let describerPoints = anyoneGuessed ? 800 : 0;
+  const describer = room.players.get(describerId);
+  if (describer) describer.score += describerPoints;
+
+  playerResults.unshift({
+    playerId: describerId,
+    playerName: describer?.name || 'الواصف',
+    isDescriber: true,
+    points: describerPoints,
+    clue: room.gameData.clue
+  });
+
+  playerResults.sort((a, b) => b.points - a.points);
+
+  io.to(room.code).emit('roundResults', {
+    game: 'backseatgamer',
+    round: room.currentRound + 1,
+    maxRounds: room.maxRounds,
+    word: challenge.word || challenge,
+    category: challenge.category || '',
+    clue: room.gameData.clue,
+    describerName: describer?.name,
+    playerResults,
+    players: getPlayerList(room),
+    isLastRound: room.currentRound >= room.maxRounds - 1
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// 🎡 عجلة العقاب (Punishment Wheel) - Smosh Game Bang inspired
+// ═══════════════════════════════════════════════════════════════════
+
+function startPunishmentWheelRound(room) {
+  const question = pickQuestion(room, content.punishmentwheel.questions);
+  room.gameData.question = question;
+  room.gameData.phase = 'answering';
+  room.gameData.answerOrder = [];
+
+  const timeLimit = 15;
+
+  io.to(room.code).emit('punishmentWheelQuestion', {
+    round: room.currentRound + 1,
+    maxRounds: room.maxRounds,
+    question: question.q,
+    category: question.category || '',
+    timeLimit
+  });
+
+  setRoundTimer(room, timeLimit, () => {
+    calculatePunishmentWheelResults(room);
+  });
+}
+
+function calculatePunishmentWheelResults(room) {
+  clearRoundTimer(room);
+
+  const question = room.gameData.question;
+  const correctAnswer = question.a;
+  const keywords = Array.isArray(question.keywords) ? question.keywords : [correctAnswer];
+  const answerOrder = room.gameData.answerOrder || [];
+  const playerResults = [];
+  let lowestPlayer = null;
+  let lowestScore = Infinity;
+
+  room.players.forEach((p, id) => {
+    let points = 0;
+    let isCorrect = false;
+
+    if (p.currentAnswer && p.currentAnswer !== '__timeout__') {
+      const playerAnswer = p.currentAnswer.trim().toLowerCase();
+      isCorrect = playerAnswer.length >= 2 && keywords.some(kw => {
+        const kwLower = kw.trim().toLowerCase();
+        return playerAnswer === kwLower || playerAnswer.includes(kwLower) || (playerAnswer.length >= 3 && kwLower.includes(playerAnswer));
+      });
+
+      if (isCorrect) {
+        const orderIdx = answerOrder.indexOf(id);
+        points = orderIdx === 0 ? 1000 : orderIdx === 1 ? 700 : 500;
+      }
+    }
+
+    p.score += points;
+    playerResults.push({
+      playerId: id,
+      playerName: p.name,
+      answer: p.currentAnswer !== '__timeout__' ? p.currentAnswer : null,
+      isCorrect,
+      points
+    });
+
+    // Track lowest score for punishment on last round
+    if (p.score < lowestScore) {
+      lowestScore = p.score;
+      lowestPlayer = { id, name: p.name, score: p.score };
+    }
+  });
+
+  playerResults.sort((a, b) => b.points - a.points);
+
+  // On last round, pick a random punishment for the loser
+  let punishment = null;
+  const isLastRound = room.currentRound >= room.maxRounds - 1;
+  if (isLastRound && content.punishmentwheel.punishments) {
+    const punishments = content.punishmentwheel.punishments;
+    punishment = punishments[Math.floor(Math.random() * punishments.length)];
+  }
+
+  io.to(room.code).emit('roundResults', {
+    game: 'punishmentwheel',
+    round: room.currentRound + 1,
+    maxRounds: room.maxRounds,
+    question: question.q,
+    correctAnswer,
+    category: question.category || '',
+    playerResults,
+    lowestPlayer: isLastRound ? lowestPlayer : null,
+    punishment: isLastRound ? punishment : null,
+    players: getPlayerList(room),
+    isLastRound
   });
 }
 
@@ -5758,18 +5726,18 @@ function startPlaylistGame(room) {
   // Shorter rounds in playlist mode (keep pace up)
   const playlistRounds = {
     quiplash: 2, guesspionage: Math.min(guesspionageRounds, 5), fakinit: 2,
-    triviamurder: 3, fibbage: 2, drawful: 2, tshirtwars: 2, lovemonster: 3,
+    triviamurder: 3, fibbage: 2, drawful: 2, tshirtwars: 2, trynottolol: 3,
     inventions: 2, wouldyourather: 3, whosaidit: 2, speedround: 6,
-    twotruths: 2, splittheroom: 3, emojidecode: 3, debateme: 2, acrophobia: 2
+    backseatgamer: 3, splittheroom: 3, courtroom: 2, debateme: 2, punishmentwheel: 3
   };
 
   const gameNames = {
     quiplash: '⚡ رد سريع', guesspionage: '📊 خمّن النسبة', fakinit: '🕵️ المزيّف',
     triviamurder: '💀 حفلة القاتل', fibbage: '🎭 كشف الكذاب', drawful: '🎨 ارسم لي',
-    tshirtwars: '👕 حرب التيشيرتات', lovemonster: '💕 الوحش العاشق', inventions: '💡 اختراعات مجنونة',
+    tshirtwars: '👕 حرب التيشيرتات', trynottolol: '😂 لا تضحك', inventions: '💡 اختراعات مجنونة',
     wouldyourather: '🤔 تبي ولا ما تبي', whosaidit: '💬 من قال؟', speedround: '⚡ أسرع واحد',
-    twotruths: '✌️ حقيقتين وكذبة', splittheroom: '🔀 سبليت ذا روم', emojidecode: '🎭 فك الرموز',
-    debateme: '⚖️ المحكمة', acrophobia: '🔤 الأسماء'
+    backseatgamer: '🎮 سوّاق أعمى', splittheroom: '🔀 سبليت ذا روم', courtroom: '👨‍⚖️ المحكمة الكبرى',
+    debateme: '⚖️ المحكمة', punishmentwheel: '🎡 عجلة العقاب'
   };
 
   // Send transition screen before starting
