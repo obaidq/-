@@ -15,10 +15,11 @@
     "socket.io": "^4.7.2"
   },
   "keywords": [
-    "jackbox",
     "party-games",
     "arabic",
-    "saudi"
+    "saudi",
+    "multiplayer",
+    "social-games"
   ],
   "author": "Abu Abed Box",
   "license": "MIT"

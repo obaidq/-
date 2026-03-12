@@ -1,7 +1,7 @@
 {
   "name": "أبو عابد بوكس",
   "short_name": "أبو عابد",
-  "description": "ألعاب جماعية سعودية مثل جاكبوكس! العب مع ربعك",
+  "description": "ألعاب جماعية سعودية! العب مع ربعك",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#001a0e",
@@ -12,9 +12,16 @@
   "categories": ["games", "entertainment"],
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧔🏻</text></svg>",
-      "sizes": "any",
-      "type": "image/svg+xml"
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='80' fill='%23001a0e'/%3E%3Ctext x='256' y='300' font-size='280' text-anchor='middle' dominant-baseline='central'%3E🧔🏻%3C/text%3E%3Ctext x='256' y='440' font-size='80' font-family='Cairo,sans-serif' font-weight='bold' fill='%2300C853' text-anchor='middle'%3E%D8%A3%D8%A8%D9%88 %D8%B9%D8%A7%D8%A8%D8%AF%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%23001a0e'/%3E%3Ctext x='96' y='110' font-size='100' text-anchor='middle' dominant-baseline='central'%3E🧔🏻%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
   ]
 }

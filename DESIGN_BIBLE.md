@@ -22,18 +22,18 @@
 
 | # | Game | Primary BG | Secondary BG | Accent 1 | Accent 2 | Accent 3 |
 |---|------|-----------|-------------|----------|----------|----------|
-| 1 | Quick Response (Quiplash) | #2D1B69 | #1A1145 | #FFD700 | #00E5FF | #FF4081 |
-| 2 | Guess % (Guesspionage) | #0D1117 | #1A2332 | #00FF41 | #FF1744 | #00BCD4 |
-| 3 | The Faker (Fakin' It) | #E07A5F | #F4D35E | #42A5F5 | #C62828 | #FDD835 |
-| 4 | Murder Party (TMP) | #0D0D0D | #1A1A1A | #2ECC40 | #CC0000 | #FFB347 |
-| 5 | Catch the Liar (Fibbage) | #1A1A5E | #0D0D3A | #FFD700 | #4CAF50 | #FF5722 |
-| 6 | Draw for Me (Drawful) | #F5C842 | #E8B830 | #C5A55A | #00897B | #1A1A1A |
-| 7 | T-Shirt Wars (Tee K.O.) | #0D0D1A | #1A1A2E | #FF007F | #00BFFF | #FFD700 |
-| 8 | Love Monster (MSM) | #1C0A2E | #2D1B4E | #FF1493 | #00FF7F | #FFD700 |
-| 9 | Mad Inventions (Patently Stupid) | #FFF8E7 | #F5E6C8 | #2980B9 | #FF8C00 | #27AE60 |
-| 10 | Would You Rather (Bracketeering) | #0A0E2A | #141852 | #FF2D7B | #00E5FF | #FFD700 |
-| 11 | Who Said It (Blather) | #1A1A3E | #2D2D5E | #FFB800 | #00BFA5 | #B388FF |
-| 12 | Speed Round (YDKJ) | #0D0D0D | #1A1A1A | #FF1744 | #00E676 | #2979FF |
+| 1 | رد سريع (Quick Response) | #2D1B69 | #1A1145 | #FFD700 | #00E5FF | #FF4081 |
+| 2 | خمّن النسبة (Guess %) | #0D1117 | #1A2332 | #00FF41 | #FF1744 | #00BCD4 |
+| 3 | المزيّف (The Faker) | #E07A5F | #F4D35E | #42A5F5 | #C62828 | #FDD835 |
+| 4 | حفلة القاتل (Murder Party) | #0D0D0D | #1A1A1A | #2ECC40 | #CC0000 | #FFB347 |
+| 5 | كشف الكذاب (Catch the Liar) | #1A1A5E | #0D0D3A | #FFD700 | #4CAF50 | #FF5722 |
+| 6 | ارسم لي (Draw for Me) | #F5C842 | #E8B830 | #C5A55A | #00897B | #1A1A1A |
+| 7 | حرب التيشيرتات (T-Shirt Wars) | #0D0D1A | #1A1A2E | #FF007F | #00BFFF | #FFD700 |
+| 8 | الوحش العاشق (Love Monster) | #1C0A2E | #2D1B4E | #FF1493 | #00FF7F | #FFD700 |
+| 9 | اختراعات مجنونة (Mad Inventions) | #FFF8E7 | #F5E6C8 | #2980B9 | #FF8C00 | #27AE60 |
+| 10 | تبي ولا ما تبي (Would You Rather) | #0A0E2A | #141852 | #FF2D7B | #00E5FF | #FFD700 |
+| 11 | من قال؟ (Who Said It) | #1A1A3E | #2D2D5E | #FFB800 | #00BFA5 | #B388FF |
+| 12 | أسرع واحد (Speed Round) | #0D0D0D | #1A1A1A | #FF1744 | #00E676 | #2979FF |
 | 13 | Two Truths (Interrogation) | #1A1A2E | #0D0D1A | #E63946 | #2ECC71 | #F4D35E |
 | 14 | Split the Room | #1B0A2E | #4A0E78 | #7B2FBE | #00CED1 | #F5E6CA |
 | 15 | Emoji Decode (Arcade) | #0A0A1A | #1A1A2E | #FF00FF | #00FFFF | #FFE600 |

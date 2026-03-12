@@ -6023,6 +6023,11 @@ setInterval(() => {
 // نقطة وصول API بسيطة (اختياري)
 // ═══════════════════════════════════════════════════════════════════
 
+// Health check endpoint (for load balancers / uptime monitors)
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', uptime: process.uptime() });
+});
+
 // حالة السيرفر
 app.get('/api/status', (req, res) => {
   res.json({
