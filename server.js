@@ -30,6 +30,7 @@
 // ═══════════════════════════════════════════════════════════════════
 
 const express = require('express');
+const helmet = require('helmet');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
@@ -117,9 +118,27 @@ function validateDrawingData(drawing) {
   }
 }
 
+// ── Security headers via Helmet ──
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https://api.dicebear.com"],
+      connectSrc: ["'self'", "wss:", "ws:"],
+    },
+  },
+  crossOriginEmbedderPolicy: false, // Allow DiceBear avatars
+}));
+
 // تقديم الملفات الثابتة
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public'), {
+  maxAge: process.env.NODE_ENV === 'production' ? '1d' : 0,
+  etag: true,
+}));
+app.use(express.json({ limit: '100kb' }));
 
 // TV/Spectator display route — auto-enables stream mode via query param
 app.get('/tv', (req, res) => {

@@ -48,6 +48,7 @@ body {
   min-height: 100dvh; /* Dynamic viewport height for mobile */
   padding: var(--safe-area-y) var(--safe-area-x);
   position: relative;
+  will-change: opacity, transform;
 }
 
 .screen.is-active {

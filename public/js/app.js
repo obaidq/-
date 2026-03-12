@@ -266,6 +266,18 @@ const App = {
     // عرض القائمة بعد التحميل
     setTimeout(() => this.showScreen('menuScreen'), 2500);
 
+    // Browser back button support
+    window.addEventListener('popstate', (e) => {
+      if (e.state && e.state.screen) {
+        this._poppingState = true;
+        this.showScreen(e.state.screen);
+      } else {
+        // Default: go to menu if no state
+        this._poppingState = true;
+        this.showScreen('menuScreen');
+      }
+    });
+
     // Enter key handlers
     ['hostNameInput', 'playerNameInput'].forEach(id => {
       document.getElementById(id)?.addEventListener('keypress', e => {
@@ -841,6 +853,14 @@ const App = {
     if (screen) {
       screen.classList.add('is-active');
       AudioEngine.whoosh();
+      // Browser history: allow back button to navigate screens
+      if (!this._poppingState) {
+        const navigableScreens = ['menuScreen', 'createScreen', 'joinScreen', 'howToPlayScreen', 'lobbyScreen'];
+        if (navigableScreens.includes(id)) {
+          history.pushState({ screen: id }, '', '#' + id.replace('Screen', ''));
+        }
+      }
+      this._poppingState = false;
       // إدارة Focus: نركّز على أول عنصر تفاعلي
       const focusable = screen.querySelector('input, button, [tabindex]');
       if (focusable) setTimeout(() => focusable.focus(), 100);
