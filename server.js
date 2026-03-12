@@ -699,6 +699,7 @@ io.on('connection', (socket) => {
       }
     }
     player.currentAnswer = processedAnswer;
+    player._answerTimestamp = Date.now();
     touchRoom(room);
 
     // ── حالة خاصة: تتبع ترتيب الإجابات في الألعاب السريعة ──
@@ -1762,6 +1763,7 @@ function startQuiplashRound(room) {
   room.gameData.currentMatchupIndex = 0;
   room.gameData.matchupResults = [];
   room.gameData.phase = 'answering';
+  room.gameData.answeringStartedAt = Date.now(); // for speed bonus tracking
   room.gameData.playerMatchupMap = new Map(); // maps playerId → { matchupIndex, question }
 
   // Build player-to-matchup mapping
@@ -2045,11 +2047,39 @@ function calculateQuiplashResults(room) {
     const voteCount = votes[id] || 0;
     let points = isJinx ? 0 : voteCount * pointsPerVote;
     let quiplash = false;
+    let speedBonus = 0;
+    let streakBonus = 0;
 
     // بونص الإجماع: لو كل الأصوات لك (و فيه أصوات أصلاً) - لا ينطبق في حالة الجينكس
     if (!isJinx && totalVoters > 0 && voteCount === totalVoters) {
       points += 200;
       quiplash = true;
+    }
+
+    // Speed bonus: +50 if answered within 15 seconds
+    if (!isJinx && voteCount > 0 && player._answerTimestamp && room.gameData.answeringStartedAt) {
+      const answerMs = player._answerTimestamp - room.gameData.answeringStartedAt;
+      if (answerMs <= 15000) {
+        speedBonus = 50;
+        points += speedBonus;
+      }
+    }
+
+    // Streak bonus: +100 if won 3+ matchups in a row
+    if (!isJinx && room.gameStats) {
+      // Check if this player is winning this matchup
+      const otherIds = matchup.filter(mid => mid !== id);
+      const isWinning = otherIds.every(oid => (votes[id] || 0) > (votes[oid] || 0));
+      if (isWinning && voteCount > 0) {
+        const currentStreak = (room.gameStats.streaks.get(id) || 0) + 1;
+        room.gameStats.streaks.set(id, currentStreak);
+        if (currentStreak >= 3) {
+          streakBonus = 100;
+          points += streakBonus;
+        }
+      } else {
+        room.gameStats.streaks.set(id, 0);
+      }
     }
 
     player.score += points;
@@ -2076,6 +2106,8 @@ function calculateQuiplashResults(room) {
       points,
       quiplash,
       jinx: isJinx,
+      speedBonus,
+      streakBonus,
       avatar: player.avatar,
       avatarData: player.avatarData || null
     };

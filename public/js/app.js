@@ -1385,7 +1385,10 @@ const App = {
                 '<div class="ql-results__player-avatar' + (aWins ? ' ql-results__player-avatar--happy' : bWins ? ' ql-results__player-avatar--sad' : '') + '">' + this._gAvatar(sideA.avatarData, 40, sideA.avatar) + '</div>' +
                 '<div class="ql-results__player-name">' + escapeHtml(sideA.playerName || '') + '</div>' +
               '</div>' +
-              '<div class="ql-points' + (sideA.quiplash ? ' ql-points--quiplash' : '') + '">+' + (sideA.points || 0) + '</div>' +
+              '<div class="ql-points' + (sideA.quiplash ? ' ql-points--quiplash' : '') + '">+' + (sideA.points || 0) +
+                (sideA.speedBonus ? ' <span class="ql-bonus-badge">⚡+' + sideA.speedBonus + '</span>' : '') +
+                (sideA.streakBonus ? ' <span class="ql-bonus-badge ql-bonus-badge--streak">🔥+' + sideA.streakBonus + '</span>' : '') +
+              '</div>' +
             '</div>' +
             // VS divider
             '<div class="ql-vs"><div class="ql-vs__badge">⚡</div></div>' +
@@ -1400,7 +1403,10 @@ const App = {
                 '<div class="ql-results__player-avatar' + (bWins ? ' ql-results__player-avatar--happy' : aWins ? ' ql-results__player-avatar--sad' : '') + '">' + this._gAvatar(sideB.avatarData, 40, sideB.avatar) + '</div>' +
                 '<div class="ql-results__player-name">' + escapeHtml(sideB.playerName || '') + '</div>' +
               '</div>' +
-              '<div class="ql-points' + (sideB.quiplash ? ' ql-points--quiplash' : '') + '">+' + (sideB.points || 0) + '</div>' +
+              '<div class="ql-points' + (sideB.quiplash ? ' ql-points--quiplash' : '') + '">+' + (sideB.points || 0) +
+                (sideB.speedBonus ? ' <span class="ql-bonus-badge">⚡+' + sideB.speedBonus + '</span>' : '') +
+                (sideB.streakBonus ? ' <span class="ql-bonus-badge ql-bonus-badge--streak">🔥+' + sideB.streakBonus + '</span>' : '') +
+              '</div>' +
             '</div>' +
           '</div>' +
         '</div>';

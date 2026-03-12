@@ -1113,6 +1113,15 @@
   from { transform:translateY(20px) scale(0.5); opacity:0; }
   to { transform:translateY(0) scale(1); opacity:1; }
 }
+.ql-bonus-badge {
+  display:inline-block; font-size:12px; font-weight:700;
+  background:rgba(0,229,118,0.2); color:#00e576;
+  padding:2px 6px; border-radius:8px; margin-inline-start:4px;
+  animation:ql-points-fly 0.4s ease-out 0.5s both;
+}
+.ql-bonus-badge--streak {
+  background:rgba(255,107,0,0.2); color:#FF6B00;
+}
 
 /* ─── QUIPLASH Moment Overlay ─── */
 .ql-quiplash-moment {
