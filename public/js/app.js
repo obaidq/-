@@ -31,16 +31,16 @@ const GAMES = {
   fibbage:        { icon: '🎭', name: 'كشف الكذاب',      hint: 'اكتب كذبة مقنعة!',                 pattern: 'pattern-newspaper' },
   drawful:        { icon: '🎨', name: 'ارسم لي',         hint: 'ارسم الكلمة!',                     pattern: 'pattern-paint' },
   tshirtwars:     { icon: '👕', name: 'حرب التيشيرتات',  hint: 'اكتب أفضل شعار!',                  pattern: 'pattern-rays' },
-  lovemonster:    { icon: '💕', name: 'الوحش العاشق',    hint: 'اختر واحد ترسل له!',               pattern: 'pattern-dots' },
+  trynottolol:    { icon: '😂', name: 'لا تضحك',         hint: 'اكتب أطرف جواب!',                  pattern: 'pattern-dots' },
   inventions:     { icon: '💡', name: 'اختراعات مجنونة',  hint: 'اخترع شي مجنون!',                  pattern: 'pattern-grid' },
   wouldyourather: { icon: '🤔', name: 'تبي ولا ما تبي',  hint: 'اختر خيار!',                       pattern: 'pattern-zigzag' },
   whosaidit:      { icon: '💬', name: 'من قال؟',         hint: 'خمّن مين كتب هالكلام!',            pattern: 'pattern-stripes' },
   speedround:     { icon: '⚡', name: 'أسرع واحد',       hint: 'أجب أسرع من الكل!',                pattern: 'pattern-confetti' },
-  twotruths:      { icon: '✌️', name: 'حقيقتين وكذبة',   hint: 'اكتشف الكذبة!',                    pattern: 'pattern-waves' },
+  backseatgamer:  { icon: '🎮', name: 'سوّاق أعمى',      hint: 'وصّف أو خمّن!',                    pattern: 'pattern-waves' },
   splittheroom:   { icon: '🔀', name: 'سبليت ذا روم',    hint: 'اقسم الغرفة!',                     pattern: 'pattern-halftone' },
-  emojidecode:    { icon: '🎭', name: 'فك الرموز',       hint: 'خمّن من الإيموجي!',                pattern: 'pattern-noise' },
+  courtroom:      { icon: '👨‍⚖️', name: 'المحكمة الكبرى',  hint: 'ادّعي أو دافع!',                   pattern: 'pattern-noise' },
   debateme:       { icon: '⚖️', name: 'المحكمة',         hint: 'قنع الباقين برأيك!',               pattern: 'pattern-spotlight' },
-  acrophobia:     { icon: '🔤', name: 'الأسماء',         hint: 'اصنع أطرف اختصار!',                pattern: 'pattern-triangles' }
+  punishmentwheel:{ icon: '🎡', name: 'عجلة العقاب',     hint: 'جاوب صح أو انعاقب!',               pattern: 'pattern-triangles' }
 };
 
 const DRAW_COLORS = ['#000000', '#ff0000', '#0066ff', '#00aa00', '#ff8800', '#9900cc', '#ff69b4', '#8B4513', '#FFD700', '#00CED1', '#808080', '#ffffff'];
@@ -302,11 +302,9 @@ const App = {
         case 'submitDrawing': this.submitDrawing(); break;
         case 'submitGuessDrawful': this.submitGuessDrawful(); break;
         case 'submitFinalPicks': this.submitFinalPicks(); break;
-        case 'submitLoveChoice': this.submitLoveChoice(id, target); break;
+        case 'submitCourtroomVote': this.submitCourtroomVote(target.dataset.vote); break;
         case 'submitWyrChoice': this.submitWyrChoice(target.getAttribute('data-choice'), target); break;
         case 'guessWhoSaidIt': this.guessWhoSaidIt(target.getAttribute('data-player'), target); break;
-        case 'submitTwoTruths': this.submitTwoTruths(); break;
-        case 'guessTwoTruths': this.guessTwoTruths(id, target); break;
         case 'submitSplitVote': this.submitSplitVote(target.getAttribute('data-vote'), target); break;
         case 'requestNextRound': this.requestNextRound(); break;
         case 'backToLobby': this.backToLobby(); break;
@@ -645,8 +643,10 @@ const App = {
     s.on('slogansAccepted', () => this.showToast('شعاراتك وصلت!', 'success'));
     s.on('choiceAccepted', () => this.showToast('اختيارك وصل!', 'success'));
 
-    // ── الوحش العاشق (Love Monster) ──
-    s.on('loveMonsterPick', data => this.handleLoveMonsterPick(data));
+    // ── لا تضحك (Try Not To LOL) ──
+    s.on('tryNotToLolWrite', data => this.handleTryNotToLolWrite(data));
+    s.on('tryNotToLolJudge', data => this.handleTryNotToLolJudge(data));
+    s.on('tryNotToLolVoting', data => this.handleTryNotToLolVoting(data));
 
     // ── اختراعات مجنونة (Inventions / Patently Stupid) ──
     s.on('inventionsProblem', data => this.handleInventionsProblem(data));
@@ -665,24 +665,25 @@ const App = {
     s.on('speedRoundQuestion', data => this.handleSpeedRoundQuestion(data));
     s.on('speedRoundResult', data => this.handleSpeedRoundResult(data));
 
-    // ── حقيقتين وكذبة (Two Truths) ──
-    s.on('twoTruthsWrite', data => this.handleTwoTruthsWrite(data));
-    s.on('twoTruthsGuess', data => this.handleTwoTruthsGuess(data));
+    // ── سوّاق أعمى (Backseat Gamer) ──
+    s.on('backseatGamerDescribe', data => this.handleBackseatGamerDescribe(data));
+    s.on('backseatGamerGuess', data => this.handleBackseatGamerGuess(data));
+    s.on('backseatGamerClue', data => this.handleBackseatGamerClue(data));
 
     // ── سبليت ذا روم (Split the Room) ──
     s.on('splitTheRoomWrite', data => this.handleSplitTheRoomWrite(data));
     s.on('splitTheRoomVote', data => this.handleSplitTheRoomVote(data));
 
-    // ── فك الرموز (Emoji Decode) ──
-    s.on('emojiDecodeQuestion', data => this.handleEmojiDecodeQuestion(data));
+    // ── المحكمة الكبرى (Courtroom) ──
+    s.on('courtroomWrite', data => this.handleCourtroomWrite(data));
+    s.on('courtroomVoting', data => this.handleCourtroomVoting(data));
 
     // ── المحكمة (Debate Me) ──
     s.on('debateMeWrite', data => this.handleDebateMeWrite(data));
     s.on('debateMeVoting', data => this.handleDebateMeVoting(data));
 
-    // ── الأسماء (Acrophobia) ──
-    s.on('acrophobiaWrite', data => this.handleAcrophobiaWrite(data));
-    s.on('acrophobiaVoting', data => this.handleAcrophobiaVoting(data));
+    // ── عجلة العقاب (Punishment Wheel) ──
+    s.on('punishmentWheelQuestion', data => this.handlePunishmentWheelQuestion(data));
 
     // ── Host Controls ──
     s.on('gamePaused', data => {
@@ -1323,16 +1324,16 @@ const App = {
     fibbage:        { bg1: '#1A1A5E', bg2: '#0D0D3A', accent: '#FFD700', glow: 'rgba(255,215,0,0.5)' },
     drawful:        { bg1: '#7A6420', bg2: '#5A4A15', accent: '#C5A55A', glow: 'rgba(197,165,90,0.5)' },
     tshirtwars:     { bg1: '#0D0D1A', bg2: '#1A1A2E', accent: '#FF007F', glow: 'rgba(255,0,127,0.5)' },
-    lovemonster:    { bg1: '#1C0A2E', bg2: '#2D1B4E', accent: '#FF1493', glow: 'rgba(255,20,147,0.5)' },
+    trynottolol:    { bg1: '#1A0A2E', bg2: '#2E1B69', accent: '#FFD700', glow: 'rgba(255,215,0,0.5)' },
     inventions:     { bg1: '#1A3A5C', bg2: '#0D2840', accent: '#2980B9', glow: 'rgba(41,128,185,0.5)' },
     wouldyourather: { bg1: '#0A0E2A', bg2: '#141852', accent: '#FF2D7B', glow: 'rgba(255,45,123,0.5)' },
     whosaidit:      { bg1: '#1A1A3E', bg2: '#2D2D5E', accent: '#FFB800', glow: 'rgba(255,184,0,0.5)' },
     speedround:     { bg1: '#0D0D0D', bg2: '#1A1A1A', accent: '#FF1744', glow: 'rgba(255,23,68,0.5)' },
-    twotruths:      { bg1: '#1A1A2E', bg2: '#0D0D1A', accent: '#E63946', glow: 'rgba(230,57,70,0.5)' },
+    backseatgamer:  { bg1: '#0D1B2A', bg2: '#1B2838', accent: '#00E5FF', glow: 'rgba(0,229,255,0.5)' },
     splittheroom:   { bg1: '#1B0A2E', bg2: '#4A0E78', accent: '#7B2FBE', glow: 'rgba(123,47,190,0.5)' },
-    emojidecode:    { bg1: '#0A0A1A', bg2: '#1A1A2E', accent: '#FF00FF', glow: 'rgba(255,0,255,0.5)' },
+    courtroom:      { bg1: '#1A1205', bg2: '#2D1F0A', accent: '#D4AF37', glow: 'rgba(212,175,55,0.5)' },
     debateme:       { bg1: '#2C1810', bg2: '#4A3728', accent: '#C9A96E', glow: 'rgba(201,169,110,0.5)' },
-    acrophobia:     { bg1: '#2D5F3A', bg2: '#1A472A', accent: '#F5F0EB', glow: 'rgba(245,240,235,0.5)' },
+    punishmentwheel:{ bg1: '#2E0A0A', bg2: '#4A0E0E', accent: '#FF4444', glow: 'rgba(255,68,68,0.5)' },
   },
 
   /**
@@ -2907,76 +2908,78 @@ const App = {
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // ✌️ حقيقتين وكذبة (Two Truths One Lie)
+  // 🎮 سوّاق أعمى (Backseat Gamer)
   // ═══════════════════════════════════════════════════════════════
 
-  handleTwoTruthsWrite(d) {
+  handleBackseatGamerDescribe(d) {
     this._submitting = false;
     this.showScreen('gameScreen');
-    this.setTheme('twotruths');
-    this.showRoundInfo(d.round, d.maxRounds, '✌️ حقيقتين وكذبة');
+    this.setTheme('backseatgamer');
+    this.showRoundInfo(d.round, d.maxRounds, '🎮 سوّاق أعمى');
     this.startTimer(d.timeLimit);
+    this.setHint('وصّف الكلمة بدون الكلمات المحرّمة!');
 
-    if (d.isFeatured) {
-      this.setHint('اكتب حقيقتين وكذبة وحدة!');
-      document.getElementById('gameContent').innerHTML =
-        '<div class="panel" style="max-width:600px">' +
-          '<div class="badge badge--warning mb-4">✌️ دورك!</div>' +
-          (d.promptHint ? '<p class="text-muted mb-4">💡 ' + escapeHtml(d.promptHint) + '</p>' : '') +
-          '<div class="mb-3"><label class="text-sm text-muted">✅ حقيقة 1</label>' +
-          '<input type="text" class="input" id="truth1" placeholder="حقيقة عنك..." maxlength="100"></div>' +
-          '<div class="mb-3"><label class="text-sm text-muted">✅ حقيقة 2</label>' +
-          '<input type="text" class="input" id="truth2" placeholder="حقيقة ثانية عنك..." maxlength="100"></div>' +
-          '<div class="mb-3"><label class="text-sm text-muted">❌ كذبة</label>' +
-          '<input type="text" class="input" id="lie1" placeholder="كذبة مقنعة..." maxlength="100"></div>' +
-          '<button class="btn btn--primary btn--full mt-4" data-action="submitTwoTruths">إرسال ✌️</button>' +
-        '</div>';
-      document.getElementById('truth1')?.focus();
-    } else {
-      this.setHint('انتظر ' + escapeHtml(d.featuredName) + '...');
-      this.showWaiting(escapeHtml(d.featuredName) + ' يكتب حقيقتين وكذبة...');
+    let tabooHtml = '';
+    if (d.tabooWords && d.tabooWords.length > 0) {
+      tabooHtml = '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:16px">';
+      d.tabooWords.forEach(w => {
+        tabooHtml += '<span style="background:rgba(255,68,68,0.3);color:#ff4444;padding:4px 12px;border-radius:20px;font-size:14px">🚫 ' + escapeHtml(w) + '</span>';
+      });
+      tabooHtml += '</div>';
     }
-  },
-
-  submitTwoTruths() {
-    if (this._submitting) return;
-    const t1 = document.getElementById('truth1')?.value?.trim();
-    const t2 = document.getElementById('truth2')?.value?.trim();
-    const lie = document.getElementById('lie1')?.value?.trim();
-    if (!t1 || !t2 || !lie) return this.showToast('اكتب كل الحقول!', 'error');
-    this._submitting = true;
-    AudioEngine.submit();
-    this.socket.emit('submitAnswer', { code: this.currentRoom, answer: JSON.stringify({ t1, t2, lie }) });
-    ScreenMachine.showLockIn(document.getElementById('gameContent'));
-  },
-
-  handleTwoTruthsGuess(d) {
-    this._submitting = false;
-    this.startTimer(d.timeLimit);
-    this.setHint('أي واحدة الكذبة؟');
-
-    const stmts = d.statements.map((s, i) =>
-      '<button class="vote-option" data-action="guessTwoTruths" data-id="' + i + '">' +
-        '<div class="vote-option__text">' + escapeHtml(s) + '</div>' +
-      '</button>'
-    ).join('');
 
     document.getElementById('gameContent').innerHTML =
       '<div class="panel" style="max-width:600px">' +
-        '<div class="badge badge--warning mb-4">🤔 أي وحدة الكذبة؟</div>' +
-        '<p class="text-lg mb-4">' + escapeHtml(d.featuredName) + ' كتب:</p>' +
-        '<div class="flex flex-col gap-3">' + stmts + '</div>' +
-        '<p class="text-muted text-center mt-4" id="waitingCount"></p>' +
+        '<div class="badge badge--danger mb-4">🎮 أنت الواصف!</div>' +
+        '<div style="font-size:36px;font-weight:900;color:#00E5FF;margin-bottom:16px;text-shadow:0 0 20px rgba(0,229,255,0.5)">' + escapeHtml(d.word) + '</div>' +
+        (d.category ? '<span class="game-tag mb-3">' + escapeHtml(d.category) + '</span>' : '') +
+        tabooHtml +
+        '<textarea class="input input--game input--textarea" id="answerInput" placeholder="وصّف الكلمة بدون استخدام الكلمات المحرّمة..." maxlength="200" rows="2"></textarea>' +
+        '<button class="btn btn--primary btn--full mt-3" data-action="submitAnswer">إرسال الوصف 🎮</button>' +
+      '</div>';
+    document.getElementById('answerInput')?.focus();
+  },
+
+  handleBackseatGamerGuess(d) {
+    this._submitting = false;
+    this.showScreen('gameScreen');
+    this.setTheme('backseatgamer');
+    this.showRoundInfo(d.round, d.maxRounds, '🎮 سوّاق أعمى');
+    this.startTimer(d.timeLimit);
+    this.setHint('انتظر الوصف من ' + escapeHtml(d.describerName) + '...');
+
+    document.getElementById('gameContent').innerHTML =
+      '<div class="panel" style="max-width:600px;text-align:center">' +
+        '<div class="badge badge--info mb-4">🎮 استعد للتخمين!</div>' +
+        (d.category ? '<span class="game-tag mb-3">' + escapeHtml(d.category) + '</span>' : '') +
+        '<div style="font-size:48px;margin:24px 0">🤔</div>' +
+        '<p class="text-muted">' + escapeHtml(d.describerName) + ' يوصف الكلمة...</p>' +
       '</div>';
   },
 
-  guessTwoTruths(id, el) {
-    if (this._submitting) return;
-    this._submitting = true;
-    document.querySelectorAll('.vote-option').forEach(c => c.classList.remove('vote-option--selected'));
-    el.classList.add('vote-option--selected');
-    AudioEngine.vote();
-    this.socket.emit('submitVote', { code: this.currentRoom, voteId: id });
+  handleBackseatGamerClue(d) {
+    this._submitting = false;
+    this.startTimer(d.timeLimit);
+    this.setHint('خمّن الكلمة!');
+
+    document.getElementById('gameContent').innerHTML =
+      '<div class="panel" style="max-width:600px">' +
+        '<div class="badge badge--warning mb-4">🎮 ' + escapeHtml(d.describerName) + ' يقول:</div>' +
+        '<p class="text-2xl font-bold mb-4" style="color:#00E5FF">"' + escapeHtml(d.clue) + '"</p>' +
+        (d.category ? '<span class="game-tag mb-3">' + escapeHtml(d.category) + '</span>' : '') +
+        '<div class="speed-input-wrap">' +
+          '<input type="text" class="input input--game" id="answerInput" placeholder="اكتب تخمينك..." maxlength="50" autocomplete="off">' +
+          '<button class="btn btn--primary btn--lg" data-action="submitAnswer">🎮</button>' +
+        '</div>' +
+      '</div>';
+
+    const input = document.getElementById('answerInput');
+    if (input) {
+      input.focus();
+      input.addEventListener('keypress', e => {
+        if (e.key === 'Enter') this.submitAnswer();
+      });
+    }
   },
 
   // ═══════════════════════════════════════════════════════════════
@@ -3033,35 +3036,74 @@ const App = {
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // 🎭 فك الرموز (Emoji Decode)
+  // 👨‍⚖️ المحكمة الكبرى (Courtroom)
   // ═══════════════════════════════════════════════════════════════
 
-  handleEmojiDecodeQuestion(d) {
+  handleCourtroomWrite(d) {
     this._submitting = false;
     this.showScreen('gameScreen');
-    this.setTheme('emojidecode');
-    this.showRoundInfo(d.round, d.maxRounds, '🎭 فك الرموز');
+    this.setTheme('courtroom');
+    this.showRoundInfo(d.round, d.maxRounds, '👨‍⚖️ المحكمة الكبرى');
     this.startTimer(d.timeLimit);
-    this.setHint('خمّن من الإيموجي!');
+
+    const roleEmoji = d.role === 'prosecutor' ? '🔴' : d.role === 'defender' ? '🔵' : '👥';
+    const roleName = d.role === 'prosecutor' ? 'المدعي' : d.role === 'defender' ? 'المدافع' : 'هيئة المحلفين';
+    const roleColor = d.role === 'prosecutor' ? 'rgba(255,68,68,0.2)' : d.role === 'defender' ? 'rgba(68,138,255,0.2)' : 'rgba(255,255,255,0.1)';
+
+    if (d.role === 'jury') {
+      this.setHint('انتظر المرافعات...');
+      document.getElementById('gameContent').innerHTML =
+        '<div class="panel" style="max-width:600px;text-align:center">' +
+          '<div class="badge badge--info mb-4">👥 أنت من هيئة المحلفين</div>' +
+          '<p class="text-2xl font-bold mb-4">📜 ' + escapeHtml(d.accusation) + '</p>' +
+          '<p class="text-muted">🔴 المدعي: ' + escapeHtml(d.prosecutorName) + '</p>' +
+          '<p class="text-muted">🔵 المدافع: ' + escapeHtml(d.defenderName) + '</p>' +
+          '<div style="font-size:48px;margin:24px 0">⚖️</div>' +
+          '<p class="text-muted">انتظر المرافعات...</p>' +
+        '</div>';
+    } else {
+      this.setHint(d.role === 'prosecutor' ? 'اكتب تهمتك!' : 'اكتب دفاعك!');
+      document.getElementById('gameContent').innerHTML =
+        '<div class="panel" style="max-width:600px">' +
+          '<div class="badge mb-4" style="background:' + roleColor + '">' + roleEmoji + ' أنت ' + escapeHtml(roleName) + '</div>' +
+          '<p class="text-2xl font-bold mb-4">📜 ' + escapeHtml(d.accusation) + '</p>' +
+          '<textarea class="input input--game input--textarea" id="answerInput" placeholder="' + (d.role === 'prosecutor' ? 'اكتب حجتك ضد المتهم...' : 'اكتب دفاعك عن المتهم...') + '" maxlength="200" rows="3"></textarea>' +
+          '<button class="btn btn--primary btn--full mt-3" data-action="submitAnswer">إرسال ' + roleEmoji + '</button>' +
+        '</div>';
+      document.getElementById('answerInput')?.focus();
+    }
+  },
+
+  handleCourtroomVoting(d) {
+    this._submitting = false;
+    this.startTimer(d.timeLimit);
+    this.setHint('مذنب أو بريء؟');
 
     document.getElementById('gameContent').innerHTML =
-      '<div class="emoji-decode-container">' +
-        '<div class="emoji-decode-category">' + escapeHtml(d.category) + '</div>' +
-        '<div class="emoji-decode-emojis">' + escapeHtml(d.emojis) + '</div>' +
-        '<div class="speed-input-wrap">' +
-          '<input type="text" class="input input--game" id="answerInput" placeholder="اكتب جوابك..." maxlength="50" autocomplete="off">' +
-          '<button class="btn btn--primary btn--lg" data-action="submitAnswer">🎭</button>' +
+      '<div class="panel" style="max-width:700px;width:100%">' +
+        '<div class="badge badge--info mb-4">⚖️ ' + escapeHtml(d.accusation) + '</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">' +
+          '<div style="background:rgba(255,68,68,0.15);padding:16px;border-radius:12px">' +
+            '<p style="color:#ff4444;font-weight:bold;margin-bottom:8px">🔴 ' + escapeHtml(d.prosecutorName) + '</p>' +
+            '<p style="color:#fff;font-size:14px">"' + escapeHtml(d.prosecutorArg) + '"</p>' +
+          '</div>' +
+          '<div style="background:rgba(68,138,255,0.15);padding:16px;border-radius:12px">' +
+            '<p style="color:#448AFF;font-weight:bold;margin-bottom:8px">🔵 ' + escapeHtml(d.defenderName) + '</p>' +
+            '<p style="color:#fff;font-size:14px">"' + escapeHtml(d.defenderArg) + '"</p>' +
+          '</div>' +
         '</div>' +
-        '<p class="text-muted mt-2" id="waitingCount"></p>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">' +
+          '<button class="btn btn--full" style="background:#ff4444;font-size:20px;padding:16px" data-action="submitCourtroomVote" data-vote="guilty">🔨 مذنب!</button>' +
+          '<button class="btn btn--full" style="background:#448AFF;font-size:20px;padding:16px" data-action="submitCourtroomVote" data-vote="innocent">✨ بريء!</button>' +
+        '</div>' +
       '</div>';
+  },
 
-    const input = document.getElementById('answerInput');
-    if (input) {
-      input.focus();
-      input.addEventListener('keypress', e => {
-        if (e.key === 'Enter') this.submitAnswer();
-      });
-    }
+  submitCourtroomVote(vote) {
+    if (this._submitting) return;
+    this._submitting = true;
+    AudioEngine.submit();
+    this.socket.emit('submitVote', { code: this.currentRoom, vote });
   },
 
   // ═══════════════════════════════════════════════════════════════
@@ -3110,44 +3152,36 @@ const App = {
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // 🔤 الأسماء (Acrophobia)
+  // 🎡 عجلة العقاب (Punishment Wheel)
   // ═══════════════════════════════════════════════════════════════
 
-  handleAcrophobiaWrite(d) {
+  handlePunishmentWheelQuestion(d) {
     this._submitting = false;
     this.showScreen('gameScreen');
-    this.setTheme('acrophobia');
-    this.showRoundInfo(d.round, d.maxRounds, '🔤 الأسماء');
+    this.setTheme('punishmentwheel');
+    this.showRoundInfo(d.round, d.maxRounds, '🎡 عجلة العقاب');
     this.startTimer(d.timeLimit);
-    this.setHint('اصنع جملة من الأحرف!');
+    this.setHint('جاوب بسرعة!');
 
     document.getElementById('gameContent').innerHTML =
       '<div class="panel" style="max-width:600px">' +
-        '<div class="badge badge--info mb-4">🔤 اصنع اختصار!</div>' +
-        '<div class="acro-letters">' + escapeHtml(d.letters) + '</div>' +
-        '<p class="text-muted mb-4">اكتب جملة كل كلمة تبدأ بحرف من الأحرف أعلاه</p>' +
-        '<input type="text" class="input input--game" id="answerInput" placeholder="مثال: كبسة ممتازة عجيبة..." maxlength="100">' +
-        '<button class="btn btn--primary btn--full mt-3" data-action="submitAnswer">إرسال 🔤</button>' +
+        '<div class="badge badge--danger mb-4">🎡 جاوب أو انعاقب!</div>' +
+        (d.category ? '<span class="game-tag mb-3">' + escapeHtml(d.category) + '</span>' : '') +
+        '<p class="text-2xl font-bold mb-4">' + escapeHtml(d.question) + '</p>' +
+        '<div class="speed-input-wrap">' +
+          '<input type="text" class="input input--game" id="answerInput" placeholder="اكتب جوابك..." maxlength="50" autocomplete="off">' +
+          '<button class="btn btn--primary btn--lg" data-action="submitAnswer">🎡</button>' +
+        '</div>' +
+        '<p class="text-muted mt-2" id="waitingCount"></p>' +
       '</div>';
-    document.getElementById('answerInput')?.focus();
-  },
 
-  handleAcrophobiaVoting(d) {
-    this._submitting = false;
-    this.startTimer(d.timeLimit);
-    this.setHint('صوّت لأطرف اختصار!');
-
-    let html = '<div class="panel" style="max-width:600px">' +
-      '<div class="acro-letters mb-4">' + escapeHtml(d.letters) + '</div>';
-
-    d.answers.forEach(a => {
-      html += '<button class="vote-option" data-action="voteAnswer" data-id="' + escapeHtml(a.id) + '">' +
-        '<div class="vote-option__text">' + escapeHtml(a.text) + '</div>' +
-      '</button>';
-    });
-
-    html += '<p class="text-muted text-center mt-4" id="waitingCount"></p></div>';
-    document.getElementById('gameContent').innerHTML = html;
+    const input = document.getElementById('answerInput');
+    if (input) {
+      input.focus();
+      input.addEventListener('keypress', e => {
+        if (e.key === 'Enter') this.submitAnswer();
+      });
+    }
   },
 
   // ═══════════════════════════════════════════════════════════════
@@ -3479,51 +3513,64 @@ const App = {
     this.renderDrawing(d.winner.drawing, document.getElementById('winnerShirt'));
   },
 
-  // ═══════════════════════════════════════════════════════
-  // 💕 الوحش العاشق (Love Monster)
-  // ═══════════════════════════════════════════════════════
+  // ═══════════════════════════════════════════════════════════════
+  // 😂 لا تضحك (Try Not To LOL)
+  // ═══════════════════════════════════════════════════════════════
 
-  handleLoveMonsterPick(d) {
+  handleTryNotToLolWrite(d) {
     this._submitting = false;
     this.showScreen('gameScreen');
-    this.setTheme('lovemonster');
-    this.showRoundInfo(d.round, d.maxRounds, '💕 الوحش العاشق');
+    this.setTheme('trynottolol');
+    this.showRoundInfo(d.round, d.maxRounds, '😂 لا تضحك');
     this.startTimer(d.timeLimit);
-    this.setHint('اختر مين تبي تواعد!');
+    this.setHint('اكتب أطرف إجابة تضحّك القاضي!');
 
-    const myMonster = d.myMonster;
-    let monsterBadge = '';
-    if (myMonster) {
-      monsterBadge = '<div class="monster-card mb-4" style="margin:0 auto"><div class="monster-card__icon">' + escapeHtml(myMonster.icon) + '</div><div class="monster-card__name">' + escapeHtml(myMonster.name) + '</div></div>';
-    }
-
-    const gc = document.getElementById('gameContent');
-    let html =
-      '<div class="game-prompt">' +
-        '<div class="game-prompt__icon">💕</div>' +
-        '<p class="game-prompt__text">اختر لاعب تبي تواعده!</p>' +
-      '</div>' +
-      monsterBadge +
-      '<div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center">';
-
-    d.players.forEach(p => {
-      const revealTag = p.monsterRevealed ? '<div class="monster-card__name" style="font-size:11px;margin-top:4px">' + escapeHtml(p.monsterRevealed.icon) + ' ' + escapeHtml(p.monsterRevealed.name) + '</div>' : '';
-      html +=
-        '<div class="monster-card" data-action="submitLoveChoice" data-id="' + p.id + '" style="cursor:pointer">' +
-          '<div class="monster-card__icon">' + (p.avatar || '🎮') + '</div>' +
-          '<div class="monster-card__name">' + escapeHtml(p.name) + '</div>' +
-          revealTag +
-        '</div>';
-    });
-    html += '</div>';
-    gc.innerHTML = html;
+    document.getElementById('gameContent').innerHTML =
+      '<div class="panel" style="max-width:600px">' +
+        '<div class="badge badge--warning mb-4">😂 ضحّك ' + escapeHtml(d.judgeName) + '!</div>' +
+        '<p class="text-2xl font-bold mb-4">' + escapeHtml(d.prompt) + '</p>' +
+        '<textarea class="input input--game input--textarea" id="answerInput" placeholder="اكتب أطرف جواب..." maxlength="200" rows="3"></textarea>' +
+        '<button class="btn btn--primary btn--full mt-3" data-action="submitAnswer">إرسال 😂</button>' +
+      '</div>';
+    document.getElementById('answerInput')?.focus();
   },
 
-  submitLoveChoice(id, target) {
-    if (this._submitting) return;
-    this._submitting = true;
-    target.classList.add('vote-option--selected');
-    this.socket.emit('submitAnswer', { code: this.currentRoom, answer: id });
+  handleTryNotToLolJudge(d) {
+    this._submitting = false;
+    this.showScreen('gameScreen');
+    this.setTheme('trynottolol');
+    this.showRoundInfo(d.round, d.maxRounds, '😂 لا تضحك');
+    this.startTimer(d.timeLimit);
+    this.setHint('أنت القاضي! حاول لا تضحك!');
+
+    document.getElementById('gameContent').innerHTML =
+      '<div class="panel" style="max-width:600px;text-align:center">' +
+        '<div class="badge badge--danger mb-4" style="font-size:20px">🧊 أنت القاضي!</div>' +
+        '<p class="text-2xl font-bold mb-4">' + escapeHtml(d.prompt) + '</p>' +
+        '<div style="font-size:64px;margin:24px 0;animation:pulse 1.5s infinite">😐</div>' +
+        '<p class="text-muted">الباقين يكتبون إجابات مضحكة...</p>' +
+        '<p class="text-muted">حاول لا تضحك لما تشوفها!</p>' +
+      '</div>';
+  },
+
+  handleTryNotToLolVoting(d) {
+    this._submitting = false;
+    this.startTimer(d.timeLimit);
+    this.setHint('صوّت لأطرف إجابة!');
+
+    let html = '<div class="panel" style="max-width:700px;width:100%">' +
+      '<div class="badge badge--warning mb-4">😂 ' + escapeHtml(d.prompt) + '</div>' +
+      '<p class="text-muted mb-4">القاضي: ' + escapeHtml(d.judgeName) + '</p>' +
+      '<div class="flex flex-col gap-3">';
+
+    d.answers.forEach(a => {
+      html += '<button class="vote-option" data-action="voteAnswer" data-id="' + escapeHtml(a.id) + '">' +
+        '<div class="vote-option__text">' + escapeHtml(a.text) + '</div>' +
+      '</button>';
+    });
+
+    html += '</div><p class="text-muted text-center mt-4" id="waitingCount"></p></div>';
+    document.getElementById('gameContent').innerHTML = html;
   },
 
   // ═══════════════════════════════════════════════════════
@@ -3916,26 +3963,18 @@ const App = {
         }
         break;
 
-      case 'lovemonster':
-        resultHtml = '<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:16px">';
-        if (d.results) {
-          d.results.forEach(r => {
-            let info = '';
-            if (r.mutual) info = '💕 توافق متبادل!';
-            else if (r.picked) info = '💌 أرسل لـ ' + escapeHtml(r.picked);
-            else info = '😴 ما أرسل';
-            if (r.receivedCount > 0) info += ' • 💌×' + r.receivedCount;
-            resultHtml +=
-              '<div class="monster-card" style="' + (r.mutual ? 'border-color:#FF4081;box-shadow:0 0 20px rgba(255,64,129,0.4)' : '') + '">' +
-                '<div class="monster-card__icon">' + (r.avatar || '💕') + '</div>' +
-                '<div class="monster-card__name">' + escapeHtml(r.playerName) + '</div>' +
-                '<div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:4px">' + info + '</div>' +
-                '<div style="color:#FF4081;font-weight:bold;margin-top:4px">+' + r.points + '</div>' +
-              '</div>';
-          });
+      case 'trynottolol': {
+        resultHtml = '<div class="game-prompt mb-4"><div class="game-prompt__icon">😂</div><p class="game-prompt__text">' + escapeHtml(d.prompt || '') + '</p></div>';
+        if (d.judgeHeldIt) {
+          resultHtml += '<div class="badge badge--success mb-4" style="font-size:16px">🧊 ' + escapeHtml(d.judgeName) + ' ما ضحك! +' + d.judgePoints + '</div>';
+        } else {
+          resultHtml += '<div class="badge badge--danger mb-4" style="font-size:16px">🤣 ' + escapeHtml(d.judgeName) + ' ضحك!</div>';
         }
-        resultHtml += '</div>';
+        if (d.results) {
+          resultHtml += this._renderResultsList(d.results);
+        }
         break;
+      }
 
       case 'inventions':
         resultHtml =
@@ -4032,23 +4071,27 @@ const App = {
         break;
       }
 
-      case 'twotruths': {
-        // حقيقتين وكذبة — كشف الكذبة مع تمييزها
-        resultHtml = '<div class="tt-results"><div class="tt-featured-name">' + escapeHtml(d.featuredPlayerName || '') + '</div>';
-        if (d.statements) {
-          resultHtml += '<div class="tt-statements">';
-          d.statements.forEach((s, i) => {
-            const isLie = (i === d.lieIndex);
+      case 'backseatgamer': {
+        resultHtml =
+          '<div class="speed-results">' +
+            '<div class="speed-results__question">🎮 الكلمة: ' + escapeHtml(d.word || '') + '</div>' +
+            (d.clue ? '<div class="speed-results__answer">💬 الوصف: "' + escapeHtml(d.clue) + '"</div>' : '') +
+            (d.category ? '<div class="emoji-results__category">' + escapeHtml(d.category) + '</div>' : '') +
+          '</div>';
+        if (d.playerResults) {
+          resultHtml += '<div class="speed-results__ranking">';
+          d.playerResults.sort((a, b) => (b.points || 0) - (a.points || 0)).forEach((r, i) => {
+            const icon = r.isDescriber ? '🎙️' : r.isCorrect ? (r.points >= 1000 ? '⚡' : '✅') : '❌';
             resultHtml +=
-              '<div class="tt-statement' + (isLie ? ' tt-statement--lie' : ' tt-statement--truth') + '">' +
-                '<span class="tt-statement__icon">' + (isLie ? '🤥 كذبة!' : '✅ صح') + '</span>' +
-                '<span class="tt-statement__text">' + escapeHtml(s) + '</span>' +
+              '<div class="speed-results__row' + (r.isCorrect || r.isDescriber ? ' speed-results__row--correct' : ' speed-results__row--wrong') + '">' +
+                '<span class="speed-results__place">' + icon + '</span>' +
+                '<span class="speed-results__name">' + escapeHtml(r.playerName) + '</span>' +
+                (r.answer ? '<span class="speed-results__ans text-sm text-muted">' + escapeHtml(r.answer) + '</span>' : '') +
+                (r.clue ? '<span class="speed-results__ans text-sm text-muted">"' + escapeHtml(r.clue) + '"</span>' : '') +
+                '<span class="speed-results__pts">+' + (r.points || 0) + '</span>' +
               '</div>';
           });
-          resultHtml += '</div></div>';
-        }
-        if (d.playerResults) {
-          resultHtml += this._renderResultsList(d.playerResults);
+          resultHtml += '</div>';
         }
         break;
       }
@@ -4077,27 +4120,32 @@ const App = {
         break;
       }
 
-      case 'emojidecode': {
-        // فك الرموز — عرض الإيموجي مع الإجابة الصحيحة
+      case 'courtroom': {
+        const verdictText = d.verdict === 'guilty' ? '🔨 مذنب!' : d.verdict === 'innocent' ? '✨ بريء!' : '⚖️ هيئة محلفين معلّقة!';
+        const verdictColor = d.verdict === 'guilty' ? '#ff4444' : d.verdict === 'innocent' ? '#448AFF' : '#D4AF37';
         resultHtml =
-          '<div class="emoji-results">' +
-            '<div class="emoji-results__emojis">' + (d.emojis || '') + '</div>' +
-            '<div class="emoji-results__answer">✅ ' + escapeHtml(d.correctAnswer || '') + '</div>' +
-            (d.category ? '<div class="emoji-results__category">' + escapeHtml(d.category) + '</div>' : '') +
+          '<div class="debate-results">' +
+            '<div class="debate-results__topic">📜 ' + escapeHtml(d.accusation || '') + '</div>' +
+            '<div style="font-size:28px;font-weight:900;color:' + verdictColor + ';margin:16px 0">' + verdictText + '</div>' +
+            '<div class="debate-results__sides">' +
+              '<div class="debate-results__side' + (d.verdict === 'guilty' ? ' debate-results__side--winner' : '') + '">' +
+                '<div class="debate-results__side-label">🔴 ' + escapeHtml(d.prosecutorName || '') + '</div>' +
+                '<div style="font-size:13px;color:rgba(255,255,255,0.6);margin:8px 0">"' + escapeHtml(d.prosecutorArg || '') + '"</div>' +
+                '<div class="debate-results__side-votes">+' + (d.prosecutorPts || 0) + '</div>' +
+                (d.verdict === 'guilty' ? '<div class="debate-results__crown">🏆</div>' : '') +
+              '</div>' +
+              '<div class="debate-results__vs">⚔️</div>' +
+              '<div class="debate-results__side' + (d.verdict === 'innocent' ? ' debate-results__side--winner' : '') + '">' +
+                '<div class="debate-results__side-label">🔵 ' + escapeHtml(d.defenderName || '') + '</div>' +
+                '<div style="font-size:13px;color:rgba(255,255,255,0.6);margin:8px 0">"' + escapeHtml(d.defenderArg || '') + '"</div>' +
+                '<div class="debate-results__side-votes">+' + (d.defenderPts || 0) + '</div>' +
+                (d.verdict === 'innocent' ? '<div class="debate-results__crown">🏆</div>' : '') +
+              '</div>' +
+            '</div>' +
+            '<div style="margin-top:12px;color:rgba(255,255,255,0.5)">مذنب: ' + (d.guiltyVotes || 0) + ' | بريء: ' + (d.innocentVotes || 0) + '</div>' +
           '</div>';
         if (d.playerResults) {
-          resultHtml += '<div class="speed-results__ranking">';
-          d.playerResults.sort((a, b) => (b.points || 0) - (a.points || 0)).forEach((r, i) => {
-            const icon = r.isCorrect ? (r.points >= 1000 ? '⚡' : '✅') : '❌';
-            resultHtml +=
-              '<div class="speed-results__row' + (r.isCorrect ? ' speed-results__row--correct' : ' speed-results__row--wrong') + '">' +
-                '<span class="speed-results__place">' + icon + '</span>' +
-                '<span class="speed-results__name">' + escapeHtml(r.playerName) + '</span>' +
-                (r.answer ? '<span class="speed-results__ans text-sm text-muted">' + escapeHtml(r.answer) + '</span>' : '') +
-                '<span class="speed-results__pts">+' + (r.points || 0) + '</span>' +
-              '</div>';
-          });
-          resultHtml += '</div>';
+          resultHtml += this._renderResultsList(d.playerResults);
         }
         break;
       }
@@ -4130,30 +4178,35 @@ const App = {
         break;
       }
 
-      case 'acrophobia': {
-        // الأسماء — عرض الأحرف والفائزين
+      case 'punishmentwheel': {
         resultHtml =
-          '<div class="acro-results">' +
-            '<div class="acro-results__letters">' + escapeHtml(d.letters || '') + '</div>' +
-            (d.category ? '<div class="acro-results__category">' + escapeHtml(d.category) + '</div>' : '') +
+          '<div class="speed-results">' +
+            '<div class="speed-results__question">' + escapeHtml(d.question || '') + '</div>' +
+            '<div class="speed-results__answer">✅ ' + escapeHtml(d.correctAnswer || '') + '</div>' +
           '</div>';
-        if (d.results) {
-          resultHtml += '<div class="flex flex-col gap-3 mb-4" style="max-width:500px;width:100%">';
-          d.results.forEach((r, i) => {
-            const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
+        if (d.playerResults) {
+          resultHtml += '<div class="speed-results__ranking">';
+          d.playerResults.sort((a, b) => (b.points || 0) - (a.points || 0)).forEach((r, i) => {
+            const icon = r.isCorrect ? (r.points >= 1000 ? '⚡' : r.points >= 700 ? '🥈' : '✅') : '❌';
             resultHtml +=
-              '<div class="acro-result-row' + (i === 0 ? ' acro-result-row--winner' : '') + '">' +
-                '<div class="acro-result-row__main">' +
-                  '<span class="font-bold">' + medal + ' ' + escapeHtml(r.playerName) + '</span>' +
-                  '<p class="acro-result-row__text">"' + escapeHtml(r.text) + '"</p>' +
-                '</div>' +
-                '<div class="acro-result-row__score">' +
-                  '<div class="acro-result-row__pts">+' + (r.points || 0) + '</div>' +
-                  '<div class="text-sm text-muted">' + (r.votes || 0) + ' صوت</div>' +
-                '</div>' +
+              '<div class="speed-results__row' + (r.isCorrect ? ' speed-results__row--correct' : ' speed-results__row--wrong') + '">' +
+                '<span class="speed-results__place">' + icon + '</span>' +
+                '<span class="speed-results__name">' + escapeHtml(r.playerName) + '</span>' +
+                (r.answer ? '<span class="speed-results__ans text-sm text-muted">' + escapeHtml(r.answer) + '</span>' : '') +
+                '<span class="speed-results__pts">+' + (r.points || 0) + '</span>' +
               '</div>';
           });
           resultHtml += '</div>';
+        }
+        // Punishment wheel animation for last round
+        if (d.punishment && d.lowestPlayer) {
+          resultHtml +=
+            '<div style="margin-top:24px;padding:24px;background:rgba(255,68,68,0.2);border-radius:16px;text-align:center">' +
+              '<div style="font-size:48px;margin-bottom:12px;animation:spin 2s ease-out">🎡</div>' +
+              '<p style="color:#ff4444;font-size:20px;font-weight:900;margin-bottom:8px">عقاب ' + escapeHtml(d.lowestPlayer.name) + '!</p>' +
+              '<p style="color:#FFD700;font-size:24px;font-weight:bold">' + escapeHtml(d.punishment) + '</p>' +
+            '</div>';
+          AudioEngine.buzzer && AudioEngine.buzzer();
         }
         break;
       }

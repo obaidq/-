@@ -201,26 +201,27 @@ const GameIllustrations = (() => {
       <polygon points="45,120 50,110 55,120" fill="rgba(255,107,53,0.3)"/>
     </svg>`,
 
-    lovemonster: `<svg viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg">
+    trynottolol: `<svg viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <filter id="lm-glow"><feGaussianBlur stdDeviation="3" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="tntl-glow"><feGaussianBlur stdDeviation="3" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
       </defs>
-      <!-- Heart monster body -->
-      <g transform="translate(110,20)" filter="url(#lm-glow)">
-        <path d="M50,25 C50,10 30,-5 15,10 C0,25 0,45 25,65 L50,85 L75,65 C100,45 100,25 85,10 C70,-5 50,10 50,25 Z" fill="rgba(193,24,91,0.35)" stroke="rgba(255,64,129,0.5)" stroke-width="2"/>
-        <!-- Eyes -->
-        <circle cx="35" cy="35" r="8" fill="rgba(255,255,255,0.5)"/>
-        <circle cx="65" cy="35" r="8" fill="rgba(255,255,255,0.5)"/>
-        <circle cx="37" cy="34" r="4" fill="#C2185B"/>
-        <circle cx="67" cy="34" r="4" fill="#C2185B"/>
-        <!-- Smile -->
-        <path d="M35,52 Q50,65 65,52" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2" stroke-linecap="round"/>
+      <!-- Laughing face -->
+      <g transform="translate(110,15)" filter="url(#tntl-glow)">
+        <circle cx="50" cy="50" r="45" fill="rgba(255,215,0,0.2)" stroke="rgba(255,215,0,0.4)" stroke-width="2"/>
+        <!-- Eyes squeezed shut from laughing -->
+        <path d="M30,40 Q35,35 40,40" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="3" stroke-linecap="round"/>
+        <path d="M60,40 Q65,35 70,40" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="3" stroke-linecap="round"/>
+        <!-- Wide open laughing mouth -->
+        <path d="M30,60 Q50,85 70,60" fill="rgba(255,215,0,0.3)" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+        <!-- Tear drops -->
+        <circle cx="25" cy="45" r="3" fill="rgba(0,229,255,0.4)"><animate attributeName="cy" values="45;55;45" dur="1.5s" repeatCount="indefinite"/></circle>
+        <circle cx="75" cy="45" r="3" fill="rgba(0,229,255,0.4)"><animate attributeName="cy" values="45;55;45" dur="1.8s" repeatCount="indefinite"/></circle>
       </g>
-      <!-- Floating hearts -->
-      <text x="50" y="50" font-size="18" opacity=".4" fill="#FF4081">&#x2665;</text>
-      <text x="260" y="70" font-size="14" opacity=".3" fill="#FF4081">&#x2665;<animate attributeName="y" values="70;55;70" dur="3s" repeatCount="indefinite"/></text>
-      <text x="70" y="130" font-size="12" opacity=".25" fill="#FF4081">&#x2665;</text>
-      <text x="250" y="130" font-size="16" opacity=".35" fill="#FF4081">&#x2665;<animate attributeName="y" values="130;115;130" dur="2.5s" repeatCount="indefinite"/></text>
+      <!-- Floating LOL text -->
+      <text x="40" y="50" font-size="16" opacity=".3" fill="#FFD700" font-weight="bold">LOL</text>
+      <text x="250" y="40" font-size="12" opacity=".25" fill="#FFD700">😂<animate attributeName="y" values="40;30;40" dur="2s" repeatCount="indefinite"/></text>
+      <text x="50" y="140" font-size="14" opacity=".2" fill="#FFD700">🤣</text>
+      <text x="260" y="130" font-size="10" opacity=".3" fill="#FFD700">HAHA<animate attributeName="y" values="130;120;130" dur="2.5s" repeatCount="indefinite"/></text>
     </svg>`,
 
     inventions: `<svg viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg">
@@ -319,23 +320,27 @@ const GameIllustrations = (() => {
       </g>
     </svg>`,
 
-    twotruths: `<svg viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg">
-      <!-- Three cards -->
-      <g transform="translate(40,25)">
-        <rect x="0" y="0" width="70" height="95" rx="10" fill="rgba(46,125,50,0.25)" stroke="rgba(102,187,106,0.5)" stroke-width="2"/>
-        <text x="35" y="58" text-anchor="middle" fill="rgba(102,187,106,0.7)" font-size="30">&#x2713;</text>
+    backseatgamer: `<svg viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="bg-glow"><feGaussianBlur stdDeviation="3" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <!-- Game controller -->
+      <g transform="translate(95,20)" filter="url(#bg-glow)">
+        <rect x="0" y="30" width="130" height="70" rx="20" fill="rgba(0,229,255,0.15)" stroke="rgba(0,229,255,0.4)" stroke-width="2"/>
+        <!-- D-pad -->
+        <rect x="25" y="50" width="8" height="30" rx="2" fill="rgba(0,229,255,0.4)"/>
+        <rect x="15" y="60" width="28" height="8" rx="2" fill="rgba(0,229,255,0.4)"/>
+        <!-- Buttons -->
+        <circle cx="95" cy="55" r="6" fill="rgba(255,68,68,0.4)"/>
+        <circle cx="110" cy="65" r="6" fill="rgba(68,138,255,0.4)"/>
+        <circle cx="80" cy="65" r="6" fill="rgba(255,215,0,0.4)"/>
+        <circle cx="95" cy="75" r="6" fill="rgba(0,200,83,0.4)"/>
       </g>
-      <g transform="translate(125,20)">
-        <rect x="0" y="0" width="70" height="95" rx="10" fill="rgba(46,125,50,0.25)" stroke="rgba(102,187,106,0.5)" stroke-width="2"/>
-        <text x="35" y="58" text-anchor="middle" fill="rgba(102,187,106,0.7)" font-size="30">&#x2713;</text>
-      </g>
-      <g transform="translate(210,30)">
-        <rect x="0" y="0" width="70" height="95" rx="10" fill="rgba(255,82,82,0.2)" stroke="rgba(255,82,82,0.45)" stroke-width="2"/>
-        <text x="35" y="58" text-anchor="middle" fill="rgba(255,82,82,0.6)" font-size="30">&#x2717;</text>
-        <animate attributeName="opacity" values=".8;1;.8" dur="2s" repeatCount="indefinite"/>
-      </g>
-      <!-- Question accent -->
-      <text x="160" y="150" text-anchor="middle" fill="rgba(255,255,255,0.15)" font-size="18" font-weight="900">which one is the lie?</text>
+      <!-- Speech bubbles -->
+      <text x="40" y="50" font-size="20" opacity=".3" fill="#00E5FF">💬</text>
+      <text x="260" y="60" font-size="16" opacity=".25" fill="#00E5FF">🚫<animate attributeName="opacity" values=".2;.4;.2" dur="2s" repeatCount="indefinite"/></text>
+      <text x="50" y="140" font-size="14" opacity=".2" fill="#00E5FF">🤔</text>
+      <text x="255" y="130" font-size="12" opacity=".3" fill="#00E5FF">❓</text>
     </svg>`,
 
     splittheroom: `<svg viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg">
@@ -356,24 +361,24 @@ const GameIllustrations = (() => {
       <text x="240" y="135" text-anchor="middle" fill="rgba(69,39,160,0.5)" font-size="18" font-weight="900">40%</text>
     </svg>`,
 
-    emojidecode: `<svg viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg">
-      <!-- Emoji puzzle pieces -->
-      <g font-size="36">
-        <text x="60" y="55" opacity=".5">🎬</text>
-        <text x="130" y="60" opacity=".45">➡️</text>
-        <text x="200" y="55" opacity=".5">❓</text>
+    courtroom: `<svg viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="cr-glow"><feGaussianBlur stdDeviation="3" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <!-- Gavel -->
+      <g transform="translate(110,10)" filter="url(#cr-glow)">
+        <rect x="35" y="70" width="30" height="8" rx="3" fill="rgba(212,175,55,0.4)"/>
+        <rect x="20" y="50" width="60" height="25" rx="5" fill="rgba(139,69,19,0.35)" stroke="rgba(212,175,55,0.5)" stroke-width="2"/>
+        <rect x="46" y="25" width="8" height="30" rx="2" fill="rgba(212,175,55,0.4)"/>
+        <animateTransform attributeName="transform" type="rotate" values="0 160 60;-15 160 60;0 160 60" dur="2s" repeatCount="indefinite" additive="sum"/>
       </g>
-      <!-- Puzzle pieces -->
-      <g opacity=".3">
-        <rect x="40" y="80" width="50" height="50" rx="8" fill="rgba(173,20,87,0.3)" stroke="rgba(240,98,146,0.4)" stroke-width="2" transform="rotate(5,65,105)"/>
-        <rect x="110" y="75" width="50" height="50" rx="8" fill="rgba(240,98,146,0.25)" stroke="rgba(173,20,87,0.35)" stroke-width="2" transform="rotate(-3,135,100)"/>
-        <rect x="185" y="82" width="50" height="50" rx="8" fill="rgba(173,20,87,0.3)" stroke="rgba(240,98,146,0.4)" stroke-width="2" transform="rotate(8,210,107)"/>
-        <rect x="255" y="78" width="50" height="50" rx="8" fill="rgba(240,98,146,0.2)" stroke="rgba(173,20,87,0.3)" stroke-width="2" transform="rotate(-5,280,103)"/>
-      </g>
-      <!-- Connecting lines -->
-      <line x1="90" y1="100" x2="115" y2="100" stroke="rgba(240,98,146,0.3)" stroke-width="2" stroke-dasharray="4 3"/>
-      <line x1="160" y1="100" x2="190" y2="100" stroke="rgba(240,98,146,0.3)" stroke-width="2" stroke-dasharray="4 3"/>
-      <line x1="235" y1="100" x2="260" y2="100" stroke="rgba(240,98,146,0.3)" stroke-width="2" stroke-dasharray="4 3"/>
+      <!-- Prosecution vs Defense -->
+      <text x="50" y="50" font-size="28" opacity=".35" fill="#ff4444">🔴</text>
+      <text x="250" y="50" font-size="28" opacity=".35" fill="#448AFF">🔵</text>
+      <!-- VS -->
+      <text x="160" y="145" text-anchor="middle" fill="rgba(212,175,55,0.3)" font-size="22" font-weight="900">⚖️</text>
+      <text x="55" y="140" font-size="12" opacity=".2" fill="#D4AF37">مذنب</text>
+      <text x="240" y="140" font-size="12" opacity=".2" fill="#D4AF37">بريء</text>
     </svg>`,
 
     debateme: `<svg viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg">
@@ -401,32 +406,37 @@ const GameIllustrations = (() => {
       <text x="270" y="50" fill="rgba(120,144,156,0.25)" font-size="28" font-weight="900">!</text>
     </svg>`,
 
-    acrophobia: `<svg viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg">
-      <!-- Letter blocks -->
-      <g font-family="'Bangers',sans-serif" font-weight="900">
-        <g transform="translate(45,35)">
-          <rect x="0" y="0" width="50" height="55" rx="8" fill="rgba(0,105,92,0.3)" stroke="rgba(38,166,154,0.5)" stroke-width="2"/>
-          <text x="25" y="40" text-anchor="middle" fill="rgba(38,166,154,0.8)" font-size="32">A</text>
-        </g>
-        <g transform="translate(110,25)">
-          <rect x="0" y="0" width="50" height="55" rx="8" fill="rgba(38,166,154,0.25)" stroke="rgba(0,105,92,0.4)" stroke-width="2"/>
-          <text x="25" y="40" text-anchor="middle" fill="rgba(0,105,92,0.7)" font-size="32">B</text>
-        </g>
-        <g transform="translate(175,40)">
-          <rect x="0" y="0" width="50" height="55" rx="8" fill="rgba(0,105,92,0.3)" stroke="rgba(38,166,154,0.5)" stroke-width="2"/>
-          <text x="25" y="40" text-anchor="middle" fill="rgba(38,166,154,0.8)" font-size="32">C</text>
-        </g>
-        <g transform="translate(240,30)">
-          <rect x="0" y="0" width="50" height="55" rx="8" fill="rgba(38,166,154,0.25)" stroke="rgba(0,105,92,0.4)" stroke-width="2"/>
-          <text x="25" y="40" text-anchor="middle" fill="rgba(0,105,92,0.7)" font-size="32">D</text>
-        </g>
+    punishmentwheel: `<svg viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="pw-glow"><feGaussianBlur stdDeviation="3" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <!-- Wheel -->
+      <g transform="translate(110,5)" filter="url(#pw-glow)">
+        <circle cx="50" cy="70" r="55" fill="none" stroke="rgba(255,68,68,0.3)" stroke-width="3">
+          <animateTransform attributeName="transform" type="rotate" values="0 50 70;360 50 70" dur="8s" repeatCount="indefinite"/>
+        </circle>
+        <!-- Wheel segments -->
+        <line x1="50" y1="15" x2="50" y2="125" stroke="rgba(255,68,68,0.2)" stroke-width="1">
+          <animateTransform attributeName="transform" type="rotate" values="0 50 70;360 50 70" dur="8s" repeatCount="indefinite"/>
+        </line>
+        <line x1="-5" y1="70" x2="105" y2="70" stroke="rgba(255,68,68,0.2)" stroke-width="1">
+          <animateTransform attributeName="transform" type="rotate" values="0 50 70;360 50 70" dur="8s" repeatCount="indefinite"/>
+        </line>
+        <line x1="10" y1="30" x2="90" y2="110" stroke="rgba(255,68,68,0.2)" stroke-width="1">
+          <animateTransform attributeName="transform" type="rotate" values="0 50 70;360 50 70" dur="8s" repeatCount="indefinite"/>
+        </line>
+        <line x1="90" y1="30" x2="10" y2="110" stroke="rgba(255,68,68,0.2)" stroke-width="1">
+          <animateTransform attributeName="transform" type="rotate" values="0 50 70;360 50 70" dur="8s" repeatCount="indefinite"/>
+        </line>
+        <!-- Center -->
+        <circle cx="50" cy="70" r="8" fill="rgba(255,68,68,0.4)"/>
+        <!-- Pointer -->
+        <polygon points="50,10 45,25 55,25" fill="rgba(255,215,0,0.6)"/>
       </g>
-      <!-- Arrow connecting letters -->
-      <path d="M95,65 L115,55" stroke="rgba(38,166,154,0.3)" stroke-width="2" marker-end="none"/>
-      <path d="M160,55 L180,65" stroke="rgba(38,166,154,0.3)" stroke-width="2"/>
-      <path d="M225,70 L245,60" stroke="rgba(38,166,154,0.3)" stroke-width="2"/>
-      <!-- Subtitle -->
-      <text x="160" y="135" text-anchor="middle" fill="rgba(255,255,255,0.15)" font-size="14" font-weight="700">= ???</text>
+      <!-- Danger icons -->
+      <text x="40" y="50" font-size="18" opacity=".3" fill="#FF4444">⚡</text>
+      <text x="260" y="60" font-size="16" opacity=".25" fill="#FF4444">💀</text>
+      <text x="50" y="140" font-size="14" opacity=".2" fill="#FFD700">🎲</text>
     </svg>`
   };
 
