@@ -253,7 +253,10 @@
 
       <!-- Game Selection (Host only) -->
       <div id="gamesSection" class="w-full" style="display:none">
-        <h3 class="text-xl font-black text-center mb-4">🎮 اختر لعبة (١٧ لعبة!)</h3>
+        <div class="text-center mb-6">
+          <h3 class="lobby-section-title">اختر لعبة</h3>
+          <p class="text-sm text-muted mt-4">١٧ لعبة جماعية مختلفة</p>
+        </div>
         <div class="games-grid">
           <!-- Quiplash -->
           <div class="game-card" data-action="selectGame" data-game="quiplash" role="button" tabindex="0" aria-label="لعبة رد سريع">
@@ -366,18 +369,18 @@
             </div>
           </div>
 
-          <!-- Love Monster -->
-          <div class="game-card" data-action="selectGame" data-game="lovemonster" role="button" tabindex="0" aria-label="لعبة الوحش العاشق">
-            <div class="game-card__banner game-card__banner--lovemonster">
-              <span class="game-card__icon">💕</span>
+          <!-- Try Not To LOL -->
+          <div class="game-card" data-action="selectGame" data-game="trynottolol" role="button" tabindex="0" aria-label="لعبة لا تضحك">
+            <div class="game-card__banner game-card__banner--trynottolol">
+              <span class="game-card__icon">😂</span>
             </div>
             <div class="game-card__content">
-              <h4 class="game-card__title">الوحش العاشق</h4>
-              <p class="game-card__desc">أرسل رسائل مواعدة سرية واكسب قلوب اللاعبين!</p>
+              <h4 class="game-card__title">لا تضحك</h4>
+              <p class="game-card__desc">اكتب أطرف إجابة وخلّ القاضي يضحك!</p>
               <div class="game-card__tags">
-                <span class="game-tag">👥 ٣-٧</span>
-                <span class="game-tag">💌 اجتماعي</span>
-                <span class="game-tag">🎭 استراتيجي</span>
+                <span class="game-tag">👥 ٣-١٠</span>
+                <span class="game-tag">😂 كوميدي</span>
+                <span class="game-tag">⚡ سريع</span>
               </div>
             </div>
           </div>
@@ -446,18 +449,18 @@
             </div>
           </div>
 
-          <!-- Two Truths One Lie -->
-          <div class="game-card" data-action="selectGame" data-game="twotruths" role="button" tabindex="0" aria-label="لعبة حقيقتين وكذبة">
-            <div class="game-card__banner game-card__banner--twotruths">
-              <span class="game-card__icon">✌️</span>
+          <!-- Backseat Gamer -->
+          <div class="game-card" data-action="selectGame" data-game="backseatgamer" role="button" tabindex="0" aria-label="لعبة سوّاق أعمى">
+            <div class="game-card__banner game-card__banner--backseatgamer">
+              <span class="game-card__icon">🎮</span>
             </div>
             <div class="game-card__content">
-              <h4 class="game-card__title">حقيقتين وكذبة</h4>
-              <p class="game-card__desc">اكتب حقيقتين وكذبة وخل الباقين يكتشفون الكذبة!</p>
+              <h4 class="game-card__title">سوّاق أعمى</h4>
+              <p class="game-card__desc">وصّف الكلمة بدون الكلمات المحرّمة وخل الباقين يخمنون!</p>
               <div class="game-card__tags">
                 <span class="game-tag">👥 ٣-١٠</span>
-                <span class="game-tag">🤥 خداع</span>
-                <span class="game-tag">💬 اجتماعي</span>
+                <span class="game-tag">🎮 وصف</span>
+                <span class="game-tag">⚡ سرعة</span>
               </div>
             </div>
           </div>
@@ -478,18 +481,18 @@
             </div>
           </div>
 
-          <!-- Emoji Decode -->
-          <div class="game-card" data-action="selectGame" data-game="emojidecode" role="button" tabindex="0" aria-label="لعبة فك الرموز">
-            <div class="game-card__banner game-card__banner--emojidecode">
-              <span class="game-card__icon">🎭</span>
+          <!-- Courtroom -->
+          <div class="game-card" data-action="selectGame" data-game="courtroom" role="button" tabindex="0" aria-label="لعبة المحكمة الكبرى">
+            <div class="game-card__banner game-card__banner--courtroom">
+              <span class="game-card__icon">👨‍⚖️</span>
             </div>
             <div class="game-card__content">
-              <h4 class="game-card__title">فك الرموز</h4>
-              <p class="game-card__desc">خمّن الفلم أو الأغنية من الإيموجي! أسرع واحد يفوز</p>
+              <h4 class="game-card__title">المحكمة الكبرى</h4>
+              <p class="game-card__desc">ادّعي أو دافع في قضايا مجنونة! هيئة المحلفين تقرر</p>
               <div class="game-card__tags">
-                <span class="game-tag">👥 ٢-١٠</span>
-                <span class="game-tag">🎭 ألغاز</span>
-                <span class="game-tag">⚡ سرعة</span>
+                <span class="game-tag">👥 ٣-١٠</span>
+                <span class="game-tag">⚖️ مرافعة</span>
+                <span class="game-tag">🗣️ إقناع</span>
               </div>
             </div>
           </div>
@@ -510,18 +513,18 @@
             </div>
           </div>
 
-          <!-- Acrophobia -->
-          <div class="game-card" data-action="selectGame" data-game="acrophobia" role="button" tabindex="0" aria-label="لعبة الأسماء">
-            <div class="game-card__banner game-card__banner--acrophobia">
-              <span class="game-card__icon">🔤</span>
+          <!-- Punishment Wheel -->
+          <div class="game-card" data-action="selectGame" data-game="punishmentwheel" role="button" tabindex="0" aria-label="لعبة عجلة العقاب">
+            <div class="game-card__banner game-card__banner--punishmentwheel">
+              <span class="game-card__icon">🎡</span>
             </div>
             <div class="game-card__content">
-              <h4 class="game-card__title">الأسماء</h4>
-              <p class="game-card__desc">اصنع أطرف اختصار من الأحرف العشوائية!</p>
+              <h4 class="game-card__title">عجلة العقاب</h4>
+              <p class="game-card__desc">جاوب صح وبسرعة! الأبطأ ينتظره عقاب مضحك</p>
               <div class="game-card__tags">
-                <span class="game-tag">👥 ٣-١٠</span>
-                <span class="game-tag">🔤 إبداع</span>
-                <span class="game-tag">😂 كوميدي</span>
+                <span class="game-tag">👥 ٢-١٠</span>
+                <span class="game-tag">🎡 عقاب</span>
+                <span class="game-tag">⚡ سرعة</span>
               </div>
             </div>
           </div>
@@ -541,18 +544,26 @@
         <p class="text-muted">⏳ انتظر المضيف يختار لعبة...</p>
       </div>
 
-      <!-- Host Controls (Family Mode, Extended Timers, Hide Code) -->
-      <div id="familyModeSection" class="w-full text-center mt-2" style="display:none">
-        <div class="flex gap-2 justify-center flex-wrap">
-          <button class="btn btn--ghost btn--sm" id="familyModeBtn" data-action="toggleFamilyMode">🏠 وضع العائلة: معطّل</button>
-          <button class="btn btn--ghost btn--sm" id="extendedTimersBtn" data-action="toggleExtendedTimers">⏱️ مؤقتات ممتدة: معطّلة</button>
-          <button class="btn btn--ghost btn--sm" data-action="toggleHideRoomCode">📺 إخفاء الكود</button>
+      <!-- Host Controls - Organized by priority -->
+      <div id="familyModeSection" class="w-full mt-2" style="display:none">
+        <!-- Primary Controls (most used) -->
+        <div class="host-controls-group">
+          <div class="host-controls-label">اعدادات الغرفة</div>
+          <div class="flex gap-2 justify-center flex-wrap">
+            <button class="btn btn--ghost btn--sm" id="familyModeBtn" data-action="toggleFamilyMode">🏠 وضع العائلة: معطّل</button>
+            <button class="btn btn--ghost btn--sm" id="extendedTimersBtn" data-action="toggleExtendedTimers">⏱️ مؤقتات ممتدة: معطّلة</button>
+            <button class="btn btn--ghost btn--sm" data-action="toggleHideRoomCode">📺 إخفاء الكود</button>
+          </div>
         </div>
-        <div class="flex gap-2 justify-center flex-wrap mt-2" id="hostControlsAdvanced">
-          <button class="btn btn--ghost btn--sm" data-action="pauseGame" id="pauseBtn">⏸️ إيقاف مؤقت</button>
-          <button class="btn btn--ghost btn--sm" data-action="skipQuestion">⏭️ تخطي السؤال</button>
-          <button class="btn btn--ghost btn--sm" data-action="toggleStreamMode" id="streamModeBtn">📺 وضع البث</button>
-          <button class="btn btn--ghost btn--sm" data-action="showKickMenu">🚫 طرد لاعب</button>
+        <!-- Advanced Controls (less frequent) -->
+        <div class="host-controls-group host-controls-group--advanced" id="hostControlsAdvanced">
+          <div class="host-controls-label">تحكم متقدم</div>
+          <div class="flex gap-2 justify-center flex-wrap">
+            <button class="btn btn--ghost btn--sm" data-action="pauseGame" id="pauseBtn">⏸️ إيقاف مؤقت</button>
+            <button class="btn btn--ghost btn--sm" data-action="skipQuestion">⏭️ تخطي السؤال</button>
+            <button class="btn btn--ghost btn--sm" data-action="toggleStreamMode" id="streamModeBtn">📺 وضع البث</button>
+            <button class="btn btn--ghost btn--sm btn--sm-danger" data-action="showKickMenu">🚫 طرد لاعب</button>
+          </div>
         </div>
       </div>
 
