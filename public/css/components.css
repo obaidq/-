@@ -633,11 +633,11 @@
 
 .room-code__value {
   font-family: var(--font-display), var(--font-primary);
-  font-size: clamp(2rem, 8vw, var(--text-5xl));
+  font-size: var(--text-5xl);
   font-weight: var(--font-black);
-  letter-spacing: var(--tracking-wider);
+  letter-spacing: 0.05em;
   color: var(--color-primary-700);
-  line-height: var(--leading-tight);
+  line-height: 1;
 }
 
 .room-code__url {

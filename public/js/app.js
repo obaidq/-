@@ -1374,15 +1374,14 @@ const App = {
   // 🎮 Universal Game Splash - Themed intro for all 17 games
   // ═══════════════════════════════════════════════════════════════
 
-  // Saudi cultural splash themes — ألوان ثقافية سعودية
   _gameSplashThemes: {
-    quiplash:       { bg1: '#3A0F1E', bg2: '#2A0A15', accent: '#D4AF37', glow: 'rgba(212,175,55,0.5)' },
-    guesspionage:   { bg1: '#0A1628', bg2: '#061220', accent: '#00BFA5', glow: 'rgba(0,191,165,0.5)' },
-    fakinit:        { bg1: '#2A1810', bg2: '#1A0E08', accent: '#C4953A', glow: 'rgba(196,149,58,0.5)' },
-    triviamurder:   { bg1: '#0C1445', bg2: '#080E30', accent: '#3ABAB4', glow: 'rgba(58,186,180,0.5)' },
+    quiplash:       { bg1: '#2D1B69', bg2: '#1A1145', accent: '#FFD700', glow: 'rgba(255,215,0,0.5)' },
+    guesspionage:   { bg1: '#0D1117', bg2: '#1A2332', accent: '#00FF41', glow: 'rgba(0,255,65,0.5)' },
+    fakinit:        { bg1: '#8B3A2A', bg2: '#6B2A1A', accent: '#42A5F5', glow: 'rgba(66,165,245,0.5)' },
+    triviamurder:   { bg1: '#0D0D0D', bg2: '#1A1A1A', accent: '#2ECC40', glow: 'rgba(46,204,64,0.5)' },
     fibbage:        { bg1: '#1A1A5E', bg2: '#0D0D3A', accent: '#FFD700', glow: 'rgba(255,215,0,0.5)' },
     drawful:        { bg1: '#7A6420', bg2: '#5A4A15', accent: '#C5A55A', glow: 'rgba(197,165,90,0.5)' },
-    tshirtwars:     { bg1: '#1A0F08', bg2: '#0D0805', accent: '#B22234', glow: 'rgba(178,34,52,0.5)' },
+    tshirtwars:     { bg1: '#0D0D1A', bg2: '#1A1A2E', accent: '#FF007F', glow: 'rgba(255,0,127,0.5)' },
     trynottolol:    { bg1: '#1A0A2E', bg2: '#2E1B69', accent: '#FFD700', glow: 'rgba(255,215,0,0.5)' },
     inventions:     { bg1: '#1A3A5C', bg2: '#0D2840', accent: '#2980B9', glow: 'rgba(41,128,185,0.5)' },
     wouldyourather: { bg1: '#0A0E2A', bg2: '#141852', accent: '#FF2D7B', glow: 'rgba(255,45,123,0.5)' },
@@ -1390,7 +1389,7 @@ const App = {
     speedround:     { bg1: '#0D0D0D', bg2: '#1A1A1A', accent: '#FF1744', glow: 'rgba(255,23,68,0.5)' },
     backseatgamer:  { bg1: '#0D1B2A', bg2: '#1B2838', accent: '#00E5FF', glow: 'rgba(0,229,255,0.5)' },
     splittheroom:   { bg1: '#1B0A2E', bg2: '#4A0E78', accent: '#7B2FBE', glow: 'rgba(123,47,190,0.5)' },
-    courtroom:      { bg1: '#0F1A0A', bg2: '#0A1205', accent: '#D4AF37', glow: 'rgba(212,175,55,0.5)' },
+    courtroom:      { bg1: '#1A1205', bg2: '#2D1F0A', accent: '#D4AF37', glow: 'rgba(212,175,55,0.5)' },
     debateme:       { bg1: '#2C1810', bg2: '#4A3728', accent: '#C9A96E', glow: 'rgba(201,169,110,0.5)' },
     punishmentwheel:{ bg1: '#2E0A0A', bg2: '#4A0E0E', accent: '#FF4444', glow: 'rgba(255,68,68,0.5)' },
   },
