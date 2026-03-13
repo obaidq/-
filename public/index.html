@@ -13,8 +13,12 @@
   <!-- Preload critical fonts for faster rendering -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Design Bible Typography System -->
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&family=Noto+Kufi+Arabic:wght@400;700;800;900&family=Lemonada:wght@400;500;600;700&family=Readex+Pro:wght@400;500;600;700&family=Changa:wght@400;500;600;700;800&family=Jomhuria&family=El+Messiri:wght@400;500;600;700&family=Lalezar&family=Rubik:wght@400;500;600;700;800;900&family=Bangers&display=swap" rel="stylesheet">
+  <!-- Design Bible Typography System - Split into critical + deferred -->
+  <!-- Critical: Primary UI fonts (Cairo, Tajawal) loaded with swap -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <!-- Deferred: Display & decorative fonts loaded async -->
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700;900&family=Lemonada:wght@400;700&family=Readex+Pro:wght@400;600;700&family=Changa:wght@400;700;800&family=Jomhuria&family=El+Messiri:wght@400;700&family=Lalezar&family=Rubik:wght@400;700;900&family=Bangers&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700;900&family=Lemonada:wght@400;700&family=Readex+Pro:wght@400;600;700&family=Changa:wght@400;700;800&family=Jomhuria&family=El+Messiri:wght@400;700&family=Lalezar&family=Rubik:wght@400;700;900&family=Bangers&display=swap" rel="stylesheet"></noscript>
   <script src="/socket.io/socket.io.js"></script>
   <link rel="stylesheet" href="/css/tokens.css">
   <link rel="stylesheet" href="/css/components.css">
@@ -24,6 +28,13 @@
   <link rel="stylesheet" href="/css/avatars.css">
 </head>
 <body data-theme="hub" data-intensity="party">
+  <!-- Screen Reader Announcements (ARIA Live Regions) -->
+  <div id="sr-announcements" class="sr-only" role="status" aria-live="polite" aria-atomic="true" lang="ar"></div>
+  <div id="sr-alerts" class="sr-only" role="alert" aria-live="assertive" lang="ar"></div>
+
+  <!-- Connection Status Banner -->
+  <div id="connection-status" class="connection-status hidden" role="status" aria-live="polite" lang="ar"></div>
+
   <!-- ═══════════════════════════════════════════════════════════
    * SVG FILTERS for Per-Game Avatar Visual Effects
    * Each game transforms player avatars with unique filters
