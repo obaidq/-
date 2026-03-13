@@ -772,24 +772,7 @@
 .game-card__banner--debateme { background: linear-gradient(135deg, #1C2833 0%, #263238 25%, #455A64 55%, #78909C 85%, #CFD8DC 100%); }
 .game-card__banner--punishmentwheel { background: linear-gradient(135deg, #3E0000 0%, #8B0000 25%, #D32F2F 55%, #FF5252 85%, #FF8A80 100%); }
 
-/* ── Per-card accent colors for borders & glow on hover ── */
-.game-card[data-game="quiplash"]      { --game-card-accent: #D4AF37; --game-card-glow: rgba(212,175,55,0.25); }
-.game-card[data-game="guesspionage"]  { --game-card-accent: #00E676; --game-card-glow: rgba(0,230,118,0.25); }
-.game-card[data-game="fakinit"]       { --game-card-accent: #C4953A; --game-card-glow: rgba(196,149,58,0.25); }
-.game-card[data-game="triviamurder"]  { --game-card-accent: #3ABAB4; --game-card-glow: rgba(58,186,180,0.25); }
-.game-card[data-game="fibbage"]       { --game-card-accent: #DAA520; --game-card-glow: rgba(218,165,32,0.25); }
-.game-card[data-game="drawful"]       { --game-card-accent: #42A5F5; --game-card-glow: rgba(66,165,245,0.25); }
-.game-card[data-game="tshirtwars"]    { --game-card-accent: #B22234; --game-card-glow: rgba(178,34,52,0.25); }
-.game-card[data-game="trynottolol"]   { --game-card-accent: #FFD700; --game-card-glow: rgba(255,215,0,0.25); }
-.game-card[data-game="inventions"]    { --game-card-accent: #00BCD4; --game-card-glow: rgba(0,188,212,0.25); }
-.game-card[data-game="wouldyourather"]{ --game-card-accent: #FF8F00; --game-card-glow: rgba(255,143,0,0.25); }
-.game-card[data-game="whosaidit"]     { --game-card-accent: #42A5F5; --game-card-glow: rgba(66,165,245,0.25); }
-.game-card[data-game="speedround"]    { --game-card-accent: #FF3D00; --game-card-glow: rgba(255,61,0,0.25); }
-.game-card[data-game="backseatgamer"] { --game-card-accent: #00E5FF; --game-card-glow: rgba(0,229,255,0.25); }
-.game-card[data-game="splittheroom"]  { --game-card-accent: #B388FF; --game-card-glow: rgba(179,136,255,0.25); }
-.game-card[data-game="courtroom"]     { --game-card-accent: #F9A825; --game-card-glow: rgba(249,168,37,0.25); }
-.game-card[data-game="debateme"]      { --game-card-accent: #78909C; --game-card-glow: rgba(120,144,156,0.25); }
-.game-card[data-game="punishmentwheel"]{ --game-card-accent: #FF5252; --game-card-glow: rgba(255,82,82,0.25); }
+/* Per-card accent colors defined in game-screens.css (loads later) */
 
 .btn--icon-lg { font-size: 20px; }
 
