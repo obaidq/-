@@ -11,11 +11,11 @@
 .avatar-picker-modal {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: var(--z-picker);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px;
+  padding: var(--space-4);
 }
 
 .avatar-picker-modal.hidden {
@@ -42,15 +42,15 @@
   overflow-x: hidden;
 
   background: linear-gradient(135deg, #0a1628 0%, #1a0a2e 50%, #0a1628 100%);
-  border: 3px solid rgba(255, 255, 255, 0.15);
-  border-radius: 24px;
+  border: var(--border-medium) solid rgba(255, 255, 255, var(--opacity-15));
+  border-radius: var(--radius-2xl);
   box-shadow:
     0 0 60px rgba(102, 126, 234, 0.3),
     0 0 120px rgba(240, 147, 251, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
 
-  padding: 24px;
-  color: white;
+  padding: var(--space-6);
+  color: var(--color-neutral-white);
 }
 
 .avatar-picker::-webkit-scrollbar {
@@ -443,11 +443,16 @@
   font-size: 2.5rem;
 }
 
-/* Selected state */
-.avatar-option--selected,
-.avatar-option--archetype.avatar-option--selected {
-  border-color: #FFD93D !important;
-  background: rgba(255, 217, 61, 0.15) !important;
+/* Selected state — doubled specificity to override all option variants */
+.avatar-option.avatar-option--selected,
+.avatar-option--archetype.avatar-option--selected,
+.avatar-option--animal.avatar-option--selected,
+.avatar-option--pixel.avatar-option--selected,
+.avatar-option--notion.avatar-option--selected,
+.avatar-option--emoji.avatar-option--selected,
+.avatar-option--small.avatar-option--selected {
+  border-color: var(--color-accent-yellow);
+  background: rgba(255, 217, 61, var(--opacity-15));
   box-shadow: 0 0 20px rgba(255, 217, 61, 0.3);
 }
 
@@ -624,10 +629,7 @@
   }
 }
 
-/* ─────────────────────────────────────────────────────────────
- * MT-4 utility (for notion section)
- * ───────────────────────────────────────────────────────────── */
-.mt-4 { margin-top: 16px; }
+/* MT-4 utility duplicated from layout.css — removed, use layout.css .mt-4 instead */
 
 
 /* ═══════════════════════════════════════════════════════════════
@@ -643,8 +645,10 @@
   justify-content: center;
   border-radius: 50%;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: all var(--duration-slow) var(--ease-default);
   position: relative;
+  will-change: transform, box-shadow;
+  contain: layout style;
 }
 
 .game-avatar img,
@@ -671,7 +675,7 @@
 
 [data-theme="quiplash"] .player-avatar__face {
   animation: avatar-wobble 3s ease-in-out infinite;
-  border: 3px dashed rgba(212, 175, 55, 0.4) !important;
+  border: 3px dashed rgba(212, 175, 55, 0.4);
 }
 
 [data-theme="quiplash"] .player-avatar__face--rich {
@@ -709,7 +713,7 @@
 
 [data-theme="guesspionage"] .player-avatar__face {
   filter: url(#filter-noir);
-  border: 2px solid rgba(200, 169, 81, 0.3) !important;
+  border: 2px solid rgba(200, 169, 81, 0.3);
   box-shadow: 0 0 12px rgba(200, 169, 81, 0.2);
 }
 
@@ -758,7 +762,7 @@
 
 [data-theme="fakinit"] .player-avatar__face {
   animation: avatar-shifty 4s ease-in-out infinite;
-  border: 2px solid rgba(232, 163, 23, 0.4) !important;
+  border: 2px solid rgba(232, 163, 23, 0.4);
   box-shadow: 0 0 10px rgba(232, 163, 23, 0.2);
 }
 
@@ -794,8 +798,8 @@
 }
 
 [data-theme="fakinit"] .player-avatar[data-action="votePlayer"]:hover .player-avatar__face {
-  box-shadow: 0 0 25px rgba(184, 134, 11, 0.5) !important;
-  border-color: rgba(184, 134, 11, 0.7) !important;
+  box-shadow: 0 0 25px rgba(184, 134, 11, 0.5);
+  border-color: rgba(184, 134, 11, 0.7);
 }
 
 
@@ -814,7 +818,7 @@
 
 [data-theme="triviamurder"] .player-avatar__face {
   animation: avatar-float 5s ease-in-out infinite;
-  border: 2px solid rgba(184, 134, 11, 0.3) !important;
+  border: 2px solid rgba(184, 134, 11, 0.3);
   box-shadow: 0 0 15px rgba(139, 34, 82, 0.3);
 }
 
@@ -823,8 +827,8 @@
 }
 
 [data-theme="triviamurder"] .player-avatar--dead .player-avatar__face {
-  filter: url(#filter-creepy) grayscale(0.8) brightness(0.5) !important;
-  animation: avatar-ghost-fade 2s ease-in-out infinite !important;
+  filter: url(#filter-creepy) grayscale(0.8) brightness(0.5);
+  animation: avatar-ghost-fade 2s ease-in-out infinite;
 }
 
 @keyframes avatar-float {
@@ -859,7 +863,7 @@
 
 [data-theme="fibbage"] .player-avatar__face {
   filter: url(#filter-vintage);
-  border: 3px double rgba(218, 165, 32, 0.4) !important;
+  border: 3px double rgba(218, 165, 32, 0.4);
   box-shadow: 0 0 15px rgba(218, 165, 32, 0.2);
   animation: avatar-spotlight 6s ease-in-out infinite;
 }
@@ -894,7 +898,7 @@
 
 [data-theme="drawful"] .player-avatar__face {
   animation: avatar-paint 4s ease-in-out infinite;
-  border: 3px solid rgba(0, 191, 165, 0.3) !important;
+  border: 3px solid rgba(0, 191, 165, 0.3);
   box-shadow: 0 0 10px rgba(0, 191, 165, 0.2);
 }
 
@@ -929,7 +933,7 @@
 
 [data-theme="tshirtwars"] .player-avatar__face {
   animation: avatar-spray 4s ease-in-out infinite;
-  border: 3px solid rgba(255, 23, 68, 0.4) !important;
+  border: 3px solid rgba(255, 23, 68, 0.4);
   box-shadow: 0 0 12px rgba(255, 23, 68, 0.2);
 }
 
@@ -963,7 +967,7 @@
 
 [data-theme="trynottolol"] .player-avatar__face {
   animation: avatar-heartbeat 2s ease-in-out infinite;
-  border: 3px solid rgba(255, 105, 180, 0.4) !important;
+  border: 3px solid rgba(255, 105, 180, 0.4);
   box-shadow: 0 0 15px rgba(255, 105, 180, 0.2);
 }
 
@@ -998,7 +1002,7 @@
 
 [data-theme="inventions"] .player-avatar__face {
   animation: avatar-gear 8s linear infinite;
-  border: 3px solid rgba(205, 127, 50, 0.4) !important;
+  border: 3px solid rgba(205, 127, 50, 0.4);
   box-shadow: 0 0 12px rgba(205, 127, 50, 0.2);
 }
 
@@ -1031,7 +1035,7 @@
 
 [data-theme="wouldyourather"] .player-avatar__face {
   animation: avatar-split 4s ease-in-out infinite;
-  border: 3px solid rgba(0, 176, 255, 0.4) !important;
+  border: 3px solid rgba(0, 176, 255, 0.4);
 }
 
 [data-theme="wouldyourather"] .player-avatar__face--rich {
@@ -1062,7 +1066,7 @@
 
 [data-theme="whosaidit"] .player-avatar__face {
   animation: avatar-ink 5s ease-in-out infinite;
-  border: 3px solid rgba(156, 39, 176, 0.4) !important;
+  border: 3px solid rgba(156, 39, 176, 0.4);
   box-shadow: 0 0 12px rgba(156, 39, 176, 0.2);
 }
 
@@ -1095,7 +1099,7 @@
 
 [data-theme="speedround"] .player-avatar__face {
   animation: avatar-zap 1s ease-in-out infinite;
-  border: 3px solid rgba(255, 235, 59, 0.5) !important;
+  border: 3px solid rgba(255, 235, 59, 0.5);
   box-shadow: 0 0 15px rgba(255, 235, 59, 0.2);
 }
 
@@ -1130,7 +1134,7 @@
 
 [data-theme="backseatgamer"] .player-avatar__face {
   animation: avatar-polygraph 4s ease-in-out infinite;
-  border: 3px solid rgba(76, 175, 80, 0.4) !important;
+  border: 3px solid rgba(76, 175, 80, 0.4);
   box-shadow: 0 0 12px rgba(76, 175, 80, 0.2);
 }
 
@@ -1179,7 +1183,7 @@
 
 [data-theme="splittheroom"] .player-avatar__face {
   animation: avatar-rift 5s ease-in-out infinite;
-  border: 3px solid rgba(233, 30, 99, 0.4) !important;
+  border: 3px solid rgba(233, 30, 99, 0.4);
 }
 
 [data-theme="splittheroom"] .player-avatar__face--rich {
@@ -1210,7 +1214,7 @@
 
 [data-theme="courtroom"] .player-avatar__face {
   animation: avatar-emoji-glow 4s ease-in-out infinite;
-  border: 3px solid rgba(255, 193, 7, 0.4) !important;
+  border: 3px solid rgba(255, 193, 7, 0.4);
   box-shadow: 0 0 12px rgba(255, 193, 7, 0.2);
 }
 
@@ -1244,7 +1248,7 @@
 
 [data-theme="debateme"] .player-avatar__face {
   animation: avatar-gavel 4s ease-in-out infinite;
-  border: 3px solid rgba(121, 85, 72, 0.5) !important;
+  border: 3px solid rgba(121, 85, 72, 0.5);
   box-shadow: 0 0 12px rgba(121, 85, 72, 0.2);
 }
 
@@ -1277,7 +1281,7 @@
 
 [data-theme="punishmentwheel"] .player-avatar__face {
   animation: avatar-typewriter 3s steps(4) infinite;
-  border: 3px solid rgba(96, 125, 139, 0.4) !important;
+  border: 3px solid rgba(96, 125, 139, 0.4);
   box-shadow: 0 0 12px rgba(96, 125, 139, 0.2);
 }
 
@@ -1302,7 +1306,7 @@
 [data-theme="victory"] .winner-showcase__avatar .game-avatar,
 [data-theme="victory"] .winner-showcase__avatar img,
 [data-theme="victory"] .winner-showcase__avatar svg {
-  filter: none !important;
+  filter: none;
   animation: winner-glow 2s ease-in-out infinite;
 }
 

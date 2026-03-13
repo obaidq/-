@@ -20,6 +20,7 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
 }
 
 html[dir="rtl"] {
@@ -352,6 +353,7 @@ body {
   padding: var(--space-4) var(--space-6);
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.35));
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
 
@@ -441,43 +443,130 @@ body {
  * RESPONSIVE BREAKPOINTS
  * ───────────────────────────────────────────────────────────── */
 
+/* ── Tablet (601-900px) ── */
+@media (min-width: 601px) and (max-width: 900px) {
+  .games-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+  }
+}
+
+/* ── Mobile (≤768px) ── */
 @media (max-width: 768px) {
   :root {
     --safe-area-x: 16px;
     --safe-area-y: 16px;
   }
-  
+
   .game-hud {
     flex-wrap: wrap;
     gap: var(--space-2);
     padding: var(--space-3);
   }
-  
+
   .game-hud__title {
     font-size: var(--text-xl);
   }
-  
+
   .games-grid {
     grid-template-columns: 1fr;
     gap: var(--space-4);
   }
-  
+
   .btn--lg {
     font-size: var(--text-xl);
     padding: var(--space-4) var(--space-6);
-    min-height: 60px;
+    min-height: 56px;
+  }
+
+  .game-content {
+    padding: var(--space-4);
   }
 }
 
+/* ── Small phones (≤480px) ── */
 @media (max-width: 480px) {
   .room-code__value {
-    font-size: var(--text-4xl);
+    font-size: clamp(2rem, 8vw, var(--text-4xl));
   }
-  
+
   .timer {
     width: 60px;
     height: 60px;
     font-size: var(--text-2xl);
+  }
+
+  .game-hud__title {
+    font-size: var(--text-lg);
+  }
+
+  .avatar-picker {
+    max-height: 90vh;
+    border-radius: var(--radius-xl);
+  }
+}
+
+/* ── Very small phones (≤320px) ── */
+@media (max-width: 320px) {
+  :root {
+    --safe-area-x: 8px;
+    --safe-area-y: 8px;
+  }
+
+  .room-code__value {
+    font-size: var(--text-3xl);
+  }
+
+  .btn {
+    min-width: 100px;
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .btn--lg {
+    min-height: 48px;
+    font-size: var(--text-lg);
+  }
+}
+
+/* ── Landscape phones ── */
+@media (orientation: landscape) and (max-height: 500px) {
+  .screen {
+    min-height: auto;
+    padding: var(--space-2) var(--safe-area-x);
+  }
+
+  .game-content {
+    padding: var(--space-2) var(--space-4);
+  }
+
+  .game-hud {
+    padding: var(--space-1) var(--space-4);
+  }
+
+  .avatar-picker {
+    max-height: 95vh;
+  }
+}
+
+/* ── Large displays (≥1200px) ── */
+@media (min-width: 1200px) {
+  .games-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    max-width: 1400px;
+  }
+}
+
+/* ── Safe area insets for notched devices ── */
+@supports (padding: env(safe-area-inset-top)) {
+  .screen {
+    padding-top: max(var(--safe-area-y), env(safe-area-inset-top));
+    padding-bottom: max(var(--safe-area-y), env(safe-area-inset-bottom));
+    padding-left: max(var(--safe-area-x), env(safe-area-inset-left));
+    padding-right: max(var(--safe-area-x), env(safe-area-inset-right));
+  }
+
+  .emoji-bar {
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
   }
 }
 
@@ -516,9 +605,100 @@ body {
   outline-offset: 2px;
 }
 
+/* Specific interactive elements get enhanced focus rings */
+.btn:focus-visible,
+.game-card:focus-visible,
+.avatar-option:focus-visible,
+.avatar-tab:focus-visible,
+.emoji-btn:focus-visible {
+  outline: 3px solid var(--theme-accent, #00E676);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px rgba(0, 230, 118, 0.15);
+}
+
+/* Disabled elements should not show focus rings */
+.btn:disabled:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Input focus-visible fallback */
+.input:focus-visible {
+  outline: 3px solid var(--theme-accent, #00E676);
+  outline-offset: -1px;
+}
+
 ::selection {
   background: var(--theme-accent);
   color: var(--color-neutral-black);
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * REDUCED MOTION - تقليل الحركة
+ * ───────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .bg__pattern,
+  .bg__glow,
+  .bg__gradient {
+    animation: none;
+  }
+
+  .mascot,
+  .boot-bar__fill,
+  .logo__box::after,
+  .room-display::before {
+    animation: none;
+  }
+
+  .game-card:hover {
+    transform: translateY(-4px);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * TOUCH TARGETS - أهداف اللمس (44×44px minimum)
+ * ───────────────────────────────────────────────────────────── */
+
+@media (pointer: coarse) {
+  .btn {
+    min-height: 48px;
+    min-width: 48px;
+  }
+
+  .btn--sm {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .emoji-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .avatar-tab {
+    min-height: 44px;
+    padding: var(--space-2) var(--space-4);
+  }
+
+  .avatar-option--emoji {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .settings-slider::-webkit-slider-thumb {
+    width: 28px;
+    height: 28px;
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────
