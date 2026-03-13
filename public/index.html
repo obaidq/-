@@ -26,6 +26,7 @@
   <link rel="stylesheet" href="/css/patterns.css">
   <link rel="stylesheet" href="/css/game-screens.css">
   <link rel="stylesheet" href="/css/avatars.css">
+  <link rel="stylesheet" href="/css/cultural-themes.css">
 </head>
 <body data-theme="hub" data-intensity="party">
   <!-- Screen Reader Announcements (ARIA Live Regions) -->
@@ -118,17 +119,30 @@
   </div>
 
   <!-- ═══════════════════════════════════════════════════════════
+   * GAME TRANSITION OVERLAY - انتقالات اللعبة (3-beat mini-launch)
+   * Dissolve → Transform → Arrive
+   * ═══════════════════════════════════════════════════════════ -->
+  <div id="gameTransition" class="game-transition hidden" aria-hidden="true">
+    <div class="game-transition__dissolve"></div>
+    <div class="game-transition__transform"></div>
+    <div class="game-transition__arrive"></div>
+    <div class="game-transition__pattern"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
    * BOOT SCREEN - شاشة التحميل
-   * Jackbox-style animated loading
+   * Jackbox-style animated loading with Abu Abed mascot
    * ═══════════════════════════════════════════════════════════ -->
   <div id="bootScreen" class="screen screen--centered is-active">
     <div class="boot-animation">
-      <div class="mascot">🧔🏻</div>
+      <div class="mascot" id="mascotContainer">🧔🏻</div>
       <div class="logo">
         <span class="logo__box">أبو عابد</span>
         <span class="logo__name">بوكس</span>
       </div>
-      <div class="boot-bar"><div class="boot-bar__fill"></div></div>
+      <div class="boot-bar">
+        <div class="boot-bar__fill"></div>
+      </div>
     </div>
     <div class="boot-tip" id="bootTip">💡 الكذب في اللعب... فن! 🎭</div>
     <div class="boot-version">V7.0 • 2026</div>
