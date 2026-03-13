@@ -655,7 +655,7 @@
   left: 50%;
   width: 10px;
   height: 10px;
-  margin-left: -5px;
+  margin-inline-start: -5px;
   margin-top: -2px;
   background: var(--cultural-accent, var(--theme-accent, #D4AF37));
   border-radius: 50%;

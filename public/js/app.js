@@ -156,6 +156,11 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+// Bidi-safe player name: wraps in <bdi dir="auto"> to prevent RTL/LTR corruption
+function bdiName(str) {
+  return '<bdi dir="auto">' + escapeHtml(str) + '</bdi>';
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // التطبيق الرئيسي
 // ═══════════════════════════════════════════════════════════════════
@@ -598,14 +603,14 @@ const App = {
     s.on('quiplashVoting', data => this.handleQuiplashVoting(data));
     s.on('quiplashMatchupResult', data => {
       const hasQuiplash = data.results?.some(r => r.quiplash);
-      if (hasQuiplash) AudioEngine.quiplash(); else AudioEngine.reveal();
+      if (hasQuiplash) AudioEngine.quiplash(); else AudioEngine.revealSting(App.currentGame);
       this.handleQuiplashMatchupResult(data);
     });
     // Thriplash (final round)
     s.on('quiplashThriplashVoting', data => this.handleQuiplashThriplashVoting(data));
     s.on('quiplashThriplashResult', data => {
       const hasQuiplash = data.results?.some(r => r.quiplash);
-      if (hasQuiplash) AudioEngine.quiplash(); else AudioEngine.reveal();
+      if (hasQuiplash) AudioEngine.quiplash(); else AudioEngine.revealSting(App.currentGame);
       this.handleQuiplashThriplashResult(data);
     });
 
@@ -721,7 +726,7 @@ const App = {
       // Remove tension effect
       document.getElementById('gameScreen')?.classList.remove('screen--tension');
       document.getElementById('gameTimer')?.classList.remove('game-timer--tension');
-      AudioEngine.reveal();
+      AudioEngine.revealSting(App.currentGame);
       if (data.commentary) this.showCommentary(data.commentary);
       this.handleRoundResults(data);
     });
@@ -784,7 +789,7 @@ const App = {
 
     // ── Audience ──
     s.on('audienceJoined', data => {
-      this.showToast(escapeHtml(data.name) + ' انضم كمتفرج! 👀', 'success');
+      this.showToast(bdiName(data.name) + ' انضم كمتفرج! 👀', 'success');
     });
 
     // ── Guesspionage Final Round (The Round-Up) ──
@@ -1121,7 +1126,7 @@ const App = {
       const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1) + '.';
       return '<div class="playlist-standing">' +
         '<span class="playlist-standing__medal">' + medal + '</span>' +
-        '<span class="playlist-standing__name">' + escapeHtml(s.name) + '</span>' +
+        '<span class="playlist-standing__name">' + bdiName(s.name) + '</span>' +
         '<span class="playlist-standing__score" style="color:' + theme.accent + '">' + s.score + '</span>' +
       '</div>';
     }).join('');
@@ -1154,14 +1159,14 @@ const App = {
       const sizes = ['120px', '90px', '70px'];
       return '<div class="playlist-podium__entry" style="order:' + [1,0,2][i] + '">' +
         '<div style="font-size:' + sizes[i] + '">' + crowns[i] + '</div>' +
-        '<div class="playlist-podium__name">' + escapeHtml(s.name) + '</div>' +
+        '<div class="playlist-podium__name">' + bdiName(s.name) + '</div>' +
         '<div class="playlist-podium__score">' + s.score + '</div>' +
       '</div>';
     }).join('');
 
     const restHtml = standings.slice(3).map((s, i) => {
       return '<div class="playlist-rest-row">' +
-        '<span>' + (i + 4) + '. ' + escapeHtml(s.name) + '</span>' +
+        '<span>' + (i + 4) + '. ' + bdiName(s.name) + '</span>' +
         '<span>' + s.score + '</span>' +
       '</div>';
     }).join('');
@@ -1224,7 +1229,11 @@ const App = {
 
         const name = document.createElement('span');
         name.className = 'player-avatar__name';
+        const nameBdi = document.createElement('bdi');
+        nameBdi.setAttribute('dir', 'auto');
+        name.appendChild(nameBdi);
         el.appendChild(name);
+        el._nameBdi = nameBdi;
         el._name = name;
 
         const title = document.createElement('span');
@@ -1245,7 +1254,7 @@ const App = {
       el.setAttribute('aria-label', p.name + (p.isReady ? ' - جاهز' : '') + (!p.isAlive ? ' - ميت' : ''));
       el._crown.style.display = p.isHost ? '' : 'none';
       el._skull.style.display = !p.isAlive ? '' : 'none';
-      el._name.textContent = p.name + (p.isReady ? ' ✓' : '');
+      (el._nameBdi || el._name).textContent = p.name + (p.isReady ? ' ✓' : '');
       if (el._title) {
         const titleText = p.avatarData && p.avatarData.nameAr ? p.avatarData.nameAr : '';
         el._title.textContent = titleText;
@@ -1353,7 +1362,7 @@ const App = {
     if (avatarsEl && answered && answered.length > 0) {
       avatarsEl.innerHTML = answered.map(a => {
         const avatarContent = this._gAvatar(a.avatarData, 32, a.avatar);
-        return '<div class="waiting-avatar' + (a.avatarData ? ' waiting-avatar--rich' : '') + '" style="background:' + escapeHtml(a.color) + '" title="' + escapeHtml(a.name) + '">' +
+        return '<div class="waiting-avatar' + (a.avatarData ? ' waiting-avatar--rich' : '') + '" style="background:' + escapeHtml(a.color) + '" title="' + bdiName(a.name) + '">' +
           avatarContent +
           '<div class="waiting-avatar__check">✓</div>' +
         '</div>';
@@ -1527,7 +1536,7 @@ const App = {
       '<div class="ql-interstitial__subtitle">' + escapeHtml(subtitle) + '</div>';
 
     document.body.appendChild(el);
-    AudioEngine.reveal();
+    AudioEngine.revealSting(App.currentGame);
 
     setTimeout(() => {
       el.classList.add('ql-interstitial--exit');
@@ -1673,14 +1682,14 @@ const App = {
         const vAvatar = this._gAvatar(v.avatarData, 24, v.avatar);
         return '<div class="ql-vote-bar" style="background:' + escapeHtml(v.color || '#444') + ';animation-delay:' + (i * 0.2) + 's">' +
           '<span class="ql-vote-bar__avatar">' + vAvatar + '</span>' +
-          '<span class="ql-vote-bar__name">' + escapeHtml(v.name || '') + '</span>' +
+          '<span class="ql-vote-bar__name">' + bdiName(v.name || '') + '</span>' +
         '</div>';
       }).join('');
       const bBars = (voterBreakdown[sideB.playerId] || []).map((v, i) => {
         const vAvatar = this._gAvatar(v.avatarData, 24, v.avatar);
         return '<div class="ql-vote-bar" style="background:' + escapeHtml(v.color || '#444') + ';animation-delay:' + (i * 0.2) + 's">' +
           '<span class="ql-vote-bar__avatar">' + vAvatar + '</span>' +
-          '<span class="ql-vote-bar__name">' + escapeHtml(v.name || '') + '</span>' +
+          '<span class="ql-vote-bar__name">' + bdiName(v.name || '') + '</span>' +
         '</div>';
       }).join('');
 
@@ -1701,7 +1710,7 @@ const App = {
               '<div class="ql-percentage ql-percentage--a' + (aWins ? ' ql-percentage--winner' : '') + (sideAPct === 0 ? ' ql-percentage--zero' : '') + '" id="qlPctA">0%</div>' +
               '<div class="ql-results__player">' +
                 '<div class="ql-results__player-avatar' + (aWins ? ' ql-results__player-avatar--happy' : bWins ? ' ql-results__player-avatar--sad' : '') + '">' + this._gAvatar(sideA.avatarData, 40, sideA.avatar) + '</div>' +
-                '<div class="ql-results__player-name">' + escapeHtml(sideA.playerName || '') + '</div>' +
+                '<div class="ql-results__player-name">' + bdiName(sideA.playerName || '') + '</div>' +
               '</div>' +
               '<div class="ql-points' + (sideA.quiplash ? ' ql-points--quiplash' : '') + '">+' + (sideA.points || 0) +
                 (sideA.speedBonus ? ' <span class="ql-bonus-badge">⚡+' + sideA.speedBonus + '</span>' : '') +
@@ -1719,7 +1728,7 @@ const App = {
               '<div class="ql-percentage ql-percentage--b' + (bWins ? ' ql-percentage--winner' : '') + (sideBPct === 0 ? ' ql-percentage--zero' : '') + '" id="qlPctB">0%</div>' +
               '<div class="ql-results__player">' +
                 '<div class="ql-results__player-avatar' + (bWins ? ' ql-results__player-avatar--happy' : aWins ? ' ql-results__player-avatar--sad' : '') + '">' + this._gAvatar(sideB.avatarData, 40, sideB.avatar) + '</div>' +
-                '<div class="ql-results__player-name">' + escapeHtml(sideB.playerName || '') + '</div>' +
+                '<div class="ql-results__player-name">' + bdiName(sideB.playerName || '') + '</div>' +
               '</div>' +
               '<div class="ql-points' + (sideB.quiplash ? ' ql-points--quiplash' : '') + '">+' + (sideB.points || 0) +
                 (sideB.speedBonus ? ' <span class="ql-bonus-badge">⚡+' + sideB.speedBonus + '</span>' : '') +
@@ -1804,7 +1813,7 @@ const App = {
       return '<div class="ql-mini-lb__row">' +
         '<div class="ql-mini-lb__rank">' + rank + '</div>' +
         '<div class="ql-mini-lb__avatar">' + this._gAvatar(p.avatarData, 28, p.avatar) + '</div>' +
-        '<div class="ql-mini-lb__name">' + escapeHtml(p.name || '') + '</div>' +
+        '<div class="ql-mini-lb__name">' + bdiName(p.name || '') + '</div>' +
         '<div class="ql-mini-lb__score">' + (p.score || 0) + '</div>' +
       '</div>';
     }).join('');
@@ -1837,9 +1846,9 @@ const App = {
           '<div class="ql-jinx__subtitle">نفس الإجابة! صفر نقاط للاثنين!</div>' +
           '<div class="ql-jinx__answer">"' + escapeHtml(r0.answer || r1.answer || '') + '"</div>' +
           '<div class="ql-jinx__players">' +
-            '<span>' + this._gAvatar(r0.avatarData, 28, r0.avatar) + ' ' + escapeHtml(r0.playerName || '') + '</span>' +
+            '<span>' + this._gAvatar(r0.avatarData, 28, r0.avatar) + ' ' + bdiName(r0.playerName || '') + '</span>' +
             '<span style="margin:0 12px;color:#B8860B;font-weight:900">=</span>' +
-            '<span>' + this._gAvatar(r1.avatarData, 28, r1.avatar) + ' ' + escapeHtml(r1.playerName || '') + '</span>' +
+            '<span>' + this._gAvatar(r1.avatarData, 28, r1.avatar) + ' ' + bdiName(r1.playerName || '') + '</span>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -1883,7 +1892,7 @@ const App = {
           '<div class="ql-thriplash-result__place">' + place + '</div>' +
           '<div class="ql-thriplash-result__avatar">' + avatar + '</div>' +
           '<div class="ql-thriplash-result__info">' +
-            '<div class="ql-thriplash-result__name">' + escapeHtml(r.playerName) + '</div>' +
+            '<div class="ql-thriplash-result__name">' + bdiName(r.playerName) + '</div>' +
             '<div class="ql-thriplash-result__answer">"' + escapeHtml(r.answer) + '"</div>' +
           '</div>' +
           '<div class="ql-thriplash-result__stats">' +
@@ -1920,7 +1929,7 @@ const App = {
     document.getElementById('gameHint').textContent = '🎯 أنت المميز! خمّن النسبة بدقة';
     this.startTimer(d.timeLimit);
     if (d.commentary) this.showCommentary(d.commentary);
-    AudioEngine.reveal();
+    AudioEngine.revealSting(App.currentGame);
     document.getElementById('gameContent').innerHTML =
       '<div class="gspy-featured-container">' +
         '<div class="gspy-badge gspy-badge--featured">🎯 أنت اللاعب المميز!</div>' +
@@ -2198,7 +2207,7 @@ const App = {
       const faceContent = this._gAvatar(p.avatarData, 48, p.avatar);
       return '<div class="faker-silhouette" style="border:none;background:rgba(255,255,255,0.05)">' +
         '<div class="player-avatar__face' + (p.avatarData ? ' player-avatar__face--rich' : '') + '" style="background:' + escapeHtml(p.color) + ';width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;border:3px solid #000;box-shadow:3px 3px 0 #000">' + faceContent + '</div>' +
-        '<span style="margin-top:6px;display:block;font-weight:600;color:#fff;font-size:13px">' + escapeHtml(p.name) + '</span>' +
+        '<span style="margin-top:6px;display:block;font-weight:600;color:#fff;font-size:13px">' + bdiName(p.name) + '</span>' +
       '</div>';
     }).join('');
 
@@ -2222,7 +2231,7 @@ const App = {
       const faceContent = this._gAvatar(p.avatarData, 56, p.avatar);
       return '<div class="faker-silhouette" style="cursor:pointer" data-action="votePlayer" data-id="' + escapeHtml(p.id) + '">' +
         '<div class="player-avatar__face' + (p.avatarData ? ' player-avatar__face--rich' : '') + '" style="background:' + escapeHtml(p.color) + ';width:68px;height:68px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:34px;border:4px solid #000;box-shadow:4px 4px 0 #000">' + faceContent + '</div>' +
-        '<span style="margin-top:8px;display:block;font-weight:700;color:#fff">' + escapeHtml(p.name) + '</span>' +
+        '<span style="margin-top:8px;display:block;font-weight:700;color:#fff">' + bdiName(p.name) + '</span>' +
       '</div>';
     }).join('');
 
@@ -2288,7 +2297,7 @@ const App = {
           const colors = ['crimson', 'purple', 'midnight', 'teal', 'rust', 'olive', 'navy', 'coral'];
           html += '<div class="doll doll--' + colors[i % colors.length] + '">' +
             '<div class="doll__body"><div class="doll__face">💀</div></div>' +
-            '<div class="doll__name">' + escapeHtml(p.name) + '</div>' +
+            '<div class="doll__name">' + bdiName(p.name) + '</div>' +
           '</div>';
         });
         html += '</div>';
@@ -2306,7 +2315,7 @@ const App = {
           const colors = ['teal', 'navy', 'olive', 'coral'];
           html += '<div class="doll doll--' + colors[i % colors.length] + '" style="transform:scale(0.8)">' +
             '<div class="doll__body"><div class="doll__face">😌</div></div>' +
-            '<div class="doll__name">' + escapeHtml(p.name) + '</div>' +
+            '<div class="doll__name">' + bdiName(p.name) + '</div>' +
           '</div>';
         });
         html += '</div>';
@@ -2385,7 +2394,7 @@ const App = {
             const colors = ['crimson', 'purple', 'midnight', 'teal'];
             return '<div class="doll doll--' + colors[i % colors.length] + '">' +
               '<div class="doll__body"><div class="doll__face">💀</div></div>' +
-              '<div class="doll__name">' + escapeHtml(p.name) + '</div>' +
+              '<div class="doll__name">' + bdiName(p.name) + '</div>' +
             '</div>';
           }).join('') +
         '</div>' +
@@ -2411,7 +2420,7 @@ const App = {
           const colors = ['teal', 'olive', 'navy', 'coral'];
           html += '<div class="doll doll--' + colors[i % colors.length] + '">' +
             '<div class="doll__body"><div class="doll__face">😇</div></div>' +
-            '<div class="doll__name">' + escapeHtml(p.name) + '</div>' +
+            '<div class="doll__name">' + bdiName(p.name) + '</div>' +
           '</div>';
         });
         html += '</div>';
@@ -2424,7 +2433,7 @@ const App = {
           const colors = ['crimson', 'purple', 'midnight', 'rust'];
           html += '<div class="doll doll--' + colors[i % colors.length] + '">' +
             '<div class="doll__body"><div class="doll__face">💀</div></div>' +
-            '<div class="doll__name">' + escapeHtml(p.name) + '</div>' +
+            '<div class="doll__name">' + bdiName(p.name) + '</div>' +
           '</div>';
         });
         html += '</div>';
@@ -2866,7 +2875,7 @@ const App = {
 
   handleWouldYouRatherResults(d) {
     clearInterval(this.gameTimer);
-    AudioEngine.reveal();
+    AudioEngine.revealSting(App.currentGame);
     const totalVotes = (d.countA || 0) + (d.countB || 0);
     const pctA = totalVotes > 0 ? Math.round((d.countA / totalVotes) * 100) : 50;
     const pctB = 100 - pctA;
@@ -2929,7 +2938,7 @@ const App = {
         '<div class="wsi-statement__options">';
       d.players.forEach(p => {
         html += '<button class="wsi-player-btn" data-action="guessWhoSaidIt" data-stmt="' + idx + '" data-player="' + escapeHtml(p.id) + '">' +
-          escapeHtml(p.name) + '</button>';
+          bdiName(p.name) + '</button>';
       });
       html += '</div></div>';
     });
@@ -2970,7 +2979,7 @@ const App = {
     this.showRoundInfo(d.round, d.maxRounds, '⚡ أسرع واحد');
     this.startTimer(d.timeLimit);
     this.setHint('أجب بأسرع ما يمكن!');
-    AudioEngine.reveal();
+    AudioEngine.revealSting(App.currentGame);
 
     document.getElementById('gameContent').innerHTML =
       '<div class="speed-container">' +
@@ -3005,7 +3014,7 @@ const App = {
         const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
         html += '<div class="speed-rank">' +
           '<span class="speed-rank__pos">' + medal + '</span>' +
-          '<span class="speed-rank__name">' + escapeHtml(r.name) + '</span>' +
+          '<span class="speed-rank__name">' + bdiName(r.name) + '</span>' +
           '<span class="speed-rank__time">' + (r.time ? (r.time / 1000).toFixed(1) + 'ث' : '⏱️') + '</span>' +
           '<span class="speed-rank__points" style="color:#D4AF37">+' + r.points + '</span>' +
         '</div>';
@@ -3318,7 +3327,6 @@ const App = {
     if (!this.isHost) return;
     const modal = document.getElementById('kickModal');
     if (!modal) return;
-    modal.classList.remove('hidden');
     const list = document.getElementById('kickPlayersList');
     if (!list) return;
     const grid = document.getElementById('playersGrid');
@@ -3329,14 +3337,24 @@ const App = {
       const pid = el.dataset.playerId;
       const name = el.querySelector('.player-avatar__name')?.textContent || '';
       if (pid !== this.myId) {
-        html += '<button class="btn btn--danger btn--full" data-action="kickPlayer" data-id="' + escapeHtml(pid) + '">🚫 طرد ' + escapeHtml(name) + '</button>';
+        html += '<button class="btn btn--danger btn--full" data-action="kickPlayer" data-id="' + escapeHtml(pid) + '">🚫 طرد ' + bdiName(name) + '</button>';
       }
     });
     list.innerHTML = html || '<p class="text-muted">ما فيه لاعبين ثانيين</p>';
+    if (typeof A11y !== 'undefined') {
+      A11y.openModal('kickModal');
+    } else {
+      modal.classList.remove('hidden');
+    }
   },
 
   closeKickMenu() {
-    document.getElementById('kickModal')?.classList.add('hidden');
+    if (typeof A11y !== 'undefined') {
+      A11y.closeModal('kickModal');
+    } else {
+      var el = document.getElementById('kickModal');
+      if (el) el.classList.add('hidden');
+    }
   },
 
   kickPlayer(id) {
@@ -3368,7 +3386,7 @@ const App = {
     const msg = document.createElement('div');
     msg.className = 'chat-msg';
     msg.innerHTML = '<span class="chat-msg__name" style="color:' + escapeHtml(data.color || '#00E676') + '">' +
-      escapeHtml(data.name) + ':</span> ' + escapeHtml(data.message);
+      bdiName(data.name) + ':</span> ' + escapeHtml(data.message);
     container.appendChild(msg);
     container.scrollTop = container.scrollHeight;
     // Keep only last 50 messages
@@ -3616,7 +3634,7 @@ const App = {
     clearInterval(this.gameTimer);
     let html = '<div class="text-center" style="max-width:600px">';
     html += '<div class="winner-stamp mb-4"><div class="winner-stamp__label">🏆 فائز!</div></div>';
-    html += '<p class="text-2xl font-bold mb-4" style="color:#FFD93D">' + escapeHtml(d.winner.name) + '</p>';
+    html += '<p class="text-2xl font-bold mb-4" style="color:#FFD93D">' + bdiName(d.winner.name) + '</p>';
     html += '<div class="tshirt-shape tshirt-shape--dark" style="margin:0 auto 16px;transform:scale(1.1)">';
     html += '<div class="tshirt-shape__design" id="winnerShirt"></div>';
     html += '<div class="tshirt-shape__slogan">' + escapeHtml(d.winner.slogan) + '</div>';
@@ -3798,7 +3816,7 @@ const App = {
       html +=
         '<div class="result-row' + (i === 0 ? ' result-row--top' : '') + '">' +
           '<div>' +
-            '<span class="font-bold">' + medal + ' ' + escapeHtml(r.playerName || r.name || '') + '</span>' +
+            '<span class="font-bold">' + medal + ' ' + bdiName(r.playerName || r.name || '') + '</span>' +
             (r.text ? '<p class="text-sm text-muted mt-1">"' + escapeHtml(r.text) + '"</p>' : '') +
             (r.detail ? '<p class="text-sm text-muted mt-1">' + escapeHtml(r.detail) + '</p>' : '') +
           '</div>' +
@@ -3845,7 +3863,7 @@ const App = {
               resultHtml +=
                 '<div class="gspy-results-row ' + rowClass + '">' +
                   '<div class="gspy-results-row-info">' +
-                    '<span class="gspy-results-row-name">' + escapeHtml(pr.playerName) + '</span>' +
+                    '<span class="gspy-results-row-name">' + bdiName(pr.playerName) + '</span>' +
                     '<span class="gspy-results-row-detail">' + pr.correctPicks + '/3 صح ✅</span>' +
                   '</div>' +
                   '<span class="gspy-results-row-points">+' + pr.points + '</span>' +
@@ -3919,7 +3937,7 @@ const App = {
             resultHtml +=
               '<div class="gspy-results-row ' + rowClass + '" style="opacity:0;transform:translateY(10px);transition:all 0.3s ease-out ' + (idx * 100) + 'ms">' +
                 '<div class="gspy-results-row-info">' +
-                  '<span class="gspy-results-row-name">' + escapeHtml(pr.playerName) + '</span>' +
+                  '<span class="gspy-results-row-name">' + bdiName(pr.playerName) + '</span>' +
                   '<span class="gspy-results-row-detail">' + info + '</span>' +
                 '</div>' +
                 '<span class="gspy-results-row-points">+' + pr.points + '</span>' +
@@ -3996,12 +4014,12 @@ const App = {
             const colors = ['crimson', 'purple', 'midnight'];
             resultHtml += '<div class="doll doll--' + colors[i % colors.length] + '" style="transform:scale(0.7)">' +
               '<div class="doll__body"><div class="doll__face">💀</div></div>' +
-              '<div class="doll__name">' + escapeHtml(p.name) + '</div></div>';
+              '<div class="doll__name">' + bdiName(p.name) + '</div></div>';
           });
           resultHtml += '</div>';
         }
         if (d.revived && d.revived.length > 0) {
-          resultHtml += '<p style="color:#006C35" class="mt-2">🎉 نجوا: ' + d.revived.map(p => escapeHtml(p.name)).join('، ') + '</p>';
+          resultHtml += '<p style="color:#006C35" class="mt-2">🎉 نجوا: ' + d.revived.map(p => bdiName(p.name)).join('، ') + '</p>';
         }
         break;
 
@@ -4019,7 +4037,7 @@ const App = {
             if (pr.fooledCount > 0) info += '🤥 خدع ' + pr.fooledCount;
             resultHtml +=
               '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(255,255,255,0.05);border-radius:10px;border-right:3px solid ' + (pr.guessedCorrect ? '#DAA520' : 'transparent') + '">' +
-                '<span style="color:#fff">' + escapeHtml(pr.playerName) + ' ' + info + '</span>' +
+                '<span style="color:#fff">' + bdiName(pr.playerName) + ' ' + info + '</span>' +
                 '<span style="color:#DAA520;font-weight:bold">+' + pr.points + '</span>' +
               '</div>';
           });
@@ -4044,7 +4062,7 @@ const App = {
             if (pr.fooledCount > 0) info += '🤥×' + pr.fooledCount;
             resultHtml +=
               '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(255,255,255,0.05);border-radius:10px;border-right:3px solid ' + (pr.guessedCorrect ? '#00C853' : 'transparent') + '">' +
-                '<span style="color:#fff">' + escapeHtml(pr.playerName) + ' ' + info + '</span>' +
+                '<span style="color:#fff">' + bdiName(pr.playerName) + ' ' + info + '</span>' +
                 '<span style="color:#D4AF37;font-weight:bold">+' + pr.points + '</span>' +
               '</div>';
           });
@@ -4070,7 +4088,7 @@ const App = {
               '<div class="tshirt-shape tshirt-shape--' + color + '" style="transform:scale(' + (i === 0 ? '1' : '0.8') + ');' + (i === 0 ? 'box-shadow:0 0 20px rgba(212,175,55,0.5)' : '') + '">' +
                 '<div class="tshirt-shape__design" style="font-size:24px">' + medal + '</div>' +
                 '<div class="tshirt-shape__slogan">' + escapeHtml(r.text || r.playerName) + '</div>' +
-                '<div class="tshirt-shape__owner" style="visibility:visible;opacity:1">' + escapeHtml(r.playerName) + '</div>' +
+                '<div class="tshirt-shape__owner" style="visibility:visible;opacity:1">' + bdiName(r.playerName) + '</div>' +
                 '<div style="color:#D4AF37;font-weight:bold;font-size:14px;margin-top:4px">+' + r.points + '</div>' +
               '</div>';
           });
@@ -4104,7 +4122,7 @@ const App = {
             resultHtml +=
               '<div class="blueprint" style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;' + (i === 0 ? 'border-color:#D4AF37;box-shadow:0 0 15px rgba(212,175,55,0.3)' : '') + '">' +
                 '<div>' +
-                  '<span style="font-weight:bold;color:#fff">' + medal + ' ' + escapeHtml(r.playerName) + '</span>' +
+                  '<span style="font-weight:bold;color:#fff">' + medal + ' ' + bdiName(r.playerName) + '</span>' +
                   '<p style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:4px">"' + escapeHtml(r.text) + '"</p>' +
                 '</div>' +
                 '<div style="text-align:left">' +
@@ -4176,7 +4194,7 @@ const App = {
             resultHtml +=
               '<div class="speed-results__row' + (r.isCorrect ? ' speed-results__row--correct' : ' speed-results__row--wrong') + '">' +
                 '<span class="speed-results__place">' + placeIcon + '</span>' +
-                '<span class="speed-results__name">' + escapeHtml(r.playerName) + '</span>' +
+                '<span class="speed-results__name">' + bdiName(r.playerName) + '</span>' +
                 (r.answer ? '<span class="speed-results__ans text-sm text-muted">' + escapeHtml(r.answer) + '</span>' : '') +
                 '<span class="speed-results__pts">+' + (r.points || 0) + '</span>' +
               '</div>';
@@ -4200,7 +4218,7 @@ const App = {
             resultHtml +=
               '<div class="speed-results__row' + (r.isCorrect || r.isDescriber ? ' speed-results__row--correct' : ' speed-results__row--wrong') + '">' +
                 '<span class="speed-results__place">' + icon + '</span>' +
-                '<span class="speed-results__name">' + escapeHtml(r.playerName) + '</span>' +
+                '<span class="speed-results__name">' + bdiName(r.playerName) + '</span>' +
                 (r.answer ? '<span class="speed-results__ans text-sm text-muted">' + escapeHtml(r.answer) + '</span>' : '') +
                 (r.clue ? '<span class="speed-results__ans text-sm text-muted">"' + escapeHtml(r.clue) + '"</span>' : '') +
                 '<span class="speed-results__pts">+' + (r.points || 0) + '</span>' +
@@ -4306,7 +4324,7 @@ const App = {
             resultHtml +=
               '<div class="speed-results__row' + (r.isCorrect ? ' speed-results__row--correct' : ' speed-results__row--wrong') + '">' +
                 '<span class="speed-results__place">' + icon + '</span>' +
-                '<span class="speed-results__name">' + escapeHtml(r.playerName) + '</span>' +
+                '<span class="speed-results__name">' + bdiName(r.playerName) + '</span>' +
                 (r.answer ? '<span class="speed-results__ans text-sm text-muted">' + escapeHtml(r.answer) + '</span>' : '') +
                 '<span class="speed-results__pts">+' + (r.points || 0) + '</span>' +
               '</div>';
@@ -4318,7 +4336,7 @@ const App = {
           resultHtml +=
             '<div style="margin-top:24px;padding:24px;background:rgba(255,68,68,0.2);border-radius:16px;text-align:center">' +
               '<div style="font-size:48px;margin-bottom:12px;animation:spin 2s ease-out">🎡</div>' +
-              '<p style="color:#ff4444;font-size:20px;font-weight:900;margin-bottom:8px">عقاب ' + escapeHtml(d.lowestPlayer.name) + '!</p>' +
+              '<p style="color:#ff4444;font-size:20px;font-weight:900;margin-bottom:8px">عقاب ' + bdiName(d.lowestPlayer.name) + '!</p>' +
               '<p style="color:#FFD700;font-size:24px;font-weight:bold">' + escapeHtml(d.punishment) + '</p>' +
             '</div>';
           AudioEngine.buzzer && AudioEngine.buzzer();
@@ -4338,7 +4356,7 @@ const App = {
       '<div class="scoreboard__row score-snap" style="animation-delay:' + (i * 0.1) + 's">' +
         '<div class="flex items-center gap-3">' +
           '<span class="text-2xl">' + (i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1)) + '</span>' +
-          '<span class="text-xl font-bold">' + escapeHtml(p.name) + '</span>' +
+          '<span class="text-xl font-bold">' + bdiName(p.name) + '</span>' +
         '</div>' +
         '<span class="text-xl font-bold" style="color:#D4AF37">' + p.score + '</span>' +
       '</div>'
@@ -4410,7 +4428,7 @@ const App = {
       winnerEl.innerHTML =
         trophyHTML +
         winnerAvatar +
-        '<h1 class="winner-showcase__name">' + escapeHtml(w.name) + '</h1>' +
+        '<h1 class="winner-showcase__name">' + bdiName(w.name) + '</h1>' +
         '<div class="winner-showcase__subtitle">البطل</div>' +
         '<div class="winner-showcase__score">' + w.score + ' نقطة</div>';
 
@@ -4427,7 +4445,7 @@ const App = {
         '<div class="flex items-center gap-3">' +
           '<span class="text-2xl">' + (i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1)) + '</span>' +
           '<span class="avatar" style="background:' + escapeHtml(p.color) + ';width:40px;height:40px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center">' + scoreAvatar + '</span>' +
-          '<span class="text-xl font-bold">' + escapeHtml(p.name) + '</span>' +
+          '<span class="text-xl font-bold">' + bdiName(p.name) + '</span>' +
         '</div>' +
         '<span class="text-xl font-bold" style="color:#D4AF37">' + p.score + '</span>' +
       '</div>';
@@ -4444,7 +4462,7 @@ const App = {
             '<span class="award-card__icon">' + a.icon + '</span>' +
             '<div class="award-card__info">' +
               '<div class="award-card__title">' + escapeHtml(a.title) + '</div>' +
-              '<div class="award-card__name">' + escapeHtml(a.name) + '</div>' +
+              '<div class="award-card__name">' + bdiName(a.name) + '</div>' +
               '<div class="award-card__detail">' + escapeHtml(a.detail) + '</div>' +
             '</div>' +
           '</div>'
@@ -4779,7 +4797,21 @@ const App = {
 
   toggleSettings() {
     const modal = document.getElementById('settingsModal');
-    if (modal) modal.classList.toggle('hidden');
+    if (!modal) return;
+    const isHidden = modal.classList.contains('hidden');
+    if (isHidden) {
+      if (typeof A11y !== 'undefined') {
+        A11y.openModal('settingsModal');
+      } else {
+        modal.classList.remove('hidden');
+      }
+    } else {
+      if (typeof A11y !== 'undefined') {
+        A11y.closeModal('settingsModal');
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
   },
 
   updateVolume(type, value) {

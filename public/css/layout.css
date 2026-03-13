@@ -561,8 +561,8 @@ body {
   .screen {
     padding-top: max(var(--safe-area-y), env(safe-area-inset-top));
     padding-bottom: max(var(--safe-area-y), env(safe-area-inset-bottom));
-    padding-left: max(var(--safe-area-x), env(safe-area-inset-left));
-    padding-right: max(var(--safe-area-x), env(safe-area-inset-right));
+    padding-inline-start: max(var(--safe-area-x), env(safe-area-inset-left));
+    padding-inline-end: max(var(--safe-area-x), env(safe-area-inset-right));
   }
 
   .emoji-bar {

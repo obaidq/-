@@ -20,13 +20,13 @@
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700;900&family=Lemonada:wght@400;700&family=Readex+Pro:wght@400;600;700&family=Changa:wght@400;700;800&family=Jomhuria&family=El+Messiri:wght@400;700&family=Lalezar&family=Rubik:wght@400;700;900&family=Bangers&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700;900&family=Lemonada:wght@400;700&family=Readex+Pro:wght@400;600;700&family=Changa:wght@400;700;800&family=Jomhuria&family=El+Messiri:wght@400;700&family=Lalezar&family=Rubik:wght@400;700;900&family=Bangers&display=swap" rel="stylesheet"></noscript>
   <script src="/socket.io/socket.io.js"></script>
-  <link rel="stylesheet" href="/css/tokens.css?v=4.0">
-  <link rel="stylesheet" href="/css/components.css?v=4.0">
-  <link rel="stylesheet" href="/css/layout.css?v=4.0">
-  <link rel="stylesheet" href="/css/patterns.css?v=4.0">
-  <link rel="stylesheet" href="/css/game-screens.css?v=4.0">
-  <link rel="stylesheet" href="/css/avatars.css?v=4.0">
-  <link rel="stylesheet" href="/css/cultural-themes.css?v=4.0">
+  <link rel="stylesheet" href="/css/tokens.css?v=5.0">
+  <link rel="stylesheet" href="/css/components.css?v=5.0">
+  <link rel="stylesheet" href="/css/layout.css?v=5.0">
+  <link rel="stylesheet" href="/css/patterns.css?v=5.0">
+  <link rel="stylesheet" href="/css/game-screens.css?v=5.0">
+  <link rel="stylesheet" href="/css/avatars.css?v=5.0">
+  <link rel="stylesheet" href="/css/cultural-themes.css?v=5.0">
 </head>
 <body data-theme="hub" data-intensity="party">
   <!-- Screen Reader Announcements (ARIA Live Regions) -->
@@ -681,12 +681,12 @@
   <!-- ═══════════════════════════════════════════════════════════
    * SETTINGS MODAL - الإعدادات
    * ═══════════════════════════════════════════════════════════ -->
-  <div id="settingsModal" class="settings-modal hidden">
+  <div id="settingsModal" class="settings-modal hidden" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
     <div class="settings-modal__backdrop" data-action="toggleSettings"></div>
     <div class="settings-modal__content">
       <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-black">⚙️ الإعدادات</h2>
-        <button class="btn btn--ghost btn--sm" data-action="toggleSettings">✕</button>
+        <h2 id="settingsModalTitle" class="text-2xl font-black">⚙️ الإعدادات</h2>
+        <button class="btn btn--ghost btn--sm" data-action="toggleSettings" aria-label="إغلاق الإعدادات">✕</button>
       </div>
       <div class="settings-group">
         <label class="settings-label" for="volMaster">🔊 الصوت الرئيسي</label>
@@ -738,10 +738,10 @@
   <div id="achievementContainer" class="achievement-container"></div>
 
   <!-- Kick Player Modal -->
-  <div id="kickModal" class="settings-modal hidden">
+  <div id="kickModal" class="settings-modal hidden" role="dialog" aria-modal="true" aria-labelledby="kickModalTitle">
     <div class="settings-modal__backdrop" data-action="closeKickMenu"></div>
     <div class="settings-modal__content">
-      <h2 class="text-2xl font-black mb-4">🚫 طرد لاعب</h2>
+      <h2 id="kickModalTitle" class="text-2xl font-black mb-4">🚫 طرد لاعب</h2>
       <div id="kickPlayersList" class="flex flex-col gap-2"></div>
       <button class="btn btn--ghost btn--full mt-4" data-action="closeKickMenu">إلغاء</button>
     </div>
@@ -760,10 +760,11 @@
   <div id="toastContainer" aria-live="assertive" role="alert"></div>
 
   <!-- App Scripts -->
-  <script src="/js/audio.js?v=4.0"></script>
-  <script src="/js/avatars.js?v=4.0"></script>
-  <script src="/js/effects.js?v=4.0"></script>
-  <script src="/js/illustrations.js?v=4.0"></script>
-  <script src="/js/app.js?v=4.0"></script>
+  <script src="/js/a11y.js?v=5.0"></script>
+  <script src="/js/audio.js?v=5.0"></script>
+  <script src="/js/avatars.js?v=5.0"></script>
+  <script src="/js/effects.js?v=5.0"></script>
+  <script src="/js/illustrations.js?v=5.0"></script>
+  <script src="/js/app.js?v=5.0"></script>
 </body>
 </html>

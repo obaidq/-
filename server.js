@@ -61,7 +61,19 @@ const io = new Server(server, {
     methods: ['GET', 'POST']
   },
   pingTimeout: 60000,
-  pingInterval: 25000
+  pingInterval: 25000,
+  maxHttpBufferSize: 1e6, // 1MB max payload
+});
+
+// ── Origin validation middleware ──
+io.use((socket, next) => {
+  if (ALLOWED_ORIGINS) {
+    const origin = socket.handshake.headers.origin;
+    if (!origin || !ALLOWED_ORIGINS.includes(origin)) {
+      return next(new Error('Origin not allowed'));
+    }
+  }
+  next();
 });
 
 // ── Rate Limiter لأحداث Socket ──
