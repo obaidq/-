@@ -45,9 +45,13 @@
 
   /* Semantic */
   --color-success: #00C853;
+  --color-success-dark: var(--color-primary-700);
   --color-warning: #FFB300;
+  --color-warning-dark: #5c3d00;
   --color-error: #FF4757;
+  --color-error-dark: #8B0000;
   --color-info: #00D2D3;
+  --color-info-dark: #003d3d;
 
   /* ─────────────────────────────────────────────────────────────
    * TYPOGRAPHY - Playful & Bold
@@ -210,15 +214,52 @@
   --intensity-overlay-vignette: 80%;
 
   /* ─────────────────────────────────────────────────────────────
+   * OPACITY SCALE
+   * ───────────────────────────────────────────────────────────── */
+  --opacity-5: 0.05;
+  --opacity-10: 0.1;
+  --opacity-15: 0.15;
+  --opacity-20: 0.2;
+  --opacity-30: 0.3;
+  --opacity-40: 0.4;
+  --opacity-50: 0.5;
+  --opacity-60: 0.6;
+  --opacity-70: 0.7;
+  --opacity-80: 0.8;
+  --opacity-90: 0.9;
+  --opacity-100: 1;
+
+  /* ─────────────────────────────────────────────────────────────
+   * TRANSITION SHORTHANDS
+   * ───────────────────────────────────────────────────────────── */
+  --transition-fast: var(--duration-fast) var(--ease-out);
+  --transition-normal: var(--duration-normal) var(--ease-default);
+  --transition-slow: var(--duration-slow) var(--ease-default);
+  --transition-bounce: var(--duration-slower) var(--ease-bounce);
+
+  /* ─────────────────────────────────────────────────────────────
+   * BREAKPOINTS (for reference in JS; used as values in @media)
+   * ───────────────────────────────────────────────────────────── */
+  --bp-xs: 320px;
+  --bp-sm: 480px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
+
+  /* ─────────────────────────────────────────────────────────────
    * Z-INDEX
    * ───────────────────────────────────────────────────────────── */
   --z-base: 0;
+  --z-above: 1;
   --z-dropdown: 100;
   --z-sticky: 200;
   --z-overlay: 300;
   --z-modal: 400;
   --z-toast: 500;
   --z-tooltip: 600;
+  --z-countdown: 800;
+  --z-settings: 850;
+  --z-picker: 900;
   --z-max: 9999;
 
   /* ─────────────────────────────────────────────────────────────

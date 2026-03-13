@@ -89,22 +89,22 @@
 
 /* Button Variants */
 .btn--primary {
-  background: linear-gradient(180deg, #00E676 0%, #00D68F 40%, #00A86B 100%);
-  color: #003d1f;
-  border-color: #008050;
-  text-shadow: 0 1px 0 rgba(255,255,255,0.15);
+  background: linear-gradient(180deg, var(--color-secondary-400) 0%, var(--brand-emerald) 40%, var(--color-primary-300) 100%);
+  color: var(--color-primary-700);
+  border-color: var(--color-primary-400);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, var(--opacity-15));
 }
 
 .btn--secondary {
-  background: linear-gradient(180deg, #FFE066 0%, #FFD93D 50%, #FF8C42 100%);
-  color: #5c3d00;
-  border-color: #e6a800;
+  background: linear-gradient(180deg, #FFE066 0%, var(--color-accent-yellow) 50%, var(--color-accent-orange) 100%);
+  color: var(--color-warning-dark, #5c3d00);
+  border-color: var(--color-warning);
 }
 
 .btn--danger {
-  background: linear-gradient(180deg, #FF6B6B 0%, #FF4757 100%);
-  color: #fff;
-  border-color: #d63031;
+  background: linear-gradient(180deg, var(--brand-coral) 0%, var(--color-error) 100%);
+  color: var(--color-neutral-white);
+  border-color: var(--color-error-dark);
 }
 
 .btn--ghost {
@@ -112,6 +112,7 @@
   color: var(--color-neutral-white);
   border: var(--border-medium) solid rgba(255, 255, 255, 0.2);
   box-shadow: none;
+  -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
 }
 
@@ -338,11 +339,11 @@
   border-radius: var(--radius-full);
 }
 
-.badge--primary { background: rgba(0, 200, 83, 0.2); color: #69F0AE; border-color: rgba(0, 200, 83, 0.25); }
-.badge--success { background: rgba(0, 200, 83, 0.2); color: #69F0AE; border-color: rgba(0, 200, 83, 0.25); }
-.badge--warning { background: rgba(255, 179, 0, 0.2); color: #FFD54F; border-color: rgba(255, 179, 0, 0.25); }
-.badge--error { background: rgba(255, 71, 87, 0.2); color: #FF6B6B; border-color: rgba(255, 71, 87, 0.25); }
-.badge--info { background: rgba(0, 210, 211, 0.2); color: #80DEEA; border-color: rgba(0, 210, 211, 0.25); }
+.badge--primary { background: rgba(0, 200, 83, var(--opacity-20)); color: var(--color-secondary-300); border-color: rgba(0, 200, 83, 0.25); }
+.badge--success { background: rgba(0, 200, 83, var(--opacity-20)); color: var(--color-secondary-300); border-color: rgba(0, 200, 83, 0.25); }
+.badge--warning { background: rgba(255, 179, 0, var(--opacity-20)); color: #FFD54F; border-color: rgba(255, 179, 0, 0.25); }
+.badge--error { background: rgba(255, 71, 87, var(--opacity-20)); color: var(--brand-coral); border-color: rgba(255, 71, 87, 0.25); }
+.badge--info { background: rgba(0, 210, 211, var(--opacity-20)); color: #80DEEA; border-color: rgba(0, 210, 211, 0.25); }
 
 /* ─────────────────────────────────────────────────────────────
  * TIMER - مؤقت ممتع
@@ -361,27 +362,27 @@
   font-weight: var(--font-black);
   font-family: var(--font-display), var(--font-primary);
 
-  background: linear-gradient(180deg, #00E676 0%, #00C853 100%);
-  color: #003d1f;
+  background: linear-gradient(180deg, var(--color-secondary-400) 0%, var(--color-success) 100%);
+  color: var(--color-primary-700);
 
-  border: var(--border-thick) solid #009624;
+  border: var(--border-thick) solid var(--color-primary-300);
   border-radius: var(--radius-full);
-  box-shadow: 0 4px 0 #007c1e,
+  box-shadow: 0 4px 0 var(--color-primary-400),
               var(--shadow-green);
 }
 
 .timer--warning {
-  background: linear-gradient(180deg, #FFE066 0%, #FFB300 100%);
-  border-color: #e6a800;
-  color: #5c3d00;
+  background: linear-gradient(180deg, #FFE066 0%, var(--color-warning) 100%);
+  border-color: var(--color-warning);
+  color: var(--color-warning-dark);
   box-shadow: 0 4px 0 #cc9600, var(--shadow-yellow);
   animation: timer-wiggle 0.5s ease infinite;
 }
 
 .timer--danger {
-  background: linear-gradient(180deg, #FF6B6B 0%, #FF4757 100%);
-  border-color: #d63031;
-  color: #fff;
+  background: linear-gradient(180deg, var(--brand-coral) 0%, var(--color-error) 100%);
+  border-color: var(--color-error-dark);
+  color: var(--color-neutral-white);
   box-shadow: 0 4px 0 #b71c1c, var(--shadow-pink);
   animation: timer-wiggle 0.25s ease infinite;
 }
@@ -406,7 +407,7 @@
 
 .progress__bar {
   height: 100%;
-  background: linear-gradient(90deg, #00C853, #69F0AE);
+  background: linear-gradient(90deg, var(--color-success), var(--color-secondary-300));
   border-radius: var(--radius-full);
   transition: width var(--duration-normal) var(--ease-default);
   position: relative;
@@ -424,8 +425,8 @@
   border-radius: inherit;
 }
 
-.progress--warning .progress__bar { background: linear-gradient(90deg, #FFB300, #FFE066); }
-.progress--danger .progress__bar { background: linear-gradient(90deg, #FF4757, #FF6B6B); }
+.progress--warning .progress__bar { background: linear-gradient(90deg, var(--color-warning), #FFE066); }
+.progress--danger .progress__bar { background: linear-gradient(90deg, var(--color-error), var(--brand-coral)); }
 
 /* ─────────────────────────────────────────────────────────────
  * TOAST - إشعارات ممتعة
@@ -455,20 +456,20 @@
 }
 
 .toast--success {
-  background: linear-gradient(135deg, #00C853, #00E676);
-  color: #003d1f;
-  border-color: #009624;
+  background: linear-gradient(135deg, var(--color-success), var(--color-secondary-400));
+  color: var(--color-success-dark);
+  border-color: var(--color-primary-300);
 }
 
 .toast--error {
-  background: linear-gradient(135deg, #FF4757, #FF6B6B);
-  color: #fff;
-  border-color: #d63031;
+  background: linear-gradient(135deg, var(--color-error), var(--brand-coral));
+  color: var(--color-neutral-white);
+  border-color: var(--color-error-dark);
 }
 
 .toast--info {
-  background: linear-gradient(135deg, #00D2D3, #48DBFB);
-  color: #003d3d;
+  background: linear-gradient(135deg, var(--color-info), #48DBFB);
+  color: var(--color-info-dark);
   border-color: #00a8a9;
 }
 
@@ -632,11 +633,11 @@
 
 .room-code__value {
   font-family: var(--font-display), var(--font-primary);
-  font-size: var(--text-5xl);
+  font-size: clamp(2rem, 8vw, var(--text-5xl));
   font-weight: var(--font-black);
-  letter-spacing: 0.05em;
+  letter-spacing: var(--tracking-wider);
   color: var(--color-primary-700);
-  line-height: 1;
+  line-height: var(--leading-tight);
 }
 
 .room-code__url {
@@ -812,7 +813,7 @@
   padding: var(--space-4);
 }
 
-.tip-box__text { color: #69F0AE; font-size: var(--text-sm); }
+.tip-box__text { color: var(--color-secondary-300); font-size: var(--text-sm); }
 
 /* ─────────────────────────────────────────────────────────────
  * LOBBY CONTAINER
@@ -875,13 +876,13 @@
 }
 
 /* Danger-tinted ghost button for destructive actions */
-.btn--sm-danger {
-  border-color: rgba(255, 71, 87, 0.2) !important;
-  color: rgba(255, 130, 130, 0.8) !important;
+.btn.btn--sm-danger {
+  border-color: rgba(255, 71, 87, var(--opacity-20));
+  color: rgba(255, 130, 130, var(--opacity-80));
 }
-.btn--sm-danger:hover {
-  background: rgba(255, 71, 87, 0.12) !important;
-  border-color: rgba(255, 71, 87, 0.35) !important;
+.btn.btn--sm-danger:hover {
+  background: rgba(255, 71, 87, 0.12);
+  border-color: rgba(255, 71, 87, 0.35);
 }
 
 /* ─────────────────────────────────────────────────────────────
