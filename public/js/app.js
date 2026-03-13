@@ -19,7 +19,7 @@ const TIPS = [
   "اللي يضحك أكثر يفوز... أحياناً",
   "الكبسة حلوة... بس النقاط أحلى",
   "الصبر مفتاح الفوز... والقهوة مفتاح الصبر",
-  "خليك سعودي وارفع راسك 🇸🇦",
+  "خليك جريء وارفع راسك!",
   "لا تصدق كل اللي يقولونه!"
 ];
 
@@ -396,7 +396,25 @@ const App = {
         case 'sendChat': this.sendChat(); break;
         case 'startPlaylist': this.startPlaylist(); break;
         case 'togglePlaylistGame': this.togglePlaylistGame(target); break;
+        case 'randomGame': this.randomGame(); break;
       }
+    });
+
+    // ── Category tab filtering ──
+    document.getElementById('gameTabs')?.addEventListener('click', (e) => {
+      const tab = e.target.closest('.game-tab');
+      if (!tab) return;
+      AudioEngine.click();
+      document.querySelectorAll('#gameTabs .game-tab').forEach(t => t.classList.remove('is-active'));
+      tab.classList.add('is-active');
+      const cat = tab.dataset.category;
+      document.querySelectorAll('#gamesGrid .game-card').forEach(card => {
+        if (cat === 'all' || (card.dataset.cat && card.dataset.cat.split(' ').includes(cat))) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+        }
+      });
     });
 
     // ── Settings input delegation (volume sliders, intensity select) ──
@@ -924,36 +942,13 @@ const App = {
   // Avatar Selection Integration
   // ═══════════════════════════════════════════════════════════════
 
-  _hostAvatarData: null,
-  _joinAvatarData: null,
-
-  openAvatarPicker(context) {
-    if (typeof AudioEngine !== 'undefined') AudioEngine.click();
-    AvatarSystem.openPicker((avatarData) => {
-      if (context === 'host') {
-        this._hostAvatarData = avatarData;
-        this._updateAvatarButton('host', avatarData);
-      } else {
-        this._joinAvatarData = avatarData;
-        this._updateAvatarButton('join', avatarData);
-      }
-    });
-  },
-
-  _updateAvatarButton(context, avatarData) {
-    const previewEl = document.getElementById(context + 'AvatarPreview');
-    const nameEl = document.getElementById(context + 'AvatarName');
-    if (!previewEl || !nameEl || !avatarData) return;
-    previewEl.innerHTML = AvatarSystem.getAvatarHtml(avatarData, 48);
-    nameEl.textContent = (avatarData.icon || '') + ' ' + (avatarData.nameAr || 'شخصية');
-  },
-
+  // Avatar is auto-assigned randomly (no picker step)
   createRoom() {
     const name = document.getElementById('hostNameInput').value.trim();
     if (!name) return this.showToast('أدخل اسمك!', 'error');
     AudioEngine.click();
-    const avatarData = this._hostAvatarData || AvatarSystem.getRandomAvatarData();
-    this.socket.emit('createRoom', { playerName: name, avatarData: AvatarSystem.getAvatarData() || avatarData });
+    const avatarData = AvatarSystem.getRandomAvatarData();
+    this.socket.emit('createRoom', { playerName: name, avatarData: avatarData });
   },
 
   joinRoom() {
@@ -965,8 +960,8 @@ const App = {
     this._savedName = name;
     this._savedRoom = code;
     this._persistSession();
-    const avatarData = this._joinAvatarData || AvatarSystem.getRandomAvatarData();
-    this.socket.emit('joinRoom', { code, playerName: name, avatarData: AvatarSystem.getAvatarData() || avatarData });
+    const avatarData = AvatarSystem.getRandomAvatarData();
+    this.socket.emit('joinRoom', { code, playerName: name, avatarData: avatarData });
   },
 
   joinAsAudience() {
@@ -978,7 +973,7 @@ const App = {
     this._savedName = name;
     this._savedRoom = code;
     this._persistSession();
-    this.socket.emit('joinAsAudience', { code, playerName: name, avatarData: AvatarSystem.getAvatarData() });
+    this.socket.emit('joinAsAudience', { code, playerName: name, avatarData: AvatarSystem.getRandomAvatarData() });
   },
 
   toggleReady() {
@@ -990,6 +985,15 @@ const App = {
     if (!this.isHost) return this.showToast('المضيف فقط!', 'error');
     AudioEngine.click();
     this.socket.emit('startGame', { code: this.currentRoom, game });
+  },
+
+  randomGame() {
+    if (!this.isHost) return this.showToast('المضيف فقط!', 'error');
+    const gameKeys = Object.keys(GAMES);
+    const pick = gameKeys[Math.floor(Math.random() * gameKeys.length)];
+    AudioEngine.click();
+    this.showToast('🎲 ' + GAMES[pick].name, 'success');
+    this.socket.emit('startGame', { code: this.currentRoom, game: pick });
   },
 
   backToLobby() {

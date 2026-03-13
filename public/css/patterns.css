@@ -367,7 +367,7 @@
 }
 
 /* ─────────────────────────────────────────────────────────────
- * PATTERN: NEON RIYADH - نيون الرياض (Saudi city nightlife glow)
+ * PATTERN: NEON CITY - نيون المدينة (city nightlife glow)
  * Warm neon strips + urban glow, inspired by Boulevard/Seasons
  * ───────────────────────────────────────────────────────────── */
 
@@ -428,7 +428,7 @@
  * كل لعبة لها هوية بصرية فريدة
  * ═══════════════════════════════════════════════════════════════ */
 
-/* Hub / Menu Theme - القائمة الرئيسية (Saudi Green + Arabesque) */
+/* Hub / Menu Theme - القائمة الرئيسية (Amber + Arabesque) */
 [data-theme="hub"] {
   --theme-bg-primary: #001a0e;
   --theme-bg-secondary: #003d1f;
@@ -800,7 +800,7 @@
 
 /* ═══════════════════════════════════════════════════════════════
  * 👕 T-SHIRT WARS THEME - حرب التيشيرتات
- * Saudi Street Art - فن الشارع السعودي
+ * Street Art - فن الشارع
  * ═══════════════════════════════════════════════════════════════ */
 
 [data-theme="tshirtwars"] {
@@ -884,7 +884,7 @@
 
 /* ═══════════════════════════════════════════════════════════════
  * 💡 INVENTIONS THEME - اختراعات مجنونة
- * Saudi Innovation Hub - مختبر الابتكار السعودي
+ * Innovation Hub - مختبر الابتكار
  * ═══════════════════════════════════════════════════════════════ */
 
 [data-theme="inventions"] {
@@ -1013,7 +1013,7 @@
               linear-gradient(180deg, #001a0e 0%, #003d1f 50%, #001a0e 100%);
 }
 
-/* Hub background - Saudi green with geometric arabesque pattern */
+/* Hub background - warm amber with geometric arabesque pattern */
 [data-theme="hub"] .bg {
   background:
     /* Subtle arabesque diamond lattice */
