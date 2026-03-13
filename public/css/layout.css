@@ -699,6 +699,38 @@ body {
     width: 28px;
     height: 28px;
   }
+
+  /* Vote buttons - easy to tap quickly during timed rounds */
+  .vote-option {
+    min-height: 56px;
+    padding: var(--space-4);
+    margin-block-end: var(--space-3);
+  }
+
+  /* Game action buttons - larger for fast gameplay */
+  .btn--lg {
+    min-height: 56px;
+  }
+
+  /* Form inputs: 16px font prevents iOS zoom on focus */
+  input[type="text"],
+  input[type="number"],
+  textarea,
+  select {
+    min-height: 48px;
+    font-size: 16px;
+  }
+
+  /* Spacing between adjacent tappable targets */
+  .btn + .btn {
+    margin-inline-start: var(--space-2);
+  }
+
+  /* Chat send button */
+  .chat-send-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────

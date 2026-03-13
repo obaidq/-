@@ -3277,3 +3277,105 @@
   color: var(--color-neutral-400);
   text-transform: uppercase;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+ * CSS CONTAINMENT & CONTENT-VISIBILITY
+ * Performance optimization: skip rendering for off-screen content
+ * ═══════════════════════════════════════════════════════════════ */
+
+/* Each game screen is an independent rendering boundary */
+.screen {
+  contain: layout style paint;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 100vh;
+}
+
+/* Hidden screens get full containment - zero rendering cost */
+.screen:not(.is-active) {
+  content-visibility: hidden;
+  contain: strict;
+}
+
+/* Active screen: relax containment for interactivity */
+.screen.is-active {
+  content-visibility: visible;
+  contain: layout style;
+}
+
+/* Game cards in hub grid - contain each independently */
+.game-card {
+  contain: layout style paint;
+  content-visibility: auto;
+  contain-intrinsic-size: 200px 280px;
+}
+
+/* Player list items */
+.player-avatar {
+  contain: layout style paint;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 80px;
+}
+
+/* Vote/answer options */
+.vote-option,
+.answer-option {
+  contain: layout style;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 80px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ * CONNECTION STATUS UI
+ * ═══════════════════════════════════════════════════════════════ */
+
+.connection-status {
+  position: fixed;
+  top: 0;
+  inset-inline: 0;
+  padding: var(--space-2) var(--space-4);
+  text-align: center;
+  font-family: var(--font-ui);
+  font-weight: var(--font-semibold);
+  z-index: var(--z-max);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.connection-status[data-state="connected"] {
+  background: var(--color-success);
+  color: #000;
+}
+
+.connection-status[data-state="reconnecting"] {
+  background: var(--color-warning);
+  color: #000;
+}
+
+.connection-status[data-state="failed"],
+.connection-status[data-state="error"] {
+  background: var(--color-error);
+  color: white;
+  cursor: pointer;
+}
+
+.connection-status.hidden {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Reconnecting spinner - respects motion preferences */
+@media (prefers-reduced-motion: no-preference) {
+  .connection-status[data-state="reconnecting"]::before {
+    content: '';
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-inline-end: var(--space-2);
+    vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+}

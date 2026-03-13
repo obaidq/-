@@ -393,3 +393,95 @@
 html {
   color-scheme: dark;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+ * SCREEN READER ONLY UTILITY
+ * ═══════════════════════════════════════════════════════════════ */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ * COLOR BLIND SUPPORT - Multi-Channel Encoding
+ * Never rely on color alone (WCAG 1.4.1)
+ * ═══════════════════════════════════════════════════════════════ */
+
+/* Game status indicators: always use icon + color */
+.status-correct::before { content: '\2713 '; }
+.status-wrong::before { content: '\2717 '; }
+.status-waiting::before { content: '\23F3 '; }
+
+/* High contrast mode for color blind / forced-colors */
+@media (forced-colors: active) {
+  .game-card {
+    border: 2px solid ButtonText;
+  }
+  .game-card:focus-visible {
+    outline: 3px solid Highlight;
+  }
+  .btn {
+    border: 2px solid ButtonText;
+    forced-color-adjust: none;
+  }
+  .timer-bar,
+  .boot-bar {
+    border: 2px solid ButtonText;
+    forced-color-adjust: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ * PREFERS-CONTRAST - High/Low Contrast Support
+ * ═══════════════════════════════════════════════════════════════ */
+
+@media (prefers-contrast: more) {
+  :root {
+    --border-thin: 3px;
+    --shadow-sm: none;
+    --shadow-md: none;
+    --glass-bg: rgba(255, 255, 255, 0.15);
+  }
+
+  .btn {
+    border: 3px solid currentColor;
+    text-decoration: underline;
+  }
+
+  .game-card {
+    border: 3px solid var(--color-accent-yellow);
+  }
+
+  body {
+    color: #ffffff;
+    background: #000000;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ * PREFERS-REDUCED-TRANSPARENCY
+ * ═══════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-transparency: reduce) {
+  .game-card,
+  .settings-modal__content,
+  .countdown-overlay {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .glass-effect,
+  .host-controls-group {
+    background: var(--theme-bg-secondary);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
