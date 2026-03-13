@@ -13,7 +13,7 @@ const GameIllustrations = (() => {
 
     quiplash: `<svg viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="ql-g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FFD93D" stop-opacity=".9"/><stop offset="100%" stop-color="#FF6B6B" stop-opacity=".7"/></linearGradient>
+        <linearGradient id="ql-g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#D4AF37" stop-opacity=".9"/><stop offset="100%" stop-color="#C4813D" stop-opacity=".7"/></linearGradient>
         <filter id="ql-glow"><feGaussianBlur stdDeviation="3" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
       </defs>
       <!-- Speech bubbles -->
@@ -29,56 +29,56 @@ const GameIllustrations = (() => {
       <text x="60" y="62" fill="rgba(255,255,255,0.7)" font-size="16" font-weight="900" font-family="sans-serif">😂 !!</text>
       <text x="200" y="82" fill="rgba(255,255,255,0.6)" font-size="14" font-weight="900" font-family="sans-serif">🤣 !!!</text>
       <!-- Stars -->
-      <circle cx="30" cy="20" r="2" fill="#FFD93D" opacity=".6"><animate attributeName="opacity" values=".3;1;.3" dur="2s" repeatCount="indefinite"/></circle>
-      <circle cx="290" cy="30" r="3" fill="#FFD93D" opacity=".8"><animate attributeName="opacity" values=".5;1;.5" dur="1.8s" repeatCount="indefinite"/></circle>
+      <circle cx="30" cy="20" r="2" fill="#D4AF37" opacity=".6"><animate attributeName="opacity" values=".3;1;.3" dur="2s" repeatCount="indefinite"/></circle>
+      <circle cx="290" cy="30" r="3" fill="#D4AF37" opacity=".8"><animate attributeName="opacity" values=".5;1;.5" dur="1.8s" repeatCount="indefinite"/></circle>
       <circle cx="270" cy="130" r="2" fill="#fff" opacity=".5"><animate attributeName="opacity" values=".2;.8;.2" dur="2.5s" repeatCount="indefinite"/></circle>
     </svg>`,
 
     guesspionage: `<svg viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="gs-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#C8A951" stop-opacity=".6"/><stop offset="100%" stop-color="#006C35" stop-opacity=".3"/></linearGradient>
+        <linearGradient id="gs-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00E676" stop-opacity=".6"/><stop offset="100%" stop-color="#0A1628" stop-opacity=".3"/></linearGradient>
       </defs>
       <!-- Grid lines (spy data) -->
-      <g stroke="rgba(200,169,81,0.15)" stroke-width="1">
+      <g stroke="rgba(0,230,118,0.15)" stroke-width="1">
         <line x1="0" y1="40" x2="320" y2="40"/><line x1="0" y1="80" x2="320" y2="80"/><line x1="0" y1="120" x2="320" y2="120"/>
         <line x1="80" y1="0" x2="80" y2="160"/><line x1="160" y1="0" x2="160" y2="160"/><line x1="240" y1="0" x2="240" y2="160"/>
       </g>
       <!-- Pie chart -->
-      <circle cx="160" cy="80" r="45" fill="none" stroke="rgba(200,169,81,0.3)" stroke-width="3"/>
+      <circle cx="160" cy="80" r="45" fill="none" stroke="rgba(0,230,118,0.3)" stroke-width="3"/>
       <circle cx="160" cy="80" r="45" fill="none" stroke="url(#gs-g)" stroke-width="8" stroke-dasharray="180 283" stroke-dashoffset="-40" stroke-linecap="round">
         <animate attributeName="stroke-dasharray" values="100 283;200 283;100 283" dur="4s" repeatCount="indefinite"/>
       </circle>
       <!-- Percentage -->
-      <text x="160" y="88" text-anchor="middle" fill="#C8A951" font-size="28" font-weight="900" font-family="sans-serif" opacity=".9">67%</text>
+      <text x="160" y="88" text-anchor="middle" fill="#00E676" font-size="28" font-weight="900" font-family="sans-serif" opacity=".9">67%</text>
       <!-- Spy silhouette -->
       <g transform="translate(50,35)" opacity=".25">
-        <circle cx="15" cy="12" r="10" fill="#C8A951"/>
-        <rect x="5" y="22" width="20" height="30" rx="5" fill="#C8A951"/>
+        <circle cx="15" cy="12" r="10" fill="#00E676"/>
+        <rect x="5" y="22" width="20" height="30" rx="5" fill="#00E676"/>
         <rect x="3" y="8" width="24" height="8" rx="3" fill="#1a1a1a"/>
       </g>
       <!-- Magnifying glass -->
       <g transform="translate(240,90)" opacity=".3">
-        <circle cx="0" cy="0" r="18" fill="none" stroke="#C8A951" stroke-width="3"/>
-        <line x1="13" y1="13" x2="28" y2="28" stroke="#C8A951" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="0" cy="0" r="18" fill="none" stroke="#00E676" stroke-width="3"/>
+        <line x1="13" y1="13" x2="28" y2="28" stroke="#00E676" stroke-width="3" stroke-linecap="round"/>
       </g>
       <!-- Scan line -->
-      <rect x="0" y="0" width="320" height="3" fill="rgba(200,169,81,0.15)">
+      <rect x="0" y="0" width="320" height="3" fill="rgba(0,230,118,0.15)">
         <animate attributeName="y" values="0;157;0" dur="4s" repeatCount="indefinite"/>
       </rect>
     </svg>`,
 
     fakinit: `<svg viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="fk-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#E8A317" stop-opacity=".7"/><stop offset="100%" stop-color="#FF6B6B" stop-opacity=".5"/></linearGradient>
+        <linearGradient id="fk-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#C4953A" stop-opacity=".7"/><stop offset="100%" stop-color="#B94630" stop-opacity=".5"/></linearGradient>
       </defs>
       <!-- Suspicious eyes -->
       <g transform="translate(110,40)">
-        <ellipse cx="30" cy="30" rx="28" ry="18" fill="rgba(255,255,255,0.15)" stroke="rgba(232,163,23,0.4)" stroke-width="2"/>
-        <ellipse cx="80" cy="30" rx="28" ry="18" fill="rgba(255,255,255,0.15)" stroke="rgba(232,163,23,0.4)" stroke-width="2"/>
-        <circle cx="33" cy="30" r="8" fill="rgba(232,163,23,0.8)">
+        <ellipse cx="30" cy="30" rx="28" ry="18" fill="rgba(255,255,255,0.15)" stroke="rgba(196,149,58,0.4)" stroke-width="2"/>
+        <ellipse cx="80" cy="30" rx="28" ry="18" fill="rgba(255,255,255,0.15)" stroke="rgba(196,149,58,0.4)" stroke-width="2"/>
+        <circle cx="33" cy="30" r="8" fill="rgba(196,149,58,0.8)">
           <animate attributeName="cx" values="28;38;28" dur="3s" repeatCount="indefinite"/>
         </circle>
-        <circle cx="83" cy="30" r="8" fill="rgba(232,163,23,0.8)">
+        <circle cx="83" cy="30" r="8" fill="rgba(196,149,58,0.8)">
           <animate attributeName="cx" values="78;88;78" dur="3s" repeatCount="indefinite"/>
         </circle>
         <circle cx="33" cy="29" r="3" fill="#000">
@@ -89,8 +89,8 @@ const GameIllustrations = (() => {
         </circle>
       </g>
       <!-- Question marks floating -->
-      <text x="50" y="50" fill="rgba(232,163,23,0.4)" font-size="32" font-weight="900">?</text>
-      <text x="260" y="70" fill="rgba(232,163,23,0.3)" font-size="24" font-weight="900">?</text>
+      <text x="50" y="50" fill="rgba(196,149,58,0.4)" font-size="32" font-weight="900">?</text>
+      <text x="260" y="70" fill="rgba(196,149,58,0.3)" font-size="24" font-weight="900">?</text>
       <text x="40" y="130" fill="rgba(255,255,255,0.2)" font-size="20" font-weight="900">?</text>
       <text x="275" y="140" fill="rgba(255,255,255,0.15)" font-size="28" font-weight="900">?</text>
       <!-- Pointing finger -->
@@ -102,37 +102,37 @@ const GameIllustrations = (() => {
     triviamurder: `<svg viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <filter id="tm-glow"><feGaussianBlur stdDeviation="4" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-        <linearGradient id="tm-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#B8860B" stop-opacity=".8"/><stop offset="100%" stop-color="#8B2252" stop-opacity=".6"/></linearGradient>
+        <linearGradient id="tm-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3ABAB4" stop-opacity=".8"/><stop offset="100%" stop-color="#8B1A1A" stop-opacity=".6"/></linearGradient>
       </defs>
       <!-- Skull -->
       <g transform="translate(120,15)" filter="url(#tm-glow)">
-        <ellipse cx="40" cy="35" rx="35" ry="30" fill="rgba(184,134,11,0.2)" stroke="rgba(184,134,11,0.5)" stroke-width="2"/>
-        <rect x="15" y="55" width="50" height="15" rx="3" fill="rgba(184,134,11,0.15)"/>
+        <ellipse cx="40" cy="35" rx="35" ry="30" fill="rgba(58,186,180,0.2)" stroke="rgba(58,186,180,0.5)" stroke-width="2"/>
+        <rect x="15" y="55" width="50" height="15" rx="3" fill="rgba(58,186,180,0.15)"/>
         <!-- Eyes -->
-        <ellipse cx="28" cy="32" rx="8" ry="9" fill="rgba(139,34,82,0.6)"/>
-        <ellipse cx="52" cy="32" rx="8" ry="9" fill="rgba(139,34,82,0.6)"/>
+        <ellipse cx="28" cy="32" rx="8" ry="9" fill="rgba(139,26,26,0.6)"/>
+        <ellipse cx="52" cy="32" rx="8" ry="9" fill="rgba(139,26,26,0.6)"/>
         <!-- Nose -->
-        <path d="M37,42 L43,42 L40,47 Z" fill="rgba(139,34,82,0.4)"/>
+        <path d="M37,42 L43,42 L40,47 Z" fill="rgba(139,26,26,0.4)"/>
         <!-- Teeth -->
-        <g fill="rgba(184,134,11,0.3)">
+        <g fill="rgba(58,186,180,0.3)">
           <rect x="24" y="56" width="6" height="10" rx="1"/><rect x="32" y="56" width="6" height="10" rx="1"/>
           <rect x="40" y="56" width="6" height="10" rx="1"/><rect x="48" y="56" width="6" height="10" rx="1"/>
         </g>
       </g>
       <!-- Candles -->
       <g opacity=".5">
-        <rect x="45" y="90" width="8" height="40" rx="2" fill="rgba(184,134,11,0.3)"/>
-        <ellipse cx="49" cy="88" rx="6" ry="8" fill="#B8860B" opacity=".7">
+        <rect x="45" y="90" width="8" height="40" rx="2" fill="rgba(58,186,180,0.3)"/>
+        <ellipse cx="49" cy="88" rx="6" ry="8" fill="#3ABAB4" opacity=".7">
           <animate attributeName="ry" values="8;10;8" dur="1s" repeatCount="indefinite"/>
         </ellipse>
-        <rect x="267" y="85" width="8" height="45" rx="2" fill="rgba(184,134,11,0.3)"/>
-        <ellipse cx="271" cy="83" rx="6" ry="8" fill="#B8860B" opacity=".7">
+        <rect x="267" y="85" width="8" height="45" rx="2" fill="rgba(58,186,180,0.3)"/>
+        <ellipse cx="271" cy="83" rx="6" ry="8" fill="#3ABAB4" opacity=".7">
           <animate attributeName="ry" values="8;10;8" dur="1.2s" repeatCount="indefinite"/>
         </ellipse>
       </g>
       <!-- Blood drips -->
-      <circle cx="80" cy="140" r="4" fill="rgba(139,34,82,0.3)"><animate attributeName="cy" values="130;145;130" dur="3s" repeatCount="indefinite"/></circle>
-      <circle cx="240" cy="135" r="3" fill="rgba(139,34,82,0.25)"><animate attributeName="cy" values="125;140;125" dur="3.5s" repeatCount="indefinite"/></circle>
+      <circle cx="80" cy="140" r="4" fill="rgba(139,26,26,0.3)"><animate attributeName="cy" values="130;145;130" dur="3s" repeatCount="indefinite"/></circle>
+      <circle cx="240" cy="135" r="3" fill="rgba(139,26,26,0.25)"><animate attributeName="cy" values="125;140;125" dur="3.5s" repeatCount="indefinite"/></circle>
     </svg>`,
 
     fibbage: `<svg viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg">
@@ -149,10 +149,10 @@ const GameIllustrations = (() => {
       </g>
       <g transform="translate(175,35)" opacity=".6">
         <!-- Sad mask -->
-        <ellipse cx="40" cy="45" rx="35" ry="40" fill="rgba(184,134,11,0.15)" stroke="rgba(184,134,11,0.4)" stroke-width="2"/>
-        <circle cx="28" cy="35" r="6" fill="rgba(184,134,11,0.3)"/>
-        <circle cx="52" cy="35" r="6" fill="rgba(184,134,11,0.3)"/>
-        <path d="M25,65 Q40,48 55,65" fill="none" stroke="rgba(184,134,11,0.4)" stroke-width="3" stroke-linecap="round"/>
+        <ellipse cx="40" cy="45" rx="35" ry="40" fill="rgba(58,186,180,0.15)" stroke="rgba(58,186,180,0.4)" stroke-width="2"/>
+        <circle cx="28" cy="35" r="6" fill="rgba(58,186,180,0.3)"/>
+        <circle cx="52" cy="35" r="6" fill="rgba(58,186,180,0.3)"/>
+        <path d="M25,65 Q40,48 55,65" fill="none" stroke="rgba(58,186,180,0.4)" stroke-width="3" stroke-linecap="round"/>
       </g>
       <!-- Sparkles -->
       <circle cx="50" cy="30" r="3" fill="#DAA520" opacity=".5"><animate attributeName="opacity" values=".2;.8;.2" dur="2s" repeatCount="indefinite"/></circle>
@@ -163,26 +163,26 @@ const GameIllustrations = (() => {
     drawful: `<svg viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="df-g" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#00BFA5" stop-opacity=".7"/><stop offset="50%" stop-color="#4facfe" stop-opacity=".5"/><stop offset="100%" stop-color="#00f2fe" stop-opacity=".6"/>
+          <stop offset="0%" stop-color="#1565C0" stop-opacity=".7"/><stop offset="50%" stop-color="#42A5F5" stop-opacity=".5"/><stop offset="100%" stop-color="#90CAF9" stop-opacity=".6"/>
         </linearGradient>
       </defs>
       <!-- Canvas/easel -->
       <rect x="90" y="20" width="140" height="110" rx="8" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
       <!-- Scribble art on canvas -->
-      <path d="M110,60 Q130,30 150,65 T190,55 T210,70" fill="none" stroke="rgba(0,191,165,0.5)" stroke-width="3" stroke-linecap="round">
+      <path d="M110,60 Q130,30 150,65 T190,55 T210,70" fill="none" stroke="rgba(21,101,192,0.5)" stroke-width="3" stroke-linecap="round">
         <animate attributeName="d" values="M110,60 Q130,30 150,65 T190,55 T210,70;M110,65 Q130,40 155,60 T185,50 T210,65;M110,60 Q130,30 150,65 T190,55 T210,70" dur="4s" repeatCount="indefinite"/>
       </path>
-      <circle cx="140" cy="85" r="15" fill="rgba(79,172,254,0.3)"/>
-      <circle cx="170" cy="90" r="10" fill="rgba(0,242,254,0.3)"/>
+      <circle cx="140" cy="85" r="15" fill="rgba(66,165,245,0.3)"/>
+      <circle cx="170" cy="90" r="10" fill="rgba(144,202,249,0.3)"/>
       <!-- Paint brush -->
       <g transform="translate(240,50) rotate(30)">
         <rect x="0" y="0" width="8" height="50" rx="2" fill="rgba(139,69,19,0.5)"/>
-        <rect x="-3" y="-15" width="14" height="18" rx="3" fill="rgba(0,191,165,0.6)"/>
+        <rect x="-3" y="-15" width="14" height="18" rx="3" fill="rgba(21,101,192,0.6)"/>
       </g>
       <!-- Paint splatters -->
-      <circle cx="50" cy="40" r="12" fill="rgba(0,191,165,0.2)"/>
-      <circle cx="55" cy="45" r="6" fill="rgba(79,172,254,0.2)"/>
-      <circle cx="275" cy="120" r="10" fill="rgba(0,242,254,0.15)"/>
+      <circle cx="50" cy="40" r="12" fill="rgba(21,101,192,0.2)"/>
+      <circle cx="55" cy="45" r="6" fill="rgba(66,165,245,0.2)"/>
+      <circle cx="275" cy="120" r="10" fill="rgba(144,202,249,0.15)"/>
       <circle cx="60" cy="120" r="8" fill="rgba(255,107,107,0.15)"/>
     </svg>`,
 
@@ -191,14 +191,14 @@ const GameIllustrations = (() => {
       <g transform="translate(95,15)" opacity=".8">
         <path d="M30,0 L0,25 L20,40 L20,110 L110,110 L110,40 L130,25 L100,0 Q80,15 65,15 Q50,15 30,0 Z" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.35)" stroke-width="2" stroke-linejoin="round"/>
         <!-- Star on shirt -->
-        <polygon points="65,45 72,62 90,62 76,74 80,92 65,82 50,92 54,74 40,62 58,62" fill="rgba(255,107,53,0.4)" stroke="rgba(255,107,53,0.6)" stroke-width="1">
+        <polygon points="65,45 72,62 90,62 76,74 80,92 65,82 50,92 54,74 40,62 58,62" fill="rgba(178,34,52,0.4)" stroke="rgba(178,34,52,0.6)" stroke-width="1">
           <animate attributeName="opacity" values=".6;1;.6" dur="2s" repeatCount="indefinite"/>
         </polygon>
       </g>
       <!-- Floating design elements -->
       <circle cx="40" cy="50" r="4" fill="rgba(108,52,131,0.4)"><animate attributeName="cy" values="50;40;50" dur="3s" repeatCount="indefinite"/></circle>
-      <rect x="270" y="80" width="15" height="15" rx="2" fill="rgba(255,107,53,0.25)" transform="rotate(20,277,87)"/>
-      <polygon points="45,120 50,110 55,120" fill="rgba(255,107,53,0.3)"/>
+      <rect x="270" y="80" width="15" height="15" rx="2" fill="rgba(178,34,52,0.25)" transform="rotate(20,277,87)"/>
+      <polygon points="45,120 50,110 55,120" fill="rgba(178,34,52,0.3)"/>
     </svg>`,
 
     trynottolol: `<svg viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg">
@@ -503,7 +503,7 @@ const GameIllustrations = (() => {
       <rect x="70" y="95" width="20" height="30" rx="3" fill="url(#trophy-g)"/>
       <!-- Base -->
       <rect x="45" y="125" width="70" height="15" rx="5" fill="url(#trophy-g)" stroke="#B8860B" stroke-width="1.5"/>
-      <rect x="55" y="140" width="50" height="10" rx="4" fill="#B8860B" opacity=".5"/>
+      <rect x="55" y="140" width="50" height="10" rx="4" fill="#3ABAB4" opacity=".5"/>
       <!-- Shine -->
       <path d="M55,30 L55,70 Q60,30 65,30 Z" fill="rgba(255,255,255,0.4)"/>
     </g>
