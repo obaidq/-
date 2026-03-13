@@ -24,23 +24,23 @@ const TIPS = [
 ];
 
 const GAMES = {
-  quiplash:       { icon: '⚡', name: 'رد سريع',        hint: 'اكتب أطرف إجابة!',                pattern: 'pattern-stage',     culturalPattern: 'pattern-cultural--quiplash',     costume: 'majlis',  loader: 'coffee-cup' },
-  guesspionage:   { icon: '📊', name: 'خمّن النسبة',     hint: 'خمّن النسبة الصحيحة!',             pattern: 'pattern-matrix',    culturalPattern: 'pattern-cultural--guesspionage', costume: 'neom',    loader: 'geometric' },
-  fakinit:        { icon: '🕵️', name: 'المزيّف',         hint: 'اكتشف المزيّف!',                   pattern: 'pattern-deception', culturalPattern: 'pattern-cultural--fakinit',       costume: 'souk',    loader: 'prayer-beads' },
-  triviamurder:   { icon: '💀', name: 'حفلة القاتل',     hint: 'أجب صح أو مت!',                    pattern: 'pattern-blood',     culturalPattern: 'pattern-cultural--triviamurder',  costume: 'djinn',   loader: 'prayer-beads' },
-  fibbage:        { icon: '🎭', name: 'كشف الكذاب',      hint: 'اكتب كذبة مقنعة!',                 pattern: 'pattern-newspaper', culturalPattern: null,                              costume: 'souk',    loader: 'coffee-cup' },
-  drawful:        { icon: '🎨', name: 'ارسم لي',         hint: 'ارسم الكلمة!',                     pattern: 'pattern-paint',     culturalPattern: null,                              costume: 'asiri',   loader: 'geometric' },
-  tshirtwars:     { icon: '👕', name: 'حرب التيشيرتات',  hint: 'اكتب أفضل شعار!',                  pattern: 'pattern-rays',      culturalPattern: 'pattern-cultural--tshirtwars',    costume: 'sadu',    loader: 'geometric' },
-  trynottolol:    { icon: '😂', name: 'لا تضحك',         hint: 'اكتب أطرف جواب!',                  pattern: 'pattern-dots',      culturalPattern: null,                              costume: 'majlis',  loader: 'coffee-cup' },
-  inventions:     { icon: '💡', name: 'اختراعات مجنونة',  hint: 'اخترع شي مجنون!',                  pattern: 'pattern-grid',      culturalPattern: null,                              costume: 'neom',    loader: 'geometric' },
-  wouldyourather: { icon: '🤔', name: 'تبي ولا ما تبي',  hint: 'اختر خيار!',                       pattern: 'pattern-zigzag',    culturalPattern: null,                              costume: 'souk',    loader: 'prayer-beads' },
-  whosaidit:      { icon: '💬', name: 'من قال؟',         hint: 'خمّن مين كتب هالكلام!',            pattern: 'pattern-stripes',   culturalPattern: null,                              costume: 'majlis',  loader: 'coffee-cup' },
-  speedround:     { icon: '⚡', name: 'أسرع واحد',       hint: 'أجب أسرع من الكل!',                pattern: 'pattern-confetti',  culturalPattern: null,                              costume: 'neom',    loader: 'geometric' },
-  backseatgamer:  { icon: '🎮', name: 'سوّاق أعمى',      hint: 'وصّف أو خمّن!',                    pattern: 'pattern-waves',     culturalPattern: null,                              costume: 'neom',    loader: 'geometric' },
-  splittheroom:   { icon: '🔀', name: 'سبليت ذا روم',    hint: 'اقسم الغرفة!',                     pattern: 'pattern-halftone',  culturalPattern: null,                              costume: 'souk',    loader: 'prayer-beads' },
-  courtroom:      { icon: '👨‍⚖️', name: 'المحكمة الكبرى',  hint: 'ادّعي أو دافع!',                   pattern: 'pattern-noise',     culturalPattern: 'pattern-cultural--courtroom',     costume: 'asiri',   loader: 'prayer-beads' },
-  debateme:       { icon: '⚖️', name: 'المحكمة',         hint: 'قنع الباقين برأيك!',               pattern: 'pattern-spotlight', culturalPattern: null,                              costume: 'majlis',  loader: 'coffee-cup' },
-  punishmentwheel:{ icon: '🎡', name: 'عجلة العقاب',     hint: 'جاوب صح أو انعاقب!',               pattern: 'pattern-triangles', culturalPattern: null,                              costume: 'djinn',   loader: 'prayer-beads' }
+  quiplash:       { icon: '⚡', name: 'رد سريع',        hint: 'اكتب أطرف إجابة!',                pattern: 'pattern-stage' },
+  guesspionage:   { icon: '📊', name: 'خمّن النسبة',     hint: 'خمّن النسبة الصحيحة!',             pattern: 'pattern-matrix' },
+  fakinit:        { icon: '🕵️', name: 'المزيّف',         hint: 'اكتشف المزيّف!',                   pattern: 'pattern-deception' },
+  triviamurder:   { icon: '💀', name: 'حفلة القاتل',     hint: 'أجب صح أو مت!',                    pattern: 'pattern-blood' },
+  fibbage:        { icon: '🎭', name: 'كشف الكذاب',      hint: 'اكتب كذبة مقنعة!',                 pattern: 'pattern-newspaper' },
+  drawful:        { icon: '🎨', name: 'ارسم لي',         hint: 'ارسم الكلمة!',                     pattern: 'pattern-paint' },
+  tshirtwars:     { icon: '👕', name: 'حرب التيشيرتات',  hint: 'اكتب أفضل شعار!',                  pattern: 'pattern-rays' },
+  trynottolol:    { icon: '😂', name: 'لا تضحك',         hint: 'اكتب أطرف جواب!',                  pattern: 'pattern-dots' },
+  inventions:     { icon: '💡', name: 'اختراعات مجنونة',  hint: 'اخترع شي مجنون!',                  pattern: 'pattern-grid' },
+  wouldyourather: { icon: '🤔', name: 'تبي ولا ما تبي',  hint: 'اختر خيار!',                       pattern: 'pattern-zigzag' },
+  whosaidit:      { icon: '💬', name: 'من قال؟',         hint: 'خمّن مين كتب هالكلام!',            pattern: 'pattern-stripes' },
+  speedround:     { icon: '⚡', name: 'أسرع واحد',       hint: 'أجب أسرع من الكل!',                pattern: 'pattern-confetti' },
+  backseatgamer:  { icon: '🎮', name: 'سوّاق أعمى',      hint: 'وصّف أو خمّن!',                    pattern: 'pattern-waves' },
+  splittheroom:   { icon: '🔀', name: 'سبليت ذا روم',    hint: 'اقسم الغرفة!',                     pattern: 'pattern-halftone' },
+  courtroom:      { icon: '👨‍⚖️', name: 'المحكمة الكبرى',  hint: 'ادّعي أو دافع!',                   pattern: 'pattern-noise' },
+  debateme:       { icon: '⚖️', name: 'المحكمة',         hint: 'قنع الباقين برأيك!',               pattern: 'pattern-spotlight' },
+  punishmentwheel:{ icon: '🎡', name: 'عجلة العقاب',     hint: 'جاوب صح أو انعاقب!',               pattern: 'pattern-triangles' }
 };
 
 const DRAW_COLORS = ['#000000', '#ff0000', '#0066ff', '#00aa00', '#ff8800', '#9900cc', '#ff69b4', '#8B4513', '#FFD700', '#00CED1', '#808080', '#ffffff'];
@@ -880,14 +880,10 @@ const App = {
       const game = GAMES[theme];
       if (game) {
         bg.classList.add(game.pattern);
-        // Layer cultural pattern on top for the 6 Saudi-anchored games
-        if (game.culturalPattern) bg.classList.add(game.culturalPattern);
       } else {
         bg.classList.add(theme === 'victory' ? 'pattern-confetti' : 'pattern-arabesque');
       }
     }
-    // Set mascot costume for game
-    this._setMascotCostume(theme);
     // Reset answer progress HUD
     const center = document.querySelector('.game-hud__center');
     if (center) center.innerHTML = '<div id="answeredCount" class="text-sm text-muted" style="display:none"></div>';
@@ -901,24 +897,7 @@ const App = {
     localStorage.setItem('intensity', level);
   },
 
-  // ── نظام أزياء التميمة — Mascot Costume System ──
-  _setMascotCostume(theme) {
-    const mascot = document.getElementById('mascotContainer');
-    if (!mascot) return;
-    // Remove all existing costume classes
-    mascot.className = mascot.className.replace(/\bmascot-costume--\w+/g, '').trim();
-    const game = GAMES[theme];
-    if (game && game.costume) {
-      mascot.classList.add('mascot-costume--' + game.costume);
-    }
-  },
-
-  // ── Cultural loader HTML per game — محمّل ثقافي ──
-  _getCulturalLoaderHtml(theme) {
-    const game = GAMES[theme];
-    const loaderType = game ? game.loader : 'coffee-cup';
-    return '<div class="cultural-loader--' + loaderType + '" aria-label="جاري التحميل"></div>';
-  },
+  _noop() {},
 
   // حفظ بيانات الجلسة لإعادة الاتصال
   _persistSession() {
@@ -1336,8 +1315,7 @@ const App = {
   showWaiting(msg) {
     const gc = document.getElementById('gameContent');
     const tip = this._waitingTips[Math.floor(Math.random() * this._waitingTips.length)];
-    // Use cultural loader matching current game, fallback to generic spinner
-    const loader = this.currentGame ? this._getCulturalLoaderHtml(this.currentGame) : '<div class="spinner mb-4"></div>';
+    const loader = '<div class="spinner mb-4"></div>';
     if (gc) gc.innerHTML =
       '<div class="text-center">' +
         '<div class="mb-4">' + loader + '</div>' +
@@ -1415,10 +1393,8 @@ const App = {
       const arriveEl = transition.querySelector('.game-transition__arrive');
       const patternEl = transition.querySelector('.game-transition__pattern');
 
-      // Set cultural pattern in transition overlay
       if (patternEl) {
         patternEl.className = 'game-transition__pattern';
-        if (gameInfo.culturalPattern) patternEl.classList.add(gameInfo.culturalPattern);
       }
 
       // Style the transition with game colors

@@ -26,7 +26,6 @@
   <link rel="stylesheet" href="/css/patterns.css?v=6.0">
   <link rel="stylesheet" href="/css/game-screens.css?v=6.0">
   <link rel="stylesheet" href="/css/avatars.css?v=6.0">
-  <link rel="stylesheet" href="/css/cultural-themes.css?v=6.0">
 </head>
 <body data-theme="hub" data-intensity="party">
   <!-- Screen Reader Announcements (ARIA Live Regions) -->
@@ -153,22 +152,54 @@
    * ═══════════════════════════════════════════════════════════ -->
   <div id="menuScreen" class="screen screen--centered">
     <div class="logo-container">
-      <div class="mascot">🧔🏻</div>
+      <div class="mascot" id="menuMascot">🧔🏻</div>
       <div class="logo">
         <span class="logo__box">أبو عابد</span>
         <span class="logo__name">بوكس</span>
       </div>
-      <p class="tagline">🇸🇦 ألعاب جماعية سعودية • العب مع ربعك!</p>
+      <p class="tagline">العب مع ربعك! • ١٧ لعبة جماعية</p>
     </div>
-    <div class="menu-actions">
-      <button class="btn btn--primary btn--lg btn--full" data-action="showScreen" data-screen="createScreen">🏠 أنشئ غرفة</button>
-      <button class="btn btn--secondary btn--lg btn--full" data-action="showScreen" data-screen="joinScreen">🚪 انضم لغرفة</button>
-      <button class="btn btn--ghost btn--full" data-action="showScreen" data-screen="howToPlayScreen">❓ كيف ألعب؟</button>
+
+    <!-- Host vs Player mode cards -->
+    <div class="menu-modes">
+      <div class="menu-mode-card" data-action="showScreen" data-screen="createScreen" role="button" tabindex="0">
+        <span class="menu-mode-card__icon">📺</span>
+        <div class="menu-mode-card__title">أنا المضيف</div>
+        <div class="menu-mode-card__hint">افتح الغرفة واعرض الكود على الشاشة</div>
+        <button class="btn btn--primary btn--full">أنشئ غرفة</button>
+      </div>
+      <div class="menu-mode-card" data-action="showScreen" data-screen="joinScreen" role="button" tabindex="0">
+        <span class="menu-mode-card__icon">📱</span>
+        <div class="menu-mode-card__title">أنا لاعب</div>
+        <div class="menu-mode-card__hint">اكتب الكود من شاشة صاحبك وانضم</div>
+        <button class="btn btn--secondary btn--full">انضم لغرفة</button>
+      </div>
     </div>
-    <div class="saudi-footer">
-      <span>🇸🇦</span>
-      <span>صنع في السعودية بكل حب</span>
-      <span>☕</span>
+
+    <!-- 3-step How It Works -->
+    <div class="menu-how-strip">
+      <div class="menu-how-step">
+        <span class="menu-how-step__num">١</span>
+        <span class="menu-how-step__text">افتح على التلفزيون</span>
+      </div>
+      <span class="menu-how-arrow">←</span>
+      <div class="menu-how-step">
+        <span class="menu-how-step__num">٢</span>
+        <span class="menu-how-step__text">شارك الكود</span>
+      </div>
+      <span class="menu-how-arrow">←</span>
+      <div class="menu-how-step">
+        <span class="menu-how-step__num">٣</span>
+        <span class="menu-how-step__text">ابدأوا اللعب!</span>
+      </div>
+    </div>
+
+    <div class="menu-help-link" data-action="showScreen" data-screen="howToPlayScreen" role="button" tabindex="0">❓ كيف ألعب؟</div>
+
+    <div class="menu-footer">
+      <span>أبو عابد بوكس</span>
+      <span>•</span>
+      <span>V7.0</span>
     </div>
   </div>
 
