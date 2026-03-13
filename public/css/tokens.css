@@ -325,14 +325,19 @@
   --brand-coral: #FF6B6B;
   --brand-electric: #00E5FF;
 
-  /* Hub/Menu warm palette (majlis-inspired warmth) */
-  --hub-bg: radial-gradient(circle at 50% 20%, rgba(255,179,71,0.22), rgba(26,26,46,1) 60%),
-            linear-gradient(180deg, #0B1020, #1A1A2E 55%, #0B1020);
-  --hub-pattern-opacity: 0.06;
-  --hub-text: #F5F0E8;
-  --hub-gold: #C9A96E;
-  --hub-green: #00BFA5;
+  /* Hub/Platform palette — warm stage night, fun accents */
+  --hub-bg0: #0B1020;
+  --hub-bg1: #1A1A2E;
   --hub-amber: #FFB347;
+  --hub-gold: #FFD93D;
+  --hub-magenta: #FF3D7F;
+  --hub-cyan: #16E0FF;
+  --hub-green: #00BFA5;
+  --hub-text: #F5F0E8;
+  --hub-pattern-opacity: 0.06;
+  /* Green demoted to success/confirm only */
+  --ok: #00E676;
+  --danger: #FF4757;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -375,8 +380,8 @@
  * ═══════════════════════════════════════════════════════════════ */
 
 /* ── Design Bible V1.0 Per-Game Palettes ── */
-/* Saudi Cultural Anchors */
-[data-theme="hub"]          { --theme-hue1: #0F1923; --theme-hue2: #0A1628; --theme-accent: #FFB347; --theme-accent2: #00D68F; --theme-accent3: #F5F0E8; --theme-glow: rgba(0, 214, 143, 0.12); --theme-font-header: 'Noto Kufi Arabic', sans-serif; --theme-font-body: 'Cairo', sans-serif; --cultural-anchor: 'Saudi national green and gold — platform identity'; }
+/* Theme Anchors */
+[data-theme="hub"]          { --theme-hue1: #0F1923; --theme-hue2: #0A1628; --theme-accent: #FFB347; --theme-accent2: #00D68F; --theme-accent3: #F5F0E8; --theme-glow: rgba(0, 214, 143, 0.12); --theme-font-header: 'Noto Kufi Arabic', sans-serif; --theme-font-body: 'Cairo', sans-serif; --cultural-anchor: 'Warm amber and teal — platform identity'; }
 [data-theme="quiplash"]     { --theme-hue1: #6B1D3A; --theme-hue2: #3A0F1E; --theme-accent: #D4AF37; --theme-accent2: #C4813D; --theme-accent3: #F5E6CA; --theme-glow: rgba(212, 175, 55, 0.12); --theme-font-header: 'Noto Kufi Arabic', sans-serif; --theme-font-body: 'Cairo', sans-serif; --cultural-anchor: 'Majlis — burgundy cushions, gold trays, warm gathering space'; }
 [data-theme="guesspionage"] { --theme-hue1: #0A1628; --theme-hue2: #0D1B2A; --theme-accent: #00E676; --theme-accent2: #C62828; --theme-accent3: #B8C4D0; --theme-glow: rgba(0, 230, 118, 0.10); --theme-font-header: 'Changa', sans-serif; --theme-font-body: 'Tajawal', sans-serif; --cultural-anchor: 'NEOM — futuristic midnight digital surveillance'; }
 [data-theme="fakinit"]      { --theme-hue1: #8B5E3C; --theme-hue2: #D4B896; --theme-accent: #C4953A; --theme-accent2: #B94630; --theme-accent3: #4A7C59; --theme-glow: rgba(196, 149, 58, 0.12); --theme-font-header: 'Lemonada', sans-serif; --theme-font-body: 'Cairo', sans-serif; --cultural-anchor: 'Souk — warm earth tones, saffron, paprika, cardamom spice market'; }

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#1A1A2E">
-  <meta name="description" content="أبو عابد بوكس - ألعاب جماعية سعودية مثل جاكبوكس! العب مع ربعك">
+  <meta name="description" content="أبو عابد بوكس - ألعاب جماعية مثل جاكبوكس! العب مع ربعك">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="/manifest.json">
@@ -209,22 +209,12 @@
   <div id="createScreen" class="screen screen--centered">
     <div class="panel panel--narrow">
       <div class="text-center mb-6">
-        <span class="panel__icon">🏠</span>
+        <span class="panel__icon">📺</span>
         <h2 class="text-2xl font-black mt-2">أنشئ غرفة</h2>
       </div>
       <div class="mb-4">
         <label class="text-sm text-muted mb-1 block">اسمك</label>
         <input type="text" id="hostNameInput" class="input" placeholder="مثال: أبو فهد..." maxlength="12" autocomplete="off">
-      </div>
-      <div class="mb-4">
-        <label class="text-sm text-muted mb-1 block">شخصيتك</label>
-        <button type="button" class="avatar-select-btn" id="hostAvatarBtn" data-action="openAvatarPicker" data-target="host">
-          <div class="avatar-select-btn__preview" id="hostAvatarPreview"><span class="avatar-emoji">🎭</span></div>
-          <div class="avatar-select-btn__text">
-            <span class="avatar-select-btn__label">اضغط لاختيار شخصية</span>
-            <span class="avatar-select-btn__name" id="hostAvatarName">اختر شخصيتك!</span>
-          </div>
-        </button>
       </div>
       <button class="btn btn--primary btn--lg btn--full mb-3" data-action="createRoom">يلا نبدأ! 🎉</button>
       <button class="btn btn--ghost btn--full" data-action="showScreen" data-screen="menuScreen">← رجوع</button>
@@ -237,7 +227,7 @@
   <div id="joinScreen" class="screen screen--centered">
     <div class="panel panel--narrow">
       <div class="text-center mb-6">
-        <span class="panel__icon">🚪</span>
+        <span class="panel__icon">📱</span>
         <h2 class="text-2xl font-black mt-2">انضم لغرفة</h2>
       </div>
       <div class="mb-4">
@@ -246,17 +236,7 @@
       </div>
       <div class="mb-4">
         <label class="text-sm text-muted mb-1 block">اسمك</label>
-        <input type="text" id="playerNameInput" class="input" placeholder="مثال: أبو سعود..." maxlength="12" autocomplete="off">
-      </div>
-      <div class="mb-4">
-        <label class="text-sm text-muted mb-1 block">شخصيتك</label>
-        <button type="button" class="avatar-select-btn" id="joinAvatarBtn" data-action="openAvatarPicker" data-target="join">
-          <div class="avatar-select-btn__preview" id="joinAvatarPreview"><span class="avatar-emoji">🎭</span></div>
-          <div class="avatar-select-btn__text">
-            <span class="avatar-select-btn__label">اضغط لاختيار شخصية</span>
-            <span class="avatar-select-btn__name" id="joinAvatarName">اختر شخصيتك!</span>
-          </div>
-        </button>
+        <input type="text" id="playerNameInput" class="input" placeholder="أدخل اسمك..." maxlength="12" autocomplete="off">
       </div>
       <button class="btn btn--primary btn--lg btn--full mb-3" data-action="joinRoom">انضم! 🎮</button>
       <button class="btn btn--secondary btn--full mb-3" data-action="joinAsAudience">👀 انضم كمتفرج</button>
@@ -312,279 +292,172 @@
 
       <!-- Game Selection (Host only) -->
       <div id="gamesSection" class="w-full" style="display:none">
-        <div class="text-center mb-6">
+        <div class="text-center mb-4">
           <h3 class="lobby-section-title">اختر لعبة</h3>
-          <p class="text-sm text-muted mt-4">١٧ لعبة جماعية مختلفة</p>
         </div>
-        <div class="games-grid">
-          <!-- Quiplash -->
-          <div class="game-card" data-action="selectGame" data-game="quiplash" role="button" tabindex="0" aria-label="لعبة رد سريع">
-            <div class="game-card__banner game-card__banner--quiplash">
-              <span class="game-card__icon">⚡</span>
-            </div>
+
+        <!-- Category Tabs -->
+        <div class="game-tabs" id="gameTabs" role="tablist">
+          <button class="game-tab is-active" data-category="all" role="tab">الكل</button>
+          <button class="game-tab" data-category="writing" role="tab">✏️ كتابة</button>
+          <button class="game-tab" data-category="deception" role="tab">🕵️ خداع</button>
+          <button class="game-tab" data-category="trivia" role="tab">🧠 معلومات</button>
+          <button class="game-tab" data-category="social" role="tab">💬 اجتماعي</button>
+          <button class="game-tab" data-category="creative" role="tab">🎨 إبداع</button>
+          <button class="game-tab" data-category="debate" role="tab">⚖️ نقاش</button>
+        </div>
+
+        <!-- Surprise Me Button -->
+        <div class="text-center mb-4">
+          <button class="btn btn--ghost btn--sm" data-action="randomGame" style="border-color:rgba(255,61,127,0.3);color:#FF3D7F">🎲 فاجئني!</button>
+        </div>
+
+        <div class="games-grid" id="gamesGrid">
+          <!-- Writing Games -->
+          <div class="game-card" data-action="selectGame" data-game="quiplash" data-cat="writing" role="button" tabindex="0">
+            <div class="game-card__banner game-card__banner--quiplash"><span class="game-card__icon">⚡</span></div>
             <div class="game-card__content">
               <h4 class="game-card__title">رد سريع</h4>
-              <p class="game-card__desc">اكتب أطرف إجابة وخل أصدقاءك يصوتون! الإجابة الأقوى تفوز</p>
-              <div class="game-card__tags">
-                <span class="game-tag">👥 ٣-١٠</span>
-                <span class="game-tag">😂 كوميدي</span>
-                <span class="game-tag">✏️ كتابة</span>
-              </div>
+              <p class="game-card__desc">اكتب أطرف إجابة والباقين يصوتون</p>
+              <div class="game-card__meta"><span>👥 ٣-١٠</span></div>
             </div>
           </div>
-
-          <!-- Guesspionage -->
-          <div class="game-card" data-action="selectGame" data-game="guesspionage" role="button" tabindex="0" aria-label="لعبة خمّن النسبة">
-            <div class="game-card__banner game-card__banner--guesspionage">
-              <span class="game-card__icon">📊</span>
-            </div>
-            <div class="game-card__content">
-              <h4 class="game-card__title">خمّن النسبة</h4>
-              <p class="game-card__desc">لاعب واحد يخمّن النسبة، والباقين يراهنون أعلى أو أقل! من يعرف الحقيقة؟</p>
-              <div class="game-card__tags">
-                <span class="game-tag">👥 ٢-١٠</span>
-                <span class="game-tag">🧠 ذكاء</span>
-                <span class="game-tag">📊 إحصائيات</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Fakin' It -->
-          <div class="game-card" data-action="selectGame" data-game="fakinit" role="button" tabindex="0" aria-label="لعبة المزيّف">
-            <div class="game-card__banner game-card__banner--fakinit">
-              <span class="game-card__icon">🕵️</span>
-            </div>
-            <div class="game-card__content">
-              <h4 class="game-card__title">المزيّف</h4>
-              <p class="game-card__desc">واحد ما يعرف المهمة - اكتشفوه قبل ما يفلت!</p>
-              <div class="game-card__tags">
-                <span class="game-tag">👥 ٣-٨</span>
-                <span class="game-tag">🎭 تمثيل</span>
-                <span class="game-tag">🕵️ تحقيق</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Trivia Murder Party -->
-          <div class="game-card" data-action="selectGame" data-game="triviamurder" role="button" tabindex="0" aria-label="لعبة حفلة القاتل">
-            <div class="game-card__banner game-card__banner--triviamurder">
-              <span class="game-card__icon">💀</span>
-            </div>
-            <div class="game-card__content">
-              <h4 class="game-card__title">حفلة القاتل</h4>
-              <p class="game-card__desc">أجب صح أو مت! تحديات الموت تنتظر الخاسرين</p>
-              <div class="game-card__tags">
-                <span class="game-tag">👥 ٢-١٠</span>
-                <span class="game-tag">☠️ رعب</span>
-                <span class="game-tag">🧠 معلومات</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Fibbage -->
-          <div class="game-card" data-action="selectGame" data-game="fibbage" role="button" tabindex="0" aria-label="لعبة كشف الكذاب">
-            <div class="game-card__banner game-card__banner--fibbage">
-              <span class="game-card__icon">🎭</span>
-            </div>
-            <div class="game-card__content">
-              <h4 class="game-card__title">كشف الكذاب</h4>
-              <p class="game-card__desc">اكتب كذبة مقنعة واخدع أصحابك! اللي يكذب أحسن يفوز</p>
-              <div class="game-card__tags">
-                <span class="game-tag">👥 ٢-١٠</span>
-                <span class="game-tag">🤥 خداع</span>
-                <span class="game-tag">🧐 كشف</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Drawful -->
-          <div class="game-card" data-action="selectGame" data-game="drawful" role="button" tabindex="0" aria-label="لعبة ارسم لي">
-            <div class="game-card__banner game-card__banner--drawful">
-              <span class="game-card__icon">🎨</span>
-            </div>
-            <div class="game-card__content">
-              <h4 class="game-card__title">ارسم لي</h4>
-              <p class="game-card__desc">ارسم الكلمة السرية وخل الباقين يخمنون! فن سعودي أصيل</p>
-              <div class="game-card__tags">
-                <span class="game-tag">👥 ٣-١٠</span>
-                <span class="game-tag">🖌️ رسم</span>
-                <span class="game-tag">😂 مضحك</span>
-              </div>
-            </div>
-          </div>
-          <!-- T-Shirt Wars -->
-          <div class="game-card" data-action="selectGame" data-game="tshirtwars" role="button" tabindex="0" aria-label="لعبة حرب التيشيرتات">
-            <div class="game-card__banner game-card__banner--tshirtwars">
-              <span class="game-card__icon">👕</span>
-            </div>
+          <div class="game-card" data-action="selectGame" data-game="tshirtwars" data-cat="writing creative" role="button" tabindex="0">
+            <div class="game-card__banner game-card__banner--tshirtwars"><span class="game-card__icon">👕</span></div>
             <div class="game-card__content">
               <h4 class="game-card__title">حرب التيشيرتات</h4>
-              <p class="game-card__desc">اكتب أفضل شعار وصوّتوا لأقوى تيشيرت!</p>
-              <div class="game-card__tags">
-                <span class="game-tag">👥 ٣-١٠</span>
-                <span class="game-tag">✏️ كتابة</span>
-                <span class="game-tag">🎨 إبداع</span>
-              </div>
+              <p class="game-card__desc">اكتب أفضل شعار وصوّتوا لأقوى تيشيرت</p>
+              <div class="game-card__meta"><span>👥 ٣-١٠</span></div>
             </div>
           </div>
-
-          <!-- Try Not To LOL -->
-          <div class="game-card" data-action="selectGame" data-game="trynottolol" role="button" tabindex="0" aria-label="لعبة لا تضحك">
-            <div class="game-card__banner game-card__banner--trynottolol">
-              <span class="game-card__icon">😂</span>
-            </div>
+          <div class="game-card" data-action="selectGame" data-game="trynottolol" data-cat="writing" role="button" tabindex="0">
+            <div class="game-card__banner game-card__banner--trynottolol"><span class="game-card__icon">😂</span></div>
             <div class="game-card__content">
               <h4 class="game-card__title">لا تضحك</h4>
-              <p class="game-card__desc">اكتب أطرف إجابة وخلّ القاضي يضحك!</p>
-              <div class="game-card__tags">
-                <span class="game-tag">👥 ٣-١٠</span>
-                <span class="game-tag">😂 كوميدي</span>
-                <span class="game-tag">⚡ سريع</span>
-              </div>
+              <p class="game-card__desc">اكتب أطرف جواب وخلّ القاضي يضحك</p>
+              <div class="game-card__meta"><span>👥 ٣-١٠</span></div>
             </div>
           </div>
-
-          <!-- Inventions -->
-          <div class="game-card" data-action="selectGame" data-game="inventions" role="button" tabindex="0" aria-label="لعبة اختراعات مجنونة">
-            <div class="game-card__banner game-card__banner--inventions">
-              <span class="game-card__icon">💡</span>
-            </div>
+          <div class="game-card" data-action="selectGame" data-game="inventions" data-cat="writing creative" role="button" tabindex="0">
+            <div class="game-card__banner game-card__banner--inventions"><span class="game-card__icon">💡</span></div>
             <div class="game-card__content">
               <h4 class="game-card__title">اختراعات مجنونة</h4>
-              <p class="game-card__desc">اخترع حلول جنونية لمشاكل حقيقية!</p>
-              <div class="game-card__tags">
-                <span class="game-tag">👥 ٣-١٠</span>
-                <span class="game-tag">💡 إبداع</span>
-                <span class="game-tag">😂 مضحك</span>
-              </div>
+              <p class="game-card__desc">اخترع حلول جنونية لمشاكل حقيقية</p>
+              <div class="game-card__meta"><span>👥 ٣-١٠</span></div>
             </div>
           </div>
-
-          <!-- Would You Rather -->
-          <div class="game-card" data-action="selectGame" data-game="wouldyourather" role="button" tabindex="0" aria-label="لعبة تبي ولا ما تبي">
-            <div class="game-card__banner game-card__banner--wouldyourather">
-              <span class="game-card__icon">🤔</span>
-            </div>
-            <div class="game-card__content">
-              <h4 class="game-card__title">تبي ولا ما تبي</h4>
-              <p class="game-card__desc">اختر بين خيارين مستحيلين! الأغلبية تفوز</p>
-              <div class="game-card__tags">
-                <span class="game-tag">👥 ٢-١٠</span>
-                <span class="game-tag">🤔 قرارات</span>
-                <span class="game-tag">😂 مضحك</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Who Said It -->
-          <div class="game-card" data-action="selectGame" data-game="whosaidit" role="button" tabindex="0" aria-label="لعبة من قال">
-            <div class="game-card__banner game-card__banner--whosaidit">
-              <span class="game-card__icon">💬</span>
-            </div>
-            <div class="game-card__content">
-              <h4 class="game-card__title">من قال؟</h4>
-              <p class="game-card__desc">اكتب شي عن نفسك وخل الباقين يخمنون مين قال!</p>
-              <div class="game-card__tags">
-                <span class="game-tag">👥 ٣-١٠</span>
-                <span class="game-tag">💬 اجتماعي</span>
-                <span class="game-tag">🕵️ تحقيق</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Speed Round -->
-          <div class="game-card" data-action="selectGame" data-game="speedround" role="button" tabindex="0" aria-label="لعبة أسرع واحد">
-            <div class="game-card__banner game-card__banner--speedround">
-              <span class="game-card__icon">⚡</span>
-            </div>
-            <div class="game-card__content">
-              <h4 class="game-card__title">أسرع واحد</h4>
-              <p class="game-card__desc">أجب أسرع من الكل! أول واحد يكتب الجواب الصح يفوز</p>
-              <div class="game-card__tags">
-                <span class="game-tag">👥 ٢-١٠</span>
-                <span class="game-tag">⚡ سرعة</span>
-                <span class="game-tag">🧠 معلومات</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Backseat Gamer -->
-          <div class="game-card" data-action="selectGame" data-game="backseatgamer" role="button" tabindex="0" aria-label="لعبة سوّاق أعمى">
-            <div class="game-card__banner game-card__banner--backseatgamer">
-              <span class="game-card__icon">🎮</span>
-            </div>
-            <div class="game-card__content">
-              <h4 class="game-card__title">سوّاق أعمى</h4>
-              <p class="game-card__desc">وصّف الكلمة بدون الكلمات المحرّمة وخل الباقين يخمنون!</p>
-              <div class="game-card__tags">
-                <span class="game-tag">👥 ٣-١٠</span>
-                <span class="game-tag">🎮 وصف</span>
-                <span class="game-tag">⚡ سرعة</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Split the Room -->
-          <div class="game-card" data-action="selectGame" data-game="splittheroom" role="button" tabindex="0" aria-label="لعبة سبليت ذا روم">
-            <div class="game-card__banner game-card__banner--splittheroom">
-              <span class="game-card__icon">🔀</span>
-            </div>
+          <div class="game-card" data-action="selectGame" data-game="splittheroom" data-cat="writing social" role="button" tabindex="0">
+            <div class="game-card__banner game-card__banner--splittheroom"><span class="game-card__icon">🔀</span></div>
             <div class="game-card__content">
               <h4 class="game-card__title">سبليت ذا روم</h4>
-              <p class="game-card__desc">اكتب سيناريو يقسم الغرفة! كل ما كان التصويت ٥٠/٥٠ تفوز أكثر</p>
-              <div class="game-card__tags">
-                <span class="game-tag">👥 ٣-١٠</span>
-                <span class="game-tag">🔀 استراتيجي</span>
-                <span class="game-tag">✏️ كتابة</span>
-              </div>
+              <p class="game-card__desc">اكتب سيناريو يقسم الغرفة ٥٠/٥٠</p>
+              <div class="game-card__meta"><span>👥 ٣-١٠</span></div>
             </div>
           </div>
 
-          <!-- Courtroom -->
-          <div class="game-card" data-action="selectGame" data-game="courtroom" role="button" tabindex="0" aria-label="لعبة المحكمة الكبرى">
-            <div class="game-card__banner game-card__banner--courtroom">
-              <span class="game-card__icon">👨‍⚖️</span>
-            </div>
+          <!-- Deception Games -->
+          <div class="game-card" data-action="selectGame" data-game="fakinit" data-cat="deception social" role="button" tabindex="0">
+            <div class="game-card__banner game-card__banner--fakinit"><span class="game-card__icon">🕵️</span></div>
             <div class="game-card__content">
-              <h4 class="game-card__title">المحكمة الكبرى</h4>
-              <p class="game-card__desc">ادّعي أو دافع في قضايا مجنونة! هيئة المحلفين تقرر</p>
-              <div class="game-card__tags">
-                <span class="game-tag">👥 ٣-١٠</span>
-                <span class="game-tag">⚖️ مرافعة</span>
-                <span class="game-tag">🗣️ إقناع</span>
-              </div>
+              <h4 class="game-card__title">المزيّف</h4>
+              <p class="game-card__desc">واحد ما يعرف المهمة - اكتشفوه!</p>
+              <div class="game-card__meta"><span>👥 ٣-٨</span></div>
             </div>
           </div>
-
-          <!-- Debate Me -->
-          <div class="game-card" data-action="selectGame" data-game="debateme" role="button" tabindex="0" aria-label="لعبة المحكمة">
-            <div class="game-card__banner game-card__banner--debateme">
-              <span class="game-card__icon">⚖️</span>
-            </div>
+          <div class="game-card" data-action="selectGame" data-game="fibbage" data-cat="deception writing" role="button" tabindex="0">
+            <div class="game-card__banner game-card__banner--fibbage"><span class="game-card__icon">🎭</span></div>
             <div class="game-card__content">
-              <h4 class="game-card__title">المحكمة</h4>
-              <p class="game-card__desc">ناقش موضوع جدلي وقنع الباقين برأيك!</p>
-              <div class="game-card__tags">
-                <span class="game-tag">👥 ٤-١٠</span>
-                <span class="game-tag">⚖️ نقاش</span>
-                <span class="game-tag">🧠 إقناع</span>
-              </div>
+              <h4 class="game-card__title">كشف الكذاب</h4>
+              <p class="game-card__desc">اكتب كذبة مقنعة واخدع أصحابك</p>
+              <div class="game-card__meta"><span>👥 ٢-١٠</span></div>
             </div>
           </div>
 
-          <!-- Punishment Wheel -->
-          <div class="game-card" data-action="selectGame" data-game="punishmentwheel" role="button" tabindex="0" aria-label="لعبة عجلة العقاب">
-            <div class="game-card__banner game-card__banner--punishmentwheel">
-              <span class="game-card__icon">🎡</span>
+          <!-- Trivia/Knowledge Games -->
+          <div class="game-card" data-action="selectGame" data-game="triviamurder" data-cat="trivia" role="button" tabindex="0">
+            <div class="game-card__banner game-card__banner--triviamurder"><span class="game-card__icon">💀</span></div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">حفلة القاتل</h4>
+              <p class="game-card__desc">أجب صح أو مت! تحديات موت للخاسرين</p>
+              <div class="game-card__meta"><span>👥 ٢-١٠</span></div>
             </div>
+          </div>
+          <div class="game-card" data-action="selectGame" data-game="guesspionage" data-cat="trivia social" role="button" tabindex="0">
+            <div class="game-card__banner game-card__banner--guesspionage"><span class="game-card__icon">📊</span></div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">خمّن النسبة</h4>
+              <p class="game-card__desc">خمّن النسبة والباقين يراهنون أعلى أو أقل</p>
+              <div class="game-card__meta"><span>👥 ٢-١٠</span></div>
+            </div>
+          </div>
+          <div class="game-card" data-action="selectGame" data-game="speedround" data-cat="trivia" role="button" tabindex="0">
+            <div class="game-card__banner game-card__banner--speedround"><span class="game-card__icon">⚡</span></div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">أسرع واحد</h4>
+              <p class="game-card__desc">أول واحد يكتب الجواب الصح يفوز</p>
+              <div class="game-card__meta"><span>👥 ٢-١٠</span></div>
+            </div>
+          </div>
+          <div class="game-card" data-action="selectGame" data-game="punishmentwheel" data-cat="trivia" role="button" tabindex="0">
+            <div class="game-card__banner game-card__banner--punishmentwheel"><span class="game-card__icon">🎡</span></div>
             <div class="game-card__content">
               <h4 class="game-card__title">عجلة العقاب</h4>
-              <p class="game-card__desc">جاوب صح وبسرعة! الأبطأ ينتظره عقاب مضحك</p>
-              <div class="game-card__tags">
-                <span class="game-tag">👥 ٢-١٠</span>
-                <span class="game-tag">🎡 عقاب</span>
-                <span class="game-tag">⚡ سرعة</span>
-              </div>
+              <p class="game-card__desc">جاوب صح أو انعاقب!</p>
+              <div class="game-card__meta"><span>👥 ٢-١٠</span></div>
+            </div>
+          </div>
+
+          <!-- Social Games -->
+          <div class="game-card" data-action="selectGame" data-game="wouldyourather" data-cat="social" role="button" tabindex="0">
+            <div class="game-card__banner game-card__banner--wouldyourather"><span class="game-card__icon">🤔</span></div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">تبي ولا ما تبي</h4>
+              <p class="game-card__desc">اختر بين خيارين مستحيلين</p>
+              <div class="game-card__meta"><span>👥 ٢-١٠</span></div>
+            </div>
+          </div>
+          <div class="game-card" data-action="selectGame" data-game="whosaidit" data-cat="social" role="button" tabindex="0">
+            <div class="game-card__banner game-card__banner--whosaidit"><span class="game-card__icon">💬</span></div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">من قال؟</h4>
+              <p class="game-card__desc">اكتب شي عن نفسك وخمّنوا مين قال</p>
+              <div class="game-card__meta"><span>👥 ٣-١٠</span></div>
+            </div>
+          </div>
+
+          <!-- Creative Games -->
+          <div class="game-card" data-action="selectGame" data-game="drawful" data-cat="creative" role="button" tabindex="0">
+            <div class="game-card__banner game-card__banner--drawful"><span class="game-card__icon">🎨</span></div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">ارسم لي</h4>
+              <p class="game-card__desc">ارسم الكلمة السرية والباقين يخمنون</p>
+              <div class="game-card__meta"><span>👥 ٣-١٠</span></div>
+            </div>
+          </div>
+          <div class="game-card" data-action="selectGame" data-game="backseatgamer" data-cat="creative social" role="button" tabindex="0">
+            <div class="game-card__banner game-card__banner--backseatgamer"><span class="game-card__icon">🎮</span></div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">سوّاق أعمى</h4>
+              <p class="game-card__desc">وصّف بدون الكلمات المحرّمة</p>
+              <div class="game-card__meta"><span>👥 ٣-١٠</span></div>
+            </div>
+          </div>
+
+          <!-- Debate Games -->
+          <div class="game-card" data-action="selectGame" data-game="courtroom" data-cat="debate" role="button" tabindex="0">
+            <div class="game-card__banner game-card__banner--courtroom"><span class="game-card__icon">👨‍⚖️</span></div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">المحكمة الكبرى</h4>
+              <p class="game-card__desc">ادّعي أو دافع! المحلفين يقررون</p>
+              <div class="game-card__meta"><span>👥 ٣-١٠</span></div>
+            </div>
+          </div>
+          <div class="game-card" data-action="selectGame" data-game="debateme" data-cat="debate" role="button" tabindex="0">
+            <div class="game-card__banner game-card__banner--debateme"><span class="game-card__icon">⚖️</span></div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">المحكمة</h4>
+              <p class="game-card__desc">ناقش موضوع جدلي وقنع الباقين</p>
+              <div class="game-card__meta"><span>👥 ٤-١٠</span></div>
             </div>
           </div>
         </div>
