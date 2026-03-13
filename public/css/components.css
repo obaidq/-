@@ -827,24 +827,144 @@
  * GAME CARD BANNERS - ألوان ممتعة
  * ───────────────────────────────────────────────────────────── */
 
-/* Richer, more distinct banner gradients per game */
-.game-card__banner--quiplash { background: linear-gradient(135deg, #2D1B69 0%, #4a3f9f 30%, #667eea 60%, #a78bfa 100%); }
-.game-card__banner--guesspionage { background: linear-gradient(135deg, #001a12 0%, #003d2e 25%, #00897b 60%, #00D4AA 85%, #A7F3D0 100%); }
-.game-card__banner--fakinit { background: linear-gradient(135deg, #c0392b 0%, #e74c3c 25%, #fa709a 55%, #fee140 100%); }
-.game-card__banner--triviamurder { background: linear-gradient(135deg, #0D0008 0%, #2D0A15 30%, #5C1A1A 60%, #1a1a1a 100%); }
-.game-card__banner--fibbage { background: linear-gradient(135deg, #5C3317 0%, #8B6914 25%, #DAA520 55%, #FFD700 100%); }
-.game-card__banner--drawful { background: linear-gradient(135deg, #1a237e 0%, #4facfe 35%, #00f2fe 65%, #00BFA5 100%); }
-.game-card__banner--tshirtwars { background: linear-gradient(135deg, #4A148C 0%, #7B1FA2 30%, #E040FB 60%, #FF6B35 100%); }
-.game-card__banner--trynottolol { background: linear-gradient(135deg, #1A0A2E 0%, #4A148C 30%, #FFD700 70%, #FFF8E1 100%); }
-.game-card__banner--inventions { background: linear-gradient(135deg, #01579B 0%, #0288D1 30%, #00BCD4 60%, #00E5FF 100%); }
-.game-card__banner--wouldyourather { background: linear-gradient(135deg, #BF360C 0%, #E65100 25%, #FF8F00 55%, #FFC107 85%, #FFF8E1 100%); }
-.game-card__banner--whosaidit { background: linear-gradient(135deg, #0D47A1 0%, #1976D2 30%, #42A5F5 60%, #BBDEFB 100%); }
-.game-card__banner--speedround { background: linear-gradient(135deg, #880E4F 0%, #BF360C 25%, #E65100 50%, #FF3D00 75%, #FF6E40 100%); }
-.game-card__banner--backseatgamer { background: linear-gradient(135deg, #0D1B2A 0%, #1B2838 30%, #006064 60%, #00E5FF 100%); }
-.game-card__banner--splittheroom { background: linear-gradient(135deg, #12005e 0%, #311B92 25%, #6200EA 55%, #B388FF 100%); }
-.game-card__banner--courtroom { background: linear-gradient(135deg, #1A1205 0%, #3E2723 25%, #8D6E63 55%, #D4AF37 85%, #FFD54F 100%); }
-.game-card__banner--debateme { background: linear-gradient(135deg, #1C2833 0%, #263238 25%, #455A64 55%, #78909C 85%, #CFD8DC 100%); }
-.game-card__banner--punishmentwheel { background: linear-gradient(135deg, #3E0000 0%, #8B0000 25%, #D32F2F 55%, #FF5252 85%, #FF8A80 100%); }
+/* ── Saudi Cultural Banner Gradients — الألوان الثقافية ── */
+
+/* Quiplash → ليلة المجلس — Majlis burgundy & gold */
+.game-card__banner--quiplash {
+  background:
+    repeating-conic-gradient(rgba(212,175,55,0.08) 0% 25%, transparent 0% 50%) 0 0 / 24px 24px,
+    linear-gradient(135deg, #3A0F1E 0%, #6B1D3A 40%, #D4AF37 85%, #C4813D 100%);
+}
+
+/* Guesspionage → استخبارات ٢٠٣٠ — NEOM midnight & neon green */
+.game-card__banner--guesspionage {
+  background:
+    repeating-linear-gradient(0deg, rgba(0,230,118,0.04) 0px, rgba(0,230,118,0.04) 1px, transparent 1px, transparent 16px),
+    repeating-linear-gradient(90deg, rgba(0,230,118,0.04) 0px, rgba(0,230,118,0.04) 1px, transparent 1px, transparent 16px),
+    linear-gradient(135deg, #050D1A 0%, #0A1628 30%, #0D1B2A 60%, #00E676 100%);
+}
+
+/* Fakin' It → دجّال السوق — Souk warm spice market */
+.game-card__banner--fakinit {
+  background:
+    repeating-linear-gradient(60deg, rgba(196,149,58,0.06) 0px, transparent 2px, transparent 18px),
+    linear-gradient(135deg, #3A2010 0%, #5C3317 25%, #C4953A 60%, #B94630 100%);
+}
+
+/* Trivia Murder → لغز الجنّي — Djinn midnight ruins */
+.game-card__banner--triviamurder {
+  background:
+    radial-gradient(circle at 30% 50%, rgba(58,186,180,0.12) 0%, transparent 50%),
+    linear-gradient(135deg, #060A28 0%, #0C1445 35%, #3ABAB4 75%, #8B1A1A 100%);
+}
+
+/* Fibbage → كشف الكذاب — Traditional gold craft */
+.game-card__banner--fibbage {
+  background:
+    repeating-conic-gradient(rgba(218,165,32,0.06) 0% 25%, transparent 0% 50%) 0 0 / 20px 20px,
+    linear-gradient(135deg, #3A2010 0%, #5C3317 25%, #DAA520 55%, #FFD700 100%);
+}
+
+/* Drawful → ارسم لي — Artistic blue palette */
+.game-card__banner--drawful {
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0px, transparent 2px, transparent 12px),
+    linear-gradient(135deg, #0D47A1 0%, #1976D2 30%, #42A5F5 65%, #00BFA5 100%);
+}
+
+/* T-Shirt Wars → معركة السدو — Sadu weaving red/white/green */
+.game-card__banner--tshirtwars {
+  background:
+    repeating-linear-gradient(0deg, rgba(178,34,52,0.1) 0px, rgba(178,34,52,0.1) 4px, transparent 4px, transparent 12px, rgba(46,125,50,0.1) 12px, rgba(46,125,50,0.1) 16px, transparent 16px, transparent 24px),
+    linear-gradient(135deg, #1A1A1A 0%, #2D0A0A 30%, #B22234 65%, #2E7D32 100%);
+}
+
+/* Try Not To LOL → لا تضحك */
+.game-card__banner--trynottolol {
+  background:
+    radial-gradient(circle at 70% 30%, rgba(255,215,0,0.15) 0%, transparent 50%),
+    linear-gradient(135deg, #1A0A2E 0%, #4A148C 30%, #FFD700 70%, #FFF8E1 100%);
+}
+
+/* Inventions → اختراعات مجنونة */
+.game-card__banner--inventions {
+  background:
+    repeating-linear-gradient(90deg, rgba(0,188,212,0.05) 0px, transparent 1px, transparent 20px),
+    linear-gradient(135deg, #01579B 0%, #0288D1 30%, #00BCD4 60%, #00E5FF 100%);
+}
+
+/* Would You Rather → تبي ولا ما تبي */
+.game-card__banner--wouldyourather {
+  background:
+    linear-gradient(135deg, #BF360C 0%, #E65100 25%, #FF8F00 55%, #FFC107 85%, #FFF8E1 100%);
+}
+
+/* Who Said It → من قال؟ */
+.game-card__banner--whosaidit {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(66,165,245,0.15) 0%, transparent 60%),
+    linear-gradient(135deg, #0D47A1 0%, #1976D2 30%, #42A5F5 60%, #BBDEFB 100%);
+}
+
+/* Speed Round → أسرع واحد */
+.game-card__banner--speedround {
+  background:
+    repeating-linear-gradient(135deg, rgba(255,61,0,0.08) 0px, transparent 3px, transparent 10px),
+    linear-gradient(135deg, #880E4F 0%, #BF360C 25%, #E65100 50%, #FF3D00 75%, #FF6E40 100%);
+}
+
+/* Backseat Gamer → سوّاق أعمى */
+.game-card__banner--backseatgamer {
+  background:
+    repeating-linear-gradient(0deg, rgba(0,229,255,0.04) 0px, transparent 1px, transparent 14px),
+    linear-gradient(135deg, #0D1B2A 0%, #1B2838 30%, #006064 60%, #00E5FF 100%);
+}
+
+/* Split The Room → سبليت ذا روم */
+.game-card__banner--splittheroom {
+  background:
+    linear-gradient(90deg, rgba(98,0,234,0.3) 50%, rgba(179,136,255,0.3) 50%),
+    linear-gradient(135deg, #12005e 0%, #311B92 25%, #6200EA 55%, #B388FF 100%);
+}
+
+/* Courtroom → المحكمة الكبرى — Al-Qatt Asiri bold colors */
+.game-card__banner--courtroom {
+  background:
+    repeating-conic-gradient(rgba(21,101,192,0.08) 0% 25%, transparent 0% 50%) 0 0 / 20px 20px,
+    linear-gradient(135deg, #1A1A1A 0%, #1565C0 30%, #C62828 60%, #F9A825 100%);
+}
+
+/* Debate Me → المحكمة */
+.game-card__banner--debateme {
+  background:
+    linear-gradient(135deg, #1C2833 0%, #263238 25%, #455A64 55%, #78909C 85%, #CFD8DC 100%);
+}
+
+/* Punishment Wheel → عجلة العقاب */
+.game-card__banner--punishmentwheel {
+  background:
+    repeating-conic-gradient(rgba(255,82,82,0.08) 0% 25%, transparent 0% 50%) 0 0 / 16px 16px,
+    linear-gradient(135deg, #3E0000 0%, #8B0000 25%, #D32F2F 55%, #FF5252 85%, #FF8A80 100%);
+}
+
+/* ── Per-card accent colors for borders & glow on hover ── */
+.game-card[data-game="quiplash"]      { --game-card-accent: #D4AF37; --game-card-glow: rgba(212,175,55,0.25); }
+.game-card[data-game="guesspionage"]  { --game-card-accent: #00E676; --game-card-glow: rgba(0,230,118,0.25); }
+.game-card[data-game="fakinit"]       { --game-card-accent: #C4953A; --game-card-glow: rgba(196,149,58,0.25); }
+.game-card[data-game="triviamurder"]  { --game-card-accent: #3ABAB4; --game-card-glow: rgba(58,186,180,0.25); }
+.game-card[data-game="fibbage"]       { --game-card-accent: #DAA520; --game-card-glow: rgba(218,165,32,0.25); }
+.game-card[data-game="drawful"]       { --game-card-accent: #42A5F5; --game-card-glow: rgba(66,165,245,0.25); }
+.game-card[data-game="tshirtwars"]    { --game-card-accent: #B22234; --game-card-glow: rgba(178,34,52,0.25); }
+.game-card[data-game="trynottolol"]   { --game-card-accent: #FFD700; --game-card-glow: rgba(255,215,0,0.25); }
+.game-card[data-game="inventions"]    { --game-card-accent: #00BCD4; --game-card-glow: rgba(0,188,212,0.25); }
+.game-card[data-game="wouldyourather"]{ --game-card-accent: #FF8F00; --game-card-glow: rgba(255,143,0,0.25); }
+.game-card[data-game="whosaidit"]     { --game-card-accent: #42A5F5; --game-card-glow: rgba(66,165,245,0.25); }
+.game-card[data-game="speedround"]    { --game-card-accent: #FF3D00; --game-card-glow: rgba(255,61,0,0.25); }
+.game-card[data-game="backseatgamer"] { --game-card-accent: #00E5FF; --game-card-glow: rgba(0,229,255,0.25); }
+.game-card[data-game="splittheroom"]  { --game-card-accent: #B388FF; --game-card-glow: rgba(179,136,255,0.25); }
+.game-card[data-game="courtroom"]     { --game-card-accent: #F9A825; --game-card-glow: rgba(249,168,37,0.25); }
+.game-card[data-game="debateme"]      { --game-card-accent: #78909C; --game-card-glow: rgba(120,144,156,0.25); }
+.game-card[data-game="punishmentwheel"]{ --game-card-accent: #FF5252; --game-card-glow: rgba(255,82,82,0.25); }
 
 .btn--icon-lg { font-size: 20px; }
 
