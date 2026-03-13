@@ -135,7 +135,7 @@ app.use(helmet({
 
 // تقديم الملفات الثابتة
 app.use(express.static(path.join(__dirname, 'public'), {
-  maxAge: process.env.NODE_ENV === 'production' ? '1d' : 0,
+  maxAge: process.env.NODE_ENV === 'production' ? '1h' : 0,
   etag: true,
 }));
 app.use(express.json({ limit: '100kb' }));
