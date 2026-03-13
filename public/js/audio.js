@@ -28,6 +28,7 @@ const AudioEngine = {
       this.voGain.connect(this.masterGain);
       this.masterGain.connect(this.ctx.destination);
 
+      this.loadVolumes();
       this.setVolumes();
       console.log('🔊 Audio engine initialized');
     } catch (e) {
@@ -53,6 +54,7 @@ const AudioEngine = {
   setVolume(type, val) {
     this.volumes[type] = Math.max(0, Math.min(1, val));
     this.setVolumes();
+    this.saveVolumes();
   },
 
   // ─── Note helper ───
@@ -363,6 +365,64 @@ const AudioEngine = {
       osc.start(t);
       osc.stop(t + 0.3);
     } catch (e) { /* تجاهل أخطاء الصوت */ }
+  },
+
+  // ═══ Music Ducking ═══
+  // Temporarily lower music volume during reveals/voice
+
+  duck(duration) {
+    if (!this.enabled || !this.ctx || !this.musicGain) return;
+    try {
+      const t = this.ctx.currentTime;
+      const originalVol = this.volumes.music;
+      this.musicGain.gain.setValueAtTime(originalVol, t);
+      this.musicGain.gain.linearRampToValueAtTime(originalVol * 0.15, t + 0.2);
+      this.musicGain.gain.setValueAtTime(originalVol * 0.15, t + (duration || 2) - 0.3);
+      this.musicGain.gain.linearRampToValueAtTime(originalVol, t + (duration || 2));
+    } catch (e) {}
+  },
+
+  // ═══ Per-Game Reveal Stings ═══
+
+  revealSting(game) {
+    if (!this.enabled || !this.ctx) return;
+    this.duck(1.5);
+    var stings = {
+      quiplash:     [523, 659, 784, 1047, 1319],
+      triviamurder: [220, 277, 330, 440, 554],
+      fibbage:      [392, 494, 587, 784],
+      guesspionage: [330, 392, 494, 659],
+      fakinit:      [349, 440, 523, 659, 784],
+      courtroom:    [261, 330, 392, 523],
+      splittheroom: [311, 392, 494, 622],
+    };
+    var notes = stings[game] || [523, 659, 784, 1047];
+    var self = this;
+    notes.forEach(function(n, i) {
+      self.playNote(n, 0.18, 'sine', self.sfxGain, 0.25, i * 0.07);
+    });
+    this.playNoise(0.08, this.sfxGain, 0.06, notes.length * 0.07);
+  },
+
+  // ═══ Volume Persistence ═══
+
+  saveVolumes() {
+    try {
+      localStorage.setItem('abuabed_volumes', JSON.stringify(this.volumes));
+    } catch (e) {}
+  },
+
+  loadVolumes() {
+    try {
+      var saved = localStorage.getItem('abuabed_volumes');
+      if (saved) {
+        var parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object') {
+          this.volumes = Object.assign(this.volumes, parsed);
+          this.setVolumes();
+        }
+      }
+    } catch (e) {}
   },
 
   // ═══ Background Music (procedural loops) ═══
