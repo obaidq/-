@@ -319,15 +319,20 @@
   --theme-text-primary: var(--color-neutral-white);
   --theme-text-secondary: var(--color-neutral-300);
   --theme-pattern: none;
-  /* Saudi cultural colors */
-  --saudi-green: #009000;
-  --saudi-gold: #FFD700;
-  --desert-sand: #F5E6CA;
-  /* Brand personality colors */
+  /* Brand colors */
   --brand-emerald: #00D68F;
-  --brand-gold: #FFB347;
+  --brand-gold: #D4AF37;
   --brand-coral: #FF6B6B;
   --brand-electric: #00E5FF;
+
+  /* Hub/Menu warm palette (majlis-inspired warmth) */
+  --hub-bg: radial-gradient(circle at 50% 20%, rgba(255,179,71,0.22), rgba(26,26,46,1) 60%),
+            linear-gradient(180deg, #0B1020, #1A1A2E 55%, #0B1020);
+  --hub-pattern-opacity: 0.06;
+  --hub-text: #F5F0E8;
+  --hub-gold: #C9A96E;
+  --hub-green: #00BFA5;
+  --hub-amber: #FFB347;
 }
 
 /* ═══════════════════════════════════════════════════════════════
