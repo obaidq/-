@@ -533,6 +533,8 @@
   background: linear-gradient(135deg, #C8A951, #A08030);
   color: #000;
 }
+[data-theme="guesspionage"] .vote-option { background: rgba(0,230,118,0.08); border-color: rgba(0,230,118,0.25); }
+[data-theme="guesspionage"] .vote-option:hover { border-color: #00E676; box-shadow: 0 0 20px rgba(0,230,118,0.2); }
 
 [data-theme="guesspionage"] .percent-display {
   color: #C8A951;
@@ -584,6 +586,8 @@
   background: linear-gradient(135deg, #E8A317, #CC7722);
   color: #000;
 }
+[data-theme="fakinit"] .vote-option { background: rgba(196,149,58,0.08); border-color: rgba(196,149,58,0.25); }
+[data-theme="fakinit"] .vote-option:hover { border-color: #C4953A; box-shadow: 0 0 20px rgba(196,149,58,0.2); }
 
 /* Faker reveal panel - dramatic henna red */
 [data-theme="fakinit"] .panel--faker {
@@ -642,6 +646,8 @@
   background: linear-gradient(135deg, #8B2252, #5C0A30);
   color: #F5E6CC;
 }
+[data-theme="triviamurder"] .vote-option { background: rgba(58,186,180,0.08); border-color: rgba(58,186,180,0.25); }
+[data-theme="triviamurder"] .vote-option:hover { border-color: #3ABAB4; box-shadow: 0 0 20px rgba(58,186,180,0.2); }
 
 [data-theme="triviamurder"] .btn--secondary {
   background: rgba(139,34,82,0.15);
@@ -766,6 +772,8 @@
   background: linear-gradient(135deg, #00BFA5, #009688);
   color: #000;
 }
+[data-theme="drawful"] .vote-option { background: rgba(197,165,90,0.08); border-color: rgba(197,165,90,0.25); }
+[data-theme="drawful"] .vote-option:hover { border-color: #C5A55A; box-shadow: 0 0 20px rgba(197,165,90,0.2); }
 
 /* Drawing canvas area */
 [data-theme="drawful"] .drawing-canvas {
@@ -873,6 +881,8 @@
   background: linear-gradient(135deg, #C2185B, #FF4081);
   box-shadow: 0 4px 15px rgba(255, 64, 129, 0.3);
 }
+[data-theme="trynottolol"] .vote-option { background: rgba(255,215,0,0.08); border-color: rgba(255,64,129,0.25); }
+[data-theme="trynottolol"] .vote-option:hover { border-color: #FF4081; box-shadow: 0 0 20px rgba(255,64,129,0.2); }
 [data-theme="trynottolol"] .vote-option--player {
   border-color: rgba(255, 128, 171, 0.2);
   background: rgba(46, 0, 41, 0.6);
