@@ -123,9 +123,9 @@ body {
   pointer-events: none;
   opacity: var(--intensity-glow-opacity, 0.3);
   background:
-    radial-gradient(ellipse 60% 40% at 20% 20%, var(--theme-glow, rgba(0,214,143,0.25)) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 20% 20%, var(--theme-glow, rgba(253,212,37,0.25)) 0%, transparent 70%),
     radial-gradient(ellipse 50% 35% at 80% 80%, var(--theme-glow, rgba(255,179,71,0.12)) 0%, transparent 70%),
-    radial-gradient(ellipse 40% 30% at 50% 50%, rgba(0,214,143,0.06) 0%, transparent 60%);
+    radial-gradient(ellipse 40% 30% at 50% 50%, rgba(253,212,37,0.06) 0%, transparent 60%);
   animation: glow-drift var(--intensity-pulse-speed, 4s) ease-in-out infinite alternate;
   will-change: opacity;
   transition: opacity 0.5s ease;
@@ -601,7 +601,7 @@ body {
  * ───────────────────────────────────────────────────────────── */
 
 :focus-visible {
-  outline: 3px solid var(--theme-accent, #00E676);
+  outline: 3px solid var(--theme-accent, #FDD425);
   outline-offset: 2px;
 }
 
@@ -611,7 +611,7 @@ body {
 .avatar-option:focus-visible,
 .avatar-tab:focus-visible,
 .emoji-btn:focus-visible {
-  outline: 3px solid var(--theme-accent, #00E676);
+  outline: 3px solid var(--theme-accent, #FDD425);
   outline-offset: 3px;
   box-shadow: 0 0 0 6px rgba(0, 230, 118, 0.15);
 }
@@ -624,7 +624,7 @@ body {
 
 /* Input focus-visible fallback */
 .input:focus-visible {
-  outline: 3px solid var(--theme-accent, #00E676);
+  outline: 3px solid var(--theme-accent, #FDD425);
   outline-offset: -1px;
 }
 
