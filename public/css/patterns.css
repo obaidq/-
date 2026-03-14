@@ -939,6 +939,8 @@
 [data-theme="wouldyourather"] .game-footer { background: linear-gradient(90deg, rgba(26,14,0,0.9), rgba(61,31,0,0.9)); border-top: 3px solid rgba(255,193,7,0.3); }
 [data-theme="wouldyourather"] .panel { background: rgba(40,20,0,0.8); border-color: rgba(255,193,7,0.25); }
 [data-theme="wouldyourather"] .btn--primary { background: linear-gradient(135deg, #FFC107, #FFD54F); color: #000; box-shadow: 0 6px 0 #c79100, 0 8px 20px rgba(255,193,7,0.3); }
+[data-theme="wouldyourather"] .vote-option { background: rgba(255,193,7,0.08); border-color: rgba(255,193,7,0.25); }
+[data-theme="wouldyourather"] .vote-option:hover { border-color: #FFC107; box-shadow: 0 0 20px rgba(255,193,7,0.2); }
 
 [data-theme="whosaidit"] {
   --theme-bg-primary: #0a1628; --theme-bg-secondary: #152238;
@@ -951,6 +953,8 @@
 [data-theme="whosaidit"] .game-footer { background: linear-gradient(90deg, rgba(10,22,40,0.9), rgba(21,34,56,0.9)); border-top: 3px solid rgba(66,165,245,0.3); }
 [data-theme="whosaidit"] .panel { background: rgba(15,28,48,0.8); border-color: rgba(66,165,245,0.25); }
 [data-theme="whosaidit"] .btn--primary { background: linear-gradient(135deg, #42A5F5, #90CAF9); color: #000; box-shadow: 0 6px 0 #1565C0, 0 8px 20px rgba(66,165,245,0.3); }
+[data-theme="whosaidit"] .vote-option { background: rgba(255,184,0,0.08); border-color: rgba(255,184,0,0.25); }
+[data-theme="whosaidit"] .vote-option:hover { border-color: #FFB800; box-shadow: 0 0 20px rgba(255,184,0,0.2); }
 
 [data-theme="speedround"] {
   --theme-bg-primary: #1a0500; --theme-bg-secondary: #3d0c00;
@@ -963,6 +967,8 @@
 [data-theme="speedround"] .game-footer { background: linear-gradient(90deg, rgba(26,5,0,0.9), rgba(61,12,0,0.9)); border-top: 3px solid rgba(255,61,0,0.4); }
 [data-theme="speedround"] .panel { background: rgba(35,8,0,0.8); border-color: rgba(255,61,0,0.3); }
 [data-theme="speedround"] .btn--primary { background: linear-gradient(135deg, #FF3D00, #FF6E40); color: #fff; box-shadow: 0 6px 0 #BF360C, 0 8px 20px rgba(255,61,0,0.3); }
+[data-theme="speedround"] .vote-option { background: rgba(255,23,68,0.08); border-color: rgba(255,23,68,0.25); }
+[data-theme="speedround"] .vote-option:hover { border-color: #FF1744; box-shadow: 0 0 20px rgba(255,23,68,0.25); }
 
 [data-theme="backseatgamer"] {
   --theme-bg-primary: #1A1A2E; --theme-bg-secondary: #0D0D1A;
@@ -975,6 +981,8 @@
 [data-theme="backseatgamer"] .game-footer { background: linear-gradient(90deg, rgba(26,26,46,0.9), rgba(13,13,26,0.9)); border-top: 3px solid rgba(230,57,70,0.3); }
 [data-theme="backseatgamer"] .panel { background: rgba(18,18,35,0.8); border-color: rgba(230,57,70,0.25); }
 [data-theme="backseatgamer"] .btn--primary { background: linear-gradient(135deg, #E63946, #F4D35E); color: #000; box-shadow: 0 6px 0 #9B1B24, 0 8px 20px rgba(230,57,70,0.3); }
+[data-theme="backseatgamer"] .vote-option { background: rgba(230,57,70,0.08); border-color: rgba(230,57,70,0.25); }
+[data-theme="backseatgamer"] .vote-option:hover { border-color: #E63946; box-shadow: 0 0 20px rgba(230,57,70,0.2); }
 
 [data-theme="splittheroom"] {
   --theme-bg-primary: #0e0a1a; --theme-bg-secondary: #1f153d;
@@ -987,6 +995,8 @@
 [data-theme="splittheroom"] .game-footer { background: linear-gradient(90deg, rgba(14,10,26,0.9), rgba(31,21,61,0.9)); border-top: 3px solid rgba(124,77,255,0.3); }
 [data-theme="splittheroom"] .panel { background: rgba(20,15,40,0.8); border-color: rgba(124,77,255,0.25); }
 [data-theme="splittheroom"] .btn--primary { background: linear-gradient(135deg, #7C4DFF, #B388FF); color: #fff; box-shadow: 0 6px 0 #4527A0, 0 8px 20px rgba(124,77,255,0.3); }
+[data-theme="splittheroom"] .vote-option { background: rgba(123,47,190,0.08); border-color: rgba(123,47,190,0.25); }
+[data-theme="splittheroom"] .vote-option:hover { border-color: #7B2FBE; box-shadow: 0 0 20px rgba(123,47,190,0.25); }
 
 [data-theme="courtroom"] {
   --theme-bg-primary: #1A1205; --theme-bg-secondary: #2D1F0A;
@@ -999,6 +1009,8 @@
 [data-theme="courtroom"] .game-footer { background: linear-gradient(90deg, rgba(26,18,5,0.9), rgba(45,31,10,0.9)); border-top: 3px solid rgba(212,175,55,0.3); }
 [data-theme="courtroom"] .panel { background: rgba(30,22,8,0.8); border-color: rgba(212,175,55,0.25); }
 [data-theme="courtroom"] .btn--primary { background: linear-gradient(135deg, #D4AF37, #FFD54F); color: #000; box-shadow: 0 6px 0 #8D6E23, 0 8px 20px rgba(212,175,55,0.3); }
+[data-theme="courtroom"] .vote-option { background: rgba(212,175,55,0.08); border-color: rgba(212,175,55,0.25); }
+[data-theme="courtroom"] .vote-option:hover { border-color: #D4AF37; box-shadow: 0 0 20px rgba(212,175,55,0.2); }
 
 [data-theme="debateme"] {
   --theme-bg-primary: #0f1114; --theme-bg-secondary: #1c2024;
@@ -1011,6 +1023,8 @@
 [data-theme="debateme"] .game-footer { background: linear-gradient(90deg, rgba(15,17,20,0.9), rgba(28,32,36,0.9)); border-top: 3px solid rgba(120,144,156,0.3); }
 [data-theme="debateme"] .panel { background: rgba(20,22,26,0.8); border-color: rgba(120,144,156,0.25); }
 [data-theme="debateme"] .btn--primary { background: linear-gradient(135deg, #78909C, #B0BEC5); color: #000; box-shadow: 0 6px 0 #455A64, 0 8px 20px rgba(120,144,156,0.3); }
+[data-theme="debateme"] .vote-option { background: rgba(201,169,110,0.08); border-color: rgba(201,169,110,0.25); }
+[data-theme="debateme"] .vote-option:hover { border-color: #C9A96E; box-shadow: 0 0 20px rgba(201,169,110,0.2); }
 
 [data-theme="punishmentwheel"] {
   --theme-bg-primary: #2E0A0A; --theme-bg-secondary: #4A0E0E;
@@ -1023,6 +1037,8 @@
 [data-theme="punishmentwheel"] .game-footer { background: linear-gradient(90deg, rgba(46,10,10,0.9), rgba(74,14,14,0.9)); border-top: 3px solid rgba(255,68,68,0.4); }
 [data-theme="punishmentwheel"] .panel { background: rgba(50,12,12,0.8); border-color: rgba(255,68,68,0.3); }
 [data-theme="punishmentwheel"] .btn--primary { background: linear-gradient(135deg, #FF4444, #FF8A80); color: #fff; box-shadow: 0 6px 0 #B71C1C, 0 8px 20px rgba(255,68,68,0.3); }
+[data-theme="punishmentwheel"] .vote-option { background: rgba(255,68,68,0.08); border-color: rgba(255,68,68,0.25); }
+[data-theme="punishmentwheel"] .vote-option:hover { border-color: #FF4444; box-shadow: 0 0 20px rgba(255,68,68,0.25); }
 
 [data-theme="lovemonster"] {
   --theme-bg-primary: #1C0A2E; --theme-bg-secondary: #2D1B4E;
