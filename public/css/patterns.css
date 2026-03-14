@@ -953,12 +953,12 @@
 [data-theme="speedround"] .bg { background: linear-gradient(135deg, #1a0500 0%, #3d0c00 50%, #1a0500 100%); }
 
 [data-theme="backseatgamer"] {
-  --theme-bg-primary: #0D1B2A; --theme-bg-secondary: #1B2838;
-  --theme-accent: #00E5FF; --theme-text-primary: #fff; --theme-text-secondary: #80DEEA;
-  --theme-glow: rgba(0,229,255,0.4); --theme-card-bg: rgba(0,229,255,0.08);
-  --theme-card-border: rgba(0,229,255,0.3);
+  --theme-bg-primary: #1A1A2E; --theme-bg-secondary: #0D0D1A;
+  --theme-accent: #E63946; --theme-text-primary: #fff; --theme-text-secondary: #F4D35E;
+  --theme-glow: rgba(230,57,70,0.4); --theme-card-bg: rgba(230,57,70,0.08);
+  --theme-card-border: rgba(230,57,70,0.3);
 }
-[data-theme="backseatgamer"] .bg { background: linear-gradient(135deg, #0D1B2A 0%, #1B2838 50%, #0D1B2A 100%); }
+[data-theme="backseatgamer"] .bg { background: linear-gradient(135deg, #1A1A2E 0%, #0D0D1A 50%, #1A1A2E 100%); }
 
 [data-theme="splittheroom"] {
   --theme-bg-primary: #0e0a1a; --theme-bg-secondary: #1f153d;
@@ -991,6 +991,48 @@
   --theme-card-border: rgba(255,68,68,0.3);
 }
 [data-theme="punishmentwheel"] .bg { background: linear-gradient(135deg, #2E0A0A 0%, #4A0E0E 50%, #2E0A0A 100%); }
+
+[data-theme="lovemonster"] {
+  --theme-bg-primary: #1C0A2E; --theme-bg-secondary: #2D1B4E;
+  --theme-accent: #FF1493; --theme-text-primary: #fff; --theme-text-secondary: #FFB6C1;
+  --theme-glow: rgba(255,20,147,0.4); --theme-card-bg: rgba(255,20,147,0.08);
+  --theme-card-border: rgba(255,20,147,0.3);
+}
+[data-theme="lovemonster"] .bg { background: linear-gradient(180deg, #1C0A2E 0%, #2D1B4E 50%, #1C0A2E 100%); }
+[data-theme="lovemonster"] .game-hud { background: linear-gradient(90deg, rgba(45,27,78,0.9), rgba(28,10,46,0.9)); border-bottom: 3px solid rgba(255,20,147,0.3); }
+[data-theme="lovemonster"] .game-footer { background: linear-gradient(90deg, rgba(28,10,46,0.9), rgba(45,27,78,0.9)); border-top: 3px solid rgba(255,20,147,0.3); }
+[data-theme="lovemonster"] .panel { background: rgba(35,15,55,0.8); border-color: rgba(255,20,147,0.3); box-shadow: 0 0 30px rgba(255,20,147,0.1); }
+[data-theme="lovemonster"] .btn--primary { background: linear-gradient(135deg, #FF1493, #FF69B4); color: #fff; box-shadow: 0 6px 0 #B8004A, 0 8px 20px rgba(255,20,147,0.3); }
+[data-theme="lovemonster"] .vote-option { background: rgba(255,20,147,0.08); border-color: rgba(255,20,147,0.25); }
+[data-theme="lovemonster"] .vote-option:hover { border-color: #FF1493; box-shadow: 0 0 25px rgba(255,20,147,0.3); }
+
+[data-theme="emojidecode"] {
+  --theme-bg-primary: #0A0A1A; --theme-bg-secondary: #1A1A2E;
+  --theme-accent: #FF00FF; --theme-text-primary: #fff; --theme-text-secondary: #00FFFF;
+  --theme-glow: rgba(255,0,255,0.5); --theme-card-bg: rgba(255,0,255,0.08);
+  --theme-card-border: rgba(255,0,255,0.3);
+}
+[data-theme="emojidecode"] .bg { background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,0,255,0.03) 2px, rgba(255,0,255,0.03) 4px), linear-gradient(180deg, #0A0A1A 0%, #1A1A2E 50%, #0A0A1A 100%); }
+[data-theme="emojidecode"] .game-hud { background: linear-gradient(90deg, rgba(26,26,46,0.95), rgba(10,10,26,0.95)); border-bottom: 3px solid rgba(255,0,255,0.4); box-shadow: 0 0 15px rgba(255,0,255,0.1); }
+[data-theme="emojidecode"] .game-footer { background: linear-gradient(90deg, rgba(10,10,26,0.95), rgba(26,26,46,0.95)); border-top: 3px solid rgba(255,0,255,0.4); box-shadow: 0 0 15px rgba(0,255,255,0.08); }
+[data-theme="emojidecode"] .panel { background: rgba(20,20,40,0.9); border-color: rgba(255,0,255,0.35); box-shadow: 0 0 25px rgba(255,0,255,0.15); }
+[data-theme="emojidecode"] .btn--primary { background: linear-gradient(135deg, #FF00FF, #00FFFF); color: #000; box-shadow: 0 6px 0 #008080, 0 8px 20px rgba(255,0,255,0.4); }
+[data-theme="emojidecode"] .vote-option { background: rgba(255,0,255,0.1); border-color: rgba(0,255,255,0.35); }
+[data-theme="emojidecode"] .vote-option:hover { border-color: #FF00FF; box-shadow: 0 0 30px rgba(255,0,255,0.4), 0 0 15px rgba(0,255,255,0.25); }
+
+[data-theme="acrophobia"] {
+  --theme-bg-primary: #2D5F3A; --theme-bg-secondary: #1A472A;
+  --theme-accent: #F5F0EB; --theme-text-primary: #fff; --theme-text-secondary: #D4B59F;
+  --theme-glow: rgba(245,240,235,0.3); --theme-card-bg: rgba(139,105,20,0.08);
+  --theme-card-border: rgba(139,105,20,0.3);
+}
+[data-theme="acrophobia"] .bg { background: linear-gradient(135deg, rgba(200,16,46,0.05) 0%, transparent 50%), linear-gradient(180deg, #2D5F3A 0%, #1A472A 50%, #2D5F3A 100%); }
+[data-theme="acrophobia"] .game-hud { background: linear-gradient(90deg, rgba(26,71,42,0.9), rgba(45,95,58,0.9)); border-bottom: 3px solid rgba(139,105,20,0.3); }
+[data-theme="acrophobia"] .game-footer { background: linear-gradient(90deg, rgba(45,95,58,0.9), rgba(26,71,42,0.9)); border-top: 3px solid rgba(139,105,20,0.3); }
+[data-theme="acrophobia"] .panel { background: rgba(30,55,40,0.8); border-color: rgba(139,105,20,0.25); box-shadow: 0 0 20px rgba(245,240,235,0.08); }
+[data-theme="acrophobia"] .btn--primary { background: linear-gradient(135deg, #8B6914, #C8102E); color: #F5F0EB; box-shadow: 0 6px 0 #5C4409, 0 8px 20px rgba(139,105,20,0.3); }
+[data-theme="acrophobia"] .vote-option { background: rgba(245,240,235,0.08); border-color: rgba(139,105,20,0.25); }
+[data-theme="acrophobia"] .vote-option:hover { border-color: #8B6914; box-shadow: 0 0 20px rgba(139,105,20,0.2); }
 
 /* ═══════════════════════════════════════════════════════════════
  * RESULTS / VICTORY THEME - شاشة الفوز 🏆
