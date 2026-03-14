@@ -40,7 +40,10 @@ const GAMES = {
   splittheroom:   { icon: '🔀', name: 'سبليت ذا روم',    hint: 'اقسم الغرفة!',                     pattern: 'pattern-halftone' },
   courtroom:      { icon: '👨‍⚖️', name: 'المحكمة الكبرى',  hint: 'ادّعي أو دافع!',                   pattern: 'pattern-noise' },
   debateme:       { icon: '⚖️', name: 'المحكمة',         hint: 'قنع الباقين برأيك!',               pattern: 'pattern-spotlight' },
-  punishmentwheel:{ icon: '🎡', name: 'عجلة العقاب',     hint: 'جاوب صح أو انعاقب!',               pattern: 'pattern-triangles' }
+  punishmentwheel:{ icon: '🎡', name: 'عجلة العقاب',     hint: 'جاوب صح أو انعاقب!',               pattern: 'pattern-triangles' },
+  lovemonster:    { icon: '👹', name: 'الوحش العاشق',    hint: 'اصنع وحشك واكسب القلوب!',          pattern: 'pattern-dots' },
+  emojidecode:    { icon: '🔮', name: 'فك الإيموجي',     hint: 'خمّن من الإيموجيات!',               pattern: 'pattern-matrix' },
+  acrophobia:     { icon: '📝', name: 'أكروفوبيا',       hint: 'كوّن أفضل جملة!',                  pattern: 'pattern-grid' }
 };
 
 const DRAW_COLORS = ['#000000', '#ff0000', '#0066ff', '#00aa00', '#ff8800', '#9900cc', '#ff69b4', '#8B4513', '#FFD700', '#00CED1', '#808080', '#ffffff'];
@@ -351,6 +354,8 @@ const App = {
         case 'submitTkoSlogans': this.submitTkoSlogans(); break;
         case 'chooseTkoSlogan': this.chooseTkoSlogan(target.getAttribute('data-slogan'), target); break;
         case 'submitFinalHL': this.submitFinalHL(target.getAttribute('data-hl'), target); break;
+        case 'selectMonsterTrait': this.selectMonsterTrait(undefined, target); break;
+        case 'submitMonster': this.submitMonster(); break;
       }
     });
 
@@ -719,6 +724,15 @@ const App = {
 
     // ── عجلة العقاب (Punishment Wheel) ──
     s.on('punishmentWheelQuestion', data => this.handlePunishmentWheelQuestion(data));
+
+    s.on('loveMonsterCreate', data => this.handleLoveMonsterCreate(data));
+    s.on('loveMonsterVoting', data => this.handleLoveMonsterVoting(data));
+
+    s.on('emojiDecodeQuestion', data => this.handleEmojiDecodeQuestion(data));
+    s.on('emojiDecodePuzzleResult', data => this.handleEmojiDecodePuzzleResult(data));
+
+    s.on('acrophobiaPrompt', data => this.handleAcrophobiaPrompt(data));
+    s.on('acrophobiaVoting', data => this.handleAcrophobiaVoting(data));
 
     // ── Host Controls ──
     s.on('gamePaused', data => {
@@ -3288,6 +3302,199 @@ const App = {
   },
 
   // ═══════════════════════════════════════════════════════════════
+  // 👹 الوحش العاشق (Love Monster)
+  // ═══════════════════════════════════════════════════════════════
+
+  handleLoveMonsterCreate(d) {
+    this._submitting = false;
+    this.showScreen('gameScreen');
+    this.setTheme('lovemonster');
+    this.showRoundInfo(d.round, d.maxRounds, '👹 الوحش العاشق');
+    this.startTimer(d.timeLimit);
+    this.setHint('اصنع وحشك!');
+
+    let traitsHtml = '';
+    if (d.traits && d.traits.length) {
+      d.traits.forEach((cat, ci) => {
+        traitsHtml +=
+          '<div class="mb-3">' +
+            '<div class="text-sm font-bold mb-1">' + escapeHtml(cat.category) + '</div>' +
+            '<div class="flex flex-wrap gap-2" id="traitGroup' + ci + '">';
+        cat.options.forEach(opt => {
+          traitsHtml += '<button class="btn btn--sm btn--outline monster-trait-btn" data-action="selectMonsterTrait" data-group="' + ci + '" data-trait="' + escapeHtml(opt) + '">' + escapeHtml(opt) + '</button>';
+        });
+        traitsHtml += '</div></div>';
+      });
+    }
+
+    document.getElementById('gameContent').innerHTML =
+      '<div class="panel" style="max-width:600px">' +
+        '<div class="badge badge--pink mb-4">👹 اصنع وحشك العاشق!</div>' +
+        '<p class="text-lg font-bold mb-4">' + escapeHtml(d.prompt) + '</p>' +
+        traitsHtml +
+        '<textarea class="input input--game input--textarea mt-3" id="monsterMessage" placeholder="اكتب رسالة حب من وحشك..." maxlength="200" rows="2"></textarea>' +
+        '<button class="btn btn--primary btn--lg mt-3 w-full" data-action="submitMonster">💕 أرسل وحشك</button>' +
+        '<p class="text-muted mt-2" id="waitingCount"></p>' +
+      '</div>';
+
+    this._monsterTraits = {};
+  },
+
+  selectMonsterTrait(_, el) {
+    const group = el.dataset.group;
+    const trait = el.dataset.trait;
+    // Deselect others in same group
+    document.querySelectorAll('#traitGroup' + group + ' .monster-trait-btn').forEach(b => b.classList.remove('btn--selected'));
+    el.classList.add('btn--selected');
+    this._monsterTraits = this._monsterTraits || {};
+    this._monsterTraits[group] = trait;
+  },
+
+  submitMonster() {
+    if (this._submitting) return;
+    this._submitting = true;
+    AudioEngine.vote();
+    const message = (document.getElementById('monsterMessage') || {}).value || '';
+    const answer = JSON.stringify({ traits: this._monsterTraits || {}, message });
+    this.socket.emit('submitAnswer', { code: this.currentRoom, answer });
+    this.showWaitingScreen('وحشك في الطريق... 👹');
+  },
+
+  handleLoveMonsterVoting(d) {
+    this._submitting = false;
+    this.showScreen('gameScreen');
+    this.setTheme('lovemonster');
+    this.showRoundInfo(d.round, d.maxRounds, '👹 صوّت لأحلى وحش!');
+    this.startTimer(d.timeLimit);
+    this.setHint('اختر الوحش اللي سرق قلبك!');
+
+    let html = '<div class="panel" style="max-width:600px">' +
+      '<div class="badge badge--pink mb-4">💕 ' + escapeHtml(d.prompt) + '</div>' +
+      '<div class="flex flex-col gap-3">';
+
+    d.monsters.forEach(m => {
+      const traitsList = Object.values(m.traits || {}).filter(Boolean).join(' • ');
+      html +=
+        '<button class="vote-option" data-action="voteAnswer" data-id="' + m.id + '">' +
+          '<div class="font-bold">' + escapeHtml(m.message || '...') + '</div>' +
+          (traitsList ? '<div class="text-sm text-muted">' + escapeHtml(traitsList) + '</div>' : '') +
+        '</button>';
+    });
+
+    html += '</div><p class="text-muted mt-3" id="waitingCount"></p></div>';
+    document.getElementById('gameContent').innerHTML = html;
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 🔮 فك الإيموجي (Emoji Decode)
+  // ═══════════════════════════════════════════════════════════════
+
+  handleEmojiDecodeQuestion(d) {
+    this._submitting = false;
+    this.showScreen('gameScreen');
+    this.setTheme('emojidecode');
+    this.showRoundInfo(d.round, d.maxRounds, '🔮 فك الإيموجي (' + d.puzzleNum + '/' + d.totalPuzzles + ')');
+    this.startTimer(d.timeLimit);
+    this.setHint('خمّن بسرعة!');
+
+    document.getElementById('gameContent').innerHTML =
+      '<div class="panel" style="max-width:600px">' +
+        '<div class="badge badge--neon mb-4">🔮 لغز ' + d.puzzleNum + ' من ' + d.totalPuzzles + '</div>' +
+        (d.category ? '<span class="game-tag mb-3">' + escapeHtml(d.category) + '</span>' : '') +
+        '<div class="emoji-decode-emojis" style="font-size:4rem;letter-spacing:0.3em;margin:1.5rem 0">' + d.emojis + '</div>' +
+        '<div class="speed-input-wrap">' +
+          '<input type="text" class="input input--game" id="answerInput" placeholder="وش هذا؟..." maxlength="80" autocomplete="off">' +
+          '<button class="btn btn--primary btn--lg" data-action="submitAnswer">🔮</button>' +
+        '</div>' +
+        '<p class="text-muted mt-2" id="waitingCount"></p>' +
+      '</div>';
+
+    const input = document.getElementById('answerInput');
+    if (input) {
+      input.focus();
+      input.addEventListener('keypress', e => {
+        if (e.key === 'Enter') this.submitAnswer();
+      });
+    }
+  },
+
+  handleEmojiDecodePuzzleResult(d) {
+    clearInterval(this.gameTimer);
+    AudioEngine.reveal();
+
+    let html =
+      '<div class="panel" style="max-width:600px">' +
+        '<div class="emoji-decode-emojis" style="font-size:3rem;letter-spacing:0.3em;margin-bottom:1rem">' + d.emojis + '</div>' +
+        '<div class="text-2xl font-bold mb-2" style="color:var(--theme-accent)">' + escapeHtml(d.correctAnswer) + '</div>' +
+        (d.category ? '<span class="game-tag mb-3">' + escapeHtml(d.category) + '</span>' : '');
+
+    if (d.puzzleResults && d.puzzleResults.length) {
+      html += '<div class="flex flex-col gap-2 mt-3" style="max-width:400px;width:100%">';
+      d.puzzleResults.filter(r => r.isCorrect).forEach((r, i) => {
+        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '✅';
+        html += '<div class="result-row"><span>' + medal + ' ' + bdiName(r.playerName) + '</span><span style="color:#D4AF37">+' + r.points + '</span></div>';
+      });
+      html += '</div>';
+    }
+
+    html += '<p class="text-muted mt-3">اللغز الجاي قريب...</p></div>';
+    document.getElementById('gameContent').innerHTML = html;
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 📝 أكروفوبيا (Acrophobia)
+  // ═══════════════════════════════════════════════════════════════
+
+  handleAcrophobiaPrompt(d) {
+    this._submitting = false;
+    this.showScreen('gameScreen');
+    this.setTheme('acrophobia');
+    this.showRoundInfo(d.round, d.maxRounds, '📝 أكروفوبيا');
+    this.startTimer(d.timeLimit);
+    this.setHint('كوّن جملة تبدأ كلماتها بالحروف!');
+
+    const lettersHtml = d.letters.map(l => '<span class="acro-letter" style="display:inline-block;font-size:2.5rem;font-weight:bold;margin:0 0.3rem;color:var(--theme-accent)">' + l + '</span>').join('');
+
+    document.getElementById('gameContent').innerHTML =
+      '<div class="panel" style="max-width:600px">' +
+        '<div class="badge badge--success mb-4">📝 كوّن جملة!</div>' +
+        '<div class="mb-3">' + lettersHtml + '</div>' +
+        '<span class="game-tag mb-4">' + escapeHtml(d.category) + '</span>' +
+        '<textarea class="input input--game input--textarea" id="answerInput" placeholder="اكتب جملة تبدأ كلماتها بالحروف..." maxlength="200" rows="3"></textarea>' +
+        '<button class="btn btn--primary btn--lg mt-3 w-full" data-action="submitAnswer">📝 أرسل</button>' +
+        '<p class="text-muted mt-2" id="waitingCount"></p>' +
+      '</div>';
+
+    const input = document.getElementById('answerInput');
+    if (input) input.focus();
+  },
+
+  handleAcrophobiaVoting(d) {
+    this._submitting = false;
+    this.showScreen('gameScreen');
+    this.setTheme('acrophobia');
+    this.showRoundInfo(d.round, d.maxRounds, '📝 صوّت لأفضل جملة!');
+    this.startTimer(d.timeLimit);
+    this.setHint('اختر الجملة اللي عجبتك!');
+
+    const lettersHtml = d.letters.map(l => '<span style="font-size:1.5rem;font-weight:bold;margin:0 0.2rem;color:var(--theme-accent)">' + l + '</span>').join('');
+
+    let html = '<div class="panel" style="max-width:600px">' +
+      '<div class="mb-3">' + lettersHtml + '</div>' +
+      '<span class="game-tag mb-3">' + escapeHtml(d.category) + '</span>' +
+      '<div class="flex flex-col gap-3">';
+
+    d.entries.forEach(e => {
+      html += '<button class="vote-option" data-action="voteAnswer" data-id="' + e.id + '">' +
+        '<div class="font-bold">' + escapeHtml(e.text) + '</div>' +
+      '</button>';
+    });
+
+    html += '</div><p class="text-muted mt-3" id="waitingCount"></p></div>';
+    document.getElementById('gameContent').innerHTML = html;
+  },
+
+  // ═══════════════════════════════════════════════════════════════
   // 🎮 Host Controls (إيقاف، تخطي، طرد)
   // ═══════════════════════════════════════════════════════════════
 
@@ -4320,6 +4527,50 @@ const App = {
             '</div>';
           AudioEngine.buzzer && AudioEngine.buzzer();
         }
+        break;
+      }
+
+      case 'lovemonster': {
+        resultHtml = '<div class="text-center">' +
+          '<div class="badge badge--pink mb-4">👹 ' + escapeHtml(d.prompt || '') + '</div>';
+        if (d.playerResults) {
+          resultHtml += this._renderResultsList(d.playerResults.map(r => ({
+            name: r.playerName,
+            text: r.message || Object.values(r.traits || {}).filter(Boolean).join(' • '),
+            points: r.points,
+            detail: r.votes + ' أصوات'
+          })));
+        }
+        resultHtml += '</div>';
+        break;
+      }
+
+      case 'emojidecode': {
+        resultHtml = '<div class="text-center">' +
+          '<div class="badge badge--neon mb-4">🔮 نتائج الجولة</div>';
+        if (d.playerResults) {
+          resultHtml += this._renderResultsList(d.playerResults.map(r => ({
+            name: r.playerName,
+            points: r.points
+          })));
+        }
+        resultHtml += '</div>';
+        break;
+      }
+
+      case 'acrophobia': {
+        const lettersStr = (d.letters || []).join(' ');
+        resultHtml = '<div class="text-center">' +
+          '<div class="badge badge--success mb-4">📝 ' + escapeHtml(lettersStr) + ' — ' + escapeHtml(d.category || '') + '</div>';
+        if (d.playerResults) {
+          resultHtml += this._renderResultsList(d.playerResults.map(r => ({
+            name: r.playerName,
+            text: r.text,
+            points: r.points,
+            detail: r.votes + ' أصوات'
+          })));
+        }
+        resultHtml += '</div>';
         break;
       }
 
