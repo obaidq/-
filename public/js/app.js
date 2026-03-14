@@ -41,9 +41,9 @@ const GAMES = {
   courtroom:      { icon: '👨‍⚖️', name: 'المحكمة الكبرى',  hint: 'ادّعي أو دافع!',                   pattern: 'pattern-noise' },
   debateme:       { icon: '⚖️', name: 'المحكمة',         hint: 'قنع الباقين برأيك!',               pattern: 'pattern-spotlight' },
   punishmentwheel:{ icon: '🎡', name: 'عجلة العقاب',     hint: 'جاوب صح أو انعاقب!',               pattern: 'pattern-triangles' },
-  lovemonster:    { icon: '👹', name: 'الوحش العاشق',    hint: 'اصنع وحشك واكسب القلوب!',          pattern: 'pattern-dots' },
-  emojidecode:    { icon: '🔮', name: 'فك الإيموجي',     hint: 'خمّن من الإيموجيات!',               pattern: 'pattern-matrix' },
-  acrophobia:     { icon: '📝', name: 'أكروفوبيا',       hint: 'كوّن أفضل جملة!',                  pattern: 'pattern-grid' }
+  lovemonster:    { icon: '👹', name: 'الوحش العاشق',    hint: 'اصنع وحشك واكسب القلوب!',          pattern: 'pattern-heartbeat' },
+  emojidecode:    { icon: '🔮', name: 'فك الإيموجي',     hint: 'خمّن من الإيموجيات!',               pattern: 'pattern-neonglitch' },
+  acrophobia:     { icon: '📝', name: 'أكروفوبيا',       hint: 'كوّن أفضل جملة!',                  pattern: 'pattern-manuscript' }
 };
 
 const DRAW_COLORS = ['#000000', '#ff0000', '#0066ff', '#00aa00', '#ff8800', '#9900cc', '#ff69b4', '#8B4513', '#FFD700', '#00CED1', '#808080', '#ffffff'];

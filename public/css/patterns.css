@@ -321,6 +321,78 @@
 }
 
 
+/* ─────────────────────────────────────────────────────────────
+ * PATTERN: HEARTBEAT - نبض القلب (Love Monster exclusive)
+ * Pulsing heart-shaped radials with romantic pink glow
+ * ───────────────────────────────────────────────────────────── */
+
+.pattern-heartbeat {
+  background:
+    radial-gradient(ellipse 25% 20% at 20% 25%, rgba(255,20,147,0.15) 0%, transparent 70%),
+    radial-gradient(ellipse 20% 25% at 80% 35%, rgba(255,20,147,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 30% 15% at 50% 75%, rgba(255,105,180,0.1) 0%, transparent 70%),
+    radial-gradient(ellipse 15% 30% at 15% 70%, rgba(0,255,127,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 18% 22% at 85% 80%, rgba(255,215,0,0.06) 0%, transparent 70%);
+  animation: heartbeat-glow var(--intensity-pulse-speed, 4s) ease-in-out infinite alternate;
+}
+
+@keyframes heartbeat-glow {
+  0% { opacity: 0.7; }
+  50% { opacity: 1; }
+  100% { opacity: 0.7; }
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * PATTERN: NEON GLITCH - خلل نيون (Emoji Decode exclusive)
+ * Cyberpunk scanlines with neon magenta/cyan flicker
+ * ───────────────────────────────────────────────────────────── */
+
+.pattern-neonglitch {
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 2px,
+      rgba(255,0,255,0.03) 2px,
+      rgba(255,0,255,0.03) 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 120px,
+      rgba(0,255,255,0.04) 120px,
+      rgba(0,255,255,0.04) 122px
+    ),
+    radial-gradient(ellipse 50% 40% at 30% 50%, rgba(255,0,255,0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 50% at 70% 50%, rgba(0,255,255,0.06) 0%, transparent 70%);
+  animation: neon-flicker calc(var(--intensity-pulse-speed, 4s) * 0.5) steps(8) infinite;
+}
+
+@keyframes neon-flicker {
+  0%, 90%, 100% { opacity: 1; }
+  92% { opacity: 0.85; }
+  94% { opacity: 1; }
+  96% { opacity: 0.9; }
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * PATTERN: MANUSCRIPT - مخطوطة (Acrophobia exclusive)
+ * Warm library lines with golden accents — old book feel
+ * ───────────────────────────────────────────────────────────── */
+
+.pattern-manuscript {
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 28px,
+      rgba(139,105,20,0.04) 28px,
+      rgba(139,105,20,0.04) 29px
+    ),
+    radial-gradient(ellipse 60% 40% at 50% 40%, rgba(245,240,235,0.06) 0%, transparent 70%),
+    linear-gradient(180deg, rgba(139,105,20,0.05) 0%, transparent 30%);
+}
+
 /* ═══════════════════════════════════════════════════════════════
  * SAUDI/GULF-INSPIRED PATTERNS - أنماط خليجية
  * Abstract, respectful, playful, non-literal
@@ -1202,7 +1274,9 @@
   .pattern-arabesque,
   .pattern-dunes,
   .pattern-neonriyadh,
-  .pattern-calliflow {
+  .pattern-calliflow,
+  .pattern-heartbeat,
+  .pattern-neonglitch {
     animation: none !important;
   }
 
@@ -1226,7 +1300,9 @@
 [data-reduced-motion="true"] .pattern-arabesque,
 [data-reduced-motion="true"] .pattern-dunes,
 [data-reduced-motion="true"] .pattern-neonriyadh,
-[data-reduced-motion="true"] .pattern-calliflow {
+[data-reduced-motion="true"] .pattern-calliflow,
+[data-reduced-motion="true"] .pattern-heartbeat,
+[data-reduced-motion="true"] .pattern-neonglitch {
   animation: none !important;
 }
 
