@@ -562,7 +562,7 @@ io.on('connection', (socket) => {
     if (room.state === 'playing') return socket.emit('error', { message: 'اللعبة شغالة بالفعل!' });
 
     // التحقق من صحة اسم اللعبة
-    const validGames = ['quiplash', 'guesspionage', 'fakinit', 'triviamurder', 'fibbage', 'drawful', 'tshirtwars', 'trynottolol', 'inventions', 'wouldyourather', 'whosaidit', 'speedround', 'backseatgamer', 'splittheroom', 'courtroom', 'debateme', 'punishmentwheel'];
+    const validGames = ['quiplash', 'guesspionage', 'fakinit', 'triviamurder', 'fibbage', 'drawful', 'tshirtwars', 'trynottolol', 'inventions', 'wouldyourather', 'whosaidit', 'speedround', 'backseatgamer', 'splittheroom', 'courtroom', 'debateme', 'punishmentwheel', 'lovemonster', 'emojidecode', 'acrophobia'];
     if (!validGames.includes(game)) {
       return socket.emit('error', { message: 'لعبة غير معروفة!' });
     }
@@ -590,7 +590,10 @@ io.on('connection', (socket) => {
       splittheroom: 5,
       courtroom: 3,
       debateme: 3,
-      punishmentwheel: 5
+      punishmentwheel: 5,
+      lovemonster: 3,
+      emojidecode: 2,
+      acrophobia: 3
     };
 
     // إعداد الغرفة للعبة
@@ -670,7 +673,10 @@ io.on('connection', (socket) => {
       splittheroom: '🔀 سبليت ذا روم',
       courtroom: '👨‍⚖️ المحكمة الكبرى',
       debateme: '⚖️ المحكمة',
-      punishmentwheel: '🎡 عجلة العقاب'
+      punishmentwheel: '🎡 عجلة العقاب',
+      lovemonster: '👹 الوحش العاشق',
+      emojidecode: '🔮 فك الإيموجي',
+      acrophobia: '📝 أكروفوبيا'
     };
 
     const startComment = CONFIG.commentaryEnabled
@@ -1027,7 +1033,7 @@ io.on('connection', (socket) => {
     if (room.state === 'playing') return socket.emit('error', { message: 'اللعبة شغالة!' });
     if (!Array.isArray(games) || games.length < 2) return socket.emit('error', { message: 'اختر لعبتين على الأقل!' });
 
-    const validGames = ['quiplash', 'guesspionage', 'fakinit', 'triviamurder', 'fibbage', 'drawful', 'tshirtwars', 'trynottolol', 'inventions', 'wouldyourather', 'whosaidit', 'speedround', 'backseatgamer', 'splittheroom', 'courtroom', 'debateme', 'punishmentwheel'];
+    const validGames = ['quiplash', 'guesspionage', 'fakinit', 'triviamurder', 'fibbage', 'drawful', 'tshirtwars', 'trynottolol', 'inventions', 'wouldyourather', 'whosaidit', 'speedround', 'backseatgamer', 'splittheroom', 'courtroom', 'debateme', 'punishmentwheel', 'lovemonster', 'emojidecode', 'acrophobia'];
     const playlist = games.filter(g => validGames.includes(g)).slice(0, 8); // max 8 games
     if (playlist.length < 2) return socket.emit('error', { message: 'اختر لعبتين صالحتين على الأقل!' });
 
@@ -5768,7 +5774,8 @@ function startPlaylistGame(room) {
     tshirtwars: '👕 حرب التيشيرتات', trynottolol: '😂 لا تضحك', inventions: '💡 اختراعات مجنونة',
     wouldyourather: '🤔 تبي ولا ما تبي', whosaidit: '💬 من قال؟', speedround: '⚡ أسرع واحد',
     backseatgamer: '🎮 سوّاق أعمى', splittheroom: '🔀 سبليت ذا روم', courtroom: '👨‍⚖️ المحكمة الكبرى',
-    debateme: '⚖️ المحكمة', punishmentwheel: '🎡 عجلة العقاب'
+    debateme: '⚖️ المحكمة', punishmentwheel: '🎡 عجلة العقاب',
+    lovemonster: '👹 الوحش العاشق', emojidecode: '🔮 فك الإيموجي', acrophobia: '📝 أكروفوبيا'
   };
 
   // Send transition screen before starting
