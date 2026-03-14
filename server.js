@@ -6190,7 +6190,8 @@ function startPlaylistGame(room) {
     quiplash: 2, guesspionage: Math.min(guesspionageRounds, 5), fakinit: 2,
     triviamurder: 3, fibbage: 2, drawful: 2, tshirtwars: 2, trynottolol: 3,
     inventions: 2, wouldyourather: 3, whosaidit: 2, speedround: 6,
-    backseatgamer: 3, splittheroom: 3, courtroom: 2, debateme: 2, punishmentwheel: 3
+    backseatgamer: 3, splittheroom: 3, courtroom: 2, debateme: 2, punishmentwheel: 3,
+    lovemonster: 2, emojidecode: 1, acrophobia: 2
   };
 
   const gameNames = {
