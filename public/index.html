@@ -20,12 +20,12 @@
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700;900&family=Lemonada:wght@400;700&family=Readex+Pro:wght@400;600;700&family=Changa:wght@400;700;800&family=Jomhuria&family=El+Messiri:wght@400;700&family=Lalezar&family=Rubik:wght@400;700;900&family=Bangers&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700;900&family=Lemonada:wght@400;700&family=Readex+Pro:wght@400;600;700&family=Changa:wght@400;700;800&family=Jomhuria&family=El+Messiri:wght@400;700&family=Lalezar&family=Rubik:wght@400;700;900&family=Bangers&display=swap" rel="stylesheet"></noscript>
   <script src="/socket.io/socket.io.js"></script>
-  <link rel="stylesheet" href="/css/tokens.css?v=7.0">
-  <link rel="stylesheet" href="/css/components.css?v=7.0">
-  <link rel="stylesheet" href="/css/layout.css?v=7.0">
-  <link rel="stylesheet" href="/css/patterns.css?v=7.0">
-  <link rel="stylesheet" href="/css/game-screens.css?v=7.0">
-  <link rel="stylesheet" href="/css/avatars.css?v=7.0">
+  <link rel="stylesheet" href="/css/tokens.css?v=7.1">
+  <link rel="stylesheet" href="/css/components.css?v=7.1">
+  <link rel="stylesheet" href="/css/layout.css?v=7.1">
+  <link rel="stylesheet" href="/css/patterns.css?v=7.1">
+  <link rel="stylesheet" href="/css/game-screens.css?v=7.1">
+  <link rel="stylesheet" href="/css/avatars.css?v=7.1">
 </head>
 <body data-theme="hub" data-intensity="party">
   <!-- Screen Reader Announcements (ARIA Live Regions) -->
@@ -157,7 +157,7 @@
         <span class="logo__box">أبو عابد</span>
         <span class="logo__name">بوكس</span>
       </div>
-      <p class="tagline">العب مع ربعك! • ١٧ لعبة جماعية</p>
+      <p class="tagline">العب مع ربعك! • ٢٠ لعبة جماعية</p>
     </div>
 
     <!-- Host vs Player mode cards -->
@@ -355,6 +355,15 @@
             </div>
           </div>
 
+          <div class="game-card" data-action="selectGame" data-game="acrophobia" data-cat="writing creative" role="button" tabindex="0">
+            <div class="game-card__banner game-card__banner--acrophobia"><span class="game-card__icon">📝</span></div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">أكروفوبيا</h4>
+              <p class="game-card__desc">كوّن جملة من الحروف العشوائية</p>
+              <div class="game-card__meta"><span>👥 ٣-١٠</span></div>
+            </div>
+          </div>
+
           <!-- Deception Games -->
           <div class="game-card" data-action="selectGame" data-game="fakinit" data-cat="deception social" role="button" tabindex="0">
             <div class="game-card__banner game-card__banner--fakinit"><span class="game-card__icon">🕵️</span></div>
@@ -408,6 +417,14 @@
           </div>
 
           <!-- Social Games -->
+          <div class="game-card" data-action="selectGame" data-game="lovemonster" data-cat="social creative" role="button" tabindex="0">
+            <div class="game-card__banner game-card__banner--lovemonster"><span class="game-card__icon">👹</span></div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">الوحش العاشق</h4>
+              <p class="game-card__desc">اختار صفات وحشك واكسب قلب الشخص</p>
+              <div class="game-card__meta"><span>👥 ٣-١٠</span></div>
+            </div>
+          </div>
           <div class="game-card" data-action="selectGame" data-game="wouldyourather" data-cat="social" role="button" tabindex="0">
             <div class="game-card__banner game-card__banner--wouldyourather"><span class="game-card__icon">🤔</span></div>
             <div class="game-card__content">
@@ -426,6 +443,14 @@
           </div>
 
           <!-- Creative Games -->
+          <div class="game-card" data-action="selectGame" data-game="emojidecode" data-cat="creative trivia" role="button" tabindex="0">
+            <div class="game-card__banner game-card__banner--emojidecode"><span class="game-card__icon">🔮</span></div>
+            <div class="game-card__content">
+              <h4 class="game-card__title">فك الإيموجي</h4>
+              <p class="game-card__desc">خمّن الفيلم أو الأغنية من الإيموجيات</p>
+              <div class="game-card__meta"><span>👥 ٢-١٠</span></div>
+            </div>
+          </div>
           <div class="game-card" data-action="selectGame" data-game="drawful" data-cat="creative" role="button" tabindex="0">
             <div class="game-card__banner game-card__banner--drawful"><span class="game-card__icon">🎨</span></div>
             <div class="game-card__content">
@@ -664,11 +689,11 @@
   <div id="toastContainer" aria-live="assertive" role="alert"></div>
 
   <!-- App Scripts -->
-  <script src="/js/a11y.js?v=7.0"></script>
-  <script src="/js/audio.js?v=7.0"></script>
-  <script src="/js/avatars.js?v=7.0"></script>
-  <script src="/js/effects.js?v=7.0"></script>
-  <script src="/js/illustrations.js?v=7.0"></script>
-  <script src="/js/app.js?v=7.0"></script>
+  <script src="/js/a11y.js?v=7.1"></script>
+  <script src="/js/audio.js?v=7.1"></script>
+  <script src="/js/avatars.js?v=7.1"></script>
+  <script src="/js/effects.js?v=7.1"></script>
+  <script src="/js/illustrations.js?v=7.1"></script>
+  <script src="/js/app.js?v=7.1"></script>
 </body>
 </html>

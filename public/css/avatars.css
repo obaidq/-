@@ -954,8 +954,8 @@
 
 
 /* ═════════════════════════════════════════════════════════════
- * LOVE MONSTER — Romantic Heartbeat
- * Soft pink glow, heartbeat pulse, love bubble
+ * TRY NOT TO LOL — Romantic Heartbeat
+ * Soft pink glow, heartbeat pulse, comedy warmth
  * ═════════════════════════════════════════════════════════════ */
 
 .game-avatar--trynottolol {
@@ -1201,8 +1201,8 @@
 
 
 /* ═════════════════════════════════════════════════════════════
- * EMOJI DECODE — Pixel Glitch Rainbow
- * Rainbow chromatic shift, pixel glitch, emoji sparkle
+ * COURTROOM — Golden Justice Glow
+ * Rainbow chromatic shift, judicial authority, warm gold
  * ═════════════════════════════════════════════════════════════ */
 
 .game-avatar--courtroom {
@@ -1268,8 +1268,8 @@
 
 
 /* ═════════════════════════════════════════════════════════════
- * ACROPHOBIA — Typewriter Letters
- * Monospace font feel, clicking keys, typing cursor blink
+ * PUNISHMENT WHEEL — Typewriter Flicker
+ * Monospace font feel, clicking keys, blueish steel glow
  * ═════════════════════════════════════════════════════════════ */
 
 .game-avatar--punishmentwheel {
@@ -1296,6 +1296,108 @@
 
 [data-theme="punishmentwheel"] .waiting-avatar {
   border: 2px solid rgba(96, 125, 139, 0.3);
+}
+
+
+/* ═════════════════════════════════════════════════════════════
+ * LOVE MONSTER — Romantic Heartbeat Pulse
+ * ═════════════════════════════════════════════════════════════ */
+
+.game-avatar--lovemonster {
+  border: 3px solid rgba(255, 20, 147, 0.5);
+  box-shadow: 0 0 20px rgba(255, 20, 147, 0.3), 0 0 40px rgba(255, 105, 180, 0.1);
+  animation: avatar-love-heartbeat 1.5s ease-in-out infinite;
+  background: linear-gradient(135deg, #1C0A2E 0%, #2D1B4E 100%);
+}
+
+[data-theme="lovemonster"] .player-avatar__face {
+  animation: avatar-love-heartbeat 2s ease-in-out infinite;
+  border: 3px solid rgba(255, 20, 147, 0.4);
+  box-shadow: 0 0 15px rgba(255, 20, 147, 0.2);
+}
+
+[data-theme="lovemonster"] .player-avatar__face--rich {
+  filter: saturate(1.2) hue-rotate(-5deg);
+}
+
+@keyframes avatar-love-heartbeat {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 12px rgba(255, 20, 147, 0.2); }
+  15% { transform: scale(1.08); box-shadow: 0 0 25px rgba(255, 20, 147, 0.5); }
+  30% { transform: scale(1); }
+  45% { transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 20, 147, 0.4); }
+}
+
+[data-theme="lovemonster"] .waiting-avatar {
+  border: 2px solid rgba(255, 20, 147, 0.3);
+  animation: avatar-love-heartbeat 2s ease-in-out infinite;
+}
+
+
+/* ═════════════════════════════════════════════════════════════
+ * EMOJI DECODE — Neon Chromatic Glitch
+ * ═════════════════════════════════════════════════════════════ */
+
+.game-avatar--emojidecode {
+  border: 3px solid rgba(255, 0, 255, 0.6);
+  box-shadow: 0 0 20px rgba(255, 0, 255, 0.4), 0 0 40px rgba(0, 255, 255, 0.2);
+  animation: avatar-neon-glitch 3s ease-in-out infinite;
+  background: linear-gradient(135deg, #0A0A1A 0%, #1A0A2E 100%);
+}
+
+[data-theme="emojidecode"] .player-avatar__face {
+  animation: avatar-neon-glitch 4s ease-in-out infinite;
+  border: 3px solid rgba(255, 0, 255, 0.5);
+  box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);
+}
+
+[data-theme="emojidecode"] .player-avatar__face--rich {
+  filter: saturate(1.5) brightness(1.05);
+}
+
+@keyframes avatar-neon-glitch {
+  0%, 100% { box-shadow: 0 0 15px rgba(255, 0, 255, 0.3), 0 0 30px rgba(0, 255, 255, 0.15); transform: translateX(0); }
+  20% { box-shadow: 2px 0 10px rgba(255, 0, 255, 0.5), -2px 0 10px rgba(0, 255, 255, 0.4); transform: translateX(-2px); }
+  40% { box-shadow: -2px 0 15px rgba(255, 0, 255, 0.4), 2px 0 15px rgba(0, 255, 255, 0.3); transform: translateX(2px); }
+  60% { box-shadow: 0 0 20px rgba(255, 0, 255, 0.4), 0 0 10px rgba(255, 230, 0, 0.2); transform: translateX(-1px); }
+}
+
+[data-theme="emojidecode"] .waiting-avatar {
+  border: 2px solid rgba(255, 0, 255, 0.3);
+  animation: avatar-neon-glitch 5s ease-in-out infinite;
+}
+
+
+/* ═════════════════════════════════════════════════════════════
+ * ACROPHOBIA — Literary Typewriter Glow
+ * ═════════════════════════════════════════════════════════════ */
+
+.game-avatar--acrophobia {
+  border: 3px solid rgba(139, 105, 20, 0.6);
+  box-shadow: 0 0 16px rgba(245, 240, 235, 0.3), 0 0 32px rgba(139, 105, 20, 0.2);
+  animation: avatar-literary 3s ease-in-out infinite;
+  background: linear-gradient(135deg, #2D5F3A 0%, #1A472A 100%);
+}
+
+[data-theme="acrophobia"] .player-avatar__face {
+  animation: avatar-literary 4s ease-in-out infinite;
+  border: 3px solid rgba(245, 240, 235, 0.5);
+  box-shadow: 0 0 12px rgba(245, 240, 235, 0.2);
+}
+
+[data-theme="acrophobia"] .player-avatar__face--rich {
+  filter: sepia(0.1) brightness(0.98);
+}
+
+@keyframes avatar-literary {
+  0%, 100% { box-shadow: 0 0 10px rgba(245, 240, 235, 0.2); transform: scale(1); }
+  25% { box-shadow: 0 0 20px rgba(245, 240, 235, 0.4); transform: scale(1.02); }
+  50% { box-shadow: 0 0 8px rgba(139, 105, 20, 0.3), 0 0 2px rgba(200, 16, 46, 0.2); transform: rotate(-0.5deg); }
+  75% { box-shadow: 0 0 15px rgba(245, 240, 235, 0.3); transform: rotate(0.5deg); }
+}
+
+[data-theme="acrophobia"] .waiting-avatar {
+  border: 2px solid rgba(139, 105, 20, 0.3);
+  animation: avatar-literary 5s ease-in-out infinite;
 }
 
 

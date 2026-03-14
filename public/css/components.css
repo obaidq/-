@@ -777,11 +777,14 @@
 .game-card__banner--wouldyourather { background: linear-gradient(135deg, #BF360C 0%, #E65100 25%, #FF8F00 55%, #FFC107 85%, #FFF8E1 100%); }
 .game-card__banner--whosaidit { background: linear-gradient(135deg, #0D47A1 0%, #1976D2 30%, #42A5F5 60%, #BBDEFB 100%); }
 .game-card__banner--speedround { background: linear-gradient(135deg, #880E4F 0%, #BF360C 25%, #E65100 50%, #FF3D00 75%, #FF6E40 100%); }
-.game-card__banner--backseatgamer { background: linear-gradient(135deg, #0D1B2A 0%, #1B2838 30%, #006064 60%, #00E5FF 100%); }
+.game-card__banner--backseatgamer { background: linear-gradient(135deg, #0D0D1A 0%, #1A1A2E 25%, #E63946 55%, #2ECC71 85%, #F4D35E 100%); }
 .game-card__banner--splittheroom { background: linear-gradient(135deg, #12005e 0%, #311B92 25%, #6200EA 55%, #B388FF 100%); }
 .game-card__banner--courtroom { background: linear-gradient(135deg, #1A1205 0%, #3E2723 25%, #8D6E63 55%, #D4AF37 85%, #FFD54F 100%); }
 .game-card__banner--debateme { background: linear-gradient(135deg, #1C2833 0%, #263238 25%, #455A64 55%, #78909C 85%, #CFD8DC 100%); }
 .game-card__banner--punishmentwheel { background: linear-gradient(135deg, #3E0000 0%, #8B0000 25%, #D32F2F 55%, #FF5252 85%, #FF8A80 100%); }
+.game-card__banner--lovemonster { background: linear-gradient(135deg, #1C0A2E 0%, #4A1942 25%, #FF1493 55%, #FF69B4 85%, #FFB6C1 100%); }
+.game-card__banner--emojidecode { background: linear-gradient(135deg, #0A0A1A 0%, #1A0A2E 20%, #FF00FF 45%, #00FFFF 70%, #FFE600 100%); }
+.game-card__banner--acrophobia { background: linear-gradient(135deg, #1A472A 0%, #2D5F3A 25%, #4A8C5E 50%, #8B6914 80%, #F5F0EB 100%); }
 
 /* Per-card accent colors defined in game-screens.css (loads later) */
 

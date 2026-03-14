@@ -23,6 +23,9 @@
  *   👨‍⚖️ المحكمة الكبرى (Courtroom)
  *   ⚖️ المحكمة (Debate Me)
  *   🎡 عجلة العقاب (Punishment Wheel)
+ *   👹 الوحش العاشق (Love Monster)
+ *   🔮 فك الإيموجي (Emoji Decode)
+ *   📝 أكروفوبيا (Acrophobia)
  */
 
 // ═══════════════════════════════════════════════════════════════════
@@ -562,7 +565,7 @@ io.on('connection', (socket) => {
     if (room.state === 'playing') return socket.emit('error', { message: 'اللعبة شغالة بالفعل!' });
 
     // التحقق من صحة اسم اللعبة
-    const validGames = ['quiplash', 'guesspionage', 'fakinit', 'triviamurder', 'fibbage', 'drawful', 'tshirtwars', 'trynottolol', 'inventions', 'wouldyourather', 'whosaidit', 'speedround', 'backseatgamer', 'splittheroom', 'courtroom', 'debateme', 'punishmentwheel'];
+    const validGames = ['quiplash', 'guesspionage', 'fakinit', 'triviamurder', 'fibbage', 'drawful', 'tshirtwars', 'trynottolol', 'inventions', 'wouldyourather', 'whosaidit', 'speedround', 'backseatgamer', 'splittheroom', 'courtroom', 'debateme', 'punishmentwheel', 'lovemonster', 'emojidecode', 'acrophobia'];
     if (!validGames.includes(game)) {
       return socket.emit('error', { message: 'لعبة غير معروفة!' });
     }
@@ -590,7 +593,10 @@ io.on('connection', (socket) => {
       splittheroom: 5,
       courtroom: 3,
       debateme: 3,
-      punishmentwheel: 5
+      punishmentwheel: 5,
+      lovemonster: 3,
+      emojidecode: 2,
+      acrophobia: 3
     };
 
     // إعداد الغرفة للعبة
@@ -670,7 +676,10 @@ io.on('connection', (socket) => {
       splittheroom: '🔀 سبليت ذا روم',
       courtroom: '👨‍⚖️ المحكمة الكبرى',
       debateme: '⚖️ المحكمة',
-      punishmentwheel: '🎡 عجلة العقاب'
+      punishmentwheel: '🎡 عجلة العقاب',
+      lovemonster: '👹 الوحش العاشق',
+      emojidecode: '🔮 فك الإيموجي',
+      acrophobia: '📝 أكروفوبيا'
     };
 
     const startComment = CONFIG.commentaryEnabled
@@ -715,7 +724,7 @@ io.on('connection', (socket) => {
     if (typeof answer === 'string') {
       const trimmed = answer.trim().substring(0, 200);
       // Only filter free-text games (not trivia choices or guesspionage bets)
-      const freeTextGames = ['quiplash', 'fibbage', 'drawful', 'tshirtwars', 'inventions', 'whosaidit', 'splittheroom', 'debateme', 'punishmentwheel', 'trynottolol', 'courtroom', 'backseatgamer'];
+      const freeTextGames = ['quiplash', 'fibbage', 'drawful', 'tshirtwars', 'inventions', 'whosaidit', 'splittheroom', 'debateme', 'punishmentwheel', 'trynottolol', 'courtroom', 'backseatgamer', 'acrophobia', 'emojidecode'];
       const isFreeText = freeTextGames.includes(room.currentGame) ||
         (room.currentGame === 'triviamurder' && room.gameData.phase === 'deathChallenge');
       if (isFreeText) {
@@ -734,15 +743,17 @@ io.on('connection', (socket) => {
     touchRoom(room);
 
     // ── حالة خاصة: تتبع ترتيب الإجابات في الألعاب السريعة ──
-    if ((room.currentGame === 'speedround' || room.currentGame === 'backseatgamer' || room.currentGame === 'punishmentwheel') && room.gameData.answerOrder) {
+    if ((room.currentGame === 'speedround' || room.currentGame === 'backseatgamer' || room.currentGame === 'punishmentwheel' || room.currentGame === 'emojidecode') && room.gameData.answerOrder) {
       if (!room.gameData.answerOrder.includes(socket.id)) {
         // تحقق من صحة الإجابة قبل إضافتها للترتيب
-        const q = room.gameData.question || room.gameData.challenge;
+        const q = room.currentGame === 'emojidecode'
+          ? (room.gameData.puzzles && room.gameData.puzzles[room.gameData.currentPuzzleIndex])
+          : (room.gameData.question || room.gameData.challenge);
         if (q && processedAnswer !== '__timeout__') {
           const correctAnswer = q.a || q.word;
           const checkAnswers = (room.currentGame === 'backseatgamer')
             ? (Array.isArray(q.keywords) ? q.keywords : [q.word || correctAnswer])
-            : (room.currentGame === 'punishmentwheel')
+            : (room.currentGame === 'punishmentwheel' || room.currentGame === 'emojidecode')
             ? (Array.isArray(q.keywords) ? q.keywords : [correctAnswer])
             : (Array.isArray(correctAnswer) ? correctAnswer : [correctAnswer]);
           const playerAns = processedAnswer.trim().toLowerCase();
@@ -1027,7 +1038,7 @@ io.on('connection', (socket) => {
     if (room.state === 'playing') return socket.emit('error', { message: 'اللعبة شغالة!' });
     if (!Array.isArray(games) || games.length < 2) return socket.emit('error', { message: 'اختر لعبتين على الأقل!' });
 
-    const validGames = ['quiplash', 'guesspionage', 'fakinit', 'triviamurder', 'fibbage', 'drawful', 'tshirtwars', 'trynottolol', 'inventions', 'wouldyourather', 'whosaidit', 'speedround', 'backseatgamer', 'splittheroom', 'courtroom', 'debateme', 'punishmentwheel'];
+    const validGames = ['quiplash', 'guesspionage', 'fakinit', 'triviamurder', 'fibbage', 'drawful', 'tshirtwars', 'trynottolol', 'inventions', 'wouldyourather', 'whosaidit', 'speedround', 'backseatgamer', 'splittheroom', 'courtroom', 'debateme', 'punishmentwheel', 'lovemonster', 'emojidecode', 'acrophobia'];
     const playlist = games.filter(g => validGames.includes(g)).slice(0, 8); // max 8 games
     if (playlist.length < 2) return socket.emit('error', { message: 'اختر لعبتين صالحتين على الأقل!' });
 
@@ -1456,6 +1467,15 @@ function startGameRound(room) {
     case 'punishmentwheel':
       startPunishmentWheelRound(room);
       break;
+    case 'lovemonster':
+      startLoveMonsterRound(room);
+      break;
+    case 'emojidecode':
+      startEmojiDecodeRound(room);
+      break;
+    case 'acrophobia':
+      startAcrophobiaRound(room);
+      break;
     default:
       console.log('❌ لعبة غير معروفة:', room.currentGame);
   }
@@ -1551,6 +1571,23 @@ function handleAllAnswered(room) {
     case 'punishmentwheel':
       calculatePunishmentWheelResults(room);
       break;
+    case 'lovemonster':
+      if (room.gameData.phase === 'creating') {
+        startLoveMonsterVoting(room);
+      } else {
+        calculateLoveMonsterResults(room);
+      }
+      break;
+    case 'emojidecode':
+      calculateEmojiPuzzleResults(room);
+      break;
+    case 'acrophobia':
+      if (room.gameData.phase === 'writing') {
+        startAcrophobiaVoting(room);
+      } else {
+        calculateAcrophobiaResults(room);
+      }
+      break;
     default:
       sendRoundResults(room, {});
   }
@@ -1605,6 +1642,12 @@ function calculateVoteResults(room) {
     case 'punishmentwheel':
       calculatePunishmentWheelResults(room);
       break;
+    case 'lovemonster':
+      calculateLoveMonsterResults(room);
+      break;
+    case 'acrophobia':
+      calculateAcrophobiaResults(room);
+      break;
     default:
       sendRoundResults(room, {});
   }
@@ -1615,7 +1658,7 @@ function calculateVoteResults(room) {
  */
 function getEligibleVoters(room) {
   // Include audience in vote-based games
-  const includeAudience = ['quiplash', 'fibbage', 'drawful', 'tshirtwars', 'inventions', 'trynottolol', 'courtroom', 'debateme'].includes(room.currentGame);
+  const includeAudience = ['quiplash', 'fibbage', 'drawful', 'tshirtwars', 'inventions', 'trynottolol', 'courtroom', 'debateme', 'lovemonster', 'acrophobia'].includes(room.currentGame);
 
   switch (room.currentGame) {
     case 'quiplash': {
@@ -5545,6 +5588,394 @@ function calculatePunishmentWheelResults(room) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// 👹 الوحش العاشق (Love Monster) - 3 جولات
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * بدء جولة الوحش العاشق
+ * المرحلة الأولى: كل لاعب يختار صفات وحشه (4 فئات)
+ * المرحلة الثانية: كل لاعب يكتب رسالة حب من وحشه
+ * المرحلة الثالثة: التصويت لأفضل وحش
+ */
+function startLoveMonsterRound(room) {
+  const prompt = pickQuestion(room, content.lovemonster.prompts);
+  room.gameData.prompt = prompt;
+  room.gameData.phase = 'creating';
+
+  const timeLimit = room._extendedTimers ? 60 : 45;
+
+  io.to(room.code).emit('loveMonsterCreate', {
+    round: room.currentRound + 1,
+    maxRounds: room.maxRounds,
+    prompt,
+    traits: content.lovemonster.traits,
+    timeLimit
+  });
+
+  setRoundTimer(room, timeLimit, () => {
+    handleAllAnswered(room);
+  });
+}
+
+/**
+ * بدء مرحلة التصويت في الوحش العاشق
+ */
+function startLoveMonsterVoting(room) {
+  clearRoundTimer(room);
+  room.gameData.phase = 'voting';
+
+  const monsters = [];
+  room.players.forEach((p, id) => {
+    if (p.currentAnswer && p.currentAnswer !== '__timeout__') {
+      try {
+        const data = typeof p.currentAnswer === 'string' ? JSON.parse(p.currentAnswer) : p.currentAnswer;
+        monsters.push({
+          playerId: id,
+          traits: data.traits || {},
+          message: data.message || ''
+        });
+      } catch (e) {
+        monsters.push({ playerId: id, traits: {}, message: p.currentAnswer });
+      }
+    }
+  });
+
+  room.gameData.monsters = shuffle(monsters);
+  room.players.forEach(p => { p.currentVote = null; });
+
+  const timeLimit = room._extendedTimers ? 30 : 20;
+
+  io.to(room.code).emit('loveMonsterVoting', {
+    round: room.currentRound + 1,
+    prompt: room.gameData.prompt,
+    monsters: room.gameData.monsters.map(m => ({
+      id: m.playerId,
+      traits: m.traits,
+      message: m.message
+    })),
+    timeLimit
+  });
+
+  setVoteTimer(room, timeLimit, () => {
+    calculateLoveMonsterResults(room);
+  });
+}
+
+/**
+ * حساب نتائج الوحش العاشق
+ */
+function calculateLoveMonsterResults(room) {
+  clearRoundTimer(room);
+
+  const monsters = room.gameData.monsters || [];
+  const votes = {};
+  monsters.forEach(m => { votes[m.playerId] = 0; });
+
+  room.players.forEach((p, id) => {
+    if (p.currentVote && p.currentVote !== '__timeout__' && votes.hasOwnProperty(p.currentVote) && p.currentVote !== id) {
+      votes[p.currentVote]++;
+    }
+  });
+
+  const totalVoters = Array.from(room.players.values()).filter(p => p.currentVote && p.currentVote !== '__timeout__').length;
+  const playerResults = [];
+
+  monsters.forEach(m => {
+    const voteCount = votes[m.playerId] || 0;
+    const points = totalVoters > 0 ? Math.round((voteCount / totalVoters) * 1000) : 0;
+    const p = room.players.get(m.playerId);
+    if (p) p.score += points;
+
+    playerResults.push({
+      playerId: m.playerId,
+      playerName: p ? p.name : 'لاعب',
+      traits: m.traits,
+      message: m.message,
+      votes: voteCount,
+      points
+    });
+  });
+
+  playerResults.sort((a, b) => b.votes - a.votes);
+
+  io.to(room.code).emit('roundResults', {
+    game: 'lovemonster',
+    round: room.currentRound + 1,
+    maxRounds: room.maxRounds,
+    prompt: room.gameData.prompt,
+    playerResults,
+    players: getPlayerList(room),
+    isLastRound: room.currentRound >= room.maxRounds - 1
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// 🔮 فك الإيموجي (Emoji Decode) - 2 جولات (5 ألغاز لكل جولة)
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * بدء جولة فك الإيموجي
+ * - عرض 5 ألغاز إيموجي متتالية
+ * - أول إجابة صحيحة: 1000، ثاني: 750، ثالث: 500، الباقي: 250
+ * - مؤقت: 15 ثانية لكل لغز
+ */
+function startEmojiDecodeRound(room) {
+  // Pick 5 puzzles for this round
+  const puzzles = [];
+  for (let i = 0; i < 5; i++) {
+    puzzles.push(pickQuestion(room, content.emojidecode.puzzles));
+  }
+  room.gameData.puzzles = puzzles;
+  room.gameData.currentPuzzleIndex = 0;
+  room.gameData.phase = 'answering';
+  room.gameData.puzzleScores = new Map();
+
+  room.players.forEach((_, id) => {
+    room.gameData.puzzleScores.set(id, 0);
+  });
+
+  presentEmojiPuzzle(room);
+}
+
+function presentEmojiPuzzle(room) {
+  const idx = room.gameData.currentPuzzleIndex;
+  const puzzles = room.gameData.puzzles;
+
+  if (idx >= puzzles.length) {
+    finalizeEmojiDecodeRound(room);
+    return;
+  }
+
+  const puzzle = puzzles[idx];
+  resetAnswers(room);
+  room.gameData.answerOrder = [];
+
+  const timeLimit = 15;
+
+  io.to(room.code).emit('emojiDecodeQuestion', {
+    round: room.currentRound + 1,
+    maxRounds: room.maxRounds,
+    puzzleNum: idx + 1,
+    totalPuzzles: puzzles.length,
+    emojis: puzzle.emojis,
+    category: puzzle.category || '',
+    timeLimit
+  });
+
+  setRoundTimer(room, timeLimit, () => {
+    calculateEmojiPuzzleResults(room);
+  });
+}
+
+function calculateEmojiPuzzleResults(room) {
+  clearRoundTimer(room);
+
+  const idx = room.gameData.currentPuzzleIndex;
+  const puzzle = room.gameData.puzzles[idx];
+  const keywords = Array.isArray(puzzle.keywords) ? puzzle.keywords : [puzzle.a];
+  const answerOrder = room.gameData.answerOrder || [];
+  const pointsByPlace = [1000, 750, 500];
+
+  const puzzleResults = [];
+
+  room.players.forEach((p, id) => {
+    let points = 0;
+    let isCorrect = false;
+
+    if (p.currentAnswer && p.currentAnswer !== '__timeout__') {
+      const playerAnswer = p.currentAnswer.trim().toLowerCase();
+      isCorrect = playerAnswer.length >= 2 && keywords.some(kw => {
+        const kwLower = kw.trim().toLowerCase();
+        return playerAnswer === kwLower || playerAnswer.includes(kwLower) || (playerAnswer.length >= 3 && kwLower.includes(playerAnswer));
+      });
+
+      if (isCorrect) {
+        const orderIdx = answerOrder.indexOf(id);
+        points = orderIdx >= 0 && orderIdx < pointsByPlace.length ? pointsByPlace[orderIdx] : 250;
+      }
+    }
+
+    p.score += points;
+    room.gameData.puzzleScores.set(id, (room.gameData.puzzleScores.get(id) || 0) + points);
+
+    puzzleResults.push({
+      playerId: id,
+      playerName: p.name,
+      answer: p.currentAnswer !== '__timeout__' ? p.currentAnswer : null,
+      isCorrect,
+      points
+    });
+  });
+
+  puzzleResults.sort((a, b) => b.points - a.points);
+
+  io.to(room.code).emit('emojiDecodePuzzleResult', {
+    puzzleNum: idx + 1,
+    totalPuzzles: room.gameData.puzzles.length,
+    emojis: puzzle.emojis,
+    correctAnswer: puzzle.a,
+    category: puzzle.category || '',
+    puzzleResults
+  });
+
+  room.gameData.currentPuzzleIndex++;
+
+  // Next puzzle after brief pause
+  setTimeout(() => {
+    presentEmojiPuzzle(room);
+  }, 4000);
+}
+
+function finalizeEmojiDecodeRound(room) {
+  const playerResults = [];
+
+  room.players.forEach((p, id) => {
+    playerResults.push({
+      playerId: id,
+      playerName: p.name,
+      points: room.gameData.puzzleScores.get(id) || 0
+    });
+  });
+
+  playerResults.sort((a, b) => b.points - a.points);
+
+  io.to(room.code).emit('roundResults', {
+    game: 'emojidecode',
+    round: room.currentRound + 1,
+    maxRounds: room.maxRounds,
+    playerResults,
+    players: getPlayerList(room),
+    isLastRound: room.currentRound >= room.maxRounds - 1
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// 📝 أكروفوبيا (Acrophobia) - 3 جولات
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * بدء جولة أكروفوبيا
+ * المرحلة الأولى: عرض 3-5 حروف عشوائية + فئة → كل لاعب يكوّن جملة
+ * المرحلة الثانية: التصويت لأفضل جملة
+ */
+function startAcrophobiaRound(room) {
+  const letters = content.acrophobia.letters;
+  const categories = content.acrophobia.categories;
+  const category = categories[Math.floor(Math.random() * categories.length)];
+
+  // 3 letters in round 1, 4 in round 2, 5 in round 3
+  const letterCount = Math.min(3 + room.currentRound, 5);
+  const selectedLetters = [];
+  for (let i = 0; i < letterCount; i++) {
+    selectedLetters.push(letters[Math.floor(Math.random() * letters.length)]);
+  }
+
+  room.gameData.letters = selectedLetters;
+  room.gameData.category = category;
+  room.gameData.phase = 'writing';
+
+  const timeLimit = room._extendedTimers ? 60 : 45;
+
+  io.to(room.code).emit('acrophobiaPrompt', {
+    round: room.currentRound + 1,
+    maxRounds: room.maxRounds,
+    letters: selectedLetters,
+    category,
+    timeLimit
+  });
+
+  setRoundTimer(room, timeLimit, () => {
+    handleAllAnswered(room);
+  });
+}
+
+/**
+ * بدء مرحلة التصويت في أكروفوبيا
+ */
+function startAcrophobiaVoting(room) {
+  clearRoundTimer(room);
+  room.gameData.phase = 'voting';
+
+  const entries = [];
+  room.players.forEach((p, id) => {
+    if (p.currentAnswer && p.currentAnswer !== '__timeout__') {
+      entries.push({
+        playerId: id,
+        text: p.currentAnswer
+      });
+    }
+  });
+
+  room.gameData.entries = shuffle(entries);
+  room.players.forEach(p => { p.currentVote = null; });
+
+  const timeLimit = room._extendedTimers ? 25 : 15;
+
+  io.to(room.code).emit('acrophobiaVoting', {
+    round: room.currentRound + 1,
+    letters: room.gameData.letters,
+    category: room.gameData.category,
+    entries: room.gameData.entries.map(e => ({
+      id: e.playerId,
+      text: e.text
+    })),
+    timeLimit
+  });
+
+  setVoteTimer(room, timeLimit, () => {
+    calculateAcrophobiaResults(room);
+  });
+}
+
+/**
+ * حساب نتائج أكروفوبيا
+ */
+function calculateAcrophobiaResults(room) {
+  clearRoundTimer(room);
+
+  const entries = room.gameData.entries || [];
+  const votes = {};
+  entries.forEach(e => { votes[e.playerId] = 0; });
+
+  room.players.forEach((p, id) => {
+    if (p.currentVote && p.currentVote !== '__timeout__' && votes.hasOwnProperty(p.currentVote) && p.currentVote !== id) {
+      votes[p.currentVote]++;
+    }
+  });
+
+  const totalVoters = Array.from(room.players.values()).filter(p => p.currentVote && p.currentVote !== '__timeout__').length;
+  const playerResults = [];
+
+  entries.forEach(e => {
+    const voteCount = votes[e.playerId] || 0;
+    const points = totalVoters > 0 ? Math.round((voteCount / totalVoters) * 1000) : 0;
+    const p = room.players.get(e.playerId);
+    if (p) p.score += points;
+
+    playerResults.push({
+      playerId: e.playerId,
+      playerName: p ? p.name : 'لاعب',
+      text: e.text,
+      votes: voteCount,
+      points
+    });
+  });
+
+  playerResults.sort((a, b) => b.votes - a.votes);
+
+  io.to(room.code).emit('roundResults', {
+    game: 'acrophobia',
+    round: room.currentRound + 1,
+    maxRounds: room.maxRounds,
+    letters: room.gameData.letters,
+    category: room.gameData.category,
+    playerResults,
+    players: getPlayerList(room),
+    isLastRound: room.currentRound >= room.maxRounds - 1
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // الدوال المشتركة
 // ═══════════════════════════════════════════════════════════════════
 
@@ -5759,7 +6190,8 @@ function startPlaylistGame(room) {
     quiplash: 2, guesspionage: Math.min(guesspionageRounds, 5), fakinit: 2,
     triviamurder: 3, fibbage: 2, drawful: 2, tshirtwars: 2, trynottolol: 3,
     inventions: 2, wouldyourather: 3, whosaidit: 2, speedround: 6,
-    backseatgamer: 3, splittheroom: 3, courtroom: 2, debateme: 2, punishmentwheel: 3
+    backseatgamer: 3, splittheroom: 3, courtroom: 2, debateme: 2, punishmentwheel: 3,
+    lovemonster: 2, emojidecode: 1, acrophobia: 2
   };
 
   const gameNames = {
@@ -5768,7 +6200,8 @@ function startPlaylistGame(room) {
     tshirtwars: '👕 حرب التيشيرتات', trynottolol: '😂 لا تضحك', inventions: '💡 اختراعات مجنونة',
     wouldyourather: '🤔 تبي ولا ما تبي', whosaidit: '💬 من قال؟', speedround: '⚡ أسرع واحد',
     backseatgamer: '🎮 سوّاق أعمى', splittheroom: '🔀 سبليت ذا روم', courtroom: '👨‍⚖️ المحكمة الكبرى',
-    debateme: '⚖️ المحكمة', punishmentwheel: '🎡 عجلة العقاب'
+    debateme: '⚖️ المحكمة', punishmentwheel: '🎡 عجلة العقاب',
+    lovemonster: '👹 الوحش العاشق', emojidecode: '🔮 فك الإيموجي', acrophobia: '📝 أكروفوبيا'
   };
 
   // Send transition screen before starting
@@ -6076,10 +6509,11 @@ server.listen(PORT, () => {
   ║                                                              ║
   ║     ⚡ رد سريع    📊 خمّن النسبة    🕵️ المزيّف             ║
   ║     💀 حفلة القاتل  🎭 كشف الكذاب    🎨 ارسم لي           ║
-  ║     👕 حرب التيشيرتات  💕 الوحش العاشق  💡 اختراعات مجنونة  ║
+  ║     👕 حرب التيشيرتات  😂 لا تضحك    💡 اختراعات مجنونة   ║
   ║     🤔 تبي ولا ما تبي  💬 من قال؟     ⚡ أسرع واحد        ║
-  ║     ✌️ حقيقتين وكذبة  🔀 سبليت ذا روم  🎭 فك الرموز      ║
-  ║     ⚖️ المحكمة      🔤 الأسماء                            ║
+  ║     🎮 سوّاق أعمى  🔀 سبليت ذا روم  👨‍⚖️ المحكمة الكبرى  ║
+  ║     ⚖️ المحكمة      🎡 عجلة العقاب                        ║
+  ║     👹 الوحش العاشق  🔮 فك الإيموجي  📝 أكروفوبيا         ║
   ║                                                              ║
   ║     ✅ السيرفر شغال على البورت ${PORT}                       ║
   ║     🌐 http://localhost:${PORT}                               ║
