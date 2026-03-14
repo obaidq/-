@@ -80,7 +80,7 @@ class EffectsEngine {
       x = this.w / 2,
       y = this.h * 0.3,
       spread = 360,
-      colors = ['#FFD93D', '#FF6B9D', '#00E676', '#00D2D3', '#A55EEA', '#FF8C42', '#4facfe', '#D4AF37'],
+      colors = ['#FDD425', '#FF6B9D', '#FFB347', '#29B6F6', '#AB47BC', '#FF8C42', '#E53935', '#43A047'],
       gravity = 0.12,
       shapes = ['rect', 'circle', 'star', 'triangle'],
     } = options;
@@ -129,7 +129,7 @@ class EffectsEngine {
       x = this.w / 2,
       y = this.h / 2,
       radius = 100,
-      colors = ['#FFD93D', '#fff', '#D4AF37', '#69F0AE'],
+      colors = ['#FDD425', '#fff', '#FFB347', '#FFE066'],
     } = options;
 
     for (let i = 0; i < count; i++) {
@@ -178,7 +178,7 @@ class EffectsEngine {
       text = '+100',
       x = this.w / 2,
       y = this.h / 2,
-      color = '#00E676',
+      color = '#FDD425',
       fontSize = 48,
     } = options;
 
@@ -236,7 +236,7 @@ class EffectsEngine {
     if (this.reducedMotion) return;
     const {
       count = 20,
-      colors = ['rgba(0,230,118,0.15)', 'rgba(255,217,61,0.1)', 'rgba(0,210,211,0.1)'],
+      colors = ['rgba(253,212,37,0.1)', 'rgba(255,179,71,0.08)', 'rgba(41,182,246,0.06)'],
       duration = 10000,
     } = options;
 
@@ -267,7 +267,7 @@ class EffectsEngine {
   _randomFireworkPalette() {
     const palettes = [
       ['#FF6B9D', '#FFD93D', '#FF8C42'],
-      ['#00E676', '#69F0AE', '#00D2D3'],
+      ['#FDD425', '#FFE066', '#00D2D3'],
       ['#A55EEA', '#f093fb', '#4facfe'],
       ['#D4AF37', '#FFD93D', '#FF8C42'],
       ['#00D2D3', '#4facfe', '#667eea'],

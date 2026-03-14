@@ -7,29 +7,33 @@
 
 :root {
   /* ─────────────────────────────────────────────────────────────
-   * COLOR PALETTE
+   * COLOR PALETTE — Goose Goose Duck × SpongeBob × Creative Mints
+   * Deep navy + gold accents + warm soul colors
    * ───────────────────────────────────────────────────────────── */
 
-  --color-primary-900: #001a0e;
-  --color-primary-800: #002815;
-  --color-primary-700: #003d1f;
-  --color-primary-600: #00522a;
-  --color-primary-500: #006633;
-  --color-primary-400: #008040;
-  --color-primary-300: #00994d;
+  --color-primary-900: #020812;
+  --color-primary-800: #0A1628;
+  --color-primary-700: #0D1B2A;
+  --color-primary-600: #112240;
+  --color-primary-500: #1A3358;
+  --color-primary-400: #234670;
+  --color-primary-300: #2C5A88;
 
-  --color-secondary-500: #00C853;
-  --color-secondary-400: #00E676;
-  --color-secondary-300: #69F0AE;
+  --color-secondary-500: #FDD425;
+  --color-secondary-400: #FFE066;
+  --color-secondary-300: #FFF3B0;
 
-  /* Accent Colors - Fun & Vibrant */
-  --color-accent-yellow: #FFD93D;
+  /* Accent Colors - Vibrant & Soulful */
+  --color-accent-yellow: #FDD425;
   --color-accent-orange: #FF8C42;
   --color-accent-pink: #FF6B9D;
-  --color-accent-red: #FF4757;
-  --color-accent-purple: #A55EEA;
-  --color-accent-green: #00C853;
-  --color-accent-cyan: #00D2D3;
+  --color-accent-red: #E53935;
+  --color-accent-purple: #AB47BC;
+  --color-accent-green: #43A047;
+  --color-accent-cyan: #29B6F6;
+  --color-accent-gold: #FDD425;
+  --color-accent-coral: #FF6B6B;
+  --color-accent-magenta: #FF2D55;
 
   /* Neutral */
   --color-neutral-white: #ffffff;
@@ -44,14 +48,14 @@
   --color-neutral-black: #000000;
 
   /* Semantic */
-  --color-success: #00C853;
-  --color-success-dark: var(--color-primary-700);
-  --color-warning: #FFB300;
+  --color-success: #43A047;
+  --color-success-dark: #1B5E20;
+  --color-warning: #FDD425;
   --color-warning-dark: #5c3d00;
-  --color-error: #FF4757;
+  --color-error: #E53935;
   --color-error-dark: #8B0000;
-  --color-info: #00D2D3;
-  --color-info-dark: #003d3d;
+  --color-info: #29B6F6;
+  --color-info-dark: #01579B;
 
   /* ─────────────────────────────────────────────────────────────
    * TYPOGRAPHY - Playful & Bold
@@ -143,30 +147,31 @@
   --shadow-xl: 0 16px 50px rgba(0, 0, 0, 0.3);
   --shadow-2xl: 0 24px 60px rgba(0, 0, 0, 0.35);
 
-  /* Fun colored shadows */
-  --shadow-green: 0 4px 20px rgba(0, 200, 83, 0.3);
-  --shadow-yellow: 0 4px 20px rgba(255, 217, 61, 0.3);
+  /* Fun colored shadows — warm gold-dominant glow system */
+  --shadow-green: 0 4px 20px rgba(67, 160, 71, 0.3);
+  --shadow-yellow: 0 4px 20px rgba(253, 212, 37, 0.35);
   --shadow-pink: 0 4px 20px rgba(255, 107, 157, 0.3);
-  --shadow-purple: 0 4px 20px rgba(165, 94, 234, 0.3);
-  --shadow-cyan: 0 4px 20px rgba(0, 210, 211, 0.3);
+  --shadow-purple: 0 4px 20px rgba(171, 71, 188, 0.3);
+  --shadow-cyan: 0 4px 20px rgba(41, 182, 246, 0.3);
   --shadow-orange: 0 4px 20px rgba(255, 140, 66, 0.3);
+  --shadow-gold: 0 4px 15px rgba(253, 212, 37, 0.3);
 
   /* Chunky bottom shadow for buttons (fun press effect) */
-  --shadow-btn: 0 6px 0 rgba(0, 0, 0, 0.2);
-  --shadow-btn-hover: 0 8px 0 rgba(0, 0, 0, 0.2);
-  --shadow-btn-active: 0 2px 0 rgba(0, 0, 0, 0.2);
+  --shadow-btn: 0 6px 0 rgba(0, 0, 0, 0.25);
+  --shadow-btn-hover: 0 8px 0 rgba(0, 0, 0, 0.25);
+  --shadow-btn-active: 0 2px 0 rgba(0, 0, 0, 0.25);
 
-  /* Glow effects */
-  --shadow-glow-yellow: 0 0 24px rgba(255, 217, 61, 0.4);
-  --shadow-glow-cyan: 0 0 24px rgba(0, 210, 211, 0.4);
+  /* Glow effects — gold-focused brand identity */
+  --shadow-glow-yellow: 0 0 24px rgba(253, 212, 37, 0.4);
+  --shadow-glow-cyan: 0 0 24px rgba(41, 182, 246, 0.4);
   --shadow-glow-pink: 0 0 24px rgba(255, 107, 157, 0.4);
-  --shadow-glow-green: 0 0 24px rgba(0, 200, 83, 0.4);
-  --shadow-glow-gold: 0 0 30px rgba(212, 175, 55, 0.35);
-  --shadow-glow-brand: 0 0 40px rgba(0, 214, 143, 0.25);
+  --shadow-glow-green: 0 0 24px rgba(67, 160, 71, 0.4);
+  --shadow-glow-gold: 0 0 30px rgba(253, 212, 37, 0.4);
+  --shadow-glow-brand: 0 0 40px rgba(253, 212, 37, 0.25);
 
-  /* Premium layered shadows */
-  --shadow-card-elevated: 0 8px 32px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  --shadow-card-hover: 0 20px 60px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.25), 0 0 30px rgba(0, 214, 143, 0.15);
+  /* Premium layered shadows — deeper navy depth */
+  --shadow-card-elevated: 0 8px 32px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --shadow-card-hover: 0 20px 60px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.3), 0 0 30px rgba(253, 212, 37, 0.12);
 
   /* ─────────────────────────────────────────────────────────────
    * MOTION - Bouncy & Playful
@@ -190,17 +195,18 @@
   /* ─────────────────────────────────────────────────────────────
    * GLASS / SURFACE EFFECTS
    * ───────────────────────────────────────────────────────────── */
-  --glass-bg: rgba(255, 255, 255, 0.07);
-  --glass-bg-strong: rgba(255, 255, 255, 0.12);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-border-strong: rgba(255, 255, 255, 0.2);
+  /* Glass — Goose Goose Duck frosted blue-tint panels */
+  --glass-bg: rgba(10, 79, 164, 0.12);
+  --glass-bg-strong: rgba(10, 79, 164, 0.2);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-strong: rgba(255, 255, 255, 0.15);
   --glass-blur: blur(20px);
   --glass-blur-strong: blur(30px);
 
-  --surface-dark: rgba(0, 0, 0, 0.4);
-  --surface-darker: rgba(0, 0, 0, 0.6);
-  --surface-card: rgba(0, 20, 10, 0.7);
-  --surface-elevated: rgba(255, 255, 255, 0.05);
+  --surface-dark: rgba(2, 8, 18, 0.5);
+  --surface-darker: rgba(2, 8, 18, 0.7);
+  --surface-card: rgba(10, 22, 40, 0.75);
+  --surface-elevated: rgba(255, 255, 255, 0.04);
 
   /* ─────────────────────────────────────────────────────────────
    * INTENSITY SYSTEM
@@ -284,11 +290,11 @@
    * MAIN CARD (Centered content card for TV show framework)
    * ───────────────────────────────────────────────────────────── */
   --card-max-width: 720px;
-  --card-bg: rgba(0, 15, 8, 0.82);
-  --card-border: rgba(255, 255, 255, 0.08);
+  --card-bg: rgba(10, 22, 40, 0.82);
+  --card-border: rgba(253, 212, 37, 0.08);
   --card-radius: var(--radius-2xl);
   --card-padding: var(--space-8);
-  --card-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --card-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(253, 212, 37, 0.06);
 
   /* ─────────────────────────────────────────────────────────────
    * SCENE TRANSITIONS
@@ -309,35 +315,35 @@
  * THEME VARIABLES
  * ═══════════════════════════════════════════════════════════════ */
 :root {
-  /* Platform-level: Deep Arabian Night with warm undertones */
-  --theme-bg-primary: #0F1923;
+  /* Platform-level: Deep Navy Night × Gold Premium Casual */
+  --theme-bg-primary: #020812;
   --theme-bg-secondary: #0A1628;
-  --theme-accent: #FFB347;
-  --theme-gold: #D4AF37;
-  --theme-cream: #F5F0E8;
-  --theme-nav: #FFD700;
+  --theme-accent: #FDD425;
+  --theme-gold: #FDD425;
+  --theme-cream: #FFF8E1;
+  --theme-nav: #FDD425;
   --theme-text-primary: var(--color-neutral-white);
-  --theme-text-secondary: var(--color-neutral-300);
+  --theme-text-secondary: rgba(255, 255, 255, 0.7);
   --theme-pattern: none;
-  /* Brand colors */
-  --brand-emerald: #00D68F;
-  --brand-gold: #D4AF37;
+  /* Brand colors — Gold-dominant identity */
+  --brand-emerald: #43A047;
+  --brand-gold: #FDD425;
   --brand-coral: #FF6B6B;
-  --brand-electric: #00E5FF;
+  --brand-electric: #29B6F6;
 
-  /* Hub/Platform palette — warm stage night, fun accents */
-  --hub-bg0: #0B1020;
-  --hub-bg1: #1A1A2E;
+  /* Hub/Platform palette — premium dark × vibrant accents */
+  --hub-bg0: #020812;
+  --hub-bg1: #0A1628;
   --hub-amber: #FFB347;
-  --hub-gold: #FFD93D;
-  --hub-magenta: #FF3D7F;
-  --hub-cyan: #16E0FF;
-  --hub-green: #00BFA5;
-  --hub-text: #F5F0E8;
-  --hub-pattern-opacity: 0.06;
+  --hub-gold: #FDD425;
+  --hub-magenta: #FF2D55;
+  --hub-cyan: #29B6F6;
+  --hub-green: #43A047;
+  --hub-text: #FFF8E1;
+  --hub-pattern-opacity: 0.04;
   /* Green demoted to success/confirm only */
-  --ok: #00E676;
-  --danger: #FF4757;
+  --ok: #43A047;
+  --danger: #E53935;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -381,7 +387,7 @@
 
 /* ── Design Bible V1.0 Per-Game Palettes ── */
 /* Theme Anchors */
-[data-theme="hub"]          { --theme-hue1: #0F1923; --theme-hue2: #0A1628; --theme-accent: #FFB347; --theme-accent2: #00D68F; --theme-accent3: #F5F0E8; --theme-glow: rgba(0, 214, 143, 0.12); --theme-font-header: 'Noto Kufi Arabic', sans-serif; --theme-font-body: 'Cairo', sans-serif; --cultural-anchor: 'Warm amber and teal — platform identity'; }
+[data-theme="hub"]          { --theme-hue1: #020812; --theme-hue2: #0A1628; --theme-accent: #FDD425; --theme-accent2: #FFB347; --theme-accent3: #FFF8E1; --theme-glow: rgba(253, 212, 37, 0.10); --theme-font-header: 'Noto Kufi Arabic', sans-serif; --theme-font-body: 'Cairo', sans-serif; --cultural-anchor: 'Deep navy × gold premium casual identity'; }
 [data-theme="quiplash"]     { --theme-hue1: #6B1D3A; --theme-hue2: #3A0F1E; --theme-accent: #D4AF37; --theme-accent2: #C4813D; --theme-accent3: #F5E6CA; --theme-glow: rgba(212, 175, 55, 0.12); --theme-font-header: 'Noto Kufi Arabic', sans-serif; --theme-font-body: 'Cairo', sans-serif; --cultural-anchor: 'Majlis — burgundy cushions, gold trays, warm gathering space'; }
 [data-theme="guesspionage"] { --theme-hue1: #0A1628; --theme-hue2: #0D1B2A; --theme-accent: #00E676; --theme-accent2: #C62828; --theme-accent3: #B8C4D0; --theme-glow: rgba(0, 230, 118, 0.10); --theme-font-header: 'Changa', sans-serif; --theme-font-body: 'Tajawal', sans-serif; --cultural-anchor: 'NEOM — futuristic midnight digital surveillance'; }
 [data-theme="fakinit"]      { --theme-hue1: #8B5E3C; --theme-hue2: #D4B896; --theme-accent: #C4953A; --theme-accent2: #B94630; --theme-accent3: #4A7C59; --theme-glow: rgba(196, 149, 58, 0.12); --theme-font-header: 'Lemonada', sans-serif; --theme-font-body: 'Cairo', sans-serif; --cultural-anchor: 'Souk — warm earth tones, saffron, paprika, cardamom spice market'; }

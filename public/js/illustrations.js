@@ -36,7 +36,7 @@ const GameIllustrations = (() => {
 
     guesspionage: `<svg viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="gs-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00E676" stop-opacity=".6"/><stop offset="100%" stop-color="#0A1628" stop-opacity=".3"/></linearGradient>
+        <linearGradient id="gs-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FDD425" stop-opacity=".6"/><stop offset="100%" stop-color="#0A1628" stop-opacity=".3"/></linearGradient>
       </defs>
       <!-- Grid lines (spy data) -->
       <g stroke="rgba(0,230,118,0.15)" stroke-width="1">
@@ -49,17 +49,17 @@ const GameIllustrations = (() => {
         <animate attributeName="stroke-dasharray" values="100 283;200 283;100 283" dur="4s" repeatCount="indefinite"/>
       </circle>
       <!-- Percentage -->
-      <text x="160" y="88" text-anchor="middle" fill="#00E676" font-size="28" font-weight="900" font-family="sans-serif" opacity=".9">67%</text>
+      <text x="160" y="88" text-anchor="middle" fill="#FDD425" font-size="28" font-weight="900" font-family="sans-serif" opacity=".9">67%</text>
       <!-- Spy silhouette -->
       <g transform="translate(50,35)" opacity=".25">
-        <circle cx="15" cy="12" r="10" fill="#00E676"/>
-        <rect x="5" y="22" width="20" height="30" rx="5" fill="#00E676"/>
+        <circle cx="15" cy="12" r="10" fill="#FDD425"/>
+        <rect x="5" y="22" width="20" height="30" rx="5" fill="#FDD425"/>
         <rect x="3" y="8" width="24" height="8" rx="3" fill="#1a1a1a"/>
       </g>
       <!-- Magnifying glass -->
       <g transform="translate(240,90)" opacity=".3">
-        <circle cx="0" cy="0" r="18" fill="none" stroke="#00E676" stroke-width="3"/>
-        <line x1="13" y1="13" x2="28" y2="28" stroke="#00E676" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="0" cy="0" r="18" fill="none" stroke="#FDD425" stroke-width="3"/>
+        <line x1="13" y1="13" x2="28" y2="28" stroke="#FDD425" stroke-width="3" stroke-linecap="round"/>
       </g>
       <!-- Scan line -->
       <rect x="0" y="0" width="320" height="3" fill="rgba(0,230,118,0.15)">
@@ -553,15 +553,33 @@ const GameIllustrations = (() => {
     const deco = document.createElement('div');
     deco.className = 'lobby-deco';
     deco.innerHTML = `<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" class="lobby-deco__svg">
-      <!-- Floating geometric shapes -->
-      <circle cx="80" cy="100" r="30" fill="rgba(0,200,83,0.06)"><animate attributeName="cy" values="100;70;100" dur="6s" repeatCount="indefinite"/></circle>
-      <circle cx="720" cy="150" r="20" fill="rgba(212,175,55,0.05)"><animate attributeName="cy" values="150;120;150" dur="5s" repeatCount="indefinite"/></circle>
-      <rect x="650" y="400" width="40" height="40" rx="8" fill="rgba(0,200,83,0.04)" transform="rotate(20,670,420)"><animate attributeName="transform" values="rotate(20,670,420);rotate(40,670,420);rotate(20,670,420)" dur="8s" repeatCount="indefinite"/></rect>
-      <polygon points="100,450 120,420 140,450" fill="rgba(212,175,55,0.05)"><animate attributeName="opacity" values=".03;.08;.03" dur="4s" repeatCount="indefinite"/></polygon>
-      <circle cx="400" cy="500" r="50" fill="rgba(0,200,83,0.03)"/>
+      <!-- Floating geometric shapes — gold + blue accent -->
+      <circle cx="80" cy="100" r="30" fill="rgba(253,212,37,0.05)"><animate attributeName="cy" values="100;70;100" dur="6s" repeatCount="indefinite"/></circle>
+      <circle cx="720" cy="150" r="20" fill="rgba(41,182,246,0.04)"><animate attributeName="cy" values="150;120;150" dur="5s" repeatCount="indefinite"/></circle>
+      <rect x="650" y="400" width="40" height="40" rx="8" fill="rgba(253,212,37,0.03)" transform="rotate(20,670,420)"><animate attributeName="transform" values="rotate(20,670,420);rotate(40,670,420);rotate(20,670,420)" dur="8s" repeatCount="indefinite"/></rect>
+      <polygon points="100,450 120,420 140,450" fill="rgba(255,179,71,0.04)"><animate attributeName="opacity" values=".03;.08;.03" dur="4s" repeatCount="indefinite"/></polygon>
+      <circle cx="400" cy="500" r="50" fill="rgba(10,79,164,0.04)"/>
+      <!-- Blob mascot characters floating in lobby — Slimepedia-inspired -->
+      <g transform="translate(60,450)">
+        <ellipse cx="25" cy="22" rx="22" ry="18" fill="rgba(253,212,37,0.08)"/>
+        <ellipse cx="19" cy="18" rx="4" ry="5" fill="rgba(253,212,37,0.15)"/>
+        <ellipse cx="31" cy="18" rx="4" ry="5" fill="rgba(253,212,37,0.15)"/>
+        <circle cx="20" cy="17" r="1.5" fill="rgba(2,8,18,0.15)"/>
+        <circle cx="32" cy="17" r="1.5" fill="rgba(2,8,18,0.15)"/>
+        <path d="M22,25 Q25,28 28,25" fill="none" stroke="rgba(253,212,37,0.12)" stroke-width="1.5"/>
+        <animate attributeName="transform" values="translate(60,450);translate(60,440);translate(60,450)" dur="3s" repeatCount="indefinite"/>
+      </g>
+      <g transform="translate(700,480)">
+        <ellipse cx="20" cy="18" rx="18" ry="15" fill="rgba(41,182,246,0.07)"/>
+        <ellipse cx="15" cy="15" rx="3" ry="4" fill="rgba(41,182,246,0.12)"/>
+        <ellipse cx="25" cy="15" rx="3" ry="4" fill="rgba(41,182,246,0.12)"/>
+        <circle cx="16" cy="14" r="1.2" fill="rgba(2,8,18,0.12)"/>
+        <circle cx="26" cy="14" r="1.2" fill="rgba(2,8,18,0.12)"/>
+        <animate attributeName="transform" values="translate(700,480);translate(700,470);translate(700,480)" dur="4s" repeatCount="indefinite"/>
+      </g>
       <!-- Dotted arcs -->
-      <path d="M0,300 Q200,200 400,300" fill="none" stroke="rgba(0,200,83,0.05)" stroke-width="2" stroke-dasharray="6 8"/>
-      <path d="M400,100 Q600,0 800,100" fill="none" stroke="rgba(212,175,55,0.04)" stroke-width="2" stroke-dasharray="4 6"/>
+      <path d="M0,300 Q200,200 400,300" fill="none" stroke="rgba(253,212,37,0.04)" stroke-width="2" stroke-dasharray="6 8"/>
+      <path d="M400,100 Q600,0 800,100" fill="none" stroke="rgba(41,182,246,0.03)" stroke-width="2" stroke-dasharray="4 6"/>
     </svg>`;
     lobby.style.position = 'relative';
     lobby.insertBefore(deco, lobby.firstChild);
@@ -581,7 +599,7 @@ const GameIllustrations = (() => {
         const r = 1 + Math.random() * 3;
         const dur = 3 + Math.random() * 4;
         const delay = Math.random() * 3;
-        const color = Math.random() > 0.5 ? '0,200,83' : '212,175,55';
+        const color = Math.random() > 0.5 ? '253,212,37' : '41,182,246';
         return `<circle cx="${x}" cy="${y}" r="${r}" fill="rgba(${color},${0.1 + Math.random() * 0.2})"><animate attributeName="cy" values="${y};${y - 30};${y}" dur="${dur}s" begin="${delay}s" repeatCount="indefinite"/><animate attributeName="opacity" values=".1;.3;.1" dur="${dur}s" begin="${delay}s" repeatCount="indefinite"/></circle>`;
       }).join('')}
     </svg>`;

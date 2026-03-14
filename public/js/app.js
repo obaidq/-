@@ -1100,7 +1100,7 @@ const App = {
   },
 
   _showPlaylistTransition(standings, nextGame, gameInfo, nextIndex, total) {
-    const theme = this._gameSplashThemes[nextGame] || { bg1: '#0A1F0E', bg2: '#000', accent: '#00C853', glow: 'rgba(0,200,83,0.5)' };
+    const theme = this._gameSplashThemes[nextGame] || { bg1: '#0A1628', bg2: '#000', accent: '#FDD425', glow: 'rgba(253,212,37,0.5)' };
     const el = document.createElement('div');
     el.className = 'playlist-transition';
     el.style.background = 'radial-gradient(ellipse at center, ' + theme.bg1 + ' 0%, ' + theme.bg2 + ' 80%)';
@@ -1387,7 +1387,7 @@ const App = {
       return this._showSimpleGameSplash(game, gameInfo, callback);
     }
 
-    const theme = this._gameSplashThemes[game] || { bg1: '#0A1F0E', bg2: '#000', accent: '#00C853', glow: 'rgba(0,200,83,0.5)' };
+    const theme = this._gameSplashThemes[game] || { bg1: '#0A1628', bg2: '#000', accent: '#FDD425', glow: 'rgba(253,212,37,0.5)' };
     const transition = document.getElementById('gameTransition');
 
     if (transition) {
@@ -1444,7 +1444,7 @@ const App = {
 
   // Simple fallback splash (used for reduced motion or missing DOM)
   _showSimpleGameSplash(game, gameInfo, callback) {
-    const theme = this._gameSplashThemes[game] || { bg1: '#0A1F0E', bg2: '#000', accent: '#00C853', glow: 'rgba(0,200,83,0.5)' };
+    const theme = this._gameSplashThemes[game] || { bg1: '#0A1628', bg2: '#000', accent: '#FDD425', glow: 'rgba(253,212,37,0.5)' };
     const el = document.createElement('div');
     el.className = 'ql-game-splash';
     el.style.background = 'radial-gradient(ellipse at center, ' + theme.bg1 + ' 0%, ' + theme.bg2 + ' 80%)';
@@ -2585,8 +2585,8 @@ const App = {
     const isDrawer = d.drawerId === this.myId;
 
     const opts = d.options.map((o, i) =>
-      '<div class="murder-option" style="border-color:rgba(0,200,83,0.3)" ' + (isDrawer ? '' : 'data-action="guessFibbage" data-id="' + escapeHtml(o.id) + '"') + '>' +
-        '<span class="murder-option__num" style="background:rgba(0,200,83,0.2);color:#00C853">' + String.fromCharCode(65 + i) + '</span>' +
+      '<div class="murder-option" style="border-color:rgba(253,212,37,0.3)" ' + (isDrawer ? '' : 'data-action="guessFibbage" data-id="' + escapeHtml(o.id) + '"') + '>' +
+        '<span class="murder-option__num" style="background:rgba(253,212,37,0.2);color:#FDD425">' + String.fromCharCode(65 + i) + '</span>' +
         '<span class="murder-option__text">' + escapeHtml(o.text) + '</span>' +
       '</div>'
     ).join('');
@@ -2621,8 +2621,8 @@ const App = {
       d.options.forEach(o => {
         const icon = o.isCorrect ? '✅' : '🎭';
         const author = o.authorName ? ' (كتبها: ' + escapeHtml(o.authorName) + ')' : '';
-        html += '<div class="murder-option" style="pointer-events:none;border-color:' + (o.isCorrect ? 'rgba(0,200,83,0.5)' : 'rgba(255,255,255,0.1)') + '">' +
-          '<span class="murder-option__num" style="background:' + (o.isCorrect ? 'rgba(0,200,83,0.2)' : 'rgba(255,255,255,0.05)') + '">' + icon + '</span>' +
+        html += '<div class="murder-option" style="pointer-events:none;border-color:' + (o.isCorrect ? 'rgba(253,212,37,0.5)' : 'rgba(255,255,255,0.1)') + '">' +
+          '<span class="murder-option__num" style="background:' + (o.isCorrect ? 'rgba(253,212,37,0.2)' : 'rgba(255,255,255,0.05)') + '">' + icon + '</span>' +
           '<span class="murder-option__text">' + escapeHtml(o.text) + author + '</span>' +
         '</div>';
       });
@@ -3225,7 +3225,7 @@ const App = {
       '<div class="panel" style="max-width:600px">' +
         '<div class="badge badge--info mb-4">⚖️ الموضوع</div>' +
         '<p class="text-2xl font-bold mb-4">' + escapeHtml(d.topic) + '</p>' +
-        '<div class="debate-side" style="background:' + (d.yourSide === 'side1' ? 'rgba(0,200,83,0.2)' : 'rgba(255,68,68,0.2)') + ';padding:12px;border-radius:12px;margin-bottom:16px">' +
+        '<div class="debate-side" style="background:' + (d.yourSide === 'side1' ? 'rgba(253,212,37,0.2)' : 'rgba(255,68,68,0.2)') + ';padding:12px;border-radius:12px;margin-bottom:16px">' +
           '<p class="text-lg font-bold">أنت في فريق: ' + escapeHtml(d.yourSideLabel) + '</p>' +
         '</div>' +
         '<textarea class="input input--game input--textarea" id="answerInput" placeholder="اكتب حجتك هنا..." maxlength="200" rows="3"></textarea>' +
@@ -3245,7 +3245,7 @@ const App = {
 
     d.arguments.forEach(arg => {
       html += '<button class="vote-option" data-action="voteAnswer" data-id="' + escapeHtml(arg.id) + '">' +
-        '<div class="vote-option__side" style="color:' + (arg.side === 'side1' ? '#00C853' : '#ff4444') + '">' + escapeHtml(arg.sideLabel) + '</div>' +
+        '<div class="vote-option__side" style="color:' + (arg.side === 'side1' ? '#FDD425' : '#ff4444') + '">' + escapeHtml(arg.sideLabel) + '</div>' +
         '<div class="vote-option__text">' + escapeHtml(arg.text) + '</div>' +
       '</button>';
     });
@@ -3364,7 +3364,7 @@ const App = {
     if (!container) return;
     const msg = document.createElement('div');
     msg.className = 'chat-msg';
-    msg.innerHTML = '<span class="chat-msg__name" style="color:' + escapeHtml(data.color || '#00E676') + '">' +
+    msg.innerHTML = '<span class="chat-msg__name" style="color:' + escapeHtml(data.color || '#FDD425') + '">' +
       bdiName(data.name) + ':</span> ' + escapeHtml(data.message);
     container.appendChild(msg);
     container.scrollTop = container.scrollHeight;
@@ -4040,7 +4040,7 @@ const App = {
             if (pr.guessedCorrect) info += '✅ ';
             if (pr.fooledCount > 0) info += '🤥×' + pr.fooledCount;
             resultHtml +=
-              '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(255,255,255,0.05);border-radius:10px;border-right:3px solid ' + (pr.guessedCorrect ? '#00C853' : 'transparent') + '">' +
+              '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(255,255,255,0.05);border-radius:10px;border-right:3px solid ' + (pr.guessedCorrect ? '#FDD425' : 'transparent') + '">' +
                 '<span style="color:#fff">' + bdiName(pr.playerName) + ' ' + info + '</span>' +
                 '<span style="color:#D4AF37;font-weight:bold">+' + pr.points + '</span>' +
               '</div>';
@@ -4702,7 +4702,7 @@ const App = {
             '<div class="donut-chart__inner" style="width:64px;height:64px"><div class="donut-chart__value" style="color:#DAA520">' + d.realPercent + '%</div></div>' +
           '</div>' +
         '</div>' +
-        '<p class="text-xl font-bold" style="color:' + (d.correctAnswer === 'higher' ? '#00C853' : '#FF5252') + '">' +
+        '<p class="text-xl font-bold" style="color:' + (d.correctAnswer === 'higher' ? '#FDD425' : '#FF5252') + '">' +
           (d.correctAnswer === 'higher' ? 'أعلى!' : 'أقل!') +
         '</p>' +
         '<p class="text-sm text-muted mt-4">السؤال التالي قريباً...</p>' +
