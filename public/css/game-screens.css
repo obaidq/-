@@ -3597,3 +3597,53 @@
   transform: scale(1.2) rotate(10deg);
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+
+/* ═══════════════════════════════════════════════════════════════
+ * CARTOON TEXT OUTLINES (SpongeBob style)
+ * Bold paint-stroke text with dark outlines on all headings
+ * ═══════════════════════════════════════════════════════════════ */
+
+/* Major headings — thick dark paint outline */
+.logo__name,
+.ql-game-splash__title,
+.round-title-card__title,
+.win-ceremony__title,
+.session-complete__title,
+.playlist-final__title,
+.awards__title,
+.death-zone__title {
+  -webkit-text-stroke: 2.5px rgba(0,0,0,0.7);
+  paint-order: stroke fill;
+  text-shadow:
+    3px 3px 0 rgba(0,0,0,0.5),
+    -1px -1px 0 rgba(0,0,0,0.3),
+    0 0 12px rgba(253,212,37,0.2);
+}
+
+/* Medium headings — moderate outline */
+.game-card__title,
+.menu-mode-card__title,
+.modal__title,
+.room-code__value,
+.lobby-section-title,
+.game-hud__title,
+.reconnect-overlay__title,
+.conditions-card__title,
+.avatar-picker__title {
+  -webkit-text-stroke: 1.5px rgba(0,0,0,0.5);
+  paint-order: stroke fill;
+  text-shadow:
+    2px 2px 0 rgba(0,0,0,0.4),
+    -1px -1px 0 rgba(0,0,0,0.2);
+}
+
+/* Small titles/labels — thin outline */
+.player-card__name,
+.award-card__title,
+.player-avatar__title,
+.ql-mini-lb__title,
+.achievement-toast__title {
+  -webkit-text-stroke: 0.8px rgba(0,0,0,0.4);
+  paint-order: stroke fill;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+}

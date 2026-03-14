@@ -36,7 +36,9 @@
   border-radius: var(--radius-xl);
 
   border-width: 3px;
-  box-shadow: 0 6px 0 rgba(0,0,0,0.35), 0 8px 15px rgba(0,0,0,0.2);
+  box-shadow: 0 6px 0 rgba(0,0,0,0.45), 0 8px 0 rgba(0,0,0,0.15), 0 10px 20px rgba(0,0,0,0.25);
+  -webkit-text-stroke: 0.8px rgba(0,0,0,0.15);
+  paint-order: stroke fill;
 
   transition: transform var(--duration-fast) var(--ease-out),
               box-shadow var(--duration-fast) var(--ease-out);
@@ -62,12 +64,12 @@
 
 .btn:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 0 rgba(0,0,0,0.35), 0 12px 20px rgba(0,0,0,0.25);
+  box-shadow: 0 8px 0 rgba(0,0,0,0.45), 0 10px 0 rgba(0,0,0,0.15), 0 14px 25px rgba(0,0,0,0.3);
 }
 
 .btn:active {
-  transform: translateY(2px);
-  box-shadow: 0 2px 0 rgba(0,0,0,0.35);
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 rgba(0,0,0,0.5), 0 3px 8px rgba(0,0,0,0.2);
 }
 
 .btn:focus-visible {
@@ -94,11 +96,11 @@
   color: #020812;
   border-color: #C9A800;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.2);
-  box-shadow: 0 6px 0 #A08700, 0 8px 20px rgba(253,212,37,0.3);
+  box-shadow: 0 6px 0 #A08700, 0 8px 0 rgba(160,135,0,0.3), 0 10px 20px rgba(253,212,37,0.3);
 }
 
 .btn--primary:hover {
-  box-shadow: 0 8px 0 #A08700, 0 12px 25px rgba(253,212,37,0.4);
+  box-shadow: 0 8px 0 #A08700, 0 10px 0 rgba(160,135,0,0.3), 0 14px 25px rgba(253,212,37,0.4);
 }
 
 .btn--secondary {
